@@ -33,12 +33,12 @@ export default function Home() {
               <p className="font-mono text-[0.65rem] text-concrete-300 tracking-[0.25em] mb-1">
                 CONCRETE IDEAS / SOFT LANDINGS
               </p>
-              <h1 className="text-display font-mono font-bold text-concrete-300 drop-shadow-[0_2px_12px_rgba(0,0,0,0.35)] scale-[0.7] origin-left">
+              <h1 className="text-display font-mono font-bold text-concrete-300 drop-shadow-[0_2px_12px_rgba(0,0,0,0.35)] scale-100 md:scale-[0.85] lg:scale-[0.7] origin-left">
                 Concrete ideas.
                 <br />
                 Soft landings.
               </h1>
-              <p className="mt-0 font-serif text-xl md:text-2xl text-concrete-400 leading-relaxed max-w-2xl drop-shadow-[0_1px_8px_rgba(0,0,0,0.25)] scale-[0.8] origin-left">
+              <p className="mt-0 font-serif text-xl md:text-2xl text-concrete-400 leading-relaxed max-w-2xl drop-shadow-[0_1px_8px_rgba(0,0,0,0.25)] scale-100 md:scale-[0.9] lg:scale-[0.8] origin-left">
                 Designing sustainable solutions for a modern world. I build software,
                 study history, and occasionally attempt fiction. This is where those
                 things live.
