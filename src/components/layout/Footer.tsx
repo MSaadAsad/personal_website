@@ -7,12 +7,12 @@ export function Footer() {
         <div className="font-mono text-[0.78rem] text-concrete-600 tracking-wider px-6 py-4 border-b md:border-b-0 md:border-r border-concrete-700/60 flex items-center justify-center md:flex-1">
           &copy; {new Date().getFullYear()} SAAD
         </div>
-        <div className="flex flex-1">
+        <div className="flex flex-col md:flex-row flex-1">
           <a
             href="https://github.com/msaadasad"
             target="_blank"
             rel="noopener noreferrer"
-            className="font-mono text-[0.78rem] text-concrete-700 hover:text-[#0000EE] transition-colors duration-150 tracking-wider px-6 py-4 border-r border-concrete-700/60 flex items-center justify-center flex-1"
+            className="font-mono text-[0.78rem] text-concrete-700 hover:text-[#0000EE] transition-colors duration-150 tracking-wider px-6 py-4 border-b md:border-b-0 md:border-r border-concrete-700/60 flex items-center justify-center flex-1"
           >
             GITHUB
           </a>
@@ -20,7 +20,7 @@ export function Footer() {
             href="https://www.linkedin.com/in/saad-asad-836b82216/"
             target="_blank"
             rel="noopener noreferrer"
-            className="font-mono text-[0.78rem] text-concrete-700 hover:text-[#0000EE] transition-colors duration-150 tracking-wider px-6 py-4 border-r border-concrete-700/60 flex items-center justify-center flex-1"
+            className="font-mono text-[0.78rem] text-concrete-700 hover:text-[#0000EE] transition-colors duration-150 tracking-wider px-6 py-4 border-b md:border-b-0 md:border-r border-concrete-700/60 flex items-center justify-center flex-1"
           >
             LINKEDIN
           </a>
@@ -28,7 +28,7 @@ export function Footer() {
             href="https://x.com/Saad_163_"
             target="_blank"
             rel="noopener noreferrer"
-            className="font-mono text-[0.78rem] text-concrete-700 hover:text-[#0000EE] transition-colors duration-150 tracking-wider px-6 py-4 border-r border-concrete-700/60 flex items-center justify-center flex-1"
+            className="font-mono text-[0.78rem] text-concrete-700 hover:text-[#0000EE] transition-colors duration-150 tracking-wider px-6 py-4 border-b md:border-b-0 md:border-r border-concrete-700/60 flex items-center justify-center flex-1"
           >
             TWITTER
           </a>

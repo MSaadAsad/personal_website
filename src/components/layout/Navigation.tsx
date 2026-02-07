@@ -24,7 +24,7 @@ export function Navigation() {
   return (
     <>
       <nav className="fixed top-0 left-0 right-0 z-50 bg-[var(--color-concrete-block)] border-b border-concrete-700/60 shadow-[0_6px_16px_rgba(46,46,44,0.18)]">
-        <div className="mx-auto max-w-6xl px-6 md:px-8 h-14 flex items-stretch">
+        <div className="mx-auto max-w-6xl px-4 md:px-8 h-14 flex items-stretch">
           <div className="hidden md:flex w-full items-stretch">
             <Link
               href="/"
@@ -51,13 +51,13 @@ export function Navigation() {
 
           <Link
             href="/"
-            className="md:hidden font-mono text-[0.9rem] font-bold text-concrete-900 tracking-[0.2em] hover:text-[#0000EE] transition-colors duration-150 border-r border-concrete-700/60 px-4 flex items-center"
+            className="md:hidden font-mono text-[0.85rem] font-bold text-concrete-900 tracking-[0.15em] hover:text-[#0000EE] transition-colors duration-150 px-3 flex items-center"
           >
             SAAD
           </Link>
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
-            className="md:hidden font-mono text-[0.78rem] tracking-wider text-concrete-700 hover:text-[#0000EE] transition-colors duration-150 ml-auto px-4 flex items-center border-l border-concrete-700/60"
+            className="md:hidden font-mono text-[0.72rem] tracking-[0.15em] text-concrete-700 hover:text-[#0000EE] transition-colors duration-150 ml-auto px-3 flex items-center"
           >
             [{mobileOpen ? 'CLOSE' : 'MENU'}]
           </button>
