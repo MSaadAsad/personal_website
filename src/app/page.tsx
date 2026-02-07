@@ -53,24 +53,12 @@ export default function Home() {
       <section className="py-0 mt-12 md:mt-14">
         <Container>
           <div className="concrete-block concrete-edge border-b-2 border-concrete-900/70 shadow-[inset_0_-18px_0_rgba(46,46,44,0.45)] bg-[linear-gradient(to_bottom,rgba(0,0,0,0)_0%,rgba(46,46,44,0.18)_100%)]">
-            <div className="flex">
+            <div className="flex justify-center">
               <Link
                 href="/resume"
-                className="flex-1 px-6 py-5 border-r border-concrete-700/60 font-mono text-[0.75rem] text-[#0000EE] tracking-[0.25em] uppercase bg-[var(--color-concrete-block)] hover:border-concrete-900/70 hover:shadow-[inset_0_-2px_0_rgba(46,46,44,0.25)] transition-colors duration-150"
+                className="w-full px-6 py-5 text-center font-mono text-[0.75rem] text-[#0000EE] tracking-[0.25em] uppercase bg-[var(--color-concrete-block)] hover:border-concrete-900/70 hover:shadow-[inset_0_-2px_0_rgba(46,46,44,0.25)] transition-colors duration-150"
               >
                 See Resume
-              </Link>
-              <Link
-                href="/botanical-garden"
-                className="flex-1 px-6 py-5 border-r border-concrete-700/60 font-mono text-[0.75rem] text-[#0000EE] tracking-[0.25em] uppercase bg-[var(--color-concrete-block)] hover:border-concrete-900/70 hover:shadow-[inset_0_-2px_0_rgba(46,46,44,0.25)] transition-colors duration-150"
-              >
-                Botanical Garden
-              </Link>
-              <Link
-                href="/timeline"
-                className="flex-1 px-6 py-5 font-mono text-[0.75rem] text-[#0000EE] tracking-[0.25em] uppercase bg-[var(--color-concrete-block)] hover:border-concrete-900/70 hover:shadow-[inset_0_-2px_0_rgba(46,46,44,0.25)] transition-colors duration-150"
-              >
-                Timeline
               </Link>
             </div>
           </div>
