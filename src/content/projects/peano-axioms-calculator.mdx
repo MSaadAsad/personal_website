@@ -1,0 +1,140 @@
+An exploration of how far one can go in building arithmetic from first principles, beginning with [Peano’s axioms](https://en.wikipedia.org/wiki/Peano_axioms), layering on addition, subtraction, multiplication, and fractions, ultimately producing a calculator that reveals the hidden trace of each calculation.
+
+At the turn of the 20th century, Bertrand Russell and Alfred North Whitehead set out to do something extraordinary: rebuild all of mathematics from the ground up using nothing but symbolic logic. Their Principia Mathematica is both a monument to rigor and a kind of absurd beauty: famously, it takes hundreds of pages just to arrive at the statement “1 + 1 = 2.” The audacity of trying to show that every piece of arithmetic, geometry, and analysis could be derived from a small set of logical axioms is what fascinated me.
+
+That sophomore semester, I was reading a lot of Bertrand Russell, and in our CS152 class, we had just been introduced to first-order logic using Prolog. I thought it would be as cool as useless (and that is to say a lot of each) if someone translated all of Principia into code. Since that couldn’t realistically be done, I started instead with the much simpler Peano axioms and tried to see how far I could go from there.
+
+Peano’s axioms start from almost nothing and build up the natural numbers. The foundation is just five principles:
+
+**A1**: Zero is a natural number.
+**A2**: Every natural number has a successor (if $\mathbf{x}$ is a number, then $s(\mathbf{x})$ is too).
+**A3**: Zero has no predecessor (there’s nothing that comes “before” zero).
+**A4**: Successors are unique. If $s(\mathbf{x}) = s(\mathbf{y})$, then $\mathbf{x} = \mathbf{y}$.
+**A5**: Induction: if something is true for zero, and true for $s(\mathbf{x})$ whenever it’s true for $\mathbf{x}$, then it’s true for all numbers.
+
+From these axioms, arithmetic can be built step by step.
+
+For one assignment, I worked my way up: first defining succession, then using it repeatedly to create addition (and its inverse, subtraction), and then multiplication. From there, I extended it to fractions by allowing ratios of valid natural numbers, which gave me coverage of all non-negative rationals. Since Peano arithmetic explicitly excludes a predecessor to 0, the system couldn’t naturally handle negative numbers (though there are alternative constructions of the integers).
+
+I later revisited the project and rebuilt it as a simple calculator that not only computes results but also shows the trace of the calculation. I thought it might be a pretty cool way to see how all of math can be constructed from fairly simple axioms, as impractical as that is, and to make the underlying mechanics of mathematical abstractions more visible.
+
+In the calculator, **Addition** is defined by recursion on the second argument:
+
+$$
+\mathbf{x} + 0 = \mathbf{x}
+$$
+
+$$
+\mathbf{x} + s(\mathbf{y}) = s(\mathbf{x} + \mathbf{y})
+$$
+
+**Multiplication** is defined by repeated addition:
+
+$$
+\mathbf{x} \times 0 = 0
+$$
+
+$$
+\mathbf{x} \times s(\mathbf{y}) = (\mathbf{x} \times \mathbf{y}) + \mathbf{x}
+$$
+
+**Subtraction** is defined as “clamped subtraction,” sometimes called monus:
+
+$$
+\mathbf{x} - 0 = \mathbf{x}
+$$
+
+$$
+0 - s(\mathbf{y}) = 0 \,\text{(if you try to subtract more than you have, it clamps at zero)}
+$$
+
+$$
+s(\mathbf{x}) - s(\mathbf{y}) = \mathbf{x} - \mathbf{y}
+$$
+
+**Less-than** is defined recursively too:
+
+$$
+0 < s(\mathbf{y}) \text{ is true.}
+$$
+
+$$
+s(\mathbf{x}) < 0 \text{ is false.}
+$$
+
+$$
+s(\mathbf{x}) < s(\mathbf{y}) \text{ reduces to } \mathbf{x} < \mathbf{y}.
+$$
+
+And by convention 0 < 0 is false.
+
+**Division** and **modulo** are built out of repeated subtraction:
+
+Divide $\mathbf{x}$ by $\mathbf{y}$ (with $\mathbf{y} \ne 0$) by repeatedly subtracting $\mathbf{y}$ from $\mathbf{x}$ until what’s left is smaller than $\mathbf{y}$. The number of times $\mathbf{y}$ fits is the quotient; the leftover is the remainder.
+
+If $\mathbf{y} = 0$, the operation is undefined (though the code throws an error).
+
+**Greatest common divisor (gcd)** uses [Euclid’s algorithm](https://en.wikipedia.org/wiki/Euclidean_algorithm):
+
+$$
+\gcd(\mathbf{x}, 0) = \mathbf{x}
+$$
+
+$$
+\gcd(\mathbf{x}, \mathbf{y}) = \gcd(\mathbf{y}, \mathbf{x} \bmod \mathbf{y}) \text{ if } \mathbf{y} \ne 0
+$$
+
+Fractions can be layered on top of these naturals once division is available. A fraction is simply a pair of natural numbers $(\mathbf{n}, \mathbf{d})$ with $\mathbf{d} \ne 0$, representing $\mathbf{n}/\mathbf{d}$. Simplification is done with gcd:
+
+**Fraction arithmetic** then follows the usual patterns, but always grounded in the Peano operations underneath:
+
+$$
+\frac{\mathbf{n}}{\mathbf{d}} \mapsto \frac{\mathbf{n} \div \gcd(\mathbf{n},\mathbf{d})}{\mathbf{d} \div \gcd(\mathbf{n},\mathbf{d})}
+$$
+
+**Addition of fractions**:
+
+$$
+\frac{\mathbf{a}}{\mathbf{b}} + \frac{\mathbf{c}}{\mathbf{d}} = \frac{\mathbf{a}\mathbf{d} + \mathbf{b}\mathbf{c}}{\mathbf{b}\mathbf{d}}
+$$
+
+**Subtraction of fractions**:
+
+$$
+\frac{\mathbf{a}}{\mathbf{b}} - \frac{\mathbf{c}}{\mathbf{d}} = \frac{\mathbf{a}\mathbf{d} - \mathbf{b}\mathbf{c}}{\mathbf{b}\mathbf{d}}
+$$
+
+Since subtraction clamps at zero, if $\mathbf{a} \cdot \mathbf{d} < \mathbf{b} \cdot \mathbf{c}$ the numerator collapses to $0$, so the whole fraction reduces to $0/1$ after simplification. This keeps everything non-negative, in line with the naturals.
+
+**Multiplication of fractions**:
+
+$$
+\frac{\mathbf{a}}{\mathbf{b}} \times \frac{\mathbf{c}}{\mathbf{d}} = \frac{\mathbf{a}\mathbf{c}}{\mathbf{b}\mathbf{d}}
+$$
+
+**Division of fractions** (reciprocal multiplication, with $\mathbf{c} \neq 0$):
+
+$$
+\frac{\mathbf{a}}{\mathbf{b}} \div \frac{\mathbf{c}}{\mathbf{d}} = \frac{\mathbf{a}\mathbf{d}}{\mathbf{b}\mathbf{c}}
+$$
+
+Every one of these operations eventually unwinds to the same handful of recursive rules: successors, addition, multiplication, and subtraction. Nothing “extra” is assumed.
+
+The nice part about building everything this way is that in this system, the division identity
+
+$$
+\mathbf{n} = \mathbf{d}\mathbf{q} + \mathbf{r} \quad \text{with} \quad 0 \le \mathbf{r} < \mathbf{d}
+$$
+
+actually plays out line by line in the trace, and you can see the quotient tick up and the remainder shrink until it’s finally less than the divisor.
+
+I’ve shared the code for this calculator, along with my original assignment submission, for anyone curious. Every operation comes with its full recursive trace, so you can watch the result being built from the axioms step by step.
+
+<img
+  src="/assets/projects/peano-axioms-calculator/trace.webp"
+  alt="Recursive calculation trace in the Peano calculator"
+  className="w-full max-w-full"
+/>
+*A full recursive trace reveals each step of the computation.*
+
+While much simpler than Russell and Whitehead’s vision, this project gives a small taste of what it means to rebuild mathematics from first principles. Don’t count on it to balance your checkbook, though, it’ll probably hit the recursion depth first.

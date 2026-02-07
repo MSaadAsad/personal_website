@@ -1,0 +1,58 @@
+import { WritingFrontmatter } from '@/types/content';
+
+export const writing: WritingFrontmatter[] = [
+  {
+    title: 'The Problem with Vibecoding',
+    slug: 'problem-with-vibecoding',
+    date: '2026-02-06',
+    category: 'technical',
+    tags: ['ai', 'software-engineering', 'systems', 'product'],
+    excerpt: 'Code is not the product. The system is.',
+    readingTime: 11,
+  },
+  {
+    title: 'Fragments',
+    slug: 'fragments',
+    date: '2025-01-30',
+    category: 'creative',
+    tags: ['creative-nonfiction', 'travel', 'memoir'],
+    excerpt: 'Life on steel, glass, and sky.',
+    readingTime: 22,
+  },
+  {
+    title: 'The Battle for Khari, 1840',
+    slug: 'battle-for-khari-1840',
+    date: '2025-08-26',
+    category: 'historical',
+    tags: ['history', 'kashmir', 'sikh-empire', 'dogra'],
+    excerpt: 'How Mirpur became a part of Dogra Jammu and Kashmir.',
+    readingTime: 5,
+  },
+  {
+    title: 'Kalwanji Haldi',
+    slug: 'kalwanji-haldi',
+    date: '2025-07-25',
+    category: 'creative',
+    tags: ['fiction', 'short-story', 'pakistan', 'folklore'],
+    excerpt: 'Putting a disappeared Covid conspiracy back on the internet.',
+    readingTime: 7,
+  },
+  {
+    title: 'Evolution of Eats',
+    slug: 'evolution-of-eats',
+    date: '2025-05-25',
+    category: 'historical',
+    tags: ['food', 'culture', 'history', 'identity'],
+    excerpt: 'How Food Becomes Culture.',
+    readingTime: 9,
+  },
+  {
+    title: 'Flex Attention Explained',
+    slug: 'flexattention',
+    date: '2024-12-04',
+    category: 'technical',
+    tags: ['machine-learning', 'attention', 'pytorch', 'systems'],
+    excerpt: 'Bridging Performance and Flexibility in Transformer Attention Mechanisms',
+    readingTime: 7,
+  },
+];
