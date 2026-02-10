@@ -44,6 +44,17 @@ export const projects: Project[] = [
     repoUrl: 'https://github.com/shivamrawat1/READMEplease.ai',
   },
   {
+    slug: 'washbot',
+    title: 'Washbot',
+    date: '2025-01-15',
+    description:
+      'A Telegram bot for Minerva students that tracks laundry availability.',
+    image: '/assets/projects/washbot/cover.png',
+    tags: ['automation', 'telegram', 'community', 'ops'],
+    techStack: ['Telegram Bot API', 'Airtable', 'Python'],
+    repoUrl: 'https://github.com/MSaadAsad/WashBot',
+  },
+  {
     slug: 'peano-axioms-calculator',
     title: 'Peano’s Axioms',
     date: '2025-09-01',
