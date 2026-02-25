@@ -43,7 +43,7 @@ export default function ProjectsPage() {
           </h1>
           <div className="section-divider" />
           <p className="mt-3 text-base text-concrete-700 font-mono max-w-2xl leading-relaxed">
-            Things I've built — from distributed systems to compilers to tools that scratch an itch.
+            Thing I&apos;vs built.
           </p>
         </div>
       </div>

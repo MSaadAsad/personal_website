@@ -20,43 +20,155 @@ export default function AboutPage() {
       <div className="concrete-block concrete-edge p-8 md:p-10">
         <div className="grid gap-16 lg:grid-cols-[1fr_300px]">
           <div className="space-y-7">
-            <p className="font-serif text-xl text-concrete-700 leading-relaxed">
-              I&apos;m Saad — an engineer who builds software, studies how things work,
-              and writes about both. I&apos;m drawn to systems: distributed ones, historical
-              ones, human ones.
+            <p className="font-serif text-base text-concrete-700 leading-relaxed">
+              I&apos;m Saad. I&apos;m from a small city in Pakistani Kashmir called{' '}
+              <a
+                href="https://en.wikipedia.org/wiki/Mirpur,_Azad_Kashmir"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[#0000EE] underline underline-offset-4 transition-colors duration-150"
+              >
+                Mirpur
+              </a>
+              , located next to a large dam called {' '}
+              <a
+                href="https://en.wikipedia.org/wiki/Mangla_Dam"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[#0000EE] underline underline-offset-4 transition-colors duration-150"
+              >
+                Mangla
+              </a>
+              . I suspect this is somehow relevant to everything.
             </p>
-            <p className="font-serif text-lg text-concrete-700 leading-relaxed">
-              By day, I write code. By night, I read about the fall of empires
-              and the rise of concrete. Sometimes I write fiction, which is just
-              debugging reality with a different compiler.
+            <p className="font-serif text-base text-concrete-700 leading-relaxed">
+              My origin story is that I used to play too much of my uncle&apos;s
+              bootlegged{' '}
+              <a
+                href="https://en.wikipedia.org/wiki/Civilization_III"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[#0000EE] underline underline-offset-4 transition-colors duration-150"
+              >
+                Civ III
+              </a>{' '}
+              on his computer as a 6-year-old.
             </p>
-            <p className="font-serif text-lg text-concrete-700 leading-relaxed">
-              I care about building things that last. Not in the Silicon Valley
-              &ldquo;scale to a billion users&rdquo; sense, but in the structural engineering
-              sense — things that bear weight, weather storms, and age honestly.
+            <p className="font-serif text-base text-concrete-700 leading-relaxed">
+              I grew up loving history and spent the COVID pandemic
+              collecting the largest dataset of{' '}
+              <a
+                href="https://x.com/Saad_163_/status/1285436990394191872"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[#0000EE] underline underline-offset-4 transition-colors duration-150"
+              >
+                fortresses in Pakistan
+              </a>{' '}
+              with over 170 sites recorded. Pakistani embassies and members of
+              parliament shared it on Twitter.
+              I&apos;m building a dedicated site for it next.
             </p>
-            <p className="font-serif text-lg text-concrete-700 leading-relaxed">
-              This website is my attempt at that. A place made of steel, glass,
-              and concrete. Raw materials. Honest structure. And growing through
-              the cracks, something green.
+            <p className="font-serif text-base text-concrete-700 leading-relaxed">
+              I achieved Enlightenment when I read{' '}
+              <a
+                href="https://en.wikipedia.org/wiki/The_Selfish_Gene"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[#0000EE] underline underline-offset-4 transition-colors duration-150"
+              >
+                The Selfish Gene
+              </a>{' '}
+              in high school. It introduced me to the simple evolutionary
+              simulation, the{' '}
+              <a
+                href="https://en.wikipedia.org/wiki/Evolutionary_game_theory#Hawk_dove"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[#0000EE] underline underline-offset-4 transition-colors duration-150"
+              >
+                hawk-dove game
+              </a>{' '}
+              , which I recreated while first teaching myself coding.{' '}
+              <em>
+                Wait, so it&apos;s that simple? This coding stuff is neat. I can make
+                things out of thin air.
+              </em>
+            </p>
+            <p className="font-serif text-base text-concrete-700 leading-relaxed">
+              <strong>
+                <a
+                  href="https://x.com/GrantSlatton/status/1830302697125478630?lang=en"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[#0000EE] underline underline-offset-4 transition-colors duration-150"
+                >
+                  I guess I can just do things.
+                </a>
+              </strong>
+            </p>
+            <p className="font-serif text-base text-concrete-700 leading-relaxed">
+              I came to SF at 16 to study Computer Science at{' '}
+              <a
+                href="https://www.minerva.edu/announcements/minerva-university-named-worlds-most-innovative-university-for-fourth-consecutive-year/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[#0000EE] underline underline-offset-4 transition-colors duration-150"
+              >
+                Minerva University
+              </a>{' '}
+              graduating in 2025 after having lived across 6 countries in 4 years.
+              Along the way, I worked on ML research and spent my senior year at
+              a YC-backed startup as a founding AI engineer.
+            </p>
+            <p className="font-serif text-base text-concrete-700 leading-relaxed">
+              Recently I have been asking myself:{' '}
+              <strong>do I want to be on the receiving end of culture, or create it?</strong>{' '}
+              I built this site to think out loud and to push myself to write more
+              in a structured way.
             </p>
 
             <div className="mt-14 pt-14 border-t border-concrete-400/60">
               <h2 className="font-mono text-[0.65rem] text-concrete-600 tracking-[0.25em] mb-8">
-                CURRENTLY
+                I AM CURRENTLY
               </h2>
               <ul className="space-y-4">
-                {[
-                  'Building distributed systems and thinking about consensus',
-                  'Reading about Ottoman architectural history',
-                  'Writing a short story collection about cities and distance',
-                  'Learning Rust, slowly and deliberately',
-                ].map((item) => (
-                  <li key={item} className="font-mono text-[0.75rem] text-concrete-700 flex items-start gap-4">
-                    <span className="text-[#0000EE] mt-0.5">→</span>
-                    <span>{item}</span>
-                  </li>
-                ))}
+                <li className="font-mono text-[0.75rem] text-concrete-700 flex items-baseline gap-4">
+                  <span className="text-[#0000EE]">→</span>
+                  <span>
+                    Reading{' '}
+                    <a
+                      href="https://en.wikipedia.org/wiki/The_Silk_Roads"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[#0000EE] underline underline-offset-4 transition-colors duration-150"
+                    >
+                      The Silk Roads
+                    </a>
+                    , a history of trade in the Old World.
+                  </span>
+                </li>
+                <li className="font-mono text-[0.75rem] text-concrete-700 flex items-baseline gap-4">
+                  <span className="text-[#0000EE]">→</span>
+                  <span>
+                    Staring at this highly detailed{' '}
+                    <a
+                      href="https://zenodo.org/records/3596387/preview/F07-37%201857%20Districts%20of%20Jhilam%20and%20Rawal%20Pindi%20Sheet%20No%202.jpg?include_deleted=0"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[#0000EE] underline underline-offset-4 transition-colors duration-150"
+                    >
+                      1857 map of the Rawalpindi district
+                    </a>
+                    .
+                  </span>
+                </li>
+                <li className="font-mono text-[0.75rem] text-concrete-700 flex items-baseline gap-4">
+                  <span className="text-[#0000EE]">→</span>
+                  <span>
+                    Patiently waiting for 1980s nostalgia media to be replaced by 2000s nostalgia media.
+                  </span>
+                </li>
               </ul>
             </div>
           </div>
@@ -76,12 +188,11 @@ export default function AboutPage() {
               </h3>
               <div className="space-y-2">
                 {[
-                  'Distributed Systems',
-                  'Compilers & Languages',
-                  'Architectural History',
-                  'Brutalism',
-                  'Film Photography',
-                  'Long-form Writing',
+                  'AI & NLP',
+                  'Semiotics & Semantics',
+                  'Languages & Etymology',
+                  'Castles & Fortresses',
+                  'Hills and Knolls and such',
                 ].map((interest) => (
                   <div key={interest} className="font-mono text-[0.75rem] text-concrete-700">
                     {interest}

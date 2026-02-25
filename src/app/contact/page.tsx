@@ -16,11 +16,6 @@ export default function ContactPage() {
 
       <div className="space-y-14">
         <div className="concrete-block concrete-edge p-8 md:p-10">
-          <p className="font-serif text-lg text-concrete-700 leading-relaxed mb-8">
-            The simplest way to reach me is email. I&apos;m also around on GitHub
-            and occasionally on X. No contact form — just honest, direct communication.
-          </p>
-
           <div className="space-y-5">
             {[
               { label: 'EMAIL', href: 'mailto:saadasad163@gmail.com', text: 'saadasad163@gmail.com' },
@@ -45,12 +40,6 @@ export default function ContactPage() {
               </a>
             ))}
           </div>
-
-          <p className="mt-8 font-mono text-[0.65rem] text-concrete-700 leading-relaxed">
-            If you want to discuss a project, collaboration, or just want to
-            talk about distributed systems, brutalist architecture, or Tarkovsky films
-            — I&apos;m interested.
-          </p>
         </div>
       </div>
     </Container>

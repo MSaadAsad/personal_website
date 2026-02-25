@@ -23,6 +23,9 @@ export const metadata: Metadata = {
     template: '%s — SAAD',
   },
   description: 'Projects, writing, and things I care about.',
+  icons: {
+    icon: '/assets/c-blue.png',
+  },
 };
 
 export default function RootLayout({

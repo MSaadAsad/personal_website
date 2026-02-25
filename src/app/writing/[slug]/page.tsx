@@ -46,7 +46,7 @@ export default async function WritingDetailPage({ params }: { params: Promise<{ 
         href="/writing"
         className="font-mono text-[0.65rem] text-concrete-600 hover:text-[#0000EE] transition-colors duration-150 mb-10 inline-block tracking-wider"
       >
-        &larr; ALL WRITING
+        &larr; ALL BLOG
       </Link>
 
       <article className="concrete-block concrete-edge p-8 md:p-10">

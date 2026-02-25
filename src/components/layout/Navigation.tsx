@@ -7,10 +7,10 @@ import { cn } from '@/lib/utils';
 
 const links = [
   { href: '/projects', label: 'PROJECTS' },
-  { href: '/writing', label: 'WRITING' },
+  { href: '/writing', label: 'BLOG' },
   { href: '/shelf', label: 'SHELF' },
-  { href: '/about', label: 'ABOUT' },
   { href: '/contact', label: 'CONTACT' },
+  { href: '/resume', label: 'RESUME' },
 ];
 
 export function Navigation() {

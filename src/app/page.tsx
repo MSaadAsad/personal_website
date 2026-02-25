@@ -26,39 +26,30 @@ export default function Home() {
       />
       <div>
       {/* Hero */}
-      <section className="flex items-center pt-6 pb-0">
+      <section className="flex items-center pt-16 pb-0">
         <Container>
-          <div className="grid lg:grid-cols-[1.1fr_1fr] gap-10 items-center">
-            <div>
-              <p className="font-mono text-[0.65rem] text-concrete-300 tracking-[0.25em] mb-1">
-                CONCRETE IDEAS / SOFT LANDINGS
-              </p>
-              <h1 className="text-display font-mono font-bold text-concrete-300 drop-shadow-[0_2px_12px_rgba(0,0,0,0.35)] scale-100 md:scale-[0.85] lg:scale-[0.7] origin-left">
-                Concrete ideas.
-                <br />
-                Soft landings.
-              </h1>
-              <p className="mt-0 font-serif text-xl md:text-2xl text-concrete-400 leading-relaxed max-w-2xl drop-shadow-[0_1px_8px_rgba(0,0,0,0.25)] scale-100 md:scale-[0.9] lg:scale-[0.8] origin-left">
-                Designing sustainable solutions for a modern world. I build software,
-                study history, and occasionally attempt fiction. This is where those
-                things live.
-              </p>
-            </div>
-
+          <div className="flex flex-col items-center text-center">
+            <img
+              src="/assets/c.png"
+              alt="Pixel hero artwork"
+              className="w-full max-w-sm drop-shadow-[0_2px_12px_rgba(0,0,0,0.35)]"
+            />
+            <p className="mt-7 mb-2 font-mono text-[0.9rem] text-concrete-200 tracking-[0.3em]">
+              M. SAAD ASAD
+            </p>
           </div>
-
         </Container>
       </section>
 
-      <section className="py-0 mt-12 md:mt-14">
+      <section className="py-0 mt-10 md:mt-12">
         <Container>
           <div className="concrete-block concrete-edge border-b-2 border-concrete-900/70 shadow-[inset_0_-18px_0_rgba(46,46,44,0.45)] bg-[linear-gradient(to_bottom,rgba(0,0,0,0)_0%,rgba(46,46,44,0.18)_100%)]">
             <div className="flex flex-col md:flex-row">
               <Link
-                href="/resume"
+                href="/about"
                 className="w-full px-6 py-5 text-center font-mono text-[0.75rem] text-[#0000EE] tracking-[0.25em] uppercase bg-[var(--color-concrete-block)] hover:border-concrete-900/70 hover:shadow-[inset_0_-2px_0_rgba(46,46,44,0.25)] transition-colors duration-150 md:border-r md:border-concrete-700/60"
               >
-                See Resume
+                About
               </Link>
             </div>
           </div>
@@ -73,7 +64,7 @@ export default function Home() {
               <div className="px-6 py-5 border-b border-concrete-700/60 concrete-edge bg-[var(--color-concrete-block)]">
                 <div className="flex items-baseline justify-between">
                   <h2 className="font-mono text-[0.6rem] text-concrete-700 tracking-[0.3em] uppercase">
-                    SELECTED WORK
+                    SELECTED PROJECTS
                   </h2>
                   <Link
                     href="/projects"
@@ -120,7 +111,7 @@ export default function Home() {
               <div className="px-6 py-5 border-b border-concrete-700/60 concrete-edge bg-[var(--color-concrete-block)]">
                 <div className="flex items-baseline justify-between">
                   <h2 className="font-mono text-[0.6rem] text-concrete-700 tracking-[0.3em] uppercase">
-                    LATEST WRITING
+                    LATEST BLOG
                   </h2>
                   <Link
                     href="/writing"
