@@ -49,7 +49,7 @@ export default function Home() {
                 href="/about"
                 className="w-full px-6 py-5 text-center font-mono text-[0.75rem] text-[#0000EE] tracking-[0.25em] uppercase bg-[var(--color-concrete-block)] hover:border-concrete-900/70 hover:shadow-[inset_0_-2px_0_rgba(46,46,44,0.25)] transition-colors duration-150 md:border-r md:border-concrete-700/60"
               >
-                About Me &rarr;
+                About
               </Link>
             </div>
           </div>
