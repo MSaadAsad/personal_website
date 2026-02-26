@@ -3,6 +3,7 @@ import { JetBrains_Mono, Source_Serif_4 } from 'next/font/google';
 import { Navigation } from '@/components/layout/Navigation';
 import { Footer } from '@/components/layout/Footer';
 import { BodyShell } from '@/components/layout/BodyShell';
+import { Analytics } from '@vercel/analytics/next';
 import './globals.css';
 
 const jetbrains = JetBrains_Mono({
@@ -42,6 +43,7 @@ export default function RootLayout({
             {children}
           </main>
           <Footer />
+          <Analytics />
         </BodyShell>
       </body>
     </html>

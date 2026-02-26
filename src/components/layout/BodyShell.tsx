@@ -8,8 +8,20 @@ export function BodyShell({ children }: { children: React.ReactNode }) {
   const isHome = pathname === '/';
 
   return (
-    <div className={cn('min-h-screen', !isHome && 'grid-overlay')}>
-      {children}
+    <div
+      className="min-h-screen"
+      style={isHome ? {
+        backgroundImage: "url('/assets/homepage-background.png')",
+        backgroundRepeat: 'no-repeat',
+        backgroundSize: 'cover',
+        backgroundPosition: 'top center',
+        backgroundColor: 'rgba(226, 225, 221, 0.9)',
+        backgroundBlendMode: 'multiply',
+      } : undefined}
+    >
+      <div className={cn(!isHome && 'grid-overlay', 'min-h-screen')}>
+        {children}
+      </div>
     </div>
   );
 }

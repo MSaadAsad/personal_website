@@ -11,19 +11,7 @@ export default function Home() {
   const recentWriting = getAllWriting().slice(0, 3);
 
   return (
-    <div className="relative min-h-screen">
-      <div
-        className="absolute inset-0 -z-10"
-        aria-hidden="true"
-        style={{
-          backgroundImage: "url('/assets/homepage-background.png')",
-          backgroundRepeat: 'no-repeat',
-          backgroundSize: 'cover',
-          backgroundPosition: 'top center',
-          backgroundColor: 'rgba(226, 225, 221, 0.9)',
-          backgroundBlendMode: 'multiply',
-        }}
-      />
+    <div className="relative">
       <div>
       {/* Hero */}
       <section className="flex items-center pt-16 pb-0">
@@ -41,7 +29,7 @@ export default function Home() {
         </Container>
       </section>
 
-      <section className="py-0 mt-11 md:mt-12">
+      <section className="py-0 mt-12 md:mt-14">
         <Container>
           <div className="concrete-block concrete-edge border-b-2 border-concrete-900/70 shadow-[inset_0_-18px_0_rgba(46,46,44,0.45)] bg-[linear-gradient(to_bottom,rgba(0,0,0,0)_0%,rgba(46,46,44,0.18)_100%)]">
             <div className="flex flex-col md:flex-row">

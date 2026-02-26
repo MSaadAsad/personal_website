@@ -17,8 +17,8 @@
     "@mdx-js/loader": "^3.1.1",
     "@mdx-js/react": "^3.1.1",
     "@next/mdx": "^16.1.6",
+    "@vercel/analytics": "^1.6.1",
     "clsx": "^2.1.1",
-    "remark-gfm": "^4.0.1",
     "framer-motion": "^12.31.0",
     "gray-matter": "^4.0.3",
     "katex": "^0.16.28",
@@ -26,6 +26,7 @@
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "rehype-katex": "^7.0.1",
+    "remark-gfm": "^4.0.1",
     "remark-math": "^6.0.0",
     "tailwind-merge": "^3.4.0"
   },
