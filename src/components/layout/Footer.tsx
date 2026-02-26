@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { Container } from './Container';
 
 export function Footer() {
@@ -7,39 +8,13 @@ export function Footer() {
         <div className="font-mono text-[0.78rem] text-concrete-600 tracking-wider px-6 py-4 border-b md:border-b-0 md:border-r border-concrete-700/60 flex items-center justify-center flex-1">
           &copy; {new Date().getFullYear()} SAAD
         </div>
-        <div className="flex flex-col md:flex-row flex-[4]">
-          <a
-            href="https://github.com/msaadasad"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="font-mono text-[0.78rem] text-concrete-700 hover:text-[#0000EE] transition-colors duration-150 tracking-wider px-6 py-4 border-b md:border-b-0 md:border-r border-concrete-700/60 flex items-center justify-center flex-1"
-          >
-            GITHUB
-          </a>
-          <a
-            href="https://www.linkedin.com/in/saad-asad-836b82216/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="font-mono text-[0.78rem] text-concrete-700 hover:text-[#0000EE] transition-colors duration-150 tracking-wider px-6 py-4 border-b md:border-b-0 md:border-r border-concrete-700/60 flex items-center justify-center flex-1"
-          >
-            LINKEDIN
-          </a>
-          <a
-            href="https://x.com/Saad_163_"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="font-mono text-[0.78rem] text-concrete-700 hover:text-[#0000EE] transition-colors duration-150 tracking-wider px-6 py-4 border-b md:border-b-0 md:border-r border-concrete-700/60 flex items-center justify-center flex-1"
-          >
-            TWITTER
-          </a>
-          <a
-            href="https://medium.com/@msaadasad"
-            target="_blank"
-            rel="noopener noreferrer"
+        <div className="flex flex-col md:flex-row flex-1">
+          <Link
+            href="/contact"
             className="font-mono text-[0.78rem] text-concrete-700 hover:text-[#0000EE] transition-colors duration-150 tracking-wider px-6 py-4 flex items-center justify-center flex-1"
           >
-            MEDIUM
-          </a>
+            CONTACT
+          </Link>
         </div>
       </Container>
     </footer>

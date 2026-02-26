@@ -9,8 +9,8 @@ const links = [
   { href: '/projects', label: 'PROJECTS' },
   { href: '/writing', label: 'BLOG' },
   { href: '/shelf', label: 'SHELF' },
-  { href: '/contact', label: 'CONTACT' },
   { href: '/resume', label: 'RESUME' },
+  { href: '/about', label: 'ABOUT' },
 ];
 
 export function Navigation() {

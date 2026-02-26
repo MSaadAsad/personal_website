@@ -41,7 +41,7 @@ export default function Home() {
         </Container>
       </section>
 
-      <section className="py-0 mt-10 md:mt-12">
+      <section className="py-0 mt-11 md:mt-12">
         <Container>
           <div className="concrete-block concrete-edge border-b-2 border-concrete-900/70 shadow-[inset_0_-18px_0_rgba(46,46,44,0.45)] bg-[linear-gradient(to_bottom,rgba(0,0,0,0)_0%,rgba(46,46,44,0.18)_100%)]">
             <div className="flex flex-col md:flex-row">
@@ -49,7 +49,7 @@ export default function Home() {
                 href="/about"
                 className="w-full px-6 py-5 text-center font-mono text-[0.75rem] text-[#0000EE] tracking-[0.25em] uppercase bg-[var(--color-concrete-block)] hover:border-concrete-900/70 hover:shadow-[inset_0_-2px_0_rgba(46,46,44,0.25)] transition-colors duration-150 md:border-r md:border-concrete-700/60"
               >
-                About
+                About Me &rarr;
               </Link>
             </div>
           </div>
