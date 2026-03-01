@@ -1,9 +1,13 @@
 import { notFound } from 'next/navigation';
+import fs from 'fs';
+import path from 'path';
 import Link from 'next/link';
 import { Container } from '@/components/layout/Container';
 import { Tag } from '@/components/ui/Tag';
 import { formatDate } from '@/lib/utils';
 import { projects } from '@/content/data/projects';
+import { extractHeadings } from '@/lib/mdx';
+import { TableOfContents } from '@/components/ui/TableOfContents';
 
 export function generateStaticParams() {
   return projects.map((p) => ({ slug: p.slug }));
@@ -33,6 +37,10 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
   } catch {
     MDXContent = null;
   }
+
+  const mdxPath = path.join(process.cwd(), 'src/content/projects', `${slug}.mdx`);
+  const rawContent = fs.existsSync(mdxPath) ? fs.readFileSync(mdxPath, 'utf-8') : '';
+  const headings = extractHeadings(rawContent);
 
   return (
     <Container className="py-24">
@@ -88,8 +96,8 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
         </header>
 
         <div className="max-w-3xl">
+          <TableOfContents headings={headings} />
           {MDXContent && <MDXContent />}
-
         </div>
       </article>
     </Container>

@@ -2,7 +2,8 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { Container } from '@/components/layout/Container';
 import { Tag } from '@/components/ui/Tag';
-import { getWritingSlugs, getWritingBySlug } from '@/lib/mdx';
+import { getWritingSlugs, getWritingBySlug, extractHeadings } from '@/lib/mdx';
+import { TableOfContents } from '@/components/ui/TableOfContents';
 import { formatDate } from '@/lib/utils';
 import { cn } from '@/lib/utils';
 
@@ -25,7 +26,8 @@ export default async function WritingDetailPage({ params }: { params: Promise<{ 
   const result = getWritingBySlug(slug);
   if (!result) notFound();
 
-  const { frontmatter } = result;
+  const { frontmatter, content } = result;
+  const headings = extractHeadings(content);
 
   let MDXContent;
   try {
@@ -73,6 +75,7 @@ export default async function WritingDetailPage({ params }: { params: Promise<{ 
         </header>
 
         <div className="max-w-3xl">
+          <TableOfContents headings={headings} />
           <MDXContent />
         </div>
       </article>

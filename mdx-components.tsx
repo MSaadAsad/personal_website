@@ -1,4 +1,16 @@
 import type { MDXComponents } from 'mdx/types';
+import React from 'react';
+import { slugify } from '@/lib/utils';
+
+function extractText(children: React.ReactNode): string {
+  if (typeof children === 'string') return children;
+  if (typeof children === 'number') return String(children);
+  if (Array.isArray(children)) return children.map(extractText).join('');
+  if (React.isValidElement(children)) {
+    return extractText((children.props as { children?: React.ReactNode }).children);
+  }
+  return '';
+}
 
 export function useMDXComponents(components: MDXComponents): MDXComponents {
   return {
@@ -7,16 +19,22 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
         {children}
       </h1>
     ),
-    h2: ({ children }) => (
-      <h2 className="font-mono text-xl font-bold tracking-tight text-[#0000EE] mb-6 mt-12 border-l-[6px] border-[#0000EE] pl-5">
-        {children}
-      </h2>
-    ),
-    h3: ({ children }) => (
-      <h3 className="font-mono text-lg font-semibold text-concrete-800 mb-4 mt-10">
-        {children}
-      </h3>
-    ),
+    h2: ({ children }) => {
+      const id = slugify(extractText(children));
+      return (
+        <h2 id={id} className="scroll-mt-20 font-mono text-xl font-bold tracking-tight text-[#0000EE] mb-6 mt-12 border-l-[6px] border-[#0000EE] pl-5">
+          {children}
+        </h2>
+      );
+    },
+    h3: ({ children }) => {
+      const id = slugify(extractText(children));
+      return (
+        <h3 id={id} className="scroll-mt-20 font-mono text-lg font-semibold text-concrete-800 mb-4 mt-10">
+          {children}
+        </h3>
+      );
+    },
     p: ({ children }) => (
       <p className="font-serif text-[20px] leading-[1.8] text-concrete-700 mb-6">
         {children}
