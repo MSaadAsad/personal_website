@@ -42,6 +42,7 @@ export default function RootLayout({
           src="https://unpkg.com/@bayanista/sdk/dist/bayanista.min.js"
           data-project="1"
           data-api-key="bayanista_0OakFajtH71QlD-Xwe8L0Nfb7LaPYEyOHELG9PPH6y0"
+          data-api-endpoint="https://bayanista-api-production.up.railway.app"
           data-auto-init
           strategy="afterInteractive"
         />
