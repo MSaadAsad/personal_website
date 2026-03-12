@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { JetBrains_Mono, Source_Serif_4 } from 'next/font/google';
+import Script from 'next/script';
 import { Navigation } from '@/components/layout/Navigation';
 import { Footer } from '@/components/layout/Footer';
 import { BodyShell } from '@/components/layout/BodyShell';
@@ -37,6 +38,13 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${jetbrains.variable} ${sourceSerif.variable}`}>
       <body className="min-h-screen">
+        <Script
+          src="https://cdn.bayanista.com/sdk/v1/bayanista.min.js"
+          data-project="1"
+          data-api-key={process.env.NEXT_PUBLIC_BAYANISTA_KEY}
+          data-auto-init
+          strategy="afterInteractive"
+        />
         <BodyShell>
           <Navigation />
           <main className="pt-14 min-h-screen">
