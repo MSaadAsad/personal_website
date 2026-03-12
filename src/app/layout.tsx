@@ -40,7 +40,7 @@ export default function RootLayout({
       <body className="min-h-screen">
         <Script
           src="https://unpkg.com/@bayanista/sdk/dist/bayanista.min.js"
-          data-project={process.env.NEXT_PUBLIC_BAYANISTA_PROJECT}
+          data-project="1"
           data-api-key={process.env.NEXT_PUBLIC_BAYANISTA_KEY}
           data-auto-init
           strategy="afterInteractive"
