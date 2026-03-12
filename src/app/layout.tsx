@@ -1,17 +1,5 @@
 import type { Metadata } from 'next';
 import { JetBrains_Mono, Source_Serif_4 } from 'next/font/google';
-
-declare global {
-  interface Window {
-    Bayanista?: {
-      init: (config: { projectId: string; apiKey?: string; apiEndpoint?: string; debug?: boolean }) => void;
-      identify: (userId: string, traits?: Record<string, any>) => void;
-      track: (eventName: string, properties?: Record<string, any>) => void;
-      reset: () => void;
-      destroy: () => void;
-    };
-  }
-}
 import Script from 'next/script';
 import { Navigation } from '@/components/layout/Navigation';
 import { Footer } from '@/components/layout/Footer';
@@ -52,15 +40,11 @@ export default function RootLayout({
       <body className="min-h-screen">
         <Script
           src="https://www.bayanista.com/sdk/v1/bayanista.min.js"
+          data-project="1"
+          data-api-key="bayanista_Ce34qD_JnP8TtxUdsuGQTWCfENGDsjio3lje4a-I5mU"
+          data-api-endpoint="https://bayanista-api-production.up.railway.app"
+          data-auto-init
           strategy="afterInteractive"
-          onLoad={() => {
-            window.Bayanista?.init({
-              projectId: '1',
-              apiKey: 'bayanista_Ce34qD_JnP8TtxUdsuGQTWCfENGDsjio3lje4a-I5mU',
-              apiEndpoint: 'https://bayanista-api-production.up.railway.app',
-              debug: true,
-            });
-          }}
         />
         <BodyShell>
           <Navigation />
