@@ -1,6 +1,15 @@
 'use client';
 import { useEffect } from 'react';
 
+declare global {
+  interface Window {
+    Bayanista?: {
+      init: (config: { projectId: string; apiKey: string; apiEndpoint: string; debug?: boolean }) => void;
+      destroy: () => void;
+    };
+  }
+}
+
 export default function BayanistaProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (window.Bayanista) {
