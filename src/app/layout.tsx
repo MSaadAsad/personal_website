@@ -1,10 +1,10 @@
 import type { Metadata } from 'next';
 import { JetBrains_Mono, Source_Serif_4 } from 'next/font/google';
-import Script from 'next/script';
 import { Navigation } from '@/components/layout/Navigation';
 import { Footer } from '@/components/layout/Footer';
 import { BodyShell } from '@/components/layout/BodyShell';
 import { Analytics } from '@vercel/analytics/next';
+import BayanistaProvider from '@/providers/BayanistaProvider';
 import './globals.css';
 
 const jetbrains = JetBrains_Mono({
@@ -38,22 +38,16 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${jetbrains.variable} ${sourceSerif.variable}`}>
       <body className="min-h-screen">
-        <Script
-          src="https://www.bayanista.com/sdk/v1/bayanista.min.js"
-          data-project="1"
-          data-api-key="bayanista_Ce34qD_JnP8TtxUdsuGQTWCfENGDsjio3lje4a-I5mU"
-          data-api-endpoint="https://bayanista-api-production.up.railway.app"
-          data-auto-init
-          strategy="afterInteractive"
-        />
-        <BodyShell>
-          <Navigation />
-          <main className="pt-14 min-h-screen">
-            {children}
-          </main>
-          <Footer />
-          <Analytics />
-        </BodyShell>
+        <BayanistaProvider>
+          <BodyShell>
+            <Navigation />
+            <main className="pt-14 min-h-screen">
+              {children}
+            </main>
+            <Footer />
+            <Analytics />
+          </BodyShell>
+        </BayanistaProvider>
       </body>
     </html>
   );
