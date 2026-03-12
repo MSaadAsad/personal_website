@@ -39,7 +39,7 @@ export default function RootLayout({
     <html lang="en" className={`${jetbrains.variable} ${sourceSerif.variable}`}>
       <body className="min-h-screen">
         <Script
-          src="https://cdn.bayanista.com/sdk/v1/bayanista.min.js"
+          src="https://unpkg.com/@bayanista/sdk/dist/bayanista.min.js"
           data-project="1"
           data-api-key={process.env.NEXT_PUBLIC_BAYANISTA_KEY}
           data-auto-init
