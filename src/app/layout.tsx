@@ -41,7 +41,7 @@ export default function RootLayout({
         <Script
           src="https://unpkg.com/@bayanista/sdk/dist/bayanista.min.js"
           data-project="1"
-          data-api-key={process.env.NEXT_PUBLIC_BAYANISTA_KEY}
+          data-api-key="bayanista_0OakFajtH71QlD-Xwe8L0Nfb7LaPYEyOHELG9PPH6y0"
           data-auto-init
           strategy="afterInteractive"
         />
