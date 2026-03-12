@@ -14,8 +14,8 @@ export default function BayanistaProvider({ children }: { children: React.ReactN
   useEffect(() => {
     if (window.Bayanista) {
       window.Bayanista.init({
-        projectId: '2',
-        apiKey: 'bayanista_yjeYRNY28bSS1xCYb7zCmxuQmDBJoH6_jZlUxl4cmYk',
+        projectId: '1',
+        apiKey: 'bayanista_zWHE1jWA7NrU423GB6AL4p3QOEnu2-TPS1PWk_oAUxc',
         apiEndpoint: 'https://bayanista-api-production.up.railway.app',
         debug: true,
       });
