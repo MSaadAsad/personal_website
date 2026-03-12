@@ -1,11 +1,22 @@
 import type { Metadata } from 'next';
 import { JetBrains_Mono, Source_Serif_4 } from 'next/font/google';
+
+declare global {
+  interface Window {
+    Bayanista?: {
+      init: (config: { projectId: string; apiKey?: string; apiEndpoint?: string; debug?: boolean }) => void;
+      identify: (userId: string, traits?: Record<string, any>) => void;
+      track: (eventName: string, properties?: Record<string, any>) => void;
+      reset: () => void;
+      destroy: () => void;
+    };
+  }
+}
 import Script from 'next/script';
 import { Navigation } from '@/components/layout/Navigation';
 import { Footer } from '@/components/layout/Footer';
 import { BodyShell } from '@/components/layout/BodyShell';
 import { Analytics } from '@vercel/analytics/next';
-import BayanistaProvider from '@/providers/BayanistaProvider';
 import './globals.css';
 
 const jetbrains = JetBrains_Mono({
@@ -41,18 +52,24 @@ export default function RootLayout({
       <body className="min-h-screen">
         <Script
           src="https://www.bayanista.com/sdk/v1/bayanista.min.js"
-          strategy="beforeInteractive"
+          strategy="afterInteractive"
+          onLoad={() => {
+            window.Bayanista?.init({
+              projectId: '1',
+              apiKey: 'bayanista_Ce34qD_JnP8TtxUdsuGQTWCfENGDsjio3lje4a-I5mU',
+              apiEndpoint: 'https://bayanista-api-production.up.railway.app',
+              debug: true,
+            });
+          }}
         />
-        <BayanistaProvider>
-          <BodyShell>
-            <Navigation />
-            <main className="pt-14 min-h-screen">
-              {children}
-            </main>
-            <Footer />
-            <Analytics />
-          </BodyShell>
-        </BayanistaProvider>
+        <BodyShell>
+          <Navigation />
+          <main className="pt-14 min-h-screen">
+            {children}
+          </main>
+          <Footer />
+          <Analytics />
+        </BodyShell>
       </body>
     </html>
   );
