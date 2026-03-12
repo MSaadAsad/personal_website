@@ -5,6 +5,7 @@ import { Navigation } from '@/components/layout/Navigation';
 import { Footer } from '@/components/layout/Footer';
 import { BodyShell } from '@/components/layout/BodyShell';
 import { Analytics } from '@vercel/analytics/next';
+import BayanistaProvider from '@/providers/BayanistaProvider';
 import './globals.css';
 
 const jetbrains = JetBrains_Mono({
@@ -39,21 +40,19 @@ export default function RootLayout({
     <html lang="en" className={`${jetbrains.variable} ${sourceSerif.variable}`}>
       <body className="min-h-screen">
         <Script
-          src="https://unpkg.com/@bayanista/sdk/dist/bayanista.min.js"
-          data-project="1"
-          data-api-key="bayanista_0OakFajtH71QlD-Xwe8L0Nfb7LaPYEyOHELG9PPH6y0"
-          data-api-endpoint="https://bayanista-api-production.up.railway.app"
-          data-auto-init
-          strategy="afterInteractive"
+          src="https://www.bayanista.com/sdk/v1/bayanista.min.js"
+          strategy="beforeInteractive"
         />
-        <BodyShell>
-          <Navigation />
-          <main className="pt-14 min-h-screen">
-            {children}
-          </main>
-          <Footer />
-          <Analytics />
-        </BodyShell>
+        <BayanistaProvider>
+          <BodyShell>
+            <Navigation />
+            <main className="pt-14 min-h-screen">
+              {children}
+            </main>
+            <Footer />
+            <Analytics />
+          </BodyShell>
+        </BayanistaProvider>
       </body>
     </html>
   );
