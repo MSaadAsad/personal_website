@@ -21,9 +21,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className={`${jetbrains.variable} ${sourceSerif.variable}`}>
       <body className="min-h-screen">
         <Script
-          src="https://www.bayanista.com/sdk/v1/bayanista.min.js"
+          src="https://cdn.jsdelivr.net/npm/bayanista-sdk@2.0.0/dist/bayanista.min.js"
           data-project="1"
           data-api-key="bayanista_Ce34qD_JnP8TtxUdsuGQTWCfENGDsjio3lje4a-I5mU"
+          data-endpoint="https://bayanista-api-production.up.railway.app"
           data-auto-init
           strategy="afterInteractive"
         />
