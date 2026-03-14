@@ -23,7 +23,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Script
           src="https://www.bayanista.com/sdk/v1/bayanista.min.js"
           data-project="7f87e047-3784-4f41-82a6-24bc31879e44"
-          data-api-key="bay_kXq-Q8Dcp9JI_y-e2UASPKXWn9pwovKj"
+          data-api-key="bayanista_oefDYUWaK3y7L0wDOB_6RVUjUvcG56p6EBv23y735MQ"
           data-auto-init
           strategy="afterInteractive"
         />
