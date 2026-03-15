@@ -138,7 +138,7 @@ export default function AboutPage() {
                   <span>
                     Reading{' '}
                     <a
-                      href="https://en.wikipedia.org/wiki/The_Silk_Roads"
+                      href="https://www.amazon.com/Silk-Roads-New-History-World/dp/1101946326"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-[#0000EE] underline underline-offset-4 transition-colors duration-150"
@@ -153,7 +153,7 @@ export default function AboutPage() {
                   <span>
                     Staring at this highly detailed{' '}
                     <a
-                      href="https://zenodo.org/records/3596387/preview/F07-37%201857%20Districts%20of%20Jhilam%20and%20Rawal%20Pindi%20Sheet%20No%202.jpg?include_deleted=0"
+                      href="https://upload.wikimedia.org/wikipedia/commons/8/8f/Map_of_the_districts_of_Jhelum_and_Rawalpindi%2C_surveyed_by_D._G._Robinson%2C_1851%E2%80%9354%2C_copied_by_Sunawullah_in_1857_%28F07-37%29.jpg"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-[#0000EE] underline underline-offset-4 transition-colors duration-150"
