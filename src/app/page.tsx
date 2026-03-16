@@ -98,7 +98,7 @@ export default function Home() {
             <div className="concrete-block concrete-edge">
               <div className="px-6 py-5 border-b border-concrete-700/60 concrete-edge bg-[var(--color-concrete-block)]">
                 <div className="flex items-baseline justify-between">
-                  <h2 className="font-mono text-[0.6rem] text-concrete-700 tracking-[0.3em] uppercase">
+                  <h2 className="font-mono text-[0.7rem] text-concrete-700 tracking-[0.3em] uppercase">
                     LATEST BLOG
                   </h2>
                   <Link
@@ -117,14 +117,14 @@ export default function Home() {
                   >
                     <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-3">
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-mono text-base font-semibold text-[#0000EE]">
+                        <h3 className="font-mono text-sm font-semibold text-[#0000EE]">
                           {post.title}
                         </h3>
-                        <p className="font-serif text-sm text-concrete-700 mt-1.5 leading-relaxed">
+                        <p className="font-serif text-xs text-concrete-700 mt-1.5 leading-relaxed">
                           {post.excerpt}
                         </p>
                       </div>
-                      <span className="font-mono text-[0.65rem] text-concrete-600 tracking-wider shrink-0">
+                      <span className="font-mono text-[0.6rem] text-concrete-600 tracking-wider shrink-0">
                         {post.date}
                       </span>
                     </div>
