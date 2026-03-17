@@ -192,7 +192,7 @@ export default function AboutPage() {
                   'Semiotics & Semantics',
                   'Languages & Etymology',
                   'Castles & Fortresses',
-                  'Hills and Knolls and such',
+                  'Hills, Creeks and such',
                 ].map((interest) => (
                   <div key={interest} className="font-mono text-[0.75rem] text-concrete-700">
                     {interest}
