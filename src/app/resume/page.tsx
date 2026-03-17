@@ -82,7 +82,7 @@ export default function ResumePage() {
                     </li>
                   </ul>
                 </div>
-                <div className="font-mono text-[0.75rem] text-concrete-600 md:text-right">
+                <div className="font-mono text-[0.75rem] text-concrete-600 md:text-right shrink-0 whitespace-nowrap">
                   <div>San Francisco, CA</div>
                   <div>May 2025</div>
                 </div>

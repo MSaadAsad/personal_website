@@ -15,7 +15,7 @@ export default function ShelfPage() {
           </h1>
           <div className="section-divider" />
           <p className="mt-3 text-base text-concrete-700 font-mono max-w-2xl leading-relaxed">
-            Reviews of what I have been consuming recently.
+            You are what you eat. Notes on what I&apos;ve been consuming.
           </p>
         </div>
       </div>

@@ -5,9 +5,14 @@ import { projects } from '@/content/data/projects';
 import { getAllWriting } from '@/lib/mdx';
 
 export default function Home() {
-  const featuredProjects = [...projects]
-    .sort((a, b) => Date.parse(b.date) - Date.parse(a.date))
-    .slice(0, 3);
+  const featuredSlugs = [
+    'x-raying-multi-head-attention',
+    'efficient-transformers-gqa-mod',
+    'readmeplease-ai',
+  ];
+  const featuredProjects = featuredSlugs
+    .map((slug) => projects.find((p) => p.slug === slug)!)
+    .filter(Boolean);
   const recentWriting = getAllWriting().slice(0, 3);
 
   return (

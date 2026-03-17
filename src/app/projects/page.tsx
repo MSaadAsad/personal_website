@@ -43,7 +43,7 @@ export default function ProjectsPage() {
           </h1>
           <div className="section-divider" />
           <p className="mt-3 text-base text-concrete-700 font-mono max-w-2xl leading-relaxed">
-            Thing I&apos;vs built.
+            Things I&apos;ve built.
           </p>
         </div>
       </div>
