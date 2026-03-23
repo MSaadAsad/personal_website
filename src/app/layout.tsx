@@ -12,7 +12,7 @@ const sourceSerif = Source_Serif_4({ subsets: ['latin'], variable: '--font-serif
 
 export const metadata: Metadata = {
   title: { default: 'SAAD', template: '%s — SAAD' },
-  description: 'Projects, writing, and things I care about.',
+  description: 'M. Saad Asad',
   icons: { icon: '/assets/c-blue.png' },
 };
 

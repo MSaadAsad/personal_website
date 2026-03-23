@@ -10,11 +10,7 @@ export function ShelfItemCard({ item }: { item: ShelfItemType }) {
           <img
             src={item.coverImage}
             alt={item.title}
-            className={
-              item.type === 'book'
-                ? 'h-full w-full object-contain p-4'
-                : 'h-full w-full object-cover'
-            }
+            className="h-full w-full object-contain p-1 border-2 border-concrete-900/70"
           />
         ) : (
           <div className="text-center px-6">
@@ -28,11 +24,14 @@ export function ShelfItemCard({ item }: { item: ShelfItemType }) {
         )}
       </div>
       <div className="flex items-center justify-between gap-4 px-4 py-3">
-        <div className="flex items-baseline gap-2 min-w-0">
+        <div className="min-w-0">
           <h3 className="font-mono text-[0.75rem] font-semibold text-concrete-700 truncate">
             {item.title}
           </h3>
-          <span className="font-mono text-[0.65rem] text-concrete-600 shrink-0">
+          <p className="mt-1 font-mono text-[0.65rem] text-concrete-600 line-clamp-2">
+            {item.creator}
+          </p>
+          <span className="mt-1 block font-mono text-[0.6rem] text-concrete-600 tracking-wider">
             {item.year}
           </span>
         </div>
