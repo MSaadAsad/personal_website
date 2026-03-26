@@ -21,7 +21,7 @@ export default function ShelfPage() {
           </p>
         </div>
       </div>
-      <div className="concrete-block concrete-edge overflow-hidden">
+      <div className="concrete-block concrete-edge overflow-hidden" style={{ backgroundColor: 'transparent', borderColor: 'rgba(74,74,72,1)', boxShadow: '0 16px 22px rgba(46,46,44,0.28)' }}>
         <ShelfGrid items={shelf} />
       </div>
     </Container>

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { ShelfItem } from '@/types/content';
 import { ShelfItemCard } from './ShelfItem';
+import { ToLetCard } from '@/components/ToLetCard';
 import { cn } from '@/lib/utils';
 
 const tabs = [
@@ -41,7 +42,12 @@ export function ShelfGrid({ items }: { items: ShelfItem[] }) {
       </div>
       <div className="grid gap-0 md:grid-cols-2 lg:grid-cols-3">
         {filtered.map((item) => (
-          <ShelfItemCard key={item.id} item={item} />
+          <div key={item.id} style={{ backgroundColor: 'var(--color-concrete-block)' }}>
+            <ShelfItemCard item={item} />
+          </div>
+        ))}
+        {Array.from({ length: (3 - (filtered.length % 3)) % 3 }, (_, i) => (
+          <ToLetCard key={`to-let-${i}`} />
         ))}
       </div>
     </>

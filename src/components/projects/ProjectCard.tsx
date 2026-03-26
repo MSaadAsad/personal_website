@@ -5,7 +5,7 @@ export function ProjectCard({ project }: { project: Project }) {
   return (
     <Link
       href={`/projects/${project.slug}`}
-      className="concrete-card concrete-edge overflow-hidden block"
+      className="concrete-card concrete-edge overflow-hidden block h-full"
     >
       <div className="aspect-[4/3] bg-concrete-300/70 border-b border-concrete-700/50 flex items-center justify-center">
         {project.image ? (

@@ -46,7 +46,7 @@ export function ShelfItemCard({ item }: { item: ShelfItemType }) {
     return (
       <Link
         href={`/shelf/${item.reviewSlug}`}
-        className="concrete-card concrete-edge overflow-hidden block"
+        className="concrete-card concrete-edge overflow-hidden block h-full"
       >
         {content}
       </Link>
@@ -59,7 +59,7 @@ export function ShelfItemCard({ item }: { item: ShelfItemType }) {
         href={item.url}
         target="_blank"
         rel="noopener noreferrer"
-        className="concrete-card concrete-edge overflow-hidden block"
+        className="concrete-card concrete-edge overflow-hidden block h-full"
       >
         {content}
       </a>
