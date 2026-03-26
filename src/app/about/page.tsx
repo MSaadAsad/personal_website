@@ -79,7 +79,7 @@ export default function AboutPage() {
               >
                 The Selfish Gene
               </a>{' '}
-              in high school. It introduced me to the simple evolutionary
+              in high school. It introduced me to the simplest evolutionary
               simulation, the{' '}
               <a
                 href="https://en.wikipedia.org/wiki/Evolutionary_game_theory#Hawk_dove"
@@ -91,8 +91,8 @@ export default function AboutPage() {
               </a>{' '}
               , which I recreated while first teaching myself coding.{' '}
               <em>
-                Wait, so it&apos;s that simple? This coding stuff is neat. I can make
-                things out of thin air.
+                Wait, so it&apos;s that simple? You can just make
+                things out of thin air? This coding stuff is neat.
               </em>
             </p>
             <p className="font-serif text-base text-concrete-700 leading-relaxed">

@@ -60,7 +60,7 @@ export default function ProjectsPage() {
                 .filter(Boolean)
                 .join(' ')}
             >
-              <div className="px-6 py-4 font-mono text-[0.65rem] tracking-[0.35em] uppercase text-concrete-700 bg-[var(--color-concrete-block)]">
+              <div className="px-6 py-4 font-mono text-[0.65rem] tracking-[0.35em] uppercase text-concrete-700 bg-concrete-300">
                 {year}
               </div>
               <div className="grid gap-0 md:grid-cols-2 lg:grid-cols-3">
