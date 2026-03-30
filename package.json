@@ -18,7 +18,7 @@
     "@mdx-js/react": "^3.1.1",
     "@next/mdx": "^16.1.6",
     "@vercel/analytics": "^1.6.1",
-    "bayanista-sdk": "^1.0.0",
+    "bayanista-sdk": "^2.2.0",
     "clsx": "^2.1.1",
     "framer-motion": "^12.31.0",
     "gray-matter": "^4.0.3",
