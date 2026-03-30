@@ -8,9 +8,18 @@ export function Footer() {
   const [variant, setVariant] = useState<'control' | 'test'>('control');
 
   useEffect(() => {
-    const w = window as any;
-    if (w.Bayanista?.experiment) {
-      setVariant(w.Bayanista.experiment('footer-layout-swap'));
+    const assign = () => {
+      const w = window as any;
+      if (w.Bayanista?.sessionManager) {
+        setVariant(w.Bayanista.experiment('footer-layout-swap'));
+        return true;
+      }
+      return false;
+    };
+
+    if (!assign()) {
+      window.addEventListener('bayanista:ready', assign, { once: true });
+      return () => window.removeEventListener('bayanista:ready', assign);
     }
   }, []);
 

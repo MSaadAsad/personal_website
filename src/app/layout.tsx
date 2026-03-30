@@ -3,8 +3,8 @@ import { JetBrains_Mono, Source_Serif_4 } from 'next/font/google';
 import { Navigation } from '@/components/layout/Navigation';
 import { Footer } from '@/components/layout/Footer';
 import { BodyShell } from '@/components/layout/BodyShell';
-import Script from 'next/script';
 import { Analytics } from '@vercel/analytics/next';
+import { BayanistaScript } from '@/components/BayanistaScript';
 import './globals.css';
 
 const jetbrains = JetBrains_Mono({ subsets: ['latin'], variable: '--font-jetbrains', display: 'swap' });
@@ -20,13 +20,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={`${jetbrains.variable} ${sourceSerif.variable}`}>
       <body className="min-h-screen">
-        <Script
-          src="https://www.bayanista.com/sdk/v1/bayanista.min.js"
-          data-project="7f87e047-3784-4f41-82a6-24bc31879e44"
-          data-api-key="bayanista_H0AT73ICH_dtd49MacAAXurJbOaSu5MlZ3wrYVrtQvI"
-          data-auto-init
-          strategy="afterInteractive"
-        />
+        <BayanistaScript />
         <BodyShell>
           <Navigation />
           <main className="pt-14 min-h-screen">{children}</main>
