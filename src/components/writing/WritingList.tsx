@@ -24,14 +24,14 @@ export function WritingList({ posts }: { posts: WritingFrontmatter[] }) {
   return (
     <div className="concrete-block concrete-edge">
       <div className="border-b border-concrete-700/60 concrete-edge bg-[var(--color-concrete-block)]">
-        <div className="flex gap-0">
+        <div className="flex gap-0 overflow-x-auto">
           {(Object.keys(CATEGORY_LABELS) as CategoryKey[]).map((key, index) => (
             <button
               key={key}
               type="button"
               onClick={() => setCategory(key)}
               className={[
-                'font-mono text-[0.65rem] tracking-[0.25em] uppercase px-6 py-5 transition-all duration-150 border-r border-concrete-700/60',
+                'shrink-0 font-mono text-[0.65rem] tracking-[0.25em] uppercase px-6 py-5 transition-all duration-150 border-r border-concrete-700/60',
                 index === 0 && 'border-l border-concrete-700/60',
                 category === key
                   ? 'text-concrete-900 bg-concrete-300/80'

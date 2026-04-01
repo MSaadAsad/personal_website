@@ -36,9 +36,13 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
       );
     },
     p: ({ children }) => (
-      <p className="font-serif text-[20px] leading-[1.8] text-concrete-700 mb-6">
+      <p className="font-serif text-[20px] leading-[1.8] text-concrete-700 mb-6 break-words">
         {children}
       </p>
+    ),
+    img: ({ src, alt }) => (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img src={src} alt={alt ?? ''} className="max-w-full h-auto" />
     ),
     a: ({ href, children }) => (
       <a

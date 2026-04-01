@@ -22,13 +22,13 @@ export function ShelfGrid({ items }: { items: ShelfItem[] }) {
   return (
     <>
       <div className="border-b border-concrete-700/60 concrete-edge bg-[var(--color-concrete-block)]">
-        <div className="flex gap-0">
+        <div className="flex gap-0 overflow-x-auto">
           {tabs.map((tab, index) => (
             <button
               key={tab.value}
               onClick={() => setFilter(tab.value)}
               className={cn(
-                'font-mono text-[0.65rem] tracking-[0.25em] uppercase px-6 py-5 transition-all duration-150 border-r border-concrete-700/60',
+                'shrink-0 font-mono text-[0.65rem] tracking-[0.25em] uppercase px-6 py-5 transition-all duration-150 border-r border-concrete-700/60',
                 index === 0 && 'border-l border-concrete-700/60',
                 filter === tab.value
                   ? 'text-concrete-900 bg-concrete-300/80'
