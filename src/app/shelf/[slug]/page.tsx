@@ -40,14 +40,14 @@ export default async function ShelfReviewPage({
     <Container className="py-24">
       <Link
         href="/shelf"
-        className="font-mono text-[0.65rem] text-concrete-600 hover:text-[#0000EE] transition-colors duration-150 mb-10 inline-block tracking-wider"
+        className="font-mono text-[0.65rem] text-concrete-700 hover:text-[#0000EE] transition-colors duration-150 mb-10 inline-block tracking-wider"
       >
         &larr; ALL SHELF
       </Link>
 
       <article className="concrete-block concrete-edge p-8 md:p-10">
         <header className="mb-12 border-l-[6px] pl-8 border-l-[#0000EE]">
-          <div className="flex items-center gap-4 mb-5 font-mono text-[0.65rem] text-concrete-600 tracking-wider">
+          <div className="flex items-center gap-4 mb-5 font-mono text-[0.65rem] text-concrete-700 tracking-wider">
             <span>{item.creator}</span>
             <span>{item.year}</span>
             <span>{item.type.toUpperCase()}</span>

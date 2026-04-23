@@ -9,8 +9,8 @@ export function BayanistaScript() {
   return (
     <Script
       src="https://www.bayanista.com/sdk/v1/bayanista.min.js"
-      data-project="9ad3faa9-0080-469c-8b21-5a48d55d55f8"
-      data-api-key="bayanista_ZZaJQ2aoPClwj-q4VaC5ILsHJvbAoKl07jWDiBhG8ws"
+      data-project={projectId}
+      data-api-key={apiKey}
       data-auto-init
       strategy="afterInteractive"
       onLoad={() => window.dispatchEvent(new Event('bayanista:ready'))}
