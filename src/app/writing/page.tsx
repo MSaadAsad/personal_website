@@ -18,7 +18,7 @@ export default function WritingPage() {
             BLOG
           </h1>
           <div className="section-divider" />
-          <p className="mt-3 text-base text-concrete-700 font-mono max-w-2xl leading-relaxed">
+          <p className="mt-3 text-lg text-concrete-700 font-mono max-w-2xl leading-relaxed">
             Essays, explorations, and creative work.
           </p>
         </div>

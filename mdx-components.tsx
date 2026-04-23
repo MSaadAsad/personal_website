@@ -36,7 +36,7 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
       );
     },
     p: ({ children }) => (
-      <p className="font-serif text-[20px] leading-[1.8] text-concrete-800 mb-6 break-words">
+      <p className="font-serif text-[22px] leading-[1.8] text-concrete-800 mb-6 break-words">
         {children}
       </p>
     ),
@@ -70,12 +70,12 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
       </pre>
     ),
     ul: ({ children }) => (
-      <ul className="font-serif text-[20px] text-concrete-800 mb-6 ml-6 list-disc list-outside space-y-2.5 leading-[1.7]">
+      <ul className="font-serif text-[22px] text-concrete-800 mb-6 ml-6 list-disc list-outside space-y-2.5 leading-[1.7]">
         {children}
       </ul>
     ),
     ol: ({ children }) => (
-      <ol className="font-serif text-[20px] text-concrete-800 mb-6 ml-6 list-decimal list-outside space-y-2.5 leading-[1.7]">
+      <ol className="font-serif text-[22px] text-concrete-800 mb-6 ml-6 list-decimal list-outside space-y-2.5 leading-[1.7]">
         {children}
       </ol>
     ),

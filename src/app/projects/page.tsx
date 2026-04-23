@@ -43,7 +43,7 @@ export default function ProjectsPage() {
             PROJECTS
           </h1>
           <div className="section-divider" />
-          <p className="mt-3 text-base text-concrete-700 font-mono max-w-2xl leading-relaxed">
+          <p className="mt-3 text-lg text-concrete-700 font-mono max-w-2xl leading-relaxed">
             Things I&apos;ve built.
           </p>
         </div>
@@ -60,7 +60,7 @@ export default function ProjectsPage() {
                 .filter(Boolean)
                 .join(' ')}
             >
-              <div className="px-6 py-4 font-mono text-[0.65rem] tracking-[0.35em] uppercase text-concrete-700 bg-concrete-300">
+              <div className="px-6 py-4 font-mono text-[0.75rem] tracking-[0.35em] uppercase text-concrete-700 bg-concrete-300">
                 {year}
               </div>
               <div className="grid gap-0 md:grid-cols-2 lg:grid-cols-3">
