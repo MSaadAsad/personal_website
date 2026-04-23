@@ -8,7 +8,7 @@ export const writing: WritingFrontmatter[] = [
     category: 'creative',
     tags: [],
     excerpt: 'When memory crumbles.',
-    readingTime: 14,
+    readingTime: 7,
   },
   {
     title: 'The Problem with Vibecoding',

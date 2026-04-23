@@ -62,7 +62,7 @@ export default async function WritingDetailPage({ params }: { params: Promise<{ 
           <h1 className="text-heading font-mono font-bold text-concrete-900 tracking-tight">
             {frontmatter.title}
           </h1>
-          <p className="mt-5 font-serif text-[1.35rem] text-concrete-800 leading-relaxed">
+          <p className="mt-5 font-serif text-xl text-concrete-800 leading-relaxed">
             {frontmatter.excerpt}
           </p>
           {frontmatter.tags.length > 0 && (

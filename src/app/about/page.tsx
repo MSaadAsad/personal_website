@@ -20,7 +20,7 @@ export default function AboutPage() {
       <div className="concrete-block concrete-edge p-8 md:p-10">
         <div className="grid gap-16 lg:grid-cols-[1fr_300px]">
           <div className="space-y-7">
-            <p className="font-serif text-base text-concrete-700 leading-relaxed">
+            <p className="font-serif text-base text-concrete-800 leading-relaxed">
               I&apos;m Saad. I&apos;m from a small city in Pakistani Kashmir called{' '}
               <a
                 href="https://en.wikipedia.org/wiki/Mirpur,_Azad_Kashmir"
@@ -41,7 +41,7 @@ export default function AboutPage() {
               </a>
               . I suspect this is somehow relevant to everything.
             </p>
-            <p className="font-serif text-base text-concrete-700 leading-relaxed">
+            <p className="font-serif text-base text-concrete-800 leading-relaxed">
               My origin story is that I used to play too much of my uncle&apos;s
               bootlegged{' '}
               <a
@@ -54,7 +54,7 @@ export default function AboutPage() {
               </a>{' '}
               on his computer as a 6-year-old.
             </p>
-            <p className="font-serif text-base text-concrete-700 leading-relaxed">
+            <p className="font-serif text-base text-concrete-800 leading-relaxed">
               I grew up loving history and spent the COVID pandemic
               collecting the largest dataset of{' '}
               <a
@@ -69,7 +69,7 @@ export default function AboutPage() {
               parliament shared it on Twitter.
               I&apos;m building a dedicated site for it next.
             </p>
-            <p className="font-serif text-base text-concrete-700 leading-relaxed">
+            <p className="font-serif text-base text-concrete-800 leading-relaxed">
               I achieved Enlightenment when I read{' '}
               <a
                 href="https://en.wikipedia.org/wiki/The_Selfish_Gene"
@@ -95,7 +95,7 @@ export default function AboutPage() {
                 things out of thin air? This coding stuff is neat.
               </em>
             </p>
-            <p className="font-serif text-base text-concrete-700 leading-relaxed">
+            <p className="font-serif text-base text-concrete-800 leading-relaxed">
               <strong>
                 <a
                   href="https://x.com/GrantSlatton/status/1830302697125478630?lang=en"
@@ -107,7 +107,7 @@ export default function AboutPage() {
                 </a>
               </strong>
             </p>
-            <p className="font-serif text-base text-concrete-700 leading-relaxed">
+            <p className="font-serif text-base text-concrete-800 leading-relaxed">
               I came to SF at 16 to study Computer Science at{' '}
               <a
                 href="https://www.minerva.edu/announcements/minerva-university-named-worlds-most-innovative-university-for-fourth-consecutive-year/"
@@ -121,7 +121,7 @@ export default function AboutPage() {
               Along the way, I worked on ML research and spent my senior year at
               a YC-backed startup as a founding AI engineer.
             </p>
-            <p className="font-serif text-base text-concrete-700 leading-relaxed">
+            <p className="font-serif text-base text-concrete-800 leading-relaxed">
               Recently I have been asking myself:{' '}
               <strong>do I want to be on the receiving end of culture, or create it?</strong>{' '}
               I built this site to think out loud and to push myself to write more
@@ -129,11 +129,11 @@ export default function AboutPage() {
             </p>
 
             <div className="mt-14 pt-14 border-t border-concrete-400/60">
-              <h2 className="font-mono text-[0.65rem] text-concrete-600 tracking-[0.25em] mb-8">
+              <h2 className="font-mono text-[0.65rem] text-concrete-700 tracking-[0.25em] mb-8">
                 I AM CURRENTLY
               </h2>
               <ul className="space-y-4">
-                <li className="font-mono text-[0.75rem] text-concrete-700 flex items-baseline gap-4">
+                <li className="font-mono text-[0.75rem] text-concrete-800 flex items-baseline gap-4">
                   <span className="text-[#0000EE]">→</span>
                   <span>
                     Reading{' '}
@@ -148,7 +148,7 @@ export default function AboutPage() {
                     , a history of trade in the Old World.
                   </span>
                 </li>
-                <li className="font-mono text-[0.75rem] text-concrete-700 flex items-baseline gap-4">
+                <li className="font-mono text-[0.75rem] text-concrete-800 flex items-baseline gap-4">
                   <span className="text-[#0000EE]">→</span>
                   <span>
                     Staring at this highly detailed{' '}
@@ -163,7 +163,7 @@ export default function AboutPage() {
                     .
                   </span>
                 </li>
-                <li className="font-mono text-[0.75rem] text-concrete-700 flex items-baseline gap-4">
+                <li className="font-mono text-[0.75rem] text-concrete-800 flex items-baseline gap-4">
                   <span className="text-[#0000EE]">→</span>
                   <span>
                     Patiently waiting for 1980s nostalgia media to be replaced by 2000s nostalgia media.
@@ -183,7 +183,7 @@ export default function AboutPage() {
             </div>
 
             <div>
-              <h3 className="font-mono text-[0.65rem] text-concrete-600 tracking-[0.2em] mb-4">
+              <h3 className="font-mono text-[0.65rem] text-concrete-700 tracking-[0.2em] mb-4">
                 INTERESTS
               </h3>
               <div className="space-y-2">
@@ -194,7 +194,7 @@ export default function AboutPage() {
                   'Castles & Fortresses',
                   'Hills, Creeks and such',
                 ].map((interest) => (
-                  <div key={interest} className="font-mono text-[0.75rem] text-concrete-700">
+                  <div key={interest} className="font-mono text-[0.75rem] text-concrete-800">
                     {interest}
                   </div>
                 ))}

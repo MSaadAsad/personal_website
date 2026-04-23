@@ -25,16 +25,16 @@ export default function ResumePage() {
               <h2 className="font-mono text-2xl text-concrete-900 tracking-tight">
                 M. Saad Asad
               </h2>
-              <div className="space-y-2 font-mono text-[0.75rem] text-concrete-700">
+              <div className="space-y-2 font-mono text-[0.75rem] text-concrete-800">
                 <div>San Francisco, CA</div>
               </div>
             </div>
 
             <div className="space-y-4">
-              <h3 className="font-mono text-[0.65rem] text-concrete-600 tracking-[0.25em]">
+              <h3 className="font-mono text-[0.65rem] text-concrete-700 tracking-[0.25em]">
                 SKILLS
               </h3>
-              <div className="space-y-3 font-serif text-sm text-concrete-700">
+              <div className="space-y-3 font-serif text-sm text-concrete-800">
                 <div>
                   <span className="font-mono text-concrete-900">Skills:</span> ML, AI
                   Agents, Deep Learning, Bayesian Modeling, Distributed Systems,
@@ -55,7 +55,7 @@ export default function ResumePage() {
 
           <div className="space-y-12">
             <section className="space-y-6">
-              <h3 className="font-mono text-[0.65rem] text-concrete-600 tracking-[0.25em]">
+              <h3 className="font-mono text-[0.65rem] text-concrete-700 tracking-[0.25em]">
                 EDUCATION
               </h3>
               <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
@@ -70,10 +70,10 @@ export default function ResumePage() {
                       Minerva University
                     </Link>
                   </p>
-                  <p className="font-serif text-base text-concrete-700">
+                  <p className="font-serif text-base text-concrete-800">
                     B.Sc Computer Science: Data Science | GPA: 3.81
                   </p>
-                  <ul className="list-disc pl-5 font-serif text-sm text-concrete-600 space-y-1 mt-2">
+                  <ul className="list-disc pl-5 font-serif text-sm text-concrete-700 space-y-1 mt-2">
                     <li>
                       Courses: Machine Learning, Artificial Intelligence, Bayesian
                       Inference, Software Engineering, Financial Modeling, Marketing and
@@ -82,7 +82,7 @@ export default function ResumePage() {
                     </li>
                   </ul>
                 </div>
-                <div className="font-mono text-[0.75rem] text-concrete-600 md:text-right shrink-0 whitespace-nowrap">
+                <div className="font-mono text-[0.75rem] text-concrete-700 md:text-right shrink-0 whitespace-nowrap">
                   <div>San Francisco, CA</div>
                   <div>May 2025</div>
                 </div>
@@ -90,7 +90,7 @@ export default function ResumePage() {
             </section>
 
             <section className="space-y-6">
-              <h3 className="font-mono text-[0.65rem] text-concrete-600 tracking-[0.25em]">
+              <h3 className="font-mono text-[0.65rem] text-concrete-700 tracking-[0.25em]">
                 EXPERIENCE
               </h3>
 
@@ -108,16 +108,16 @@ export default function ResumePage() {
                       </Link>{' '}
                       (Research and Engineering Team)
                     </p>
-                    <p className="font-serif text-base text-concrete-700">
+                    <p className="font-serif text-base text-concrete-800">
                       Research Scientist
                     </p>
                   </div>
-                  <div className="font-mono text-[0.75rem] text-concrete-600 md:text-right">
+                  <div className="font-mono text-[0.75rem] text-concrete-700 md:text-right">
                     <div>San Francisco, CA</div>
                     <div>July 2024 - Current</div>
                   </div>
                 </div>
-                <ul className="list-disc pl-5 font-serif text-sm text-concrete-700 space-y-2">
+                <ul className="list-disc pl-5 font-serif text-sm text-concrete-800 space-y-2">
                   <li>
                     4th engineering hire; designed and built TaxGPT&apos;s scalable AI
                     tax-research agent in a SOC 2–compliant production environment,
@@ -157,16 +157,16 @@ export default function ResumePage() {
                     <p className="font-mono text-base text-concrete-900">
                       Womp Labs (Research Team)
                     </p>
-                    <p className="font-serif text-base text-concrete-700">
+                    <p className="font-serif text-base text-concrete-800">
                       Machine Learning Intern
                     </p>
                   </div>
-                  <div className="font-mono text-[0.75rem] text-concrete-600 md:text-right">
+                  <div className="font-mono text-[0.75rem] text-concrete-700 md:text-right">
                     <div>San Francisco, CA</div>
                     <div>June 2024 - July 2024</div>
                   </div>
                 </div>
-                <ul className="list-disc pl-5 font-serif text-sm text-concrete-700 space-y-2">
+                <ul className="list-disc pl-5 font-serif text-sm text-concrete-800 space-y-2">
                   <li>
                     Researched model-agnostic data attribution for CV and NLP,
                     benchmarking interpretability methods and identifying high-impact
@@ -196,16 +196,16 @@ export default function ResumePage() {
                       </Link>
                       )
                     </p>
-                    <p className="font-serif text-base text-concrete-700">
+                    <p className="font-serif text-base text-concrete-800">
                       Machine Learning Research Intern
                     </p>
                   </div>
-                  <div className="font-mono text-[0.75rem] text-concrete-600 md:text-right">
+                  <div className="font-mono text-[0.75rem] text-concrete-700 md:text-right">
                     <div>Buenos Aires, Argentina</div>
                     <div>Sep 2023 - Dec 2023</div>
                   </div>
                 </div>
-                <ul className="list-disc pl-5 font-serif text-sm text-concrete-700 space-y-2">
+                <ul className="list-disc pl-5 font-serif text-sm text-concrete-800 space-y-2">
                   <li>
                     Researched rule-extraction methods for interpretable deep learning,
                     benchmarking the RxREN algorithm across CV datasets and
@@ -226,16 +226,16 @@ export default function ResumePage() {
                     <p className="font-mono text-base text-concrete-900">
                       World Wildlife Fund (Data and Technology Team)
                     </p>
-                    <p className="font-serif text-base text-concrete-700">
+                    <p className="font-serif text-base text-concrete-800">
                       Data Science Intern
                     </p>
                   </div>
-                  <div className="font-mono text-[0.75rem] text-concrete-600 md:text-right">
+                  <div className="font-mono text-[0.75rem] text-concrete-700 md:text-right">
                     <div>San Francisco, CA</div>
                     <div>June 2023 - Aug 2023</div>
                   </div>
                 </div>
-                <ul className="list-disc pl-5 font-serif text-sm text-concrete-700 space-y-2">
+                <ul className="list-disc pl-5 font-serif text-sm text-concrete-800 space-y-2">
                   <li>
                     Built Django REST APIs and Azure CI/CD workflows to automate
                     partner data ingestion and standardize unstructured geospatial and
@@ -246,7 +246,7 @@ export default function ResumePage() {
             </section>
 
             <section className="space-y-6">
-              <h3 className="font-mono text-[0.65rem] text-concrete-600 tracking-[0.25em]">
+              <h3 className="font-mono text-[0.65rem] text-concrete-700 tracking-[0.25em]">
                 PROJECTS
               </h3>
               <div className="space-y-3">
@@ -263,17 +263,17 @@ export default function ResumePage() {
                       </Link>{' '}
                       (Co-founder)
                     </p>
-                    <p className="font-serif text-sm text-concrete-700">
+                    <p className="font-serif text-sm text-concrete-800">
                       Built sentiment modeling pipelines over MD&amp;A disclosures in
                       10-K/10-Q filings to produce risk-calibrated signals guiding the
                       structure and tone of corporate investor communications.
                     </p>
-                    <p className="font-serif text-sm text-concrete-700 mt-2">
+                    <p className="font-serif text-sm text-concrete-800 mt-2">
                       Developed sentiment-conditioned text generation to produce
                       tone-aligned investor communication drafts.
                     </p>
                   </div>
-                  <div className="font-mono text-[0.75rem] text-concrete-600 md:text-right">
+                  <div className="font-mono text-[0.75rem] text-concrete-700 md:text-right">
                     March 2025
                   </div>
                 </div>
@@ -290,14 +290,14 @@ export default function ResumePage() {
                         Hybrid GQA-MoD LLM
                       </Link>
                     </p>
-                    <p className="font-serif text-sm text-concrete-700">
+                    <p className="font-serif text-sm text-concrete-800">
                       Implemented the first hybrid of Grouped-Query Attention and
                       Mixture-of-Depths in a compact language model, achieving 70%
                       faster training with ~10% accuracy tradeoff compared to baseline
                       architectures.
                     </p>
                   </div>
-                  <div className="font-mono text-[0.75rem] text-concrete-600 md:text-right">
+                  <div className="font-mono text-[0.75rem] text-concrete-700 md:text-right">
                     April 2024
                   </div>
                 </div>
