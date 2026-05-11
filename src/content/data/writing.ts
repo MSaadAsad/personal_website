@@ -29,7 +29,7 @@ export const writing: WritingFrontmatter[] = [
     readingTime: 22,
   },
   {
-    title: 'The Battle for Khari, 1840',
+    title: 'The Campaign for Khari Khariyali, 1841',
     slug: 'battle-for-khari-1840',
     date: '2025-08-26',
     category: 'historical',
