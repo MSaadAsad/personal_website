@@ -67,7 +67,16 @@ export default function AboutPage() {
               </a>{' '}
               with over 170 sites recorded. Pakistani embassies and members of
               parliament shared it on Twitter.
-              I&apos;m building a dedicated site for it next.
+              I&apos;m currently extending it into a dedicated site for Pakistani history,{' '}
+              <a
+                href="https://indusatlas.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[#0000EE] underline underline-offset-4 transition-colors duration-150"
+              >
+                Indus Atlas
+              </a>
+              .
             </p>
             <p className="font-serif text-base text-concrete-800 leading-relaxed">
               I achieved Enlightenment when I read{' '}
