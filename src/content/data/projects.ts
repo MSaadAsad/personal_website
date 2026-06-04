@@ -2,6 +2,17 @@ import { Project } from '@/types/content';
 
 export const projects: Project[] = [
   {
+    slug: 'indus-atlas',
+    title: 'Indus Atlas',
+    date: '2026-06-04',
+    description:
+      'A digital humanities project for cataloguing, digitizing, and mapping historical sources related to Pakistan’s past.',
+    image: '/assets/projects/indus-atlas/cover.png',
+    tags: [],
+    techStack: [],
+    url: 'https://indusatlas.com',
+  },
+  {
     slug: 'efficient-transformers-gqa-mod',
     title: 'Efficient Transformers',
     date: '2024-04-26',
