@@ -7,7 +7,7 @@ export const writing: WritingFrontmatter[] = [
     date: '2026-04-23',
     category: 'creative',
     tags: [],
-    excerpt: 'When memory crumbles.',
+    excerpt: 'BART has gotten louder.',
     readingTime: 7,
   },
   {
