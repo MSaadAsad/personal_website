@@ -2,6 +2,18 @@ import { ShelfItem } from '@/types/content';
 
 export const shelf: ShelfItem[] = [
   {
+    id: 'objectivity',
+    title: 'Objectivity',
+    creator: 'Lorraine Daston, Peter Galison',
+    type: 'book',
+    year: 2007,
+    consumedOn: '2026',
+    coverImage:
+      'http://i.thriftbooks.com/api/imagehandler/m/F5B95E8DB8B6F7C469B8D3CA5695A86AB573490D.jpeg',
+    reviewSlug: 'objectivity',
+    tags: [],
+  },
+  {
     id: 'still-life',
     title: 'Still Life',
     creator: 'Jia Zhangke',
