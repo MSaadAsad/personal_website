@@ -7,14 +7,16 @@ export function ProjectCard({ project }: { project: Project }) {
       href={`/projects/${project.slug}`}
       className="concrete-card concrete-edge overflow-hidden block h-full"
     >
-      <div className="aspect-[4/3] bg-concrete-300/70 border-b border-concrete-700/50 flex items-center justify-center">
+      <div className="aspect-[4/3] bg-concrete-300/70 border-b border-concrete-700/50 flex items-center justify-center p-3">
         {project.image ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={project.image}
-            alt={project.title}
-            className="h-full w-full object-contain p-1 border-2 border-concrete-900/70"
-          />
+          <div className="w-full aspect-[3/2] overflow-hidden border-2 border-concrete-900/70 bg-concrete-200 shadow-[0_5px_10px_rgba(46,46,44,0.18)]">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={project.image}
+              alt={project.title}
+              className="h-full w-full object-cover"
+            />
+          </div>
         ) : (
           <div className="text-center px-6">
             <div className="font-mono text-[0.65rem] text-concrete-700 tracking-[0.2em] uppercase">
