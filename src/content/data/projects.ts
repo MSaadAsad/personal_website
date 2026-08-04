@@ -6,7 +6,7 @@ export const projects: Project[] = [
     title: 'Lahore Neighbourhoods',
     date: '2026-08-03',
     description:
-      'One way to divide Lahore into regions using streets, buildings, destinations, satellite observations, and sampled travel distance.',
+      'Connected parts of Lahore, grouped by similarities in streets, buildings, destinations, vegetation, and sampled travel times.',
     image: '/assets/projects/lahore-neighbourhoods/cover.png',
     tags: [],
     techStack: ['JavaScript', 'Leaflet', 'OpenStreetMap'],
