@@ -1,0 +1,46 @@
+Lahore is usually divided through administrative boundaries or familiar place names. I wanted to test a different question: if we begin with the physical city, which adjoining areas appear to belong together?
+
+[Open the interactive map](/projects/lahore-neighbourhoods/map/index.html)
+
+## Starting with street blocks
+
+The basic unit is the street block, not a grid cell or an official neighbourhood. OpenStreetMap roads were used to form roughly 46,000 blocks clipped to Lahore District. Empty areas inside the district were retained as lower-confidence infill so that the map covers the whole district rather than only well-mapped central Lahore.
+
+Two blocks can be grouped only when they touch. This prevents the model from assigning disconnected pieces of the city to the same region simply because their statistics look similar.
+
+## Building the hierarchy
+
+The map uses adjacency-constrained hierarchical clustering. It begins with individual blocks and repeatedly joins the neighbouring pair with the strongest overall match. The same merge tree produces the 90, 50, 35, and 10 region views.
+
+This matters because changing the level of detail does not rebuild the city from scratch. A small region can merge into a larger one, but it cannot jump between unrelated regions as the number of regions changes.
+
+The match between neighbouring blocks considers:
+
+- **Movement across the shared edge:** road class, crossings, bridges, railways, waterways, and other barriers.
+- **Street structure:** density, intersection pattern, and how permeable the local street network is.
+- **Building form:** footprint coverage, building density, and typical building size.
+- **Destinations and land use:** the amount and mix of mapped commerce, education, health, religious, civic, transport, recreation, and lodging activity, alongside mapped commercial areas.
+- **Satellite surface:** Sentinel-2 vegetation and built or bare surface signals.
+- **Travel distance:** sampled walking and driving reach, used as one supporting measure of how similarly connected nearby blocks are.
+
+No single feature draws a boundary. A boundary becomes more plausible when several signals change in the same place.
+
+## What was kept separate
+
+**Population** is displayed as a separate WorldPop 2020 view but does not determine the regions. Early tests made dense places cluster together even when streets and barriers suggested that they functioned as different neighbourhoods. Population is useful for describing a resulting region, but it was too dominant as a rule for constructing one.
+
+**Official boundaries and neighbourhood labels** are references, not training targets. Using them to construct the regions would reproduce the divisions the project is trying to examine independently.
+
+## What was excluded
+
+- **Elevation and slope:** Lahore is too flat for these variables to add much useful separation, and small measurement differences created arbitrary boundaries.
+- **Street-level imagery and visual embeddings:** available Mapillary coverage was sparse, geographically uneven, and inconsistent across contributors and years. It was useful for experimentation but not credible as a citywide feature.
+- **Traffic and pedestrian counts:** no sufficiently complete, open, district-wide source was found. Road width or road class was not treated as a substitute for observed movement.
+- **Community centres and centroids:** these are useful summaries of a finished region, but forcing every region around a chosen centre made the result depend too heavily on uncertain seed locations.
+- **Population-based balancing:** regions were not forced to contain equal populations or equal areas. The goal was structural similarity, not electoral or service-delivery districts.
+
+## How to read the result
+
+The map is an exploratory decomposition, not a claim that Lahore has one correct set of neighbourhood boundaries. The broad views are best for seeing major divisions; the finer views show where the same evidence supports smaller subregions. Clicking a region reveals its area, modeled population, and the main mapped place names inside it.
+
+Coverage also matters. OpenStreetMap, building footprints, destinations, and satellite observations are much richer in some parts of Lahore than others. The map therefore distinguishes directly observed blocks from inferred coverage and should be read as a hypothesis built from available public evidence, not as an official boundary map.

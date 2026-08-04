@@ -2,6 +2,17 @@ import { Project } from '@/types/content';
 
 export const projects: Project[] = [
   {
+    slug: 'lahore-neighbourhoods',
+    title: 'Lahore Neighbourhoods',
+    date: '2026-08-03',
+    description:
+      'One way to divide Lahore into regions using streets, buildings, destinations, satellite observations, and sampled travel distance.',
+    image: '/assets/projects/lahore-neighbourhoods/cover.png',
+    tags: [],
+    techStack: ['JavaScript', 'Leaflet', 'OpenStreetMap'],
+    url: '/projects/lahore-neighbourhoods/map/index.html',
+  },
+  {
     slug: 'indus-atlas',
     title: 'Indus Atlas',
     date: '2026-06-04',

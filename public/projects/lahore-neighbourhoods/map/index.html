@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <title>Lahore neighbourhoods</title>
+  <meta name="description" content="An experimental bottom-up structural map of Lahore District." />
+  <link rel="stylesheet" href="vendor/leaflet/leaflet.css?v=16" />
+  <link rel="stylesheet" href="styles.css?v=21" />
+</head>
+<body>
+  <header>
+    <div>
+      <h1><span id="regionName">Lahore</span> neighbourhoods</h1>
+    </div>
+    <div class="header-actions">
+      <button id="aboutBtn" class="quiet">How to read this</button>
+    </div>
+  </header>
+  <main>
+    <aside class="panel">
+      <section>
+        <p class="label">VIEW</p>
+        <div class="segmented view-options" role="group" aria-label="Map view">
+          <button class="mode active" data-mode="clusters">Neighbourhoods</button>
+          <button class="mode" data-mode="activity">Intensity</button>
+          <button class="mode" data-mode="population">Population</button>
+          <button class="mode" data-mode="vegetation">Vegetation</button>
+        </div>
+        <p id="viewDescription" class="view-description">Each colour is a model-derived neighbourhood: adjoining blocks grouped by street structure, urban form, destinations and sampled travel reach.</p>
+      </section>
+      <section id="resolutionSection">
+        <div class="resolution-head"><p class="label">NEIGHBOURHOOD DETAIL</p><strong id="resolutionValue">35</strong></div>
+        <div id="resolutionOptions" class="resolution-options" aria-label="Neighbourhood count"></div>
+      </section>
+      <section>
+        <p class="label">EVIDENCE</p>
+        <label class="toggle"><input id="infraToggle" type="checkbox" checked><span></span> Barriers + arterials</label>
+        <label class="toggle"><input id="labelsToggle" type="checkbox" checked><span></span> Reference labels</label>
+        <label class="toggle"><input id="waterToggle" type="checkbox" checked><span></span> Water surfaces</label>
+      </section>
+      <section class="reading">
+        <p class="label">SELECTED UNIT</p>
+        <div id="selection"><p class="muted">Click a street block to highlight its whole neighbourhood and inspect its population and main place names.</p></div>
+      </section>
+      <section class="stats">
+        <div><strong id="cellCount">…</strong><span>street blocks</span></div>
+        <div><strong id="clusterCount">…</strong><span>neighbourhoods</span></div>
+        <div><strong id="roadCount">…</strong><span>street ways</span></div>
+      </section>
+      <p class="source">OpenStreetMap contributors · ODbL<br>Updated 23 July 2026</p>
+    </aside>
+    <div id="map" aria-label="Interactive district structural map"></div>
+    <div class="legend" id="legend"><span>Solid = observed blocks · faded/dashed = inferred coverage</span></div>
+  </main>
+  <dialog id="about">
+    <button class="close" aria-label="Close">×</button>
+    <p class="eyebrow">HOW THIS MAP WORKS</p>
+    <h2>One way to break Lahore into regions.</h2>
+    <p>The map starts with individual street blocks. Only blocks that touch can be joined. It repeatedly combines the strongest neighbouring match, creating the nested 90, 50, 35 and 10 region views.</p>
+    <p>Each match considers how easily the shared edge can be crossed; major roads, railways and water barriers; street layout; building density and size; commercial land and mapped destinations; satellite-observed vegetation and built surface; and sampled walking and driving reach.</p>
+    <div class="method"><b>Region sizes</b><span>Switch between 10, 35, 50 or 90 regions. A larger number gives a finer breakdown.</span></div>
+    <div class="method"><b>Other views</b><span>Intensity shows mapped destinations; Population shows WorldPop estimates; Vegetation shows satellite-observed greenness.</span></div>
+    <div class="method"><b>Click a neighbourhood</b><span>Highlight it and see its estimated population, area and main place names.</span></div>
+    <p class="muted">Population is shown separately and does not create the regions. These are model-generated areas based on the available data, not official neighbourhood boundaries.</p>
+  </dialog>
+  <script src="vendor/leaflet/leaflet.js?v=16"></script>
+  <script src="data/loader.js?v=45"></script>
+  <script src="app.js?v=60"></script>
+</body>
+</html>
