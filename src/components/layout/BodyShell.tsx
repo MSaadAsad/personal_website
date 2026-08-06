@@ -11,7 +11,7 @@ export function BodyShell({ children }: { children: React.ReactNode }) {
     <div
       className="min-h-screen"
       style={isHome ? {
-        backgroundImage: "url('/assets/homepage-background.png')",
+        backgroundImage: "url('/assets/homepage-background.webp')",
         backgroundRepeat: 'no-repeat',
         backgroundSize: 'cover',
         backgroundPosition: 'top center',

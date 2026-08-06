@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { Project } from '@/types/content';
 
 export function ProjectCard({ project }: { project: Project }) {
@@ -9,12 +10,13 @@ export function ProjectCard({ project }: { project: Project }) {
     >
       <div className="aspect-[4/3] bg-concrete-300/70 border-b border-concrete-700/50 flex items-center justify-center p-3">
         {project.image ? (
-          <div className="w-full aspect-[3/2] overflow-hidden border-2 border-concrete-900/70 bg-concrete-200 shadow-[0_5px_10px_rgba(46,46,44,0.18)]">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
+          <div className="relative w-full aspect-[3/2] overflow-hidden border-2 border-concrete-900/70 bg-concrete-200 shadow-[0_5px_10px_rgba(46,46,44,0.18)]">
+            <Image
               src={project.image}
               alt={project.title}
-              className="h-full w-full object-cover"
+              fill
+              sizes="(min-width: 1024px) 30vw, (min-width: 768px) 45vw, 90vw"
+              className="object-cover"
             />
           </div>
         ) : (

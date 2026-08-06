@@ -1,3 +1,5 @@
+const loading=document.querySelector('#mapLoading');
+const loadingMessage=document.querySelector('#mapLoadingMessage');
 window.BASELINE_READY.then(()=>{
 const D=window.LAHORE_BASELINE;
 const P=window.LAHORE_TERRITORY_PLACES;
@@ -46,4 +48,5 @@ document.querySelector('#clusterCount').textContent=clusterCount;
 document.querySelector('#roadCount').textContent=Math.round(D.meta.source_records.street_ways/1000)+'k';
 const dialog=document.querySelector('#about');document.querySelector('#aboutBtn').onclick=()=>dialog.showModal();document.querySelector('.close').onclick=()=>dialog.close();
 try{const introKey='lahore-neighbourhoods-intro-seen-v1';if(!localStorage.getItem(introKey)){dialog.showModal();localStorage.setItem(introKey,'1')}}catch{if(!dialog.open)dialog.showModal()}
-});
+loading.classList.add('loaded');
+}).catch(error=>{console.error(error);loading.classList.add('error');loadingMessage.textContent='The map could not load. Please refresh and try again.'});

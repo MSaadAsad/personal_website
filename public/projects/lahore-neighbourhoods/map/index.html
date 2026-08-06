@@ -18,6 +18,13 @@
       <button id="aboutBtn" class="quiet">How to read this</button>
     </div>
   </header>
+  <div id="mapLoading" class="map-loading" role="status" aria-live="polite">
+    <div class="map-loading-card">
+      <span class="map-loading-mark" aria-hidden="true"></span>
+      <strong>Loading Lahore</strong>
+      <span id="mapLoadingMessage">Preparing 46,000 street blocks</span>
+    </div>
+  </div>
   <main>
     <aside class="panel">
       <section>
@@ -67,6 +74,6 @@
   </dialog>
   <script src="vendor/leaflet/leaflet.js?v=16"></script>
   <script src="data/loader.js?v=45"></script>
-  <script src="app.js?v=60"></script>
+  <script src="app.js?v=61"></script>
 </body>
 </html>

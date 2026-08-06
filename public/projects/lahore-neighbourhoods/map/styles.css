@@ -101,6 +101,38 @@ dialog p { font: 15px/1.55 Georgia, serif; }
 .close { position: absolute; right: 15px; top: 10px; border: 0; background: none; font-size: 30px; cursor: pointer; }
 .method { border-top: 1px solid var(--line); padding: 12px 0; display: grid; grid-template-columns: 110px 1fr; font-size: 12px; line-height: 1.4; }
 .method span { color: var(--muted); }
+.map-loading {
+  position: fixed;
+  z-index: 2000;
+  inset: 138px 0 0;
+  display: grid;
+  place-items: center;
+  background: #e8e8e3;
+  transition: opacity .25s ease, visibility .25s ease;
+}
+.map-loading.loaded { opacity: 0; visibility: hidden; pointer-events: none; }
+.map-loading-card {
+  display: grid;
+  justify-items: center;
+  gap: 9px;
+  min-width: 250px;
+  padding: 25px 30px;
+  border: 1px solid var(--ink);
+  background: var(--paper);
+  box-shadow: 7px 7px 0 var(--acid);
+}
+.map-loading-card strong { font: 700 22px/1 ui-sans-serif, system-ui, sans-serif; letter-spacing: -.03em; }
+.map-loading-card > span:last-child { color: var(--muted); font: italic 13px/1.4 Georgia, serif; }
+.map-loading-mark {
+  width: 24px;
+  height: 24px;
+  border: 3px solid rgba(23, 26, 24, .18);
+  border-top-color: var(--ink);
+  border-radius: 50%;
+  animation: map-loading-spin .75s linear infinite;
+}
+.map-loading.error .map-loading-mark { border: 0; border-radius: 0; background: var(--acid); animation: none; }
+@keyframes map-loading-spin { to { transform: rotate(360deg); } }
 
 @media (max-width: 720px) {
   header { height: 118px; padding: 16px 18px; }
@@ -112,4 +144,5 @@ dialog p { font: 15px/1.55 Georgia, serif; }
   .legend { top: 14px; bottom: auto; right: 14px; }
   .quiet { font-size: 11px; padding: 8px 10px; }
   .page-switch a { padding: 8px 9px; font-size: 9px; }
+  .map-loading { inset: 118px 0 0; }
 }
