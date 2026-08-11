@@ -91,6 +91,7 @@ main { height: calc(100% - 138px); position: relative; }
 .legend::before { content: ""; display: inline-block; width: 9px; height: 9px; background: var(--acid); margin-right: 8px; }
 #map { height: 100%; background: #dfe2da; }
 .leaflet-tile { filter: saturate(.15) contrast(.9) brightness(1.06); }
+.leaflet-tile.place-label-tiles { filter: none; }
 .leaflet-control-attribution { font-size: 9px !important; }
 .centre-label { background: var(--ink); color: #fff; border: 0; border-radius: 0; box-shadow: none; font-size: 10px; font-weight: 700; padding: 3px 5px; }
 .centre-label::before { display: none; }
