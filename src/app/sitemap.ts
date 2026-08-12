@@ -1,5 +1,5 @@
 import { MetadataRoute } from 'next';
-import { getWritingSlugs } from '@/lib/mdx';
+import { getPublishedWritingSlugs } from '@/lib/mdx';
 import { projects } from '@/content/data/projects';
 
 export default function sitemap(): MetadataRoute.Sitemap {
@@ -22,7 +22,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     lastModified: new Date(),
   }));
 
-  const writingPages = getWritingSlugs().map((slug) => ({
+  const writingPages = getPublishedWritingSlugs().map((slug) => ({
     url: `${baseUrl}/writing/${slug}`,
     lastModified: new Date(),
   }));

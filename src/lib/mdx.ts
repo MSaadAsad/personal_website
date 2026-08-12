@@ -11,6 +11,10 @@ export function getWritingSlugs(): string[] {
   return writing.map((post) => post.slug);
 }
 
+export function getPublishedWritingSlugs(): string[] {
+  return writing.filter((post) => post.published !== false).map((post) => post.slug);
+}
+
 export function getAllWriting(): WritingFrontmatter[] {
   return writing
     .filter((post) => post.published !== false)

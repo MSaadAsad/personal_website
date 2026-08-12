@@ -8,6 +8,7 @@ export const writing: WritingFrontmatter[] = [
     category: 'creative',
     tags: [],
     excerpt: 'BART has gotten louder.',
+    published: false,
     readingTime: 7,
   },
   {
@@ -26,6 +27,7 @@ export const writing: WritingFrontmatter[] = [
     category: 'creative',
     tags: [],
     excerpt: 'Life on steel, glass, and sky.',
+    published: false,
     readingTime: 22,
   },
   {
