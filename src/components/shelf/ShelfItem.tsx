@@ -30,10 +30,10 @@ export function ShelfItemCard({ item }: { item: ShelfItemType }) {
           <h3 className="font-mono text-[0.75rem] font-semibold text-concrete-700 truncate">
             {item.title}
           </h3>
-          <p className="mt-1 font-mono text-[0.65rem] text-concrete-600 line-clamp-2">
+          <p className="mt-1 font-mono text-[0.65rem] text-concrete-700 line-clamp-2">
             {item.creator}
           </p>
-          <span className="mt-1 block font-mono text-[0.6rem] text-concrete-600 tracking-wider">
+          <span className="mt-1 block font-mono text-[0.6rem] text-concrete-700 tracking-wider">
             {item.year}
           </span>
         </div>
