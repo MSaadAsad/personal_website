@@ -17,7 +17,7 @@ export const writing: WritingFrontmatter[] = [
     date: '2026-02-06',
     category: 'technical',
     tags: [],
-    excerpt: 'Code is not the product. The system is.',
+    excerpt: 'Code is not the product.',
     readingTime: 11,
   },
   {
