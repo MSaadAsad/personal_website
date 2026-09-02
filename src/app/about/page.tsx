@@ -147,14 +147,14 @@ export default function AboutPage() {
                   <span>
                     Reading{' '}
                     <a
-                      href="https://www.amazon.com/Silk-Roads-New-History-World/dp/1101946326"
+                      href="https://en.wikipedia.org/wiki/Invisible_Cities"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-[#0000EE] underline underline-offset-4 transition-colors duration-150"
                     >
-                      The Silk Roads
+                      Invisible Cities
                     </a>
-                    , a history of trade in the Old World.
+                    {' '}by Italo Calvino.
                   </span>
                 </li>
                 <li className="font-mono text-[0.75rem] text-concrete-800 flex items-baseline gap-4">
