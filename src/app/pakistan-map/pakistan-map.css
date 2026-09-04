@@ -175,7 +175,11 @@
 .paint-color-grid button.selected { outline:3px solid #111; outline-offset:0; }
 .custom-color { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:10px; padding-top:8px; border-top:1px solid #777; font:750 9px var(--font-mono),monospace; }
 .custom-color input { width:42px; height:26px; padding:0; border:2px outset #eee; background:#c3c3c3; cursor:pointer; }
-.province-name { font-size:15px; font-weight:700; color:#292d31; }
+.name-editor { display:flex; align-items:center; min-width:0; border-bottom:1px solid transparent; }
+.name-editor:focus-within { border-bottom-color:#435267; background:rgba(255,255,255,.28); }
+.province-name { width:100%; font-size:15px; font-weight:700; color:#292d31; }
+.name-editor>button { flex:none; width:25px; height:28px; padding:0; border:0; background:transparent; color:#435267; font:750 17px/1 var(--font-mono),monospace; cursor:pointer; }
+.name-editor>button:hover { background:#435267; color:#fff; }
 .count { color:#44494e; font:600 13px var(--font-mono),monospace; }
 .unit-kind { min-height:30px; padding:5px 7px; border:1px solid #73787c; background:#d0d0cd; color:#34393d; font:750 9px var(--font-mono),monospace !important; text-transform:uppercase; cursor:pointer; }
 .unit-kind.territory { background:#626970; color:#fff; border-color:#3f454a; }
