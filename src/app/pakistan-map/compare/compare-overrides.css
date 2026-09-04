@@ -45,6 +45,25 @@
   line-height: 1.55;
 }
 
+.comparison-no-data {
+  display: grid;
+  gap: 8px;
+  min-height: 220px;
+  place-content: center;
+  border: 2px dashed #858a8d;
+  color: #4b5155;
+  text-align: center;
+}
+
+.comparison-no-data b {
+  color: #292d31;
+  font-size: 22px;
+}
+
+.comparison-no-data span {
+  font-size: 12px;
+}
+
 .comparison-column-chart {
   display: grid;
   grid-template-columns: 60px minmax(0, 1fr);
