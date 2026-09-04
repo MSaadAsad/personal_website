@@ -399,6 +399,10 @@ export default function PakistanMapStudio() {
     window.open(`/pakistan-map/profile#map=${encodeShare(currentShareConfig())}&unit=${encodeURIComponent(unitId)}`, '_blank', 'noopener,noreferrer');
   };
 
+  const openComparison = () => {
+    window.open(`/pakistan-map/compare#map=${encodeShare(currentShareConfig())}`, '_blank', 'noopener,noreferrer');
+  };
+
   const shareMap = async () => {
     const config = currentShareConfig();
     const url = `${window.location.origin}${window.location.pathname}${window.location.search}#map=${encodeShare(config)}`;
@@ -490,7 +494,7 @@ export default function PakistanMapStudio() {
       </section>
       {finalized && <div className="final-overlay" role="dialog" aria-modal="true" aria-labelledby="final-title" onMouseDown={e => e.target === e.currentTarget && setFinalized(false)}>
         <section className="final-sheet">
-          <div className="final-head"><div><span>PROVINCE PLAN · {level.toUpperCase()}</span><h1 id="final-title">{mapName || 'Untitled province plan'}</h1><p>{totalAssigned} of {features.length} {level} assigned across {provinces.filter(p => finalRows.find(r => r.id === p.id)?.members.length).length} populated provinces.</p></div><div className="final-head-actions"><button className="compare-button" onClick={() => setRankedOpen(true)}>Compare provinces</button><button onClick={() => setFinalized(false)} aria-label="Close summary">×</button></div></div>
+          <div className="final-head"><div><span>PROVINCE PLAN · {level.toUpperCase()}</span><h1 id="final-title">{mapName || 'Untitled province plan'}</h1><p>{totalAssigned} of {features.length} {level} assigned across {provinces.filter(p => finalRows.find(r => r.id === p.id)?.members.length).length} populated provinces.</p></div><div className="final-head-actions"><button className="compare-button" onClick={openComparison}>Compare provinces ↗</button><button onClick={() => setFinalized(false)} aria-label="Close summary">×</button></div></div>
           {rankedOpen && <aside className="rank-drawer" aria-label="Rank proposed provinces by indicator">
             <div className="rank-head"><div><span>VITAL STATISTICS</span><h2>Compare provinces</h2><p>Ranked highest to lowest for the selected indicator.</p></div><button onClick={() => setRankedOpen(false)} aria-label="Close comparison">×</button></div>
             <div className="rank-picker" role="tablist" aria-label="Choose indicator">{RANK_METRICS.map(metric => <button key={metric.key} className={rankMetric === metric.key ? 'selected' : ''} onClick={() => setRankMetric(metric.key)} role="tab" aria-selected={rankMetric === metric.key}>{metric.label}</button>)}</div>
