@@ -75,7 +75,6 @@ export default function ProvinceComparison(){
     <header><a href={`/pakistan-map#map=${new URLSearchParams(location.hash.slice(1)).get('map')||''}`}>← Back to map</a><span>NAYA NAQSHA · COMPARISON</span></header>
     <section className="compare-head">
       <div><span>PROVINCE PLAN · {config.l.toUpperCase()}</span><h1>{config.n}</h1><p>{rows.length} populated provinces and territories compared using the same matched source data as the profiles.</p></div>
-      <div><b>{rows.length}</b><span>MAP UNITS</span></div>
     </section>
     <section className="metric-picker">
       <label htmlFor="comparison-metric">Compare by</label>

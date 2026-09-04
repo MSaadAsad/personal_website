@@ -9,6 +9,22 @@
   text-transform: uppercase;
 }
 
+.compare-head > div:first-child:last-child {
+  display: block;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.compare-head > div:first-child:last-child > span {
+  color: var(--color-sky-accent);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: .11em;
+}
+
 .metric-picker {
   display: grid;
   grid-template-columns: 150px minmax(280px, 560px);
@@ -210,6 +226,10 @@
 }
 
 @media (max-width: 760px) {
+  .compare-head > div:first-child:last-child {
+    margin-top: 0;
+  }
+
   .metric-picker {
     grid-template-columns: 1fr;
     gap: 8px;
