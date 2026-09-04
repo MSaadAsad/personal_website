@@ -84,6 +84,47 @@ const CITY_MARKERS: CityMarker[] = [
   { name:'Gwadar', lon:62.3254, lat:25.1264, tier:2, dx:7, dy:-7 },
 ];
 
+const DIVISION_DISTRICTS: Record<string, string[]> = {
+  'KP · Malakand': ['chitralupper','chitrallower','upperdir','lowerdir','swat','shangla','buner','malakand','bajaur'],
+  'KP · Hazara': ['kohistanupper','kohistanlower','kolaipalaskohistan','mansehra','torghar','batagram','abbottabad','haripur'],
+  'KP · Mardan': ['mardan','swabi'],
+  'KP · Peshawar': ['charsadda','peshawar','nowshera','khyber','mohmand'],
+  'KP · Kohat': ['kohat','hangu','karak','orakzai','kurram'],
+  'KP · Bannu': ['bannu','lakkimarwat','northwaziristan'],
+  'KP · Dera Ismail Khan': ['dikhan','tank','southwaziristan'],
+  'Punjab · Rawalpindi': ['attock','rawalpindi','jhelum','chakwal'],
+  'Punjab · Sargodha': ['sargodha','bhakkar','khushab','mianwali'],
+  'Punjab · Faisalabad': ['faisalabad','jhang','chiniot','tobateksingh'],
+  'Punjab · Gujranwala': ['gujranwala','hafizabad','gujrat','mandibahauddin','sialkot','narowal'],
+  'Punjab · Lahore': ['lahore','kasur','sheikhupura','nankanasahib'],
+  'Punjab · Sahiwal': ['sahiwal','okara','pakpattan'],
+  'Punjab · Multan': ['vehari','multan','lodhran','khanewal'],
+  'Punjab · Dera Ghazi Khan': ['deraghazikhan','rajanpur','leiah','muzaffargarh'],
+  'Punjab · Bahawalpur': ['bahawalpur','bahawalnagar','rahimyarkhan'],
+  'Sindh · Larkana': ['jacobabad','kashmore','shikarpur','larkana','kambarshahdadkot'],
+  'Sindh · Sukkur': ['sukkur','ghotki','khairpur'],
+  'Sindh · Shaheed Benazirabad': ['naushahroferoze','shaheedbenazirabad','sanghar'],
+  'Sindh · Hyderabad': ['dadu','jamshoro','hyderabad','matiari','tandoallahyar','tandomuhammadkhan','badin','thatta','sujawal'],
+  'Sindh · Mirpur Khas': ['mirpurkhas','umerkot','tharparkar'],
+  'Sindh · Karachi': ['eastkarachi','westkarachi','southkarachi','centralkarachi','malirkarachi','korangikarachi','keamari'],
+  'Balochistan · Quetta': ['quetta','pishin','killaabdullah','chaman'],
+  'Balochistan · Rakhshan': ['chagai','nushki','kharan','washuk'],
+  'Balochistan · Loralai': ['loralai','duki','barkhan','musakhel'],
+  'Balochistan · Zhob': ['killasaifullah','zhob','sherani'],
+  'Balochistan · Sibi': ['sibi','harnai','ziarat','kohlu','derabugti','lehri'],
+  'Balochistan · Nasirabad': ['jaffarabad','nasirabad','kachhi','jhalmagsi','sohbatpur'],
+  'Balochistan · Kalat': ['kalat','shaheedsikandarabad','mastung','khuzdar','awaran','lasbela'],
+  'Balochistan · Mekran': ['kech','gwadar','panjgur'],
+  'AJK · Muzaffarabad': ['jhelumvalley','muzaffarabad','neelum'],
+  'AJK · Rawalakot': ['bagh','haveli','sudhnoti','poonch'],
+  'AJK · Mirpur': ['bhimber','mirpur','kotli'],
+  'GB · Gilgit': ['gilgit','hunza','nagar','ghizer','gupisyasin'],
+  'GB · Baltistan': ['skardu','kharmang','shigar','ghanche','rondu'],
+  'GB · Diamer': ['astore','diamir','darel','tangir'],
+  'ICT': ['islamabad'],
+};
+const DIVISION_BY_DISTRICT = Object.fromEntries(Object.entries(DIVISION_DISTRICTS).flatMap(([division, districts]) => districts.map(district => [district, division])));
+
 function project([lon, lat]: number[]) {
   return [20 + ((lon - EXTENT.minX) / (EXTENT.maxX - EXTENT.minX)) * 720, 20 + ((EXTENT.maxY - lat) / (EXTENT.maxY - EXTENT.minY)) * 780];
 }
@@ -95,6 +136,28 @@ function ringPath(ring: number[][]) {
 function geometryPath(geometry: Feature['geometry']) {
   const polygons = geometry.type === 'Polygon' ? [geometry.coordinates as number[][][]] : geometry.coordinates as number[][][][];
   return polygons.map(polygon => polygon.map(ringPath).join(' ')).join(' ');
+}
+
+function divisionBoundaryPath(features: Feature[]) {
+  const segments = new Map<string, { start:number[]; end:number[]; divisions:Set<string>; uses:number }>();
+  features.forEach(feature => {
+    const district = normalise(feature.properties.district_name);
+    const division = DIVISION_BY_DISTRICT[district] || `${String(feature.properties.province_name)} · ${district}`;
+    const polygons = feature.geometry.type === 'Polygon' ? [feature.geometry.coordinates as number[][][]] : feature.geometry.coordinates as number[][][][];
+    polygons.forEach(polygon => polygon.forEach(ring => ring.forEach((start, index) => {
+      const end = ring[(index + 1) % ring.length];
+      if (!end || (start[0] === end[0] && start[1] === end[1])) return;
+      const a = `${start[0].toFixed(4)},${start[1].toFixed(4)}`;
+      const b = `${end[0].toFixed(4)},${end[1].toFixed(4)}`;
+      const key = a < b ? `${a}|${b}` : `${b}|${a}`;
+      const segment = segments.get(key) || { start, end, divisions:new Set<string>(), uses:0 };
+      segment.divisions.add(division); segment.uses++; segments.set(key, segment);
+    })));
+  });
+  return [...segments.values()].filter(segment => segment.uses === 1 || segment.divisions.size > 1).map(segment => {
+    const start = project(segment.start), end = project(segment.end);
+    return `M${start[0].toFixed(1)} ${start[1].toFixed(1)}L${end[0].toFixed(1)} ${end[1].toFixed(1)}`;
+  }).join(' ');
 }
 
 function featureId(feature: Feature, level: Level) {
@@ -254,6 +317,7 @@ export default function PakistanMapStudio() {
   const assignmentCounts = useMemo(() => Object.values(assignments).reduce<Record<string, number>>((counts, id) => { counts[id] = (counts[id] || 0) + 1; return counts; }, {}), [assignments]);
   const tehsilDataByKey = useMemo(() => new Map((darbar?.tehsils || []).map(row => [`${row.d}:${normalise(row.n)}`, row])), [darbar]);
   const paths = useMemo(() => features.map(feature => ({ feature, d: geometryPath(feature.geometry) })), [features]);
+  const divisionPath = useMemo(() => divisionBoundaryPath(features), [features]);
   const matches = useMemo(() => query.trim() ? features.filter(f => `${featureName(f, level)} ${f.properties.district_name} ${f.properties.province_name}`.toLowerCase().includes(query.toLowerCase())).slice(0, 8) : [], [features, level, query]);
   const totalAssigned = Object.keys(assignments).length;
   const districtOwners = useMemo(() => {
@@ -547,6 +611,7 @@ export default function PakistanMapStudio() {
                   return <path key={id} d={d} fill={province?.color || '#e8e1d5'} className={highlighted ? 'region highlighted' : 'region'} onPointerDown={e => { if (e.shiftKey||e.button===1) return; if (toolMode === 'inspect') { setSelectedFeature(feature); setPainting(false); return; } e.currentTarget.setPointerCapture(e.pointerId); setPainting(true); paint(feature); }} onPointerEnter={() => { setHovered(feature); if (painting && toolMode === 'paint') paint(feature); }} onPointerMove={() => painting && toolMode === 'paint' && paint(feature)} onPointerUp={() => setPainting(false)}/>;
                 })}
               </g>
+              {divisionPath && <path className="division-boundaries" d={divisionPath}/>}
               <g className="city-layer" aria-label="Major cities">
                 {CITY_MARKERS.filter(city => city.tier === 1 || cityZoom >= 1.35).map(city => {
                   const [x, y] = project([city.lon, city.lat]);
@@ -558,7 +623,7 @@ export default function PakistanMapStudio() {
             <div className="north">N<span>↑</span></div>
             {hovered && <div className="map-tooltip"><b>{featureName(hovered, level)}</b><span>{level === 'tehsils' && `${String(hovered.properties.district_name)} · `}{String(hovered.properties.province_name)}</span><small>{provinceById[assignments[featureId(hovered, level)]]?.name || 'Unassigned'}</small></div>}
             {selectedFeature && toolMode === 'inspect' && <aside className="district-drawer"><div className="district-head"><div><small>{level === 'tehsils' ? 'TEHSIL DETAIL' : 'DISTRICT DETAIL'}</small><h2>{featureName(selectedFeature, level)}</h2><p>{level === 'tehsils' && `${String(selectedFeature.properties.district_name)} · `}{String(selectedFeature.properties.province_name)}</p></div><button onClick={() => setSelectedFeature(null)} aria-label="Close district details">×</button></div>{selectedDistrict ? <div className="district-stats"><span><b>{selectedTehsil?.p || selectedDistrict.p ? `${((selectedTehsil?.p || selectedDistrict.p || 0)/1_000_000).toFixed(2)}m` : '—'}</b>{level === 'tehsils' ? 'estimated population' : 'population · 2023'}</span><span><b>{selectedDistrict.l != null && selectedDistrict.i != null ? `${(selectedDistrict.l/(selectedDistrict.l+selectedDistrict.i)*100).toFixed(1)}%` : '—'}</b>literacy</span><span><b>{selectedDistrict.mat==null?'—':`${selectedDistrict.mat.toFixed(1)}%`}</b>matric or higher</span><span><b>{selectedDistrict.enrol==null?'—':`${selectedDistrict.enrol.toFixed(1)}%`}</b>net enrolment</span><span><b>{selectedDistrict.lfpr==null?'—':`${selectedDistrict.lfpr.toFixed(1)}%`}</b>labor-force participation</span><span><b>{selectedDistrict.ur==null?'—':`${selectedDistrict.ur.toFixed(1)}%`}</b>unemployment</span><span><b>{selectedDistrict.cons==null?'—':`Rs ${Math.round(selectedDistrict.cons).toLocaleString()}`}</b>consumption / person</span><span><b>{selectedDistrict.mpi==null?'—':selectedDistrict.mpi.toFixed(3)}</b>MPI</span><span><b>{selectedDistrict.net==null?'—':`${selectedDistrict.net.toFixed(1)}%`}</b>internet users</span><span><b>{selectedDistrict.elec==null?'—':`${selectedDistrict.elec.toFixed(1)}%`}</b>electricity access</span>{selectedTehsil && <><span><b>{selectedTehsil.r==null?'—':`${selectedTehsil.r.toFixed(0)}th`}</b>wealth percentile</span><span><b>{selectedTehsil.nl==null?'—':selectedTehsil.nl.toFixed(2)}</b>night radiance</span></>}</div>:<p className="district-empty">No matched Data Darbar record is available for this area.</p>}<footer>Data Darbar · PBS Census 2023 and household surveys</footer></aside>}
-            <div className="map-caption">BOUNDARIES ARE INDICATIVE · {level.toUpperCase()} VIEW · CITY POINTS ARE REFERENCE LOCATIONS</div>
+            <div className="map-caption">PBS 2023 DIVISIONS HEAVY · {level.toUpperCase()} LIGHT · CITY POINTS ARE REFERENCE LOCATIONS</div>
           </div>
         </section>
 
