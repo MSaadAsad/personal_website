@@ -293,8 +293,7 @@
 .unit-heading { display:flex; align-items:flex-start; justify-content:space-between; gap:15px; }
 .unit-heading h2 { margin-bottom:12px; }
 .open-profile { min-height:34px; margin:0 0 10px; padding:6px 10px; border:1px solid #73787c; background:#b4b8b8; color:#29323c; font:750 10px var(--font-mono),monospace !important; text-transform:uppercase; cursor:pointer; }
-.status-pill { display:block; max-width:190px; padding:6px 8px; border:1px solid #7c8184; background:#b5bab9; color:#30363a; font:750 9px/1.35 var(--font-mono),monospace; text-transform:uppercase; text-align:right; }
-.status-pill.territory { background:#626970; border-color:#3e454b; color:#fff; }
+.unit-type-line { display:block; color:#4b5155; font:750 11px/1.4 var(--font-mono),monospace; letter-spacing:.05em; text-transform:uppercase; text-align:right; }
 .regional-politics { background:#b9bbb9; border:1px solid #8b8e90; padding:14px; }
 .metric-section { margin-top:16px; padding-top:15px; border-top:2px solid #929598; }
 .metric-section h3 { margin:0 0 10px; color:#3d4752; font:750 12px/1.2 var(--font-mono),monospace; letter-spacing:.1em; text-transform:uppercase; }
