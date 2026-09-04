@@ -405,6 +405,36 @@
 .panel-resizer.collapsed { cursor:default; }
 .panel-resizer.collapsed .panel-grip { display:none; }
 
+/* Square, mechanical scrollbars for the map workspace. */
+.naqsha-shell { scrollbar-color:var(--color-sky-accent) #a6a9aa; scrollbar-width:auto; }
+.naqsha-shell *::-webkit-scrollbar { width:18px; height:18px; }
+.naqsha-shell *::-webkit-scrollbar-track {
+  background:#a6a9aa;
+  border-left:2px solid #666c70;
+  border-right:2px solid #d6d7d4;
+  box-shadow:inset 2px 2px #8a8e90,inset -2px -2px #c7c9c7;
+}
+.naqsha-shell *::-webkit-scrollbar-thumb {
+  min-width:42px;
+  min-height:42px;
+  border:3px solid #a6a9aa;
+  border-radius:0;
+  background:var(--color-sky-accent);
+  box-shadow:inset 2px 2px rgba(255,255,255,.22),inset -2px -2px #315da8,0 0 0 1px #315da8;
+}
+.naqsha-shell *::-webkit-scrollbar-thumb:hover { background:#5a87df; }
+.naqsha-shell *::-webkit-scrollbar-thumb:active { background:#315da8; }
+.naqsha-shell *::-webkit-scrollbar-button {
+  display:block;
+  width:18px;
+  height:18px;
+  border:2px solid #666c70;
+  border-radius:0;
+  background:#c9cac7;
+  box-shadow:inset 2px 2px rgba(255,255,255,.55),inset -2px -2px #85898c;
+}
+.naqsha-shell *::-webkit-scrollbar-corner { background:#8f9395; border:2px solid #666c70; }
+
 .header-actions .dark,
 .final-footer button.dark,
 .segmented button.selected,
