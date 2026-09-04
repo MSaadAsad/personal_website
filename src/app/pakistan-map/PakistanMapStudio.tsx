@@ -131,8 +131,8 @@ function allocateSeats(parties: Record<string, number>, seats = 23) {
 export default function PakistanMapStudio() {
   const [level, setLevel] = useState<Level>('districts');
   const [features, setFeatures] = useState<Feature[]>([]);
-  const [provinces, setProvinces] = useState<Province[]>(CANONICAL);
-  const [active, setActive] = useState(CANONICAL[0].id);
+  const [provinces, setProvinces] = useState<Province[]>([]);
+  const [active, setActive] = useState('');
   const [assignments, setAssignments] = useState<Record<string, string>>({});
   const [history, setHistory] = useState<Record<string, string>[]>([]);
   const [future, setFuture] = useState<Record<string, string>[]>([]);
@@ -185,11 +185,9 @@ export default function PakistanMapStudio() {
       setAssignments(restored); setHistory([]); setFuture([]);
       return;
     }
-    const saved = localStorage.getItem(`naya-naqsha-${level}`);
     fetch(`/data/pakistan-map/${level}.geojson`).then(r => r.json()).then(data => {
       setFeatures(data.features);
-      if (saved) setAssignments(JSON.parse(saved));
-      else { setProvinces(CANONICAL); setActive(CANONICAL[0].id); setMapName('My province plan'); setAssignments({}); }
+      setProvinces([]); setActive(''); setMapName('My province plan'); setAssignments({});
     });
     setHistory([]); setFuture([]);
   }, [level]);
@@ -197,10 +195,6 @@ export default function PakistanMapStudio() {
   useEffect(() => { if (hasAssignments && !darbar) fetch('/data/pakistan-map/datadarbar.json').then(r => r.json()).then(setDarbar).catch(() => setDarbar(null)); }, [darbar, hasAssignments]);
   useEffect(() => { if (finalized && !assembly) fetch('/data/pakistan-map/assembly-2024.json').then(r => r.json()).then(setAssembly).catch(() => setAssembly(null)); }, [assembly, finalized]);
   useEffect(() => { if (finalized && !regionalAssembly) fetch('/data/pakistan-map/regional-assembly-2026.json').then(r => r.json()).then(setRegionalAssembly).catch(() => setRegionalAssembly(null)); }, [finalized, regionalAssembly]);
-
-  useEffect(() => {
-    if (Object.keys(assignments).length) localStorage.setItem(`naya-naqsha-${level}`, JSON.stringify(assignments));
-  }, [assignments, level]);
 
   const provinceById = useMemo(() => Object.fromEntries(provinces.map(p => [p.id, p])), [provinces]);
   const assignmentCounts = useMemo(() => Object.values(assignments).reduce<Record<string, number>>((counts, id) => { counts[id] = (counts[id] || 0) + 1; return counts; }, {}), [assignments]);
@@ -316,6 +310,7 @@ export default function PakistanMapStudio() {
     : rankMetric === 'mpi' ? value.toFixed(3) : `${value.toFixed(1)}%`;
 
   const paint = useCallback((feature: Feature) => {
+    if (!active) return;
     const id = featureId(feature, level);
     if (assignments[id] === active) return;
     setHistory(h => [...h.slice(-39), assignments]);
