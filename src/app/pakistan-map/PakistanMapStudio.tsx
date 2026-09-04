@@ -127,6 +127,29 @@ const DIVISION_DISTRICTS: Record<string, string[]> = {
   'ICT': ['islamabad'],
 };
 const DIVISION_BY_DISTRICT = Object.fromEntries(Object.entries(DIVISION_DISTRICTS).flatMap(([division, districts]) => districts.map(district => [district, division])));
+const DIVISION_DISTRICT_ALIASES: Record<string, string> = {
+  deraismailkhan: 'dikhan', layyah: 'leiah', battagram: 'batagram', qambarshahdadkot: 'kambarshahdadkot',
+  chaghi: 'chagai', sudhnutti: 'sudhnoti', surab: 'shaheedsikandarabad',
+};
+
+function divisionColor(index: number) {
+  const hue = index * 137.508 % 360;
+  const saturation = 42 + index % 3 * 5;
+  const lightness = 48 + index % 4 * 3;
+  const chroma = (1 - Math.abs(2 * lightness / 100 - 1)) * saturation / 100;
+  const x = chroma * (1 - Math.abs(hue / 60 % 2 - 1));
+  const match = lightness / 100 - chroma / 2;
+  const [red, green, blue] = hue < 60 ? [chroma, x, 0] : hue < 120 ? [x, chroma, 0] : hue < 180 ? [0, chroma, x] : hue < 240 ? [0, x, chroma] : hue < 300 ? [x, 0, chroma] : [chroma, 0, x];
+  return `#${[red, green, blue].map(channel => Math.round((channel + match) * 255).toString(16).padStart(2, '0')).join('')}`;
+}
+
+const DIVISION_PROVINCES: Province[] = Object.keys(DIVISION_DISTRICTS).map((division, index) => ({
+  id: `division-${division.toLowerCase().replace(/[^a-z0-9]/g, '')}`,
+  name: division === 'ICT' ? 'Islamabad' : `${division.split(' · ')[1]} Division`,
+  color: divisionColor(index),
+  kind: division === 'ICT' ? 'territory' : 'province',
+  capital: '',
+}));
 
 function project([lon, lat]: number[]) {
   return [20 + ((lon - EXTENT.minX) / (EXTENT.maxX - EXTENT.minX)) * 720, 20 + ((EXTENT.maxY - lat) / (EXTENT.maxY - EXTENT.minY)) * 780];
@@ -234,6 +257,14 @@ function presetOneAssignments(features: Feature[], level: Level) {
 }
 function currentStructureAssignments(features: Feature[], level: Level) {
   return Object.fromEntries(features.map(feature => [featureId(feature, level), CURRENT_OWNER_BY_SOURCE[String(feature.properties.province_name)]]).filter(([, owner]) => owner));
+}
+function divisionProvinceAssignments(features: Feature[], level: Level) {
+  return Object.fromEntries(features.flatMap(feature => {
+    const division = level === 'divisions'
+      ? String(feature.properties.division_name)
+      : featureDistrictKeys(feature).map(district => DIVISION_BY_DISTRICT[district] || DIVISION_BY_DISTRICT[DIVISION_DISTRICT_ALIASES[district]]).find(Boolean);
+    return division ? [[featureId(feature, level), `division-${normalise(division)}`]] : [];
+  }));
 }
 const DISTRICT_ALIASES: Record<string, string> = {
   chagai: 'chaghi', sudhnoti: 'sudhnutti', leiah: 'layyah', dikhan: 'deraismailkhan',
@@ -536,13 +567,14 @@ export default function PakistanMapStudio() {
     localStorage.removeItem(`naya-naqsha-${level}`);
   };
 
-  const loadPreset = (preset: 'current' | 'preset-1') => {
+  const loadPreset = (preset: 'current' | 'preset-1' | 'preset-2') => {
     const isCurrent = preset === 'current';
-    const nextProvinces = isCurrent ? CURRENT_STRUCTURE : PRESET_1;
+    const isDivisions = preset === 'preset-2';
+    const nextProvinces = isCurrent ? CURRENT_STRUCTURE : isDivisions ? DIVISION_PROVINCES : PRESET_1;
     setHistory(h => [...h, assignments]); setFuture([]);
     setProvinces(nextProvinces); setActive(nextProvinces[0].id);
-    setMapName(isCurrent ? 'Current provincial structure' : 'Preset 1');
-    setAssignments(isCurrent ? currentStructureAssignments(features, level) : presetOneAssignments(features, level));
+    setMapName(isCurrent ? 'Current provincial structure' : isDivisions ? 'Preset 2 · Division provinces' : 'Preset 1');
+    setAssignments(isCurrent ? currentStructureAssignments(features, level) : isDivisions ? divisionProvinceAssignments(features, level) : presetOneAssignments(features, level));
   };
 
   const exportPlan = () => {
@@ -626,6 +658,10 @@ export default function PakistanMapStudio() {
               <button type="button" onClick={() => loadPreset('preset-1')}>
                 <b>Preset 1</b>
                 <small>Proposed split · Karachi · South Punjab · Hazara</small>
+              </button>
+              <button type="button" onClick={() => loadPreset('preset-2')}>
+                <b>Preset 2</b>
+                <small>Every administrative division becomes a province · Islamabad remains a territory</small>
               </button>
             </div>
           </div>
