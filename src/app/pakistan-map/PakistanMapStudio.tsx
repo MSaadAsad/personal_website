@@ -155,10 +155,15 @@ function divisionBoundaryPath(features: Feature[]) {
       segment.divisions.add(division); segment.uses++; segments.set(key, segment);
     })));
   });
-  return [...segments.values()].filter(segment => segment.uses === 1 || segment.divisions.size > 1).map(segment => {
+  const pathFor = (selected: { start:number[]; end:number[]; divisions:Set<string>; uses:number }[]) => selected.map(segment => {
     const start = project(segment.start), end = project(segment.end);
     return `M${start[0].toFixed(1)} ${start[1].toFixed(1)}L${end[0].toFixed(1)} ${end[1].toFixed(1)}`;
   }).join(' ');
+  const allSegments = [...segments.values()];
+  return {
+    divisionPath: pathFor(allSegments.filter(segment => segment.uses > 1 && segment.divisions.size > 1)),
+    nationalPath: pathFor(allSegments.filter(segment => segment.uses === 1)),
+  };
 }
 
 function featureId(feature: Feature, level: Level) {
@@ -317,7 +322,7 @@ export default function PakistanMapStudio() {
   const assignmentCounts = useMemo(() => Object.values(assignments).reduce<Record<string, number>>((counts, id) => { counts[id] = (counts[id] || 0) + 1; return counts; }, {}), [assignments]);
   const tehsilDataByFeatureId = useMemo(() => buildTehsilDataLookup(features, darbar?.tehsils || []), [darbar, features]);
   const paths = useMemo(() => features.map(feature => ({ feature, d: geometryPath(feature.geometry) })), [features]);
-  const divisionPath = useMemo(() => divisionBoundaryPath(features), [features]);
+  const { divisionPath, nationalPath } = useMemo(() => divisionBoundaryPath(features), [features]);
   const matches = useMemo(() => query.trim() ? features.filter(f => `${featureName(f, level)} ${f.properties.district_name} ${f.properties.province_name}`.toLowerCase().includes(query.toLowerCase())).slice(0, 8) : [], [features, level, query]);
   const totalAssigned = Object.keys(assignments).length;
   const districtOwners = useMemo(() => {
@@ -620,6 +625,7 @@ export default function PakistanMapStudio() {
                 })}
               </g>
               {divisionPath && <path className="division-boundaries" d={divisionPath}/>}
+              {nationalPath && <path className="national-boundary" d={nationalPath}/>}
               <g className="city-layer" aria-label="Major cities">
                 {CITY_MARKERS.filter(city => city.tier === 1 || cityZoom >= 1.35).map(city => {
                   const [x, y] = project([city.lon, city.lat]);
