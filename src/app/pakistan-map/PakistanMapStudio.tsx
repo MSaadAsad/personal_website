@@ -924,8 +924,7 @@ export default function PakistanMapStudio() {
           </div>
           <div className="map-paper">
             {toolMode === 'inspect' && <div className={`inspect-map-picker ${inspectMetricOpen ? 'open' : ''}`}>
-              <span>INSPECT MAP</span>
-              <button type="button" aria-haspopup="listbox" aria-expanded={inspectMetricOpen} onClick={() => setInspectMetricOpen(open => !open)}><b>{inspectMetricMeta.label}</b><i>{inspectMetricOpen ? '×' : '⌄'}</i></button>
+              <button type="button" aria-label={`Inspect map: ${inspectMetricMeta.label}`} aria-haspopup="listbox" aria-expanded={inspectMetricOpen} onClick={() => setInspectMetricOpen(open => !open)}><b><small>MAP</small>{inspectMetricMeta.label}</b><i>{inspectMetricOpen ? '×' : '⌄'}</i></button>
               {inspectMetricOpen && <div role="listbox" className="inspect-map-menu">{INSPECT_METRICS.map((item,index) => <button type="button" role="option" aria-selected={item.key === inspectMetric} className={item.key === inspectMetric ? 'selected' : ''} key={item.key} onClick={() => { setInspectMetric(item.key); setInspectMetricOpen(false); }}><span>{String(index + 1).padStart(2,'0')}</span><b>{item.label}</b>{item.key === inspectMetric && <i>✓</i>}</button>)}</div>}
             </div>}
             {!features.length && <div className="loading">Drawing boundaries…</div>}
