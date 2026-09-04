@@ -1,5 +1,5 @@
 .population-composition li b em,
-.bar-name em {
+.column-label b em {
   display: block;
   margin-top: 3px;
   color: #5a6064;
@@ -9,105 +9,107 @@
   text-transform: uppercase;
 }
 
-.comparison-bar-chart {
-  --bar-columns: 44px minmax(150px, 230px) minmax(280px, 1fr) 104px;
-}
-
-.bar-axis,
-.comparison-bars li {
+.comparison-column-chart {
   display: grid;
-  grid-template-columns: var(--bar-columns);
-  gap: 16px;
+  grid-template-columns: 60px minmax(0, 1fr);
+  gap: 14px;
+  overflow-x: auto;
+  padding-top: 10px;
 }
 
-.bar-axis {
+.column-axis {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 360px;
+  padding-bottom: 1px;
+  color: #555c61;
+  font-size: 10px;
+  text-align: right;
+}
+
+.column-axis b {
+  font-weight: 700;
+  transform: translateY(-50%);
+}
+
+.column-axis b:last-child {
+  transform: translateY(50%);
+}
+
+.comparison-columns {
+  display: grid;
   align-items: end;
-  padding: 0 0 9px;
+  gap: clamp(10px, 1.5vw, 24px);
+  min-width: max-content;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  background-image: repeating-linear-gradient(to bottom, #858b8e 0 1px, transparent 1px 90px);
+}
+
+.comparison-columns li {
+  display: grid;
+  grid-template-rows: 30px 330px minmax(72px, auto);
+  width: 100%;
+  min-width: 92px;
+  text-align: center;
+}
+
+.comparison-columns li > strong {
+  align-self: start;
+  font-size: 15px;
+  white-space: nowrap;
+}
+
+.column-track {
+  display: flex;
+  align-items: end;
+  justify-content: center;
+  min-height: 0;
+  border-bottom: 2px solid #555c61;
+}
+
+.column-track i {
+  display: block;
+  width: min(62px, 68%);
+  min-height: 3px;
+  border: 1px solid #315da8;
+  border-bottom: 0;
+  background: var(--color-sky-accent);
+  box-shadow: inset 1px 0 rgba(255, 255, 255, .22);
+}
+
+.column-label {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  align-items: start;
+  gap: 4px;
+  padding-top: 11px;
+  text-align: left;
+}
+
+.column-label > span {
   color: #555c61;
   font-size: 10px;
 }
 
-.bar-axis > div {
-  display: flex;
-  justify-content: space-between;
-}
-
-.bar-axis b {
-  font-weight: 700;
-  transform: translateX(-50%);
-}
-
-.bar-axis b:first-child {
-  transform: none;
-}
-
-.bar-axis b:last-child {
-  transform: translateX(0);
-}
-
-.comparison-bars {
-  gap: 0;
-  border-top: 2px solid #73797d;
-  border-bottom: 2px solid #73797d;
-}
-
-.comparison-bars li {
-  align-items: center;
-  min-height: 76px;
-  padding: 12px 0;
-  border: 0;
-  border-bottom: 1px solid #8b9093;
-  background: transparent;
-}
-
-.comparison-bars li:last-child {
-  border-bottom: 0;
-}
-
-.comparison-bars .rank {
-  padding-left: 8px;
-}
-
-.comparison-bars .bar-name {
-  font-size: 17px;
-}
-
-.comparison-bars li > strong {
-  font-size: 18px;
-  text-align: right;
-  white-space: nowrap;
-}
-
-.comparison-bars .bar-track {
-  display: block;
-  height: 30px;
-  border: 1px solid #757b7f;
-  background-color: #aeb2b2;
-  background-image: linear-gradient(90deg, rgba(70, 76, 81, .2) 1px, transparent 1px);
-  background-size: 25% 100%;
-}
-
-.comparison-bars .bar-track i {
-  display: block;
-  min-width: 3px;
-  height: 100%;
-  background: var(--color-sky-accent);
-  box-shadow: inset 0 1px rgba(255, 255, 255, .22);
+.column-label > b {
+  overflow-wrap: anywhere;
+  font-size: 12px;
+  line-height: 1.25;
 }
 
 @media (max-width: 760px) {
-  .bar-axis {
-    display: none;
+  .comparison-column-chart {
+    grid-template-columns: 48px minmax(700px, 1fr);
   }
 
-  .comparison-bars li {
-    grid-template-columns: 34px minmax(0, 1fr) auto;
-    gap: 8px 12px;
-    min-height: 92px;
+  .column-axis {
+    height: 300px;
   }
 
-  .comparison-bars .bar-track {
-    grid-column: 2 / 4;
-    height: 22px;
+  .comparison-columns li {
+    grid-template-rows: 28px 272px minmax(72px, auto);
   }
 }
