@@ -2,3 +2,10 @@
 .demographics-card .breakdown-row i {
   background: var(--color-sky-accent);
 }
+
+.chart-tabs button.selected,
+.profile-shell > footer button {
+  background: var(--color-sky-accent);
+  border-color: #315da8;
+  color: #fff;
+}
