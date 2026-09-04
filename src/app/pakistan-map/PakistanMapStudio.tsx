@@ -11,8 +11,9 @@ type SharedMap = { v: 1; n: string; l: Level; p: [string, string, string, UnitKi
 type DistrictData = { n: string; p: number | null; l: number | null; i: number | null; u: number | null; ur: number | null; lfpr: number | null; oos: number | null; mat: number | null; enrol: number | null; num: number | null; cons: number | null; fi: number | null; net: number | null; elec: number | null; mpi: number | null; h: number | null };
 type TehsilData = { n: string; d: string; p: number | null; r: number | null; nl: number | null };
 type DarbarData = { source: string; generated: string; methodology: string; districts: Record<string, DistrictData>; tehsils: TehsilData[] };
-type AssemblyDistrict = { district: string; province: string; seats: number; parties: Record<string, number> };
-type AssemblyData = { election: string; basis: string; source: string; districts: AssemblyDistrict[] };
+type ElectionYear = 2018 | 2024;
+type AssemblyDistrict = { district: string; districts?: string[]; province: string; seats: number; parties: Record<string, number> };
+type AssemblyData = { election: string; year?: number; basis: string; source: string; districts: AssemblyDistrict[] };
 type RegionalAssemblyData = { generated: string; sources: Record<string, string>; notes: Record<string, string>; districts: { region: 'AJK' | 'GB'; district: string; parties: Record<string, number> }[] };
 type RankMetric = 'population' | 'literacy' | 'matricPlus' | 'outOfSchool' | 'consumption' | 'lfpr' | 'foodInsecurity' | 'internet' | 'electricity' | 'mpi';
 
@@ -103,20 +104,27 @@ const DISTRICT_ALIASES: Record<string, string> = {
   westkarachi: 'karachiwest', malirkarachi: 'karachimalir', korangikarachi: 'karachikorangi',
 };
 const ELECTION_ALIASES: Record<string, string> = {
-  leiah: 'layyah', kambershahdadkot: 'qambarshahdadkot', shaheedbenazirabad: 'nawabshah',
+  leiah: 'layyah', kambershahdadkot: 'qambarshahdadkot', kambarshahdadkot: 'qambarshahdadkot',
+  naushahroferoze: 'naushahroferoz', batagram: 'battagram', shaheedbenazirabad: 'nawabshah',
   umerkot: 'umerkot', centralkarachi: 'central', eastkarachi: 'east', southkarachi: 'south',
   westkarachi: 'west', malirkarachi: 'malir', korangikarachi: 'korangi', dikhan: 'deraismailkhan',
   chitralupper: 'upperchitral', chitrallower: 'lowerchitral', kohistanupper: 'upperkohistan',
   kohistanlower: 'lowerkohistan', kolaipalaskohistan: 'kolaipalas', torghar: 'torghar',
   shaheedsikandarabad: 'surab', musakhel: 'musakhail',
 };
-const ELECTION_CHILDREN: Record<string, string[]> = {
+const ELECTION_2024_CHILDREN: Record<string, string[]> = {
   rawalpindi: ['murree'], chakwal: ['talagang'], gujranwala: ['wazirabad'],
   muzaffargarh: ['kotaddu'], deraghazikhan: ['taunsa'], west: ['keamari'],
   southwaziristan: ['uppersouthwaziristan', 'lowersouthwaziristan'],
   lasbela: ['hub'], jaffarabad: ['ustamuhammad'],
 };
-const PARTY_COLORS: Record<string, string> = { 'PTI-backed IND': '#d64b43', 'PML-N': '#2f8a52', PPP: '#252525', 'MQM-P': '#e0a526', 'JUI-F': '#6a8f76', IND: '#8b887f', 'PML-Q': '#74b85a', ANP: '#9f3b3b', BAP: '#788b36', NP: '#b96b6b', 'PTI-P': '#d77b78', JI: '#397db2', GDA: '#6267b8', IPP: '#78a94a', 'BNP-M': '#c6ad2f', 'BNP-A': '#31a697', HDT: '#315fc0', Other: '#aaa49a', Postponed: '#d8d1c5' };
+const ELECTION_2018_PARENTS: Record<string, string> = {
+  murree: 'rawalpindi', talagang: 'chakwal', wazirabad: 'gujranwala', kotaddu: 'muzaffargarh',
+  taunsa: 'deraghazikhan', keamari: 'west', upperchitral: 'chitral', lowerchitral: 'chitral',
+  uppersouthwaziristan: 'southwaziristan', lowersouthwaziristan: 'southwaziristan',
+  hub: 'lasbela', ustamuhammad: 'jaffarabad', chaman: 'killaabdullah',
+};
+const PARTY_COLORS: Record<string, string> = { PTI: '#d64b43', 'PTI-backed IND': '#d64b43', 'PML-N': '#2f8a52', PPP: '#252525', 'MQM-P': '#e0a526', 'JUI-F': '#6a8f76', MMA: '#6a8f76', IND: '#8b887f', 'PML-Q': '#74b85a', ANP: '#9f3b3b', BAP: '#788b36', NP: '#b96b6b', 'PTI-P': '#d77b78', JI: '#397db2', GDA: '#6267b8', IPP: '#78a94a', 'BNP-M': '#c6ad2f', 'BNP-A': '#31a697', HDT: '#8d65a8', PKMAP: '#d2773f', JWP: '#d88aa3', PRHP: '#8a7055', Other: '#aaa49a', Postponed: '#d8d1c5' };
 
 function allocateSeats(parties: Record<string, number>, seats = 23) {
   const total = Object.values(parties).reduce((sum, value) => sum + value, 0);
@@ -149,6 +157,7 @@ export default function PakistanMapStudio() {
   const [shareStatus, setShareStatus] = useState('Share link');
   const [darbar, setDarbar] = useState<DarbarData | null>(null);
   const [assembly, setAssembly] = useState<AssemblyData | null>(null);
+  const [electionYear, setElectionYear] = useState<ElectionYear>(2024);
   const [regionalAssembly, setRegionalAssembly] = useState<RegionalAssemblyData | null>(null);
   const [paletteOpen, setPaletteOpen] = useState<string | null>(null);
   const svgRef = useRef<SVGSVGElement>(null);
@@ -193,7 +202,13 @@ export default function PakistanMapStudio() {
   }, [level]);
 
   useEffect(() => { if (hasAssignments && !darbar) fetch('/data/pakistan-map/datadarbar.json').then(r => r.json()).then(setDarbar).catch(() => setDarbar(null)); }, [darbar, hasAssignments]);
-  useEffect(() => { if (finalized && !assembly) fetch('/data/pakistan-map/assembly-2024.json').then(r => r.json()).then(setAssembly).catch(() => setAssembly(null)); }, [assembly, finalized]);
+  useEffect(() => {
+    if (!finalized) return;
+    let cancelled = false;
+    setAssembly(null);
+    fetch(`/data/pakistan-map/assembly-${electionYear}.json`).then(r => r.json()).then(data => { if (!cancelled) setAssembly(data); }).catch(() => { if (!cancelled) setAssembly(null); });
+    return () => { cancelled = true; };
+  }, [electionYear, finalized]);
   useEffect(() => { if (finalized && !regionalAssembly) fetch('/data/pakistan-map/regional-assembly-2026.json').then(r => r.json()).then(setRegionalAssembly).catch(() => setRegionalAssembly(null)); }, [finalized, regionalAssembly]);
 
   const provinceById = useMemo(() => Object.fromEntries(provinces.map(p => [p.id, p])), [provinces]);
@@ -212,6 +227,19 @@ export default function PakistanMapStudio() {
     });
     return Object.fromEntries(Object.entries(votes).map(([district, counts]) => [district, Object.entries(counts).sort((a, b) => b[1] - a[1])[0][0]]));
   }, [assignments, features, level]);
+  const electionOwners = useMemo(() => {
+    const owners: Record<string, string | null> = {};
+    Object.entries(districtOwners).forEach(([rawKey, owner]) => {
+      const ownerId = String(owner);
+      let key = ELECTION_ALIASES[rawKey] || rawKey;
+      const keys = electionYear === 2018 ? [ELECTION_2018_PARENTS[key] || key] : [key, ...(ELECTION_2024_CHILDREN[key] || [])];
+      keys.forEach(electionKey => {
+        if (!(electionKey in owners)) owners[electionKey] = ownerId;
+        else if (owners[electionKey] !== ownerId) owners[electionKey] = null;
+      });
+    });
+    return owners;
+  }, [districtOwners, electionYear]);
   const finalRows = useMemo(() => provinces.map(province => {
     const members = features.filter(feature => assignments[featureId(feature, level)] === province.id);
     const area = members.reduce((sum, feature) => sum + Number(feature.properties.area_km2 || 0), 0);
@@ -258,18 +286,17 @@ export default function PakistanMapStudio() {
         if (tehsil.nl != null && pop) { weightedNightLight += tehsil.nl * pop; nightLightBase += pop; }
       }
     }
-    const ownedElectionKeys = new Set<string>();
-    Object.entries(districtOwners).filter(([, owner]) => owner === province.id).forEach(([rawKey]) => {
-      const key = ELECTION_ALIASES[rawKey] || rawKey;
-      ownedElectionKeys.add(key); (ELECTION_CHILDREN[key] || []).forEach(child => ownedElectionKeys.add(child));
-    });
+    const ownedElectionKeys = new Set(Object.entries(electionOwners).filter(([, owner]) => owner === province.id).map(([key]) => key));
     const partySeats: Record<string, number> = {};
-    if (province.kind === 'province') assembly?.districts.filter(row => ownedElectionKeys.has(normalise(row.district))).forEach(row => Object.entries(row.parties).forEach(([party, seats]) => { partySeats[party] = (partySeats[party] || 0) + seats; }));
+    if (province.kind === 'province') assembly?.districts.filter(row => (row.districts || [row.district]).every(district => {
+      const rawKey = normalise(district);
+      return ownedElectionKeys.has(ELECTION_ALIASES[rawKey] || rawKey);
+    })).forEach(row => Object.entries(row.parties).forEach(([party, seats]) => { partySeats[party] = (partySeats[party] || 0) + seats; }));
     const electionSeats = Object.values(partySeats).reduce((sum, seats) => sum + seats, 0);
     const senateSeats = allocateSeats(partySeats);
     const regionalSeats: Record<string, number> = {};
     const regionalRegions = new Set<string>();
-    regionalAssembly?.districts.filter(row => ownedElectionKeys.has(normalise(row.district))).forEach(row => { regionalRegions.add(row.region); Object.entries(row.parties).forEach(([party, seats]) => { regionalSeats[party] = (regionalSeats[party] || 0) + seats; }); });
+    regionalAssembly?.districts.filter(row => Object.entries(districtOwners).some(([rawKey, owner]) => owner === province.id && (ELECTION_ALIASES[rawKey] || rawKey) === normalise(row.district))).forEach(row => { regionalRegions.add(row.region); Object.entries(row.parties).forEach(([party, seats]) => { regionalSeats[party] = (regionalSeats[party] || 0) + seats; }); });
     const regionalSeatCount = Object.values(regionalSeats).reduce((sum, seats) => sum + seats, 0);
     return { ...province, members, area, origins, dataMatches, population, partySeats, electionSeats, senateSeats, regionalSeats, regionalSeatCount, regionalRegions: [...regionalRegions],
       literacy: literacyBase ? literate / literacyBase * 100 : null,
@@ -287,7 +314,7 @@ export default function PakistanMapStudio() {
       mpi: mpiBase ? weightedMpi / mpiBase : null,
       rwi: rwiBase ? weightedRwi / rwiBase : null,
       nightLight: nightLightBase ? weightedNightLight / nightLightBase : null };
-  }), [assembly, assignments, darbar, districtOwners, features, level, provinces, regionalAssembly, tehsilDataByKey]);
+  }), [assembly, assignments, darbar, districtOwners, electionOwners, features, level, provinces, regionalAssembly, tehsilDataByKey]);
   const assignedArea = finalRows.reduce((sum, row) => sum + row.area, 0);
   const activeRow = finalRows.find(row => row.id === active);
   const countryPolitics = finalRows.filter(row => row.kind === 'province' && row.members.length).reduce((summary, row) => {
@@ -499,11 +526,12 @@ export default function PakistanMapStudio() {
         <section className="final-sheet">
           <div className="final-head"><div><span>PROVINCE PLAN · {level.toUpperCase()}</span><h1 id="final-title">{mapName || 'Untitled province plan'}</h1><p>{totalAssigned} of {features.length} {level} assigned across {provinces.filter(p => finalRows.find(r => r.id === p.id)?.members.length).length} populated provinces and territories.</p></div><div className="final-head-actions"><button className="compare-button" onClick={openComparison}>Compare provinces ↗</button><button onClick={() => setFinalized(false)} aria-label="Close summary">×</button></div></div>
           <section className="country-politics">
-            <div className="country-politics-head"><div><span>COUNTRY-WIDE OVERVIEW</span><h2>Assembly composition</h2></div><p>{countryPolitics.provinces} provinces counted · territories excluded</p></div>
+            <div className="country-politics-head"><div><span>COUNTRY-WIDE OVERVIEW</span><h2>Assembly composition</h2></div><div className="election-controls"><div className="election-year" role="group" aria-label="Election year"><button className={electionYear === 2024 ? 'selected' : ''} onClick={() => { setElectionYear(2024); setAssembly(null); }}>2024</button><button className={electionYear === 2018 ? 'selected' : ''} onClick={() => { setElectionYear(2018); setAssembly(null); }}>2018</button></div><p>{countryPolitics.provinces} provinces counted · territories excluded</p></div></div>
             <div className="country-politics-grid">
-              <article><div className="politics-title"><b>2024 National Assembly replay</b><span>{countryAssemblySeats} directly elected seats</span></div><div className="party-bar">{Object.entries(countryPolitics.assembly).sort((a,b)=>b[1]-a[1]).map(([party,seats])=><i key={party} style={{width:`${seats/Math.max(countryAssemblySeats,1)*100}%`,background:PARTY_COLORS[party]||'#9b958a'}} title={`${party}: ${seats}`}/>)}</div><div className="party-list">{Object.entries(countryPolitics.assembly).sort((a,b)=>b[1]-a[1]).map(([party,seats])=><span key={party}><i style={{background:PARTY_COLORS[party]||'#9b958a'}}/>{party}<b>{seats}</b></span>)}</div></article>
-              <article><div className="politics-title"><b>Country-wide Senate projection</b><span>{countrySenateSeats} seats · 23 per proposed province</span></div><div className="party-bar">{Object.entries(countryPolitics.senate).sort((a,b)=>b[1]-a[1]).map(([party,seats])=><i key={party} style={{width:`${seats/Math.max(countrySenateSeats,1)*100}%`,background:PARTY_COLORS[party]||'#9b958a'}} title={`${party}: ${seats}`}/>)}</div><div className="party-list">{Object.entries(countryPolitics.senate).sort((a,b)=>b[1]-a[1]).map(([party,seats])=><span key={party}><i style={{background:PARTY_COLORS[party]||'#9b958a'}}/>{party}<b>{seats}</b></span>)}</div></article>
+              <article><div className="politics-title"><b>{electionYear} provincial assembly replay · country total</b><span>{countryAssemblySeats} directly elected seats</span></div><div className="party-bar">{Object.entries(countryPolitics.assembly).sort((a,b)=>b[1]-a[1]).map(([party,seats])=><i key={party} style={{width:`${seats/Math.max(countryAssemblySeats,1)*100}%`,background:PARTY_COLORS[party]||'#9b958a'}} title={`${party}: ${seats}`}/>)}</div><div className="party-list">{Object.entries(countryPolitics.assembly).sort((a,b)=>b[1]-a[1]).map(([party,seats])=><span key={party}><i style={{background:PARTY_COLORS[party]||'#9b958a'}}/>{party}<b>{seats}</b></span>)}</div></article>
+              <article><div className="politics-title"><b>Country-wide Senate projection · {electionYear} basis</b><span>{countrySenateSeats} seats · 23 per proposed province</span></div><div className="party-bar">{Object.entries(countryPolitics.senate).sort((a,b)=>b[1]-a[1]).map(([party,seats])=><i key={party} style={{width:`${seats/Math.max(countrySenateSeats,1)*100}%`,background:PARTY_COLORS[party]||'#9b958a'}} title={`${party}: ${seats}`}/>)}</div><div className="party-list">{Object.entries(countryPolitics.senate).sort((a,b)=>b[1]-a[1]).map(([party,seats])=><span key={party}><i style={{background:PARTY_COLORS[party]||'#9b958a'}}/>{party}<b>{seats}</b></span>)}</div></article>
             </div>
+            {electionYear === 2018 && <p className="historical-note">2018 did not use today’s district map. Later splits are rolled back to their 2018 parent district; a seat is omitted if your proposed boundary divides that historical unit. Former FATA districts had no KP Assembly seats in the July 2018 election.</p>}
           </section>
           {rankedOpen && <aside className="rank-drawer" aria-label="Rank proposed provinces by indicator">
             <div className="rank-head"><div><span>VITAL STATISTICS</span><h2>Compare provinces</h2><p>Ranked highest to lowest for the selected indicator.</p></div><button onClick={() => setRankedOpen(false)} aria-label="Close comparison">×</button></div>
@@ -523,7 +551,7 @@ export default function PakistanMapStudio() {
               <p>Drawn from {row.origins.map(([origin, count]) => `${count} ${origin}`).join(' · ')} · Data matched for {row.dataMatches}/{row.members.length} units</p>
               {row.regionalSeatCount > 0 && <div className="politics-block regional-politics"><div className="politics-title"><b>{row.regionalRegions.join(' + ')} 2026 assembly results</b><span>{row.regionalSeatCount} mapped general seats</span></div><div className="party-bar">{Object.entries(row.regionalSeats).sort((a,b) => b[1] - a[1]).map(([party,seats]) => <i key={party} style={{ width: `${seats / row.regionalSeatCount * 100}%`, background: PARTY_COLORS[party] || '#9b958a' }} title={`${party}: ${seats}`}/>)}</div><div className="party-list">{Object.entries(row.regionalSeats).sort((a,b) => b[1] - a[1]).map(([party,seats]) => <span key={party}><i style={{ background: PARTY_COLORS[party] || '#9b958a' }}/>{party}<b>{seats}</b></span>)}</div><p>Latest 2026 regional election results follow their districts if AJK or GB is split. Pending AJK seats and non-geographic refugee seats are excluded.</p></div>}
               {row.kind === 'province' && row.electionSeats > 0 && <div className="politics-block">
-                <div className="politics-title"><b>2024 assembly replay</b><span>{row.electionSeats} directly elected seats</span></div>
+                <div className="politics-title"><b>{electionYear} assembly replay</b><span>{row.electionSeats} directly elected seats</span></div>
                 <div className="party-bar">{Object.entries(row.partySeats).sort((a,b) => b[1] - a[1]).map(([party,seats]) => <i key={party} style={{ width: `${seats / row.electionSeats * 100}%`, background: PARTY_COLORS[party] || '#9b958a' }} title={`${party}: ${seats}`}/>)}</div>
                 <div className="party-list">{Object.entries(row.partySeats).sort((a,b) => b[1] - a[1]).map(([party,seats]) => <span key={party}><i style={{ background: PARTY_COLORS[party] || '#9b958a' }}/>{party}<b>{seats}</b></span>)}</div>
                 {row.kind === 'province' && <div className="senate-line"><div className="senate-title"><strong>Province-wide Senate projection</strong><span>23 seats elected by this proposed assembly</span></div><div className="senate-bar">{Object.entries(row.senateSeats).filter(([,seats]) => seats > 0).sort((a,b) => b[1] - a[1]).map(([party,seats]) => <i key={party} style={{ width: `${seats / 23 * 100}%`, background: PARTY_COLORS[party] || '#9b958a' }} title={`${party}: ${seats}`}/>)}</div><div className="senate-parties">{Object.entries(row.senateSeats).filter(([,seats]) => seats > 0).sort((a,b) => b[1] - a[1]).map(([party,seats]) => <span key={party}><i style={{ background: PARTY_COLORS[party] || '#9b958a' }}/>{party}<b>{seats}</b></span>)}</div></div>}
@@ -531,7 +559,7 @@ export default function PakistanMapStudio() {
               </div>
             </article>)}
           </div>
-          <footer className="final-footer"><p><b>Data & method</b> <a href="https://darbar.adaad.org/" target="_blank" rel="noreferrer">Data Darbar</a>: PBS Census 2023, PSLM/HIES education, employment and living-conditions measures, Meta/WorldPop wealth and population, and VIIRS night lights. Custom-province GDP is not published, so monthly household consumption, wealth and night lights are shown as economic proxies—not GDP estimates. Tehsil figures marked ≈ apply district rates to tehsil populations. Politics replays February 2024 general-seat winners by district; reserved seats are excluded. The Senate line is a 23-seat proportional scenario, not a legal prediction.</p><div><button onClick={exportPng}>Export PNG</button><button onClick={shareMap}>{shareStatus}</button><button className="dark" onClick={exportPlan}>Download plan</button></div></footer>
+          <footer className="final-footer"><p><b>Data & method</b> <a href="https://darbar.adaad.org/" target="_blank" rel="noreferrer">Data Darbar</a>: PBS Census 2023, PSLM/HIES education, employment and living-conditions measures, Meta/WorldPop wealth and population, and VIIRS night lights. Custom-province GDP is not published, so monthly household consumption, wealth and night lights are shown as economic proxies—not GDP estimates. Tehsil figures marked ≈ apply district rates to tehsil populations. Politics replays {electionYear} provincial general-seat winners grouped by election-era districts from the <a href={electionYear === 2018 ? 'https://www.ecp.gov.pk/storage/files/3/03-ECP%20Annual%20Report%202018.pdf' : 'https://www.ecp.gov.pk/storage/files/3/General%20Election%20Report%202024%20Vol-II-compressed.pdf'} target="_blank" rel="noreferrer">Election Commission of Pakistan</a>; reserved seats are excluded. The 2018 view explicitly rolls later district splits back to their historical parents. The Senate line is a 23-seat proportional scenario, not a legal prediction.</p><div><button onClick={exportPng}>Export PNG</button><button onClick={shareMap}>{shareStatus}</button><button className="dark" onClick={exportPlan}>Download plan</button></div></footer>
         </section>
       </div>}
     </main>
