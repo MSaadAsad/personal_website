@@ -133,7 +133,7 @@ export default function ProvinceComparison(){
     <section className="metric-picker">
       <span className="metric-picker-label" id="comparison-metric-label">Compare by</span>
       <div className={`metric-select ${metricOpen?'open':''}`}>
-        <button className="metric-select-trigger" type="button" aria-labelledby="comparison-metric-label comparison-metric-value" aria-haspopup="listbox" aria-expanded={metricOpen} onClick={()=>setMetricOpen(open=>!open)}><span id="comparison-metric-value">{meta.label}</span><b aria-hidden="true">{metricOpen?'×':'⌄'}</b></button>
+        <button className="metric-select-trigger" type="button" aria-labelledby="comparison-metric-label comparison-metric-value" aria-haspopup="listbox" aria-expanded={metricOpen} onClick={()=>setMetricOpen(open=>!open)}><span id="comparison-metric-value">{meta.label}</span><b className={metricOpen?'close':'chevron'} aria-hidden="true">{metricOpen?'×':''}</b></button>
         {metricOpen&&<div className="metric-select-menu" role="listbox" aria-labelledby="comparison-metric-label">{METRICS.map((item,index)=><button type="button" role="option" aria-selected={metric===item.key} className={metric===item.key?'selected':''} key={item.key} onClick={()=>{setMetric(item.key);setMetricOpen(false)}}><span>{String(index+1).padStart(2,'0')}</span><b>{item.label}</b>{metric===item.key&&<i aria-hidden="true">✓</i>}</button>)}</div>}
       </div>
     </section>

@@ -75,6 +75,16 @@
   background: var(--color-sky-accent);
   color: #fff;
   font-size: 24px;
+  line-height: 1;
+}
+
+.metric-select-trigger > b.chevron::before {
+  width: 10px;
+  height: 10px;
+  border-right: 3px solid currentColor;
+  border-bottom: 3px solid currentColor;
+  content: "";
+  transform: translateY(-3px) rotate(45deg);
 }
 
 .metric-select-trigger:focus-visible,
