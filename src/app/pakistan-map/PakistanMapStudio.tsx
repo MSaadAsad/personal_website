@@ -623,7 +623,7 @@ export default function PakistanMapStudio() {
               <g className="city-layer" aria-label="Major cities">
                 {CITY_MARKERS.filter(city => city.tier === 1 || cityZoom >= 1.35).map(city => {
                   const [x, y] = project([city.lon, city.lat]);
-                  return <g className={`city-marker city-tier-${city.tier}`} key={city.name} transform={`translate(${x} ${y})`}><title>{city.name}</title><circle className="city-halo" r={city.tier === 1 ? 5.5 : 4.5}/><circle className="city-dot" r={city.tier === 1 ? 2.8 : 2.2}/></g>;
+                  return <g className={`city-marker city-tier-${city.tier}`} key={city.name} transform={`translate(${x} ${y})`}><title>{city.name}</title><circle className="city-dot" r="2.5"/></g>;
                 })}
               </g>
             </svg>
