@@ -49,6 +49,26 @@ const MAP_WIDTH=760,MAP_HEIGHT=820;
 const project=([lon,lat]:number[])=>[20+((lon-MAP_EXTENT.minX)/(MAP_EXTENT.maxX-MAP_EXTENT.minX))*720,20+((MAP_EXTENT.maxY-lat)/(MAP_EXTENT.maxY-MAP_EXTENT.minY))*780];
 const ringPath=(ring:number[][])=>ring.map((point,index)=>`${index?'L':'M'}${project(point).map(value=>value.toFixed(1)).join(' ')}`).join(' ')+'Z';
 const geometryPath=(geometry:Feature['geometry'])=>(geometry.type==='Polygon'?[geometry.coordinates as number[][][]]:geometry.coordinates as number[][][][]).map(polygon=>polygon.map(ringPath).join(' ')).join(' ');
+const proposedBoundaryPath=(features:Feature[],owners:Map<string,number>,level:Level)=>{
+  const segments=new Map<string,{start:number[];end:number[];owners:Set<string>;uses:number}>();
+  features.forEach(feature=>{
+    const code=String(feature.properties[level==='tehsils'?'tehsil_code':'district_code']);
+    const owner=String(owners.get(code)??'unassigned');
+    const polygons=feature.geometry.type==='Polygon'?[feature.geometry.coordinates as number[][][]]:feature.geometry.coordinates as number[][][][];
+    polygons.forEach(polygon=>polygon.forEach(ring=>ring.forEach((start,index)=>{
+      const end=ring[(index+1)%ring.length];
+      if(!end||(start[0]===end[0]&&start[1]===end[1]))return;
+      const a=`${start[0].toFixed(4)},${start[1].toFixed(4)}`,b=`${end[0].toFixed(4)},${end[1].toFixed(4)}`;
+      const key=a<b?`${a}|${b}`:`${b}|${a}`;
+      const segment=segments.get(key)||{start,end,owners:new Set<string>(),uses:0};
+      segment.owners.add(owner);segment.uses++;segments.set(key,segment);
+    })));
+  });
+  return [...segments.values()].filter(segment=>segment.uses>1&&segment.owners.size>1).map(segment=>{
+    const start=project(segment.start),end=project(segment.end);
+    return `M${start[0].toFixed(1)} ${start[1].toFixed(1)}L${end[0].toFixed(1)} ${end[1].toFixed(1)}`;
+  }).join(' ');
+};
 
 export default function ProvinceComparison(){
   const [config,setConfig]=useState<Config|null>(null);
@@ -101,6 +121,7 @@ export default function ProvinceComparison(){
   let angle=0;
   const pie=ranked.map(r=>{const start=angle;angle+=compositionTotal?metricValue(r)/compositionTotal*360:0;return `${r.color} ${start}deg ${angle}deg`}).join(',');
   const featureOwners=useMemo(()=>new Map(config?.a.map(([id,,owner])=>[id,owner])||[]),[config]);
+  const proposedBoundaries=useMemo(()=>config?proposedBoundaryPath(features,featureOwners,config.l):'',[config,featureOwners,features]);
   const rowsByOwner=useMemo(()=>new Map(config?.p.map((province,index)=>[index,rows.find(row=>row.id===province[0])])||[]),[config,rows]);
   const mapValue=(feature:Feature)=>{const code=String(feature.properties[config?.l==='tehsils'?'tehsil_code':'district_code']);const row=rowsByOwner.get(featureOwners.get(code)??-1);return row&&row[metric]!=null&&(!perCapita||row.population)?metricValue(row):null};
   if(!config)return <main className="compare-shell"><div className="compare-empty"><h1>No map to compare</h1><a href="/pakistan-map">← Build a map</a></div></main>;
@@ -123,7 +144,15 @@ export default function ProvinceComparison(){
         <div className="pie" style={{background:`conic-gradient(${pie})`}} role="img" aria-label={`${meta.label} share by map unit`}><span><b>{compositionCentre}</b>{compositionLabel}</span></div>
         <ol>{ranked.map((r,i)=><li key={r.id}><i style={{background:r.color}}/><span>{String(i+1).padStart(2,'0')}</span><b>{r.name}<em>{r.kind}</em></b><strong>{formatValue(r)}</strong><small>{compositionTotal?(metricValue(r)/compositionTotal*100).toFixed(1):'0.0'}%</small></li>)}</ol>
       </div>:<div className="depth-map-layout">
-        <div className="depth-map-panel"><svg className="depth-map" viewBox={`0 0 ${MAP_WIDTH} ${MAP_HEIGHT}`} role="img" aria-labelledby="depth-map-title depth-map-description"><title id="depth-map-title">{meta.label} by proposed province</title><desc id="depth-map-description">Darker blue indicates a higher {meta.label.toLowerCase()} value. Areas without comparable data are concrete grey.</desc>{features.map((feature,index)=>{const value=mapValue(feature);const depth=value==null?0:.18+.82*Math.max(0,Math.min(1,value/maximum));return <path key={index} d={geometryPath(feature.geometry)} className={value==null?'depth-region unavailable':'depth-region'} style={value==null?undefined:{fillOpacity:depth}}><title>{value==null?'No comparable data':formatScale(value)}</title></path>})}</svg><div className="depth-legend"><span>Lower</span><i/><span>Higher</span><b>Unavailable</b></div></div>
+        <div className="depth-map-panel">
+          <svg className="depth-map" viewBox={`0 0 ${MAP_WIDTH} ${MAP_HEIGHT}`} role="img" aria-labelledby="depth-map-title depth-map-description">
+            <title id="depth-map-title">{meta.label} by proposed province</title>
+            <desc id="depth-map-description">Darker blue indicates a higher {meta.label.toLowerCase()} value. Heavy lines show the proposed provincial boundaries; areas without comparable data are concrete grey.</desc>
+            {features.map((feature,index)=>{const value=mapValue(feature);const depth=value==null?0:.18+.82*Math.max(0,Math.min(1,value/maximum));return <path key={index} d={geometryPath(feature.geometry)} className={value==null?'depth-region unavailable':'depth-region'} style={value==null?undefined:{fillOpacity:depth}}><title>{value==null?'No comparable data':formatScale(value)}</title></path>})}
+            {proposedBoundaries&&<path className="proposed-province-boundaries" d={proposedBoundaries}/>}
+          </svg>
+          <div className="depth-legend"><span>Lower</span><i/><span>Higher</span><b>Unavailable</b><em>Heavy line · proposed province</em></div>
+        </div>
         <ol className="depth-ranking">{ranked.map((row,index)=><li key={row.id}><div className="depth-rank-main"><span>{String(index+1).padStart(2,'0')}</span><b>{row.name}<em>{row.kind}</em></b><strong>{formatValue(row)}</strong></div><span className="depth-rank-bar"><i style={{width:`${Math.max(0,Math.min(100,metricValue(row)/maximum*100))}%`}}/></span></li>)}</ol>
       </div>}
       {perCapita&&ranked.length>0&&<p className="comparison-note">Calculated from out-of-school children divided by total 2023 population. This is per 1,000 residents, not per 1,000 children aged 5–16.</p>}

@@ -223,6 +223,16 @@
   fill-opacity: 1;
 }
 
+.proposed-province-boundaries {
+  fill: none;
+  stroke: #20252a;
+  stroke-width: 2.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+  pointer-events: none;
+}
+
 .depth-legend {
   display: grid;
   grid-template-columns: auto minmax(140px, 1fr) auto auto;
@@ -246,6 +256,14 @@
   padding-left: 22px;
   background: linear-gradient(90deg,#dfd9ce 0 15px,transparent 15px);
   font-size: inherit;
+}
+
+.depth-legend > em {
+  grid-column: 1 / -1;
+  width: max-content;
+  padding-left: 32px;
+  background: linear-gradient(#20252a,#20252a) 0 50% / 23px 3px no-repeat;
+  font-style: normal;
 }
 
 .depth-ranking {
