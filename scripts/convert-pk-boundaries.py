@@ -22,7 +22,9 @@ def parse_wkb(data, offset=0):
             for _ in range(point_count):
                 x, y = struct.unpack_from(order + "dd", data, offset)
                 offset += 16
-                points.append([round(x, 5), round(y, 5)])
+                # Four decimals retain roughly 11 m precision, far beyond what
+                # this 760 px national map can display, while cutting payload.
+                points.append([round(x, 4), round(y, 4)])
             rings.append(points)
         return {"type": "Polygon", "coordinates": rings}, offset
 

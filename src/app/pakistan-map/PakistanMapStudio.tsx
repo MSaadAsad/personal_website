@@ -151,6 +151,7 @@ export default function PakistanMapStudio() {
   const svgRef = useRef<SVGSVGElement>(null);
   const hashLoaded = useRef(false);
   const pendingSharedAssignments = useRef<Record<string, string> | null>(null);
+  const hasAssignments = Object.keys(assignments).length > 0;
 
   useEffect(() => {
     if (!hashLoaded.current) {
@@ -189,15 +190,17 @@ export default function PakistanMapStudio() {
     setHistory([]); setFuture([]);
   }, [level]);
 
-  useEffect(() => { fetch('/data/pakistan-map/datadarbar.json').then(r => r.json()).then(setDarbar).catch(() => setDarbar(null)); }, []);
-  useEffect(() => { fetch('/data/pakistan-map/assembly-2024.json').then(r => r.json()).then(setAssembly).catch(() => setAssembly(null)); }, []);
-  useEffect(() => { fetch('/data/pakistan-map/regional-assembly-2026.json').then(r => r.json()).then(setRegionalAssembly).catch(() => setRegionalAssembly(null)); }, []);
+  useEffect(() => { if (hasAssignments && !darbar) fetch('/data/pakistan-map/datadarbar.json').then(r => r.json()).then(setDarbar).catch(() => setDarbar(null)); }, [darbar, hasAssignments]);
+  useEffect(() => { if (finalized && !assembly) fetch('/data/pakistan-map/assembly-2024.json').then(r => r.json()).then(setAssembly).catch(() => setAssembly(null)); }, [assembly, finalized]);
+  useEffect(() => { if (finalized && !regionalAssembly) fetch('/data/pakistan-map/regional-assembly-2026.json').then(r => r.json()).then(setRegionalAssembly).catch(() => setRegionalAssembly(null)); }, [finalized, regionalAssembly]);
 
   useEffect(() => {
     if (Object.keys(assignments).length) localStorage.setItem(`naya-naqsha-${level}`, JSON.stringify(assignments));
   }, [assignments, level]);
 
   const provinceById = useMemo(() => Object.fromEntries(provinces.map(p => [p.id, p])), [provinces]);
+  const assignmentCounts = useMemo(() => Object.values(assignments).reduce<Record<string, number>>((counts, id) => { counts[id] = (counts[id] || 0) + 1; return counts; }, {}), [assignments]);
+  const tehsilDataByKey = useMemo(() => new Map((darbar?.tehsils || []).map(row => [`${row.d}:${normalise(row.n)}`, row])), [darbar]);
   const paths = useMemo(() => features.map(feature => ({ feature, d: geometryPath(feature.geometry) })), [features]);
   const matches = useMemo(() => query.trim() ? features.filter(f => `${featureName(f, level)} ${f.properties.district_name} ${f.properties.province_name}`.toLowerCase().includes(query.toLowerCase())).slice(0, 8) : [], [features, level, query]);
   const totalAssigned = Object.keys(assignments).length;
@@ -247,7 +250,7 @@ export default function PakistanMapStudio() {
         addExtended(district, pop);
       } else {
         const tehsilName = normalise(feature.properties.tehsil_name);
-        const tehsil = darbar?.tehsils.find(row => normalise(row.n) === tehsilName && row.d === districtKey);
+        const tehsil = tehsilDataByKey.get(`${districtKey}:${tehsilName}`);
         if (!tehsil) continue;
         dataMatches++;
         const pop = tehsil.p || 0; population += pop;
@@ -286,13 +289,13 @@ export default function PakistanMapStudio() {
       mpi: mpiBase ? weightedMpi / mpiBase : null,
       rwi: rwiBase ? weightedRwi / rwiBase : null,
       nightLight: nightLightBase ? weightedNightLight / nightLightBase : null };
-  }), [assembly, assignments, darbar, districtOwners, features, level, provinces, regionalAssembly]);
+  }), [assembly, assignments, darbar, districtOwners, features, level, provinces, regionalAssembly, tehsilDataByKey]);
   const assignedArea = finalRows.reduce((sum, row) => sum + row.area, 0);
   const activeRow = finalRows.find(row => row.id === active);
   const selectedDistrictKeyRaw = selectedFeature ? normalise(selectedFeature.properties.district_name) : '';
   const selectedDistrictKey = DISTRICT_ALIASES[selectedDistrictKeyRaw] || selectedDistrictKeyRaw;
   const selectedDistrict = selectedDistrictKey ? darbar?.districts[selectedDistrictKey] : null;
-  const selectedTehsil = selectedFeature && level === 'tehsils' ? darbar?.tehsils.find(row => normalise(row.n) === normalise(selectedFeature.properties.tehsil_name) && row.d === selectedDistrictKey) : null;
+  const selectedTehsil = selectedFeature && level === 'tehsils' ? tehsilDataByKey.get(`${selectedDistrictKey}:${normalise(selectedFeature.properties.tehsil_name)}`) : null;
   const rankedRows = useMemo(() => finalRows.filter(row => row.members.length && row[rankMetric] != null).sort((a, b) => Number(b[rankMetric]) - Number(a[rankMetric])), [finalRows, rankMetric]);
   const rankMaximum = Math.max(...rankedRows.map(row => Number(row[rankMetric])), 1);
   const formatRankValue = (value: number) => rankMetric === 'population' || rankMetric === 'outOfSchool'
@@ -399,7 +402,7 @@ export default function PakistanMapStudio() {
           <p className="hint">Set each unit as a province or territory, then paint.</p>
           <div className="province-list">
             {provinces.map((province, index) => {
-              const count = Object.values(assignments).filter(id => id === province.id).length;
+              const count = assignmentCounts[province.id] || 0;
               return <div className={`province-row ${active === province.id ? 'active' : ''}`} key={province.id} onClick={() => setActive(province.id)}>
                 <label className="swatch" style={{ background: province.color }}><input type="color" value={province.color} aria-label={`${province.name} colour`} onChange={e => setProvinces(items => items.map(item => item.id === province.id ? { ...item, color: e.target.value } : item))}/></label>
                 <input className="province-name" value={province.name} aria-label={`Province ${index + 1} name`} onChange={e => setProvinces(items => items.map(item => item.id === province.id ? { ...item, name: e.target.value } : item))}/>
@@ -445,7 +448,7 @@ export default function PakistanMapStudio() {
           </section>}
           <div className="big-stat"><strong>{provinces.length}</strong><span>PROVINCES<br/>CREATED</span></div>
           <div className="assignment-stat"><span>{totalAssigned} of {features.length}</span><span>{Math.round(totalAssigned / Math.max(features.length, 1) * 100)}% assigned</span><div><i style={{ width: `${totalAssigned / Math.max(features.length, 1) * 100}%` }}/></div></div>
-          <div className="summary-list">{provinces.map(p => { const count = Object.values(assignments).filter(id => id === p.id).length; return <div key={p.id}><i style={{ background: p.color }}/><span>{p.name}</span><b>{count}</b></div>; })}</div>
+          <div className="summary-list">{provinces.map(p => { const count = assignmentCounts[p.id] || 0; return <div key={p.id}><i style={{ background: p.color }}/><span>{p.name}</span><b>{count}</b></div>; })}</div>
           <div className="unassigned"><i/>Unassigned <b>{features.length - totalAssigned}</b></div>
           <button className="clear" onClick={clearMap}>Clear map</button>
           <p className="source-note">Boundary data: <a href="https://github.com/abdullahumer1101/pkmapr" target="_blank" rel="noreferrer">pkmapr / OCHA</a>. Administrative boundaries and names may change.</p>
