@@ -210,7 +210,7 @@
 .map-navigation button:last-child { border-right:0; font-size:17px; }
 .map-navigation button:hover { filter:brightness(1.08); }
 .map-navigation button:focus-visible { position:relative; outline:3px solid #fff; outline-offset:-5px; }
-.map-paper { background-color:#dbe7ed; background-image:linear-gradient(rgba(218,226,230,.38),rgba(218,226,230,.38)),linear-gradient(rgba(67,82,103,.12) 1px,transparent 1px),linear-gradient(90deg,rgba(67,82,103,.12) 1px,transparent 1px),url('/assets/site-background.webp'); background-size:auto,28px 28px,28px 28px,cover; background-position:center,0 0,0 0,top center; background-repeat:no-repeat,repeat,repeat,no-repeat; box-shadow:inset 0 0 22px rgba(42,58,70,.16); }
+.map-paper { background-color:#d0d1cf; background-image:linear-gradient(rgba(66,71,75,.1) 1px,transparent 1px),linear-gradient(90deg,rgba(66,71,75,.1) 1px,transparent 1px),conic-gradient(from 90deg at 1px 1px,#d9dad8 25%,#c9cac8 0 50%,#d9dad8 0 75%,#c9cac8 0); background-size:28px 28px,28px 28px,112px 112px; background-position:0 0; background-repeat:repeat; box-shadow:inset 0 0 22px rgba(42,46,49,.14); }
 .region { stroke:#555b60; stroke-width:.9; }
 .city-layer { pointer-events:none; }
 .city-halo { fill:#f2f5f5; stroke:#2d5fae; stroke-width:1.5; vector-effect:non-scaling-stroke; }
