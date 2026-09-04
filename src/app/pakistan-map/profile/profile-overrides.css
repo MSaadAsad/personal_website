@@ -18,3 +18,8 @@ body:has(.profile-shell) nav a,
 body:has(.profile-shell) nav button {
   color: #292d31;
 }
+
+.profile-hero > div > span,
+.section-title > span {
+  color: var(--color-sky-accent);
+}
