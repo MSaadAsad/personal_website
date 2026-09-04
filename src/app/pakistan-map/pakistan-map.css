@@ -351,7 +351,7 @@
 .final-footer p b { margin-bottom:5px; font-size:13px; }
 .final-footer button { min-height:48px; padding:11px 15px; border:2px solid #676c70; background:#c5c5c2; font:700 12px var(--font-mono),monospace; }
 .country-politics { padding:24px 34px 28px; border-bottom:2px solid #777c80; background:#b8bab9; }
-.country-politics-head { display:flex; align-items:end; justify-content:space-between; gap:20px; margin-bottom:20px; }
+.country-politics-head { display:flex; align-items:end; justify-content:space-between; gap:20px; }
 .country-politics-head span { color:var(--color-sky-accent); font:750 11px var(--font-mono),monospace; letter-spacing:.11em; }
 .country-politics-head h2 { margin:6px 0 0; font:750 30px var(--font-serif),serif; }
 .country-politics-head p { margin:0; color:#4b5155; font:11px var(--font-mono),monospace; text-transform:uppercase; }
@@ -360,9 +360,19 @@
 .election-year button { min-width:74px; min-height:42px; border:0; background:#c8c8c5; color:#30353a; font:750 12px var(--font-mono),monospace; cursor:pointer; }
 .election-year button+button { border-left:2px solid #6d7276; }
 .election-year button.selected { background:var(--color-sky-accent); color:#fff; }
+.politics-toggle { min-height:42px; padding:8px 13px; border:2px solid #5f6569; border-radius:0; background:#d2d2cf; color:#292d31; box-shadow:3px 3px 0 #85898c; font:750 10px var(--font-mono),monospace; text-transform:uppercase; cursor:pointer; }
+.politics-toggle:active { transform:translate(2px,2px); box-shadow:1px 1px 0 #85898c; }
+.country-politics-body { margin-top:20px; }
 .country-politics-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
 .country-politics-grid article { padding:18px; border:2px solid #858a8d; background:#c8c8c5; box-shadow:4px 4px 0 #929596; }
 .country-politics-grid .party-list { margin-top:13px; }
+.province-politics-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; margin-top:22px; padding-top:22px; border-top:2px solid #858a8d; }
+.province-politics-grid>article { min-width:0; padding:18px; border:2px solid #858a8d; border-left:7px solid var(--province-color); background:#c8c8c5; box-shadow:4px 4px 0 #929596; }
+.province-politics-head { display:flex; align-items:center; gap:10px; }
+.province-politics-head>i { width:13px; height:13px; flex:none; background:var(--province-color); }
+.province-politics-head b { display:block; font:750 18px var(--font-mono),monospace; }
+.province-politics-head span { display:block; margin-top:3px; color:#4b5155; font:9px var(--font-mono),monospace; text-transform:uppercase; }
+.province-politics-grid .politics-block { margin-top:15px; padding-top:14px; }
 .historical-note { max-width:980px; margin:20px 0 0; padding:13px 15px; border-left:5px solid var(--color-sky-accent); background:#c8c8c5; color:#34393d; font:12px/1.55 var(--font-mono),monospace; }
 
 /* Resizable, collapsible workspace panels. */
@@ -508,6 +518,7 @@
   .election-controls { align-items:flex-start; flex-direction:column; margin-top:14px; gap:8px; }
   .country-politics-head p { margin-top:0; }
   .country-politics-grid { grid-template-columns:1fr; }
+  .province-politics-grid { grid-template-columns:1fr; }
   .final-grid { display:block; }
   .final-grid article:nth-child(odd) { border-right:0; }
   .final-grid article { padding:24px 18px; }
