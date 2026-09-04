@@ -145,7 +145,7 @@
 .segmented button { min-height:52px; padding:12px 3px; font:650 13px var(--font-mono),monospace; color:#35393d; }
 .segmented button+button { border-left:2px solid #686d71; }
 .segmented button.selected { background:#435267; color:#fff; }
-.segmented b { font-size:12px; }
+.segmented b { display:block; margin:4px 0 0; font-size:12px; font-weight:500; }
 .preset-control { margin-top:14px; padding:13px; border:2px solid #74787b; border-radius:2px; background:#c9c9c6; color:#303438; box-shadow:inset 1px 1px rgba(255,255,255,.45),3px 3px 0 #85888a; }
 .preset-control>h3 { margin:0 0 8px; font:750 11px var(--font-mono),monospace; letter-spacing:.09em; text-transform:uppercase; }
 .preset-list { display:grid; gap:7px; }
