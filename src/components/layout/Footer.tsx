@@ -28,7 +28,7 @@ export function Footer() {
   if (pathname.startsWith('/pakistan-map')) return null;
 
   const copyright = (
-    <div className="font-mono text-[0.78rem] text-concrete-600 tracking-wider px-6 py-4 flex items-center justify-center flex-1">
+    <div className="font-mono text-[0.78rem] text-concrete-700 tracking-wider px-6 py-4 flex items-center justify-center flex-1">
       &copy; {new Date().getFullYear()} SAAD
     </div>
   );
