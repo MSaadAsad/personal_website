@@ -6,7 +6,7 @@ import { buildTehsilDataLookup } from '../tehsil-data-match';
 
 type Level='districts'|'tehsils';
 type Kind='province'|'territory';
-type Config={n:string;l:Level;p:[string,string,string,Kind?][];a:[string,string,number][]};
+type Config={n:string;l:Level;p:[string,string,string,Kind?,string?][];a:[string,string,number][]};
 type Feature={properties:Record<string,string|number>};
 type District={p:number|null;l:number|null;i:number|null;u:number|null;mat:number|null;oos:number|null;cons:number|null;lfpr:number|null;fi:number|null;net:number|null;elec:number|null;mpi:number|null};
 type Darbar={districts:Record<string,District>;tehsils:{n:string;d:string;p:number|null}[]};

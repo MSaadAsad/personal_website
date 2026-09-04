@@ -8,8 +8,8 @@ type Level = 'divisions' | 'districts' | 'tehsils';
 type Props = Record<string, string | number>;
 type Feature = { type: 'Feature'; properties: Props; geometry: { type: 'Polygon' | 'MultiPolygon'; coordinates: number[][][] | number[][][][] } };
 type UnitKind = 'province' | 'territory';
-type Province = { id: string; name: string; color: string; kind: UnitKind };
-type SharedMap = { v: 1; n: string; l: Level; p: [string, string, string, UnitKind?][]; a: [string, string, number][] };
+type Province = { id: string; name: string; color: string; kind: UnitKind; capital?: string };
+type SharedMap = { v: 1; n: string; l: Level; p: [string, string, string, UnitKind?, string?][]; a: [string, string, number][] };
 type DistrictData = { n: string; p: number | null; l: number | null; i: number | null; u: number | null; ur: number | null; lfpr: number | null; oos: number | null; mat: number | null; enrol: number | null; num: number | null; cons: number | null; fi: number | null; net: number | null; elec: number | null; mpi: number | null; h: number | null };
 type TehsilData = { n: string; d: string; p: number | null; r: number | null; nl: number | null };
 type DarbarData = { source: string; generated: string; methodology: string; districts: Record<string, DistrictData>; tehsils: TehsilData[] };
@@ -36,18 +36,20 @@ const RANK_METRICS: { key: RankMetric; label: string; unit: string }[] = [
 const PALETTE = ['#ef6351', '#f4b942', '#48a9a6', '#5b70d6', '#a267c7', '#3c9d60', '#e27d3f', '#d85b8b'];
 const PAINT_COLORS = ['#000000','#464646','#787878','#b4b4b4','#ffffff','#880015','#ed1c24','#ff7f27','#fff200','#22b14c','#00a2e8','#3f48cc','#a349a4','#b97a57','#ffaec9','#ffc90e','#b5e61d','#99d9ea','#7092be','#c8bfe7','#65915f','#d99b42','#b76d57','#435267'];
 const PRESET_1: Province[] = [
-  { id: 'punjab', name: 'Punjab', color: '#65915f', kind: 'province' },
-  { id: 'south-punjab', name: 'South Punjab', color: '#d99b42', kind: 'province' },
-  { id: 'sindh', name: 'Sindh', color: '#b76d57', kind: 'province' },
-  { id: 'karachi', name: 'Karachi', color: '#cf5d87', kind: 'province' },
-  { id: 'kp', name: 'Khyber Pakhtunkhwa', color: '#5577ad', kind: 'province' },
-  { id: 'hazara', name: 'Hazara', color: '#75a6bc', kind: 'province' },
-  { id: 'balochistan', name: 'Balochistan', color: '#a97b50', kind: 'province' },
-  { id: 'islamabad', name: 'Islamabad', color: '#786999', kind: 'territory' },
-  { id: 'gb', name: 'Gilgit–Baltistan', color: '#829b73', kind: 'territory' },
-  { id: 'ajk', name: 'Azad Kashmir', color: '#418674', kind: 'territory' },
+  { id: 'punjab', name: 'Punjab', color: '#65915f', kind: 'province', capital: 'Lahore' },
+  { id: 'south-punjab', name: 'South Punjab', color: '#d99b42', kind: 'province', capital: '' },
+  { id: 'sindh', name: 'Sindh', color: '#b76d57', kind: 'province', capital: '' },
+  { id: 'karachi', name: 'Karachi', color: '#cf5d87', kind: 'province', capital: 'Karachi' },
+  { id: 'kp', name: 'Khyber Pakhtunkhwa', color: '#5577ad', kind: 'province', capital: 'Peshawar' },
+  { id: 'hazara', name: 'Hazara', color: '#75a6bc', kind: 'province', capital: '' },
+  { id: 'balochistan', name: 'Balochistan', color: '#a97b50', kind: 'province', capital: 'Quetta' },
+  { id: 'islamabad', name: 'Islamabad', color: '#786999', kind: 'territory', capital: 'Islamabad' },
+  { id: 'gb', name: 'Gilgit–Baltistan', color: '#829b73', kind: 'territory', capital: 'Gilgit' },
+  { id: 'ajk', name: 'Azad Kashmir', color: '#418674', kind: 'territory', capital: 'Muzaffarabad' },
 ];
-const CURRENT_STRUCTURE: Province[] = PRESET_1.filter(province => !['south-punjab', 'karachi', 'hazara'].includes(province.id));
+const CURRENT_STRUCTURE: Province[] = PRESET_1
+  .filter(province => !['south-punjab', 'karachi', 'hazara'].includes(province.id))
+  .map(province => province.id === 'sindh' ? { ...province, capital: 'Karachi' } : province);
 const CURRENT_OWNER_BY_SOURCE: Record<string, string> = {
   Punjab: 'punjab',
   Sindh: 'sindh',
@@ -310,7 +312,7 @@ export default function PakistanMapStudio() {
         try {
           const shared = decodeShare(raw);
           if (shared.v === 1 && (shared.l === 'divisions' || shared.l === 'districts' || shared.l === 'tehsils')) {
-            const restoredProvinces = shared.p.map(([id, name, color, kind]) => ({ id, name, color, kind: kind || 'province' }));
+            const restoredProvinces = shared.p.map(([id, name, color, kind, capital]) => ({ id, name, color, kind: kind || 'province', capital: capital || '' }));
             const restoredAssignments = Object.fromEntries(shared.a.map(([id, , provinceIndex]) => [id, restoredProvinces[provinceIndex]?.id]).filter(([, id]) => id));
             setMapName(shared.n || 'Shared province plan');
             setProvinces(restoredProvinces);
@@ -514,7 +516,7 @@ export default function PakistanMapStudio() {
 
   const addProvince = () => {
     const id = `province-${Date.now()}`;
-    const next: Province = { id, name: `Province ${provinces.length + 1}`, color: PALETTE[provinces.length % PALETTE.length], kind: 'province' };
+    const next: Province = { id, name: `Province ${provinces.length + 1}`, color: PALETTE[provinces.length % PALETTE.length], kind: 'province', capital: '' };
     setProvinces(p => [...p, next]); setActive(id);
   };
 
@@ -576,7 +578,7 @@ export default function PakistanMapStudio() {
         })
       : features.filter(feature => assignments[featureId(feature, level)] !== undefined).map(feature => [featureId(feature, level), featureName(feature, level), provinceIndex[assignments[featureId(feature, level)]]]);
     return { v: 1, n: mapName.trim() || 'Untitled province plan', l: sharedLevel,
-      p: provinces.map(province => [province.id, province.name, province.color, province.kind]),
+      p: provinces.map(province => [province.id, province.name, province.color, province.kind, province.capital || '']),
       a: sharedAssignments,
     };
   };
@@ -640,13 +642,17 @@ export default function PakistanMapStudio() {
                   <div className="paint-color-grid">{PAINT_COLORS.map(color=><button key={color} className={color.toLowerCase()===province.color.toLowerCase()?'selected':''} style={{background:color}} onClick={()=>{setProvinceColor(province.id,color);setPaletteOpen(null)}} aria-label={`Use colour ${color}`}/>)}</div>
                   <label className="custom-color"><span>EDIT COLOUR</span><input type="color" value={province.color} aria-label={`Custom colour for ${province.name}`} onChange={e=>setProvinceColor(province.id,e.target.value)}/></label>
                 </div>}
-                <div className="name-editor"><input className="province-name" value={province.name} aria-label={`Map unit ${index + 1} name`} onChange={e => setProvinces(items => items.map(item => item.id === province.id ? { ...item, name: e.target.value } : item))}/></div>
+                <div className="unit-fields">
+                  <div className="name-editor"><input className="province-name" value={province.name} aria-label={`Map unit ${index + 1} name`} onChange={e => setProvinces(items => items.map(item => item.id === province.id ? { ...item, name: e.target.value } : item))}/></div>
+                  <label className="capital-editor"><span>Capital</span><input list="capital-options" value={province.capital || ''} placeholder="Select or type" aria-label={`Capital of ${province.name}`} onChange={e => setProvinces(items => items.map(item => item.id === province.id ? { ...item, capital: e.target.value } : item))}/></label>
+                </div>
                 <button className={`unit-kind ${province.kind}`} onClick={e => { e.stopPropagation(); setProvinces(items => items.map(item => item.id === province.id ? { ...item, kind: item.kind === 'province' ? 'territory' : 'province' } : item)); }} aria-label={`Set ${province.name} as ${province.kind === 'province' ? 'territory' : 'province'}`}>{province.kind}</button>
                 <span className="count">{count}</span>
                 <button className="remove-unit" disabled={provinces.length <= 1} onClick={e => { e.stopPropagation(); removeProvince(province.id); }} aria-label={`Delete ${province.name}`} title={provinces.length <= 1 ? 'At least one map unit is required' : `Delete ${province.name}`}><span className="trash-icon" aria-hidden="true"/></button>
               </div>;
             })}
           </div>
+          <datalist id="capital-options">{CITY_MARKERS.map(city => <option value={city.name} key={city.name}/>)}</datalist>
           <button className="add-province" onClick={addProvince}>＋ Add a map unit</button>
           <div className="tip"><b>TIP</b><span>Click and drag across neighbouring areas to paint faster.</span></div>
         </aside>
@@ -688,7 +694,7 @@ export default function PakistanMapStudio() {
         <aside className="summary-panel">
           <div className="eyebrow"><span>03</span> YOUR NEW MAP</div>
           {activeRow && <section className="live-vitals" style={{ '--province-color': activeRow.color } as React.CSSProperties}>
-            <div className="live-vitals-head"><div><small>{activeRow.kind}</small><h2>{activeRow.name}</h2></div><b>{activeRow.members.length}</b></div>
+            <div className="live-vitals-head"><div><small>{activeRow.kind}</small><h2>{activeRow.name}</h2>{activeRow.capital && <span>Capital · {activeRow.capital}</span>}</div><b>{activeRow.members.length}</b></div>
             {activeRow.members.length ? <><div className="live-vitals-grid"><span><b>{activeRow.population ? `${(activeRow.population/1_000_000).toFixed(2)}m` : '—'}</b>population</span><span><b>{activeRow.population && finalRows.reduce((sum,row)=>sum+row.population,0) ? `${(activeRow.population/finalRows.reduce((sum,row)=>sum+row.population,0)*100).toFixed(1)}%` : '—'}</b>mapped share</span><span><b>{activeRow.literacy==null?'—':`${activeRow.literacy.toFixed(1)}%`}</b>literacy</span><span><b>{activeRow.matricPlus==null?'—':`${activeRow.matricPlus.toFixed(1)}%`}</b>matric+</span><span><b>{activeRow.urbanShare==null?'—':`${activeRow.urbanShare.toFixed(1)}%`}</b>urban</span><span><b>{activeRow.consumption==null?'—':`Rs ${Math.round(activeRow.consumption).toLocaleString()}`}</b>consumption / person</span></div><button onClick={() => openProfile(activeRow.id)}>Open full profile ↗</button></> : <p>Paint {level} with {activeRow.name} to see its live statistics.</p>}
           </section>}
           <div className="big-stat"><strong>{provinces.length}</strong><span>MAP UNITS<br/>CREATED</span></div>
@@ -722,7 +728,7 @@ export default function PakistanMapStudio() {
           <div className="final-grid">
             {finalRows.filter(row => row.members.length).map((row, index) => <article key={row.id} style={{ '--province-color': row.color } as React.CSSProperties}>
               <div className="final-number">{String(index + 1).padStart(2, '0')}</div>
-              <div><div className="unit-heading"><div><h2>{row.name}</h2><button className="open-profile" onClick={() => openProfile(row.id)}>Open full profile ↗</button></div><span className="unit-type-line">{row.name} · {row.kind}</span></div>
+              <div><div className="unit-heading"><div><h2>{row.name}</h2><button className="open-profile" onClick={() => openProfile(row.id)}>Open full profile ↗</button></div><span className="unit-type-line">{row.kind}{row.capital ? ` · capital: ${row.capital}` : ' · capital not selected'}</span></div>
               <section className="metric-section overview-metrics"><h3>At a glance</h3><div className="final-metrics"><span><b>{row.members.length}</b>{level}</span><span><b>{Math.round(row.area).toLocaleString()}</b>km²</span><span><b>{row.population ? (row.population / 1_000_000).toFixed(2) + 'm' : '—'}</b>{level === 'tehsils' ? `estimated population${row.populationYear ? ` · ${row.populationYear}` : ' · mixed years'}` : `population${row.populationYear ? ` · ${row.populationYear}` : ' · mixed years'}`}</span><span><b>{row.urbanShare == null ? '—' : `${row.urbanShare.toFixed(1)}%`}</b>urban share</span></div></section>
               <section className="metric-section"><h3>Education</h3><div className="final-metrics"><span><b>{row.literacy == null ? '—' : `${level === 'tehsils' ? '≈' : ''}${row.literacy.toFixed(1)}%`}</b>literacy · 2023</span><span><b>{row.matricPlus == null ? '—' : `≈${row.matricPlus.toFixed(1)}%`}</b>matric or higher</span><span><b>{row.enrolment == null ? '—' : `≈${row.enrolment.toFixed(1)}%`}</b>net enrolment</span><span><b>{row.numeracy == null ? '—' : `≈${row.numeracy.toFixed(1)}%`}</b>numeracy</span>{level !== 'tehsils' && <span className="wide-metric"><b>{row.outOfSchool == null ? '—' : Math.round(row.outOfSchool).toLocaleString()}</b>children aged 5–16 out of school</span>}</div></section>
               <section className="metric-section"><h3>Economy &amp; living conditions</h3><div className="final-metrics"><span><b>{row.consumption == null ? '—' : `Rs ${Math.round(row.consumption).toLocaleString()}`}</b>monthly consumption / person</span><span><b>{row.lfpr == null ? '—' : `≈${row.lfpr.toFixed(1)}%`}</b>labor-force participation</span><span><b>{row.foodInsecurity == null ? '—' : `≈${row.foodInsecurity.toFixed(1)}%`}</b>food insecurity</span><span><b>{row.internet == null ? '—' : `≈${row.internet.toFixed(1)}%`}</b>internet users</span><span><b>{row.electricity == null ? '—' : `≈${row.electricity.toFixed(1)}%`}</b>electricity access</span>{level !== 'tehsils' ? <><span><b>{row.mpi == null ? '—' : row.mpi.toFixed(3)}</b>MPI · 2019–20</span><span><b>{row.unemployment == null ? '—' : `${row.unemployment.toFixed(1)}%`}</b>unemployment</span></> : <><span><b>{row.rwi == null ? '—' : `${row.rwi.toFixed(0)}th`}</b>wealth percentile</span><span><b>{row.nightLight == null ? '—' : row.nightLight.toFixed(2)}</b>night radiance · 2026</span></>}</div></section>

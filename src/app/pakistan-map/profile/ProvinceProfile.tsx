@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { completeRegionalPopulation2017, isRegionalPopulationDistrict, regionalDistrictPopulation2017 } from '../regional-population';
 
 type Kind = 'province' | 'territory';
-type Config = { n:string; l:'districts'|'tehsils'; p:[string,string,string,Kind?][]; a:[string,string,number][] };
+type Config = { n:string; l:'districts'|'tehsils'; p:[string,string,string,Kind?,string?][]; a:[string,string,number][] };
 type Feature = { properties:Record<string,string|number> };
 type District = { n:string; p:number|null; l:number|null; i:number|null; u:number|null; ur:number|null; lfpr:number|null; oos:number|null; mat:number|null; enrol:number|null; num:number|null; cons:number|null; fi:number|null; net:number|null; elec:number|null; mpi:number|null };
 type Darbar = { districts:Record<string,District> };
