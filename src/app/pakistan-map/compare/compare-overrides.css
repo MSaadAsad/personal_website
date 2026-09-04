@@ -9,6 +9,42 @@
   text-transform: uppercase;
 }
 
+.comparison-mode {
+  display: flex;
+  width: fit-content;
+  margin: -8px 0 28px;
+  border: 2px solid #6d7377;
+}
+
+.comparison-mode button {
+  min-height: 44px;
+  padding: 9px 16px;
+  border: 0;
+  border-right: 1px solid #6d7377;
+  background: #cececb;
+  color: #33383c;
+  font: 750 12px var(--font-mono), monospace;
+  cursor: pointer;
+}
+
+.comparison-mode button:last-child {
+  border-right: 0;
+}
+
+.comparison-mode button.selected {
+  background: var(--color-sky-accent);
+  color: #fff;
+}
+
+.comparison-note {
+  margin: 24px 0 0;
+  padding-top: 14px;
+  border-top: 1px solid #858a8d;
+  color: #464c50;
+  font-size: 11px;
+  line-height: 1.55;
+}
+
 .comparison-column-chart {
   display: grid;
   grid-template-columns: 60px minmax(0, 1fr);
