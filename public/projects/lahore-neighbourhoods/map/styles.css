@@ -196,3 +196,10 @@ dialog p { font:14px/1.6 ui-monospace,'SFMono-Regular',Menlo,monospace; }
 .map-loading-mark { border-color:#858b8f; border-top-color:#435267; border-radius:2px; }
 
 @media(max-width:720px){header{height:112px;padding:16px 18px}h1{font-size:31px}main{height:calc(100% - 112px)}.panel{bottom:14px;left:14px;right:14px;width:auto;max-height:46%;padding:17px;box-shadow:5px 5px 0 rgba(44,49,53,.72)}.map-loading{inset:112px 0 0}.quiet{min-height:44px;font-size:11px}.legend{top:14px;right:14px;bottom:auto}}
+
+/* Sky light behind the concrete slabs; the mesh sits over the map like the site's facade grid. */
+header { background:linear-gradient(180deg,#cbd7de 0%,#bec5c8 100%); }
+main::after { content:""; position:absolute; z-index:450; inset:0; pointer-events:none; background-image:linear-gradient(rgba(67,82,103,.09) 1px,transparent 1px),linear-gradient(90deg,rgba(67,82,103,.09) 1px,transparent 1px),linear-gradient(180deg,rgba(218,234,245,.16),transparent 38%); background-size:52px 52px,52px 52px,auto; }
+#map { background:#dce8ef; }
+.leaflet-tile { filter:grayscale(1) contrast(.78) brightness(1.12); }
+.panel { background:rgba(199,201,199,.94); }
