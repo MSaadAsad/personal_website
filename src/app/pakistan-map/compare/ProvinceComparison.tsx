@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { completeRegionalPopulation2017, REGIONAL_POPULATION_SOURCES, regionalDistrictPopulation2017 } from '../regional-population';
+import { buildTehsilDataLookup } from '../tehsil-data-match';
 
 type Level='districts'|'tehsils';
 type Kind='province'|'territory';
@@ -41,14 +42,14 @@ export default function ProvinceComparison(){
   const rows=useMemo<Row[]>(()=>{
     if(!config||!data)return[];
     const assigned=new Map(config.a.map(([id,,owner])=>[id,owner]));
-    const tehsils=new Map(data.tehsils.map(t=>[`${normalise(t.d)}:${normalise(t.n)}`,t]));
+    const tehsils=buildTehsilDataLookup(features,data.tehsils);
     return config.p.map(([id,name,color,kind],owner)=>{
       const members=features.filter(f=>assigned.get(String(f.properties[config.l==='districts'?'district_code':'tehsil_code']))===owner);
       let population=0,literate=0,literacyBase=0,urban=0,urbanBase=0,outOfSchool=0,oosMatches=0;
       const totals={matric:0,consumption:0,lfpr:0,food:0,internet:0,electricity:0,mpi:0};
       const bases={...totals};
       if(config.l==='districts')population+=members.reduce((sum,f)=>{const raw=normalise(f.properties.district_name);const key=aliases[raw]||raw;return data.districts[key]?sum:sum+(regionalDistrictPopulation2017(key)||0)},0);
-      members.forEach(f=>{const districtKey=aliases[normalise(f.properties.district_name)]||normalise(f.properties.district_name);const district=data.districts[districtKey];if(!district)return;const tehsil=config.l==='tehsils'?tehsils.get(`${districtKey}:${normalise(f.properties.tehsil_name)}`):null;const pop=config.l==='tehsils'?(tehsil?.p||0):(district.p||regionalDistrictPopulation2017(districtKey)||0);population+=pop;if(district.l!=null&&district.i!=null&&pop){literate+=district.l/(district.l+district.i)*pop;literacyBase+=pop}if(district.u!=null&&district.p&&pop){urban+=district.u/district.p*pop;urbanBase+=pop}if(config.l==='districts'&&district.oos!=null){outOfSchool+=district.oos;oosMatches++}const source:{[K in keyof typeof totals]:number|null}={matric:district.mat,consumption:district.cons,lfpr:district.lfpr,food:district.fi,internet:district.net,electricity:district.elec,mpi:district.mpi};(Object.keys(totals) as (keyof typeof totals)[]).forEach(k=>{if(source[k]!=null&&pop){totals[k]+=Number(source[k])*pop;bases[k]+=pop}})});
+      members.forEach(f=>{const districtKey=aliases[normalise(f.properties.district_name)]||normalise(f.properties.district_name);const district=data.districts[districtKey];const tehsil=config.l==='tehsils'?tehsils.get(String(f.properties.tehsil_code)):null;if(config.l==='districts'&&!district)return;const pop=config.l==='tehsils'?(tehsil?.p||0):(district?.p||regionalDistrictPopulation2017(districtKey)||0);population+=pop;if(!district)return;if(district.l!=null&&district.i!=null&&pop){literate+=district.l/(district.l+district.i)*pop;literacyBase+=pop}if(district.u!=null&&district.p&&pop){urban+=district.u/district.p*pop;urbanBase+=pop}if(config.l==='districts'&&district.oos!=null){outOfSchool+=district.oos;oosMatches++}const source:{[K in keyof typeof totals]:number|null}={matric:district.mat,consumption:district.cons,lfpr:district.lfpr,food:district.fi,internet:district.net,electricity:district.elec,mpi:district.mpi};(Object.keys(totals) as (keyof typeof totals)[]).forEach(k=>{if(source[k]!=null&&pop){totals[k]+=Number(source[k])*pop;bases[k]+=pop}})});
       const memberDistricts=new Set(members.map(f=>normalise(f.properties.district_name)));
       if(config.l==='districts')population+=completeRegionalPopulation2017(memberDistricts);else if(!population)population=completeRegionalPopulation2017(memberDistricts,true);
       const weighted=(k:keyof typeof totals)=>bases[k]?totals[k]/bases[k]:null;

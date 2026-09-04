@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { completeRegionalPopulation2017, isRegionalPopulationDistrict, regionalDistrictPopulation2017 } from './regional-population';
+import { buildTehsilDataLookup } from './tehsil-data-match';
 
 type Level = 'districts' | 'tehsils';
 type Props = Record<string, string | number>;
@@ -316,7 +317,7 @@ export default function PakistanMapStudio() {
 
   const provinceById = useMemo(() => Object.fromEntries(provinces.map(p => [p.id, p])), [provinces]);
   const assignmentCounts = useMemo(() => Object.values(assignments).reduce<Record<string, number>>((counts, id) => { counts[id] = (counts[id] || 0) + 1; return counts; }, {}), [assignments]);
-  const tehsilDataByKey = useMemo(() => new Map((darbar?.tehsils || []).map(row => [`${row.d}:${normalise(row.n)}`, row])), [darbar]);
+  const tehsilDataByFeatureId = useMemo(() => buildTehsilDataLookup(features, darbar?.tehsils || []), [darbar, features]);
   const paths = useMemo(() => features.map(feature => ({ feature, d: geometryPath(feature.geometry) })), [features]);
   const divisionPath = useMemo(() => divisionBoundaryPath(features), [features]);
   const matches = useMemo(() => query.trim() ? features.filter(f => `${featureName(f, level)} ${f.properties.district_name} ${f.properties.province_name}`.toLowerCase().includes(query.toLowerCase())).slice(0, 8) : [], [features, level, query]);
@@ -379,8 +380,7 @@ export default function PakistanMapStudio() {
         if (district.oos != null) { outOfSchool += district.oos; outOfSchoolMatches++; }
         addExtended(district, pop);
       } else {
-        const tehsilName = normalise(feature.properties.tehsil_name);
-        const tehsil = tehsilDataByKey.get(`${districtKey}:${tehsilName}`);
+        const tehsil = tehsilDataByFeatureId.get(featureId(feature, 'tehsils'));
         if (!tehsil) continue;
         dataMatches++;
         const pop = tehsil.p || 0; population += pop;
@@ -422,7 +422,7 @@ export default function PakistanMapStudio() {
       mpi: mpiBase ? weightedMpi / mpiBase : null,
       rwi: rwiBase ? weightedRwi / rwiBase : null,
       nightLight: nightLightBase ? weightedNightLight / nightLightBase : null };
-  }), [assembly, assignments, darbar, districtOwners, electionOwners, features, level, provinces, regionalAssembly, tehsilDataByKey]);
+  }), [assembly, assignments, darbar, districtOwners, electionOwners, features, level, provinces, regionalAssembly, tehsilDataByFeatureId]);
   const assignedArea = finalRows.reduce((sum, row) => sum + row.area, 0);
   const activeRow = finalRows.find(row => row.id === active);
   const countryPolitics = finalRows.filter(row => row.kind === 'province' && row.members.length).reduce((summary, row) => {
@@ -436,7 +436,7 @@ export default function PakistanMapStudio() {
   const selectedDistrictKeyRaw = selectedFeature ? normalise(selectedFeature.properties.district_name) : '';
   const selectedDistrictKey = DISTRICT_ALIASES[selectedDistrictKeyRaw] || selectedDistrictKeyRaw;
   const selectedDistrict = selectedDistrictKey ? darbar?.districts[selectedDistrictKey] : null;
-  const selectedTehsil = selectedFeature && level === 'tehsils' ? tehsilDataByKey.get(`${selectedDistrictKey}:${normalise(selectedFeature.properties.tehsil_name)}`) : null;
+  const selectedTehsil = selectedFeature && level === 'tehsils' ? tehsilDataByFeatureId.get(featureId(selectedFeature, 'tehsils')) : null;
   const rankedRows = useMemo(() => finalRows.filter(row => row.members.length && row[rankMetric] != null).sort((a, b) => Number(b[rankMetric]) - Number(a[rankMetric])), [finalRows, rankMetric]);
   const rankMaximum = Math.max(...rankedRows.map(row => Number(row[rankMetric])), 1);
   const formatRankValue = (value: number) => rankMetric === 'population' || rankMetric === 'outOfSchool'
