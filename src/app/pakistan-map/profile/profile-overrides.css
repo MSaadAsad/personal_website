@@ -9,3 +9,12 @@
   border-color: #315da8;
   color: #fff;
 }
+
+.profile-hero {
+  padding-top: 32px;
+}
+
+body:has(.profile-shell) nav a,
+body:has(.profile-shell) nav button {
+  color: #292d31;
+}
