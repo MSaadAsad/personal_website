@@ -14,7 +14,6 @@ type DistrictData = { n: string; p: number | null; l: number | null; i: number |
 type TehsilData = { n: string; d: string; p: number | null; r: number | null; nl: number | null };
 type DarbarData = { source: string; generated: string; methodology: string; districts: Record<string, DistrictData>; tehsils: TehsilData[] };
 type ElectionYear = 2018 | 2024;
-type PresetId = 'current' | 'preset-1';
 type AssemblyDistrict = { district: string; districts?: string[]; province: string; seats: number; parties: Record<string, number> };
 type AssemblyData = { election: string; year?: number; basis: string; source: string; districts: AssemblyDistrict[] };
 type RegionalAssemblyData = { generated: string; sources: Record<string, string>; notes: Record<string, string>; districts: { region: 'AJK' | 'GB'; district: string; parties: Record<string, number> }[] };
@@ -260,7 +259,6 @@ export default function PakistanMapStudio() {
   const [darbar, setDarbar] = useState<DarbarData | null>(null);
   const [assembly, setAssembly] = useState<AssemblyData | null>(null);
   const [electionYear, setElectionYear] = useState<ElectionYear>(2024);
-  const [selectedPreset, setSelectedPreset] = useState<PresetId>('current');
   const [regionalAssembly, setRegionalAssembly] = useState<RegionalAssemblyData | null>(null);
   const [paletteOpen, setPaletteOpen] = useState<string | null>(null);
   const svgRef = useRef<SVGSVGElement>(null);
@@ -498,8 +496,8 @@ export default function PakistanMapStudio() {
     localStorage.removeItem(`naya-naqsha-${level}`);
   };
 
-  const loadPreset = () => {
-    const isCurrent = selectedPreset === 'current';
+  const loadPreset = (preset: 'current' | 'preset-1') => {
+    const isCurrent = preset === 'current';
     const nextProvinces = isCurrent ? CURRENT_STRUCTURE : PRESET_1;
     setHistory(h => [...h, assignments]); setFuture([]);
     setProvinces(nextProvinces); setActive(nextProvinces[0].id);
@@ -568,12 +566,17 @@ export default function PakistanMapStudio() {
             <button className={level === 'tehsils' ? 'selected' : ''} onClick={() => setLevel('tehsils')}>Tehsils <b>577</b></button>
           </div>
           <div className="preset-control">
-            <label htmlFor="map-preset">Presets</label>
-            <div className="preset-actions">
-              <div className="preset-select"><select id="map-preset" value={selectedPreset} onChange={event => setSelectedPreset(event.target.value as PresetId)}><option value="current">Current structure — default</option><option value="preset-1">Preset 1 — proposed split</option></select><span aria-hidden="true">⌄</span></div>
-              <button type="button" onClick={loadPreset}>Load</button>
+            <h3>Presets</h3>
+            <div className="preset-list">
+              <button type="button" onClick={() => loadPreset('current')}>
+                <b>Current structure</b>
+                <small>Default · Punjab · Sindh · Khyber Pakhtunkhwa · Balochistan · federal territories</small>
+              </button>
+              <button type="button" onClick={() => loadPreset('preset-1')}>
+                <b>Preset 1</b>
+                <small>Proposed split · Karachi · South Punjab · Hazara</small>
+              </button>
             </div>
-            <small>{selectedPreset === 'current' ? 'Punjab · Sindh · Khyber Pakhtunkhwa · Balochistan · federal territories' : 'Karachi · South Punjab · Hazara'}</small>
           </div>
 
           <div className="eyebrow province-title"><span>02</span> YOUR MAP UNITS</div>
