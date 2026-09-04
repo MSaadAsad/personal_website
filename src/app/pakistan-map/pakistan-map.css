@@ -248,7 +248,7 @@
 .big-stat span { color:#44494d; font:700 13px/1.5 var(--font-mono),monospace; }
 .assignment-stat { padding:19px 0 23px; border-top:2px solid #8999a2; gap:12px; color:#414b51; font:600 13px var(--font-mono),monospace; }
 .assignment-stat>div { height:8px; background:#c2d0d7; border:1px solid #68757d; }
-.assignment-stat i { background:#435267; }
+.assignment-stat i { background:var(--color-sky-accent); }
 .summary-list { gap:11px; padding:18px 0; border-top:2px solid #8999a2; }
 .summary-list div,.unassigned { grid-template-columns:13px 1fr auto; gap:10px; min-height:38px; font-size:14px; }
 .summary-list i,.unassigned i { width:12px; height:12px; border-radius:2px; }
