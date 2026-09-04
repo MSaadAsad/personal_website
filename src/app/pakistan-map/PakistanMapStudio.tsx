@@ -30,6 +30,7 @@ const RANK_METRICS: { key: RankMetric; label: string; unit: string }[] = [
 ];
 
 const PALETTE = ['#ef6351', '#f4b942', '#48a9a6', '#5b70d6', '#a267c7', '#3c9d60', '#e27d3f', '#d85b8b'];
+const PAINT_COLORS = ['#000000','#464646','#787878','#b4b4b4','#ffffff','#880015','#ed1c24','#ff7f27','#fff200','#22b14c','#00a2e8','#3f48cc','#a349a4','#b97a57','#ffaec9','#ffc90e','#b5e61d','#99d9ea','#7092be','#c8bfe7','#65915f','#d99b42','#b76d57','#435267'];
 const CANONICAL: Province[] = [
   { id: 'punjab', name: 'Punjab', color: '#65915f', kind: 'province' },
   { id: 'south-punjab', name: 'South Punjab', color: '#d99b42', kind: 'province' },
@@ -148,6 +149,7 @@ export default function PakistanMapStudio() {
   const [darbar, setDarbar] = useState<DarbarData | null>(null);
   const [assembly, setAssembly] = useState<AssemblyData | null>(null);
   const [regionalAssembly, setRegionalAssembly] = useState<RegionalAssemblyData | null>(null);
+  const [paletteOpen, setPaletteOpen] = useState<string | null>(null);
   const svgRef = useRef<SVGSVGElement>(null);
   const hashLoaded = useRef(false);
   const pendingSharedAssignments = useRef<Record<string, string> | null>(null);
@@ -338,6 +340,8 @@ export default function PakistanMapStudio() {
     setHistory([]); setFuture([]);
   };
 
+  const setProvinceColor = (id: string, color: string) => setProvinces(items => items.map(item => item.id === id ? { ...item, color } : item));
+
   const clearMap = () => {
     setHistory(h => [...h, assignments]); setAssignments({}); setFuture([]);
     localStorage.removeItem(`naya-naqsha-${level}`);
@@ -413,7 +417,12 @@ export default function PakistanMapStudio() {
             {provinces.map((province, index) => {
               const count = assignmentCounts[province.id] || 0;
               return <div className={`province-row ${active === province.id ? 'active' : ''}`} key={province.id} onClick={() => setActive(province.id)}>
-                <label className="swatch" style={{ background: province.color }}><input type="color" value={province.color} aria-label={`${province.name} colour`} onChange={e => setProvinces(items => items.map(item => item.id === province.id ? { ...item, color: e.target.value } : item))}/></label>
+                <button className="swatch" style={{ background: province.color }} aria-label={`Choose ${province.name} colour`} aria-expanded={paletteOpen === province.id} onClick={e => { e.stopPropagation(); setPaletteOpen(open => open === province.id ? null : province.id); }}/>
+                {paletteOpen === province.id && <div className="paint-palette" onClick={e => e.stopPropagation()}>
+                  <div className="paint-palette-head"><span className="paint-wells"><i style={{background:province.color}}/><i/></span><b>COLOURS</b><button onClick={()=>setPaletteOpen(null)} aria-label="Close colour palette">×</button></div>
+                  <div className="paint-color-grid">{PAINT_COLORS.map(color=><button key={color} className={color.toLowerCase()===province.color.toLowerCase()?'selected':''} style={{background:color}} onClick={()=>{setProvinceColor(province.id,color);setPaletteOpen(null)}} aria-label={`Use colour ${color}`}/>)}</div>
+                  <label className="custom-color"><span>EDIT COLOUR</span><input type="color" value={province.color} aria-label={`Custom colour for ${province.name}`} onChange={e=>setProvinceColor(province.id,e.target.value)}/></label>
+                </div>}
                 <input className="province-name" value={province.name} aria-label={`Province ${index + 1} name`} onChange={e => setProvinces(items => items.map(item => item.id === province.id ? { ...item, name: e.target.value } : item))}/>
                 <button className={`unit-kind ${province.kind}`} onClick={e => { e.stopPropagation(); setProvinces(items => items.map(item => item.id === province.id ? { ...item, kind: item.kind === 'province' ? 'territory' : 'province' } : item)); }} aria-label={`Set ${province.name} as ${province.kind === 'province' ? 'territory' : 'province'}`}>{province.kind}</button>
                 <span className="count">{count}</span>
