@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { completeRegionalPopulation2017, isRegionalPopulationDistrict, regionalDistrictPopulation2017 } from './regional-population';
+import { completeRegionalPopulation2017, isRegionalPopulationDistrict, regionalDistrictPopulation2017, regionalSocialStats } from './regional-population';
 import { buildTehsilDataLookup } from './tehsil-data-match';
 
 type Level = 'divisions' | 'districts' | 'tehsils';
@@ -462,6 +462,10 @@ export default function PakistanMapStudio() {
     const memberDistricts = new Set(members.flatMap(feature => featureDistrictKeys(feature)));
     if (level !== 'tehsils') population += completeRegionalPopulation2017(memberDistricts);
     else if (!population) population = completeRegionalPopulation2017(memberDistricts, true);
+    const regionalSocial = level === 'tehsils' ? null : regionalSocialStats(memberDistricts);
+    if (regionalSocial?.literacy != null && regionalSocial.literacyWeight) { literate += regionalSocial.literacy / 100 * regionalSocial.literacyWeight; literacyBase += regionalSocial.literacyWeight; }
+    if (regionalSocial?.enrolment != null && regionalSocial.enrolmentWeight) { extended.enrol += regionalSocial.enrolment * regionalSocial.enrolmentWeight; extendedBase.enrol += regionalSocial.enrolmentWeight; }
+    if (regionalSocial?.urbanShare != null && regionalSocial.urbanWeight) { urban += regionalSocial.urbanShare / 100 * regionalSocial.urbanWeight; urbanBase += regionalSocial.urbanWeight; }
     const ownedElectionKeys = new Set(Object.entries(electionOwners).filter(([, owner]) => owner === province.id).map(([key]) => key));
     const partySeats: Record<string, number> = {};
     if (province.kind === 'province') assembly?.districts.filter(row => (row.districts || [row.district]).every(district => {
@@ -475,7 +479,7 @@ export default function PakistanMapStudio() {
     regionalAssembly?.districts.filter(row => Object.entries(districtOwners).some(([rawKey, owner]) => owner === province.id && (ELECTION_ALIASES[rawKey] || rawKey) === normalise(row.district))).forEach(row => { regionalRegions.add(row.region); Object.entries(row.parties).forEach(([party, seats]) => { regionalSeats[party] = (regionalSeats[party] || 0) + seats; }); });
     const regionalSeatCount = Object.values(regionalSeats).reduce((sum, seats) => sum + seats, 0);
     const populationYears = new Set([...memberDistricts].map(district => isRegionalPopulationDistrict(district) ? 2017 : 2023));
-    return { ...province, members, area, origins, dataMatches, dataUnitCount: level === 'tehsils' ? members.length : memberDistricts.size, population, populationYear: populationYears.size === 1 ? [...populationYears][0] : null, partySeats, electionSeats, senateSeats, regionalSeats, regionalSeatCount, regionalRegions: [...regionalRegions],
+    return { ...province, members, area, origins, dataMatches:dataMatches + (regionalSocial?.matchedDistricts || 0), dataUnitCount: level === 'tehsils' ? members.length : memberDistricts.size, population, populationYear: populationYears.size === 1 ? [...populationYears][0] : null, literacyYear:regionalSocial?.literacyYear || '2023', enrolmentYear:regionalSocial?.enrolmentYear || '2019–20', urbanYear:regionalSocial?.urbanYear || '2023', partySeats, electionSeats, senateSeats, regionalSeats, regionalSeatCount, regionalRegions: [...regionalRegions],
       literacy: literacyBase ? literate / literacyBase * 100 : null,
       urbanShare: urbanBase ? urban / urbanBase * 100 : null,
       unemployment: unemploymentBase ? weightedUnemployment / unemploymentBase : null,
@@ -547,12 +551,19 @@ export default function PakistanMapStudio() {
     });
     if (level === 'tehsils') population = tehsilPopulation;
     else population += completeRegionalPopulation2017(districtKeys);
+    const regionalSocial = level === 'tehsils' ? null : regionalSocialStats(districtKeys);
+    if (regionalSocial?.literacy != null && regionalSocial.literacyWeight) { literate += regionalSocial.literacy / 100 * regionalSocial.literacyWeight; literacyBase += regionalSocial.literacyWeight; }
+    if (regionalSocial?.urbanShare != null && regionalSocial.urbanWeight) { urban += regionalSocial.urbanShare / 100 * regionalSocial.urbanWeight; urbanBase += regionalSocial.urbanWeight; }
+    if (regionalSocial?.enrolment != null && regionalSocial.enrolmentWeight) { weightedTotals.enrol += regionalSocial.enrolment * regionalSocial.enrolmentWeight; weightedBases.enrol += regionalSocial.enrolmentWeight; }
     const weighted = (key: keyof typeof weightedTotals) => weightedBases[key] ? weightedTotals[key] / weightedBases[key] : null;
     const populationYears = new Set(districtKeys.map(key => isRegionalPopulationDistrict(key) ? 2017 : 2023));
     return {
       area,
       population: population || null,
       populationYear: populationYears.size === 1 ? [...populationYears][0] : null,
+      literacyYear: regionalSocial?.literacyYear || '2023',
+      enrolmentYear: regionalSocial?.enrolmentYear || '2019–20',
+      urbanYear: regionalSocial?.urbanYear || '2023',
       density: area && population ? population / area : null,
       literacy: literacyBase ? literate / literacyBase * 100 : null,
       urbanShare: urbanBase ? urban / urbanBase * 100 : null,
@@ -576,11 +587,11 @@ export default function PakistanMapStudio() {
     { value:selectedStats.area ? Math.round(selectedStats.area).toLocaleString() : '—', label:'area · km²' },
     { value:selectedStats.population == null ? '—' : Math.round(selectedStats.population).toLocaleString(), label:`total population${selectedStats.populationYear ? ` · ${selectedStats.populationYear}` : ''}` },
     { value:selectedStats.density == null ? '—' : Math.round(selectedStats.density).toLocaleString(), label:'population density · people / km²' },
-    { value:formatPercent(selectedStats.urbanShare), label:'urban share' },
-    { value:formatPercent(selectedStats.literacy), label:'literacy' },
+    { value:formatPercent(selectedStats.urbanShare), label:`urban share · ${selectedStats.urbanYear}` },
+    { value:formatPercent(selectedStats.literacy), label:`literacy · ${selectedStats.literacyYear}` },
     { value:formatPercent(selectedStats.matricPlus), label:'matric or higher' },
     { value:selectedStats.outOfSchool == null ? '—' : Math.round(selectedStats.outOfSchool).toLocaleString(), label:'children aged 5–16 out of school' },
-    { value:formatPercent(selectedStats.enrolment), label:'net enrolment' },
+    { value:formatPercent(selectedStats.enrolment), label:`net enrolment · ${selectedStats.enrolmentYear}` },
     { value:formatPercent(selectedStats.numeracy), label:'numeracy' },
     { value:formatPercent(selectedStats.lfpr), label:'labor-force participation' },
     { value:formatPercent(selectedStats.unemployment), label:'unemployment' },
@@ -832,7 +843,7 @@ export default function PakistanMapStudio() {
           <div className="unassigned"><i/>Unassigned <b>{features.length - totalAssigned}</b></div>
           <button className="clear" onClick={clearMap}>Clear map</button>
           <p className="source-note">Boundary data: <a href="https://github.com/abdullahumer1101/pkmapr" target="_blank" rel="noreferrer">pkmapr / OCHA</a>. Administrative boundaries and names may change.</p>
-          <p className="source-note">AJK population uses its government’s 2017 district table. GB uses its official 2017 total only when all current GB districts stay together; missing indicators remain blank, never zero.</p>
+          <p className="source-note">AJK uses government 2017 district population plus territory-wide PSLM 2019–20 literacy and primary enrolment. GB uses official 2017 census population, MICS 2016–17 district literacy, and territory-wide 2017 urban share / 2022 primary enrolment. Historical parent figures appear only when all successor districts stay together; missing indicators remain blank, never zero.</p>
         </aside>
       </section>
       {finalized && <div className="final-overlay" role="dialog" aria-modal="true" aria-labelledby="final-title" onMouseDown={e => e.target === e.currentTarget && setFinalized(false)}>
@@ -858,8 +869,8 @@ export default function PakistanMapStudio() {
             {finalRows.filter(row => row.members.length).map((row, index) => <article key={row.id} style={{ '--province-color': row.color } as React.CSSProperties}>
               <div className="final-number">{String(index + 1).padStart(2, '0')}</div>
               <div><div className="unit-heading"><div><h2>{row.name}</h2><button className="open-profile" onClick={() => openProfile(row.id)}>Open full profile ↗</button></div><span className="unit-type-line">{row.kind}{row.capital ? ` · capital: ${row.capital}` : ' · capital not selected'}</span></div>
-              <section className="metric-section overview-metrics"><h3>At a glance</h3><div className="final-metrics"><span><b>{row.members.length}</b>{level}</span><span><b>{Math.round(row.area).toLocaleString()}</b>km²</span><span><b>{row.population ? (row.population / 1_000_000).toFixed(2) + 'm' : '—'}</b>{level === 'tehsils' ? `estimated population${row.populationYear ? ` · ${row.populationYear}` : ' · mixed years'}` : `population${row.populationYear ? ` · ${row.populationYear}` : ' · mixed years'}`}</span><span><b>{row.urbanShare == null ? '—' : `${row.urbanShare.toFixed(1)}%`}</b>urban share</span></div></section>
-              <section className="metric-section"><h3>Education</h3><div className="final-metrics"><span><b>{row.literacy == null ? '—' : `${level === 'tehsils' ? '≈' : ''}${row.literacy.toFixed(1)}%`}</b>literacy · 2023</span><span><b>{row.matricPlus == null ? '—' : `≈${row.matricPlus.toFixed(1)}%`}</b>matric or higher</span><span><b>{row.enrolment == null ? '—' : `≈${row.enrolment.toFixed(1)}%`}</b>net enrolment</span><span><b>{row.numeracy == null ? '—' : `≈${row.numeracy.toFixed(1)}%`}</b>numeracy</span>{level !== 'tehsils' && <span className="wide-metric"><b>{row.outOfSchool == null ? '—' : Math.round(row.outOfSchool).toLocaleString()}</b>children aged 5–16 out of school</span>}</div></section>
+              <section className="metric-section overview-metrics"><h3>At a glance</h3><div className="final-metrics"><span><b>{row.members.length}</b>{level}</span><span><b>{Math.round(row.area).toLocaleString()}</b>km²</span><span><b>{row.population ? (row.population / 1_000_000).toFixed(2) + 'm' : '—'}</b>{level === 'tehsils' ? `estimated population${row.populationYear ? ` · ${row.populationYear}` : ' · mixed years'}` : `population${row.populationYear ? ` · ${row.populationYear}` : ' · mixed years'}`}</span><span><b>{row.urbanShare == null ? '—' : `${row.urbanShare.toFixed(1)}%`}</b>urban share · {row.urbanYear}</span></div></section>
+              <section className="metric-section"><h3>Education</h3><div className="final-metrics"><span><b>{row.literacy == null ? '—' : `${level === 'tehsils' ? '≈' : ''}${row.literacy.toFixed(1)}%`}</b>literacy · {row.literacyYear}</span><span><b>{row.matricPlus == null ? '—' : `≈${row.matricPlus.toFixed(1)}%`}</b>matric or higher</span><span><b>{row.enrolment == null ? '—' : `≈${row.enrolment.toFixed(1)}%`}</b>net enrolment · {row.enrolmentYear}</span><span><b>{row.numeracy == null ? '—' : `≈${row.numeracy.toFixed(1)}%`}</b>numeracy</span>{level !== 'tehsils' && <span className="wide-metric"><b>{row.outOfSchool == null ? '—' : Math.round(row.outOfSchool).toLocaleString()}</b>children aged 5–16 out of school</span>}</div></section>
               <section className="metric-section"><h3>Economy &amp; living conditions</h3><div className="final-metrics"><span><b>{row.consumption == null ? '—' : `Rs ${Math.round(row.consumption).toLocaleString()}`}</b>monthly consumption / person</span><span><b>{row.lfpr == null ? '—' : `≈${row.lfpr.toFixed(1)}%`}</b>labor-force participation</span><span><b>{row.foodInsecurity == null ? '—' : `≈${row.foodInsecurity.toFixed(1)}%`}</b>food insecurity</span><span><b>{row.internet == null ? '—' : `≈${row.internet.toFixed(1)}%`}</b>internet users</span><span><b>{row.electricity == null ? '—' : `≈${row.electricity.toFixed(1)}%`}</b>electricity access</span>{level !== 'tehsils' ? <><span><b>{row.mpi == null ? '—' : row.mpi.toFixed(3)}</b>MPI · 2019–20</span><span><b>{row.unemployment == null ? '—' : `${row.unemployment.toFixed(1)}%`}</b>unemployment</span></> : <><span><b>{row.rwi == null ? '—' : `${row.rwi.toFixed(0)}th`}</b>wealth percentile</span><span><b>{row.nightLight == null ? '—' : row.nightLight.toFixed(2)}</b>night radiance · 2026</span></>}</div></section>
               <div className="origin-bar">{row.origins.map(([origin, count]) => <i key={origin} style={{ width: `${count / row.members.length * 100}%` }} title={`${origin}: ${count}`}/>)}</div>
               <p>Drawn from {row.origins.map(([origin, count]) => `${count} ${origin}`).join(' · ')} · Data matched for {row.dataMatches}/{row.dataUnitCount} source units</p>

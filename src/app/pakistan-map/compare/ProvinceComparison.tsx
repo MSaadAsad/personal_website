@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { completeRegionalPopulation2017, REGIONAL_POPULATION_SOURCES, regionalDistrictPopulation2017 } from '../regional-population';
+import { completeRegionalPopulation2017, REGIONAL_POPULATION_SOURCES, regionalDistrictPopulation2017, regionalSocialStats } from '../regional-population';
 import { buildTehsilDataLookup } from '../tehsil-data-match';
 
 type Level='districts'|'tehsils';
@@ -58,6 +58,9 @@ export default function ProvinceComparison(){
       members.forEach(f=>{const districtKey=aliases[normalise(f.properties.district_name)]||normalise(f.properties.district_name);const district=data.districts[districtKey];const tehsil=config.l==='tehsils'?tehsils.get(String(f.properties.tehsil_code)):null;if(config.l==='districts'&&!district)return;const pop=config.l==='tehsils'?(tehsil?.p||0):(district?.p||regionalDistrictPopulation2017(districtKey)||0);population+=pop;if(!district)return;if(district.l!=null&&district.i!=null&&pop){literate+=district.l/(district.l+district.i)*pop;literacyBase+=pop}if(district.u!=null&&district.p&&pop){urban+=district.u/district.p*pop;urbanBase+=pop}if(config.l==='districts'&&district.oos!=null){outOfSchool+=district.oos;oosMatches++}const source:{[K in keyof typeof totals]:number|null}={matric:district.mat,consumption:district.cons,lfpr:district.lfpr,food:district.fi,internet:district.net,electricity:district.elec,mpi:district.mpi};(Object.keys(totals) as (keyof typeof totals)[]).forEach(k=>{if(source[k]!=null&&pop){totals[k]+=Number(source[k])*pop;bases[k]+=pop}})});
       const memberDistricts=new Set(members.map(f=>normalise(f.properties.district_name)));
       if(config.l==='districts')population+=completeRegionalPopulation2017(memberDistricts);else if(!population)population=completeRegionalPopulation2017(memberDistricts,true);
+      const regionalSocial=config.l==='districts'?regionalSocialStats(memberDistricts):null;
+      if(regionalSocial?.literacy!=null&&regionalSocial.literacyWeight){literate+=regionalSocial.literacy/100*regionalSocial.literacyWeight;literacyBase+=regionalSocial.literacyWeight}
+      if(regionalSocial?.urbanShare!=null&&regionalSocial.urbanWeight){urban+=regionalSocial.urbanShare/100*regionalSocial.urbanWeight;urbanBase+=regionalSocial.urbanWeight}
       const weighted=(k:keyof typeof totals)=>bases[k]?totals[k]/bases[k]:null;
       return{id,name,color,kind:kind||'province',members:members.length,population:population||null,literacy:literacyBase?literate/literacyBase*100:null,urban:urbanBase?urban/urbanBase*100:null,matric:weighted('matric'),outOfSchool:oosMatches?outOfSchool:null,consumption:weighted('consumption'),lfpr:weighted('lfpr'),food:weighted('food'),internet:weighted('internet'),electricity:weighted('electricity'),mpi:weighted('mpi')};
     }).filter(r=>r.members);
@@ -111,6 +114,6 @@ export default function ProvinceComparison(){
       {perCapita&&ranked.length>0&&<p className="comparison-note">Calculated from out-of-school children divided by total 2023 population. This is per 1,000 residents, not per 1,000 children aged 5–16.</p>}
       {unavailable.length>0&&<p className="comparison-note"><b>No comparable {meta.label.toLowerCase()} data:</b> {unavailable.map(row=>row.name).join(', ')}. {metric==='population'?'AJK has district-level 2017 figures; the GB total can only be used when all 14 current map districts remain together because the 2017 census used an older district structure.':'These units are omitted from the chart rather than plotted as zero.'}</p>}
     </section>
-    <footer><span>Population fallback sources: <a href={REGIONAL_POPULATION_SOURCES.ajk} target="_blank" rel="noreferrer">AJK Government district table (2017) ↗</a> · <a href={REGIONAL_POPULATION_SOURCES.gb} target="_blank" rel="noreferrer">GB at a Glance / Census 2017 ↗</a>. Unavailable indicators are omitted, never treated as zero.</span><button onClick={()=>navigator.clipboard.writeText(location.href)}>Copy comparison link</button></footer>
+    <footer><span>Regional sources: <a href={REGIONAL_POPULATION_SOURCES.ajk} target="_blank" rel="noreferrer">AJK population (2017) ↗</a> · <a href={REGIONAL_POPULATION_SOURCES.ajkSocial} target="_blank" rel="noreferrer">AJK literacy / primary enrolment (PSLM 2019–20) ↗</a> · <a href={REGIONAL_POPULATION_SOURCES.gb} target="_blank" rel="noreferrer">GB population / urban share (2017), literacy (MICS 2016–17), primary enrolment (2022) ↗</a>. Historical parent figures require all successor districts; unavailable indicators are omitted, never treated as zero.</span><button onClick={()=>navigator.clipboard.writeText(location.href)}>Copy comparison link</button></footer>
   </main>;
 }
