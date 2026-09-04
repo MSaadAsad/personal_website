@@ -20,6 +20,7 @@ type AssemblyDistrict = { district: string; districts?: string[]; province: stri
 type AssemblyData = { election: string; year?: number; basis: string; source: string; districts: AssemblyDistrict[] };
 type RegionalAssemblyData = { generated: string; sources: Record<string, string>; notes: Record<string, string>; districts: { region: 'AJK' | 'GB'; district: string; parties: Record<string, number> }[] };
 type RankMetric = 'population' | 'literacy' | 'matricPlus' | 'outOfSchool' | 'consumption' | 'lfpr' | 'foodInsecurity' | 'internet' | 'electricity' | 'mpi';
+type InspectMetric = 'allocation' | 'population' | 'density' | 'growthRate' | 'householdSize' | 'under15Share' | 'workingAgeShare' | 'dependencyRatio' | 'literacy' | 'urbanShare' | 'matricPlus' | 'outOfSchool' | 'consumption' | 'lfpr' | 'foodInsecurity' | 'internet' | 'electricity' | 'mpi' | 'improvedWater' | 'waterInside' | 'flushToilet' | 'noToilet' | 'ownedHousing' | 'oneRoomHousing';
 type CityMarker = { name: string; lon: number; lat: number; tier: 1 | 2; dx?: number; dy?: number; anchor?: 'start' | 'middle' | 'end' };
 
 const RANK_METRICS: { key: RankMetric; label: string; unit: string }[] = [
@@ -33,6 +34,32 @@ const RANK_METRICS: { key: RankMetric; label: string; unit: string }[] = [
   { key: 'internet', label: 'Internet users', unit: '%' },
   { key: 'electricity', label: 'Electricity access', unit: '%' },
   { key: 'mpi', label: 'Multidimensional poverty', unit: 'MPI' },
+];
+const INSPECT_METRICS: { key: InspectMetric; label: string; unit: string; scale: 'allocation' | 'percent' | 'index' | 'observed' }[] = [
+  { key:'allocation', label:'Province allocation', unit:'', scale:'allocation' },
+  { key:'population', label:'Population', unit:'people', scale:'observed' },
+  { key:'density', label:'Population density', unit:'people / km²', scale:'observed' },
+  { key:'growthRate', label:'Annual population growth', unit:'%', scale:'observed' },
+  { key:'householdSize', label:'Average household size', unit:'people / household', scale:'observed' },
+  { key:'under15Share', label:'Population under 15', unit:'%', scale:'percent' },
+  { key:'workingAgeShare', label:'Working-age population', unit:'%', scale:'percent' },
+  { key:'dependencyRatio', label:'Age dependency ratio', unit:'per 100 working-age', scale:'percent' },
+  { key:'literacy', label:'Literacy', unit:'%', scale:'percent' },
+  { key:'urbanShare', label:'Urban share', unit:'%', scale:'percent' },
+  { key:'matricPlus', label:'Matric or higher', unit:'%', scale:'percent' },
+  { key:'outOfSchool', label:'Out of school', unit:'children', scale:'observed' },
+  { key:'consumption', label:'Monthly consumption', unit:'Rs / person', scale:'observed' },
+  { key:'lfpr', label:'Labor-force participation', unit:'%', scale:'percent' },
+  { key:'foodInsecurity', label:'Food insecurity', unit:'%', scale:'percent' },
+  { key:'internet', label:'Internet users', unit:'%', scale:'percent' },
+  { key:'electricity', label:'Electricity access', unit:'%', scale:'percent' },
+  { key:'mpi', label:'Multidimensional poverty', unit:'MPI', scale:'index' },
+  { key:'improvedWater', label:'Improved drinking water', unit:'% households', scale:'percent' },
+  { key:'waterInside', label:'Water inside the home', unit:'% households', scale:'percent' },
+  { key:'flushToilet', label:'Flush toilet', unit:'% households', scale:'percent' },
+  { key:'noToilet', label:'No toilet', unit:'% households', scale:'percent' },
+  { key:'ownedHousing', label:'Owner-occupied housing', unit:'% households', scale:'percent' },
+  { key:'oneRoomHousing', label:'One-room housing', unit:'% households', scale:'percent' },
 ];
 
 const PALETTE = ['#ef6351', '#f4b942', '#48a9a6', '#5b70d6', '#a267c7', '#3c9d60', '#e27d3f', '#d85b8b'];
@@ -318,6 +345,8 @@ export default function PakistanMapStudio() {
   const [hovered, setHovered] = useState<Feature | null>(null);
   const [painting, setPainting] = useState(false);
   const [toolMode, setToolMode] = useState<'paint' | 'inspect'>('paint');
+  const [inspectMetric, setInspectMetric] = useState<InspectMetric>('allocation');
+  const [inspectMetricOpen, setInspectMetricOpen] = useState(false);
   const [mapView, setMapView] = useState({ x: 0, y: 0, width: WIDTH, height: HEIGHT });
   const [selectedFeature, setSelectedFeature] = useState<Feature | null>(null);
   const [finalized, setFinalized] = useState(false);
@@ -378,8 +407,8 @@ export default function PakistanMapStudio() {
     setHistory([]); setFuture([]);
   }, [level]);
 
-  useEffect(() => { if (hasAssignments && !darbar) fetch('/data/pakistan-map/datadarbar.json').then(r => r.json()).then(setDarbar).catch(() => setDarbar(null)); }, [darbar, hasAssignments]);
-  useEffect(() => { if ((hasAssignments || selectedFeature) && !censusDetail) fetch('/data/pakistan-map/census-2023-detail.json').then(r => r.json()).then(setCensusDetail).catch(() => setCensusDetail(null)); }, [censusDetail, hasAssignments, selectedFeature]);
+  useEffect(() => { if ((hasAssignments || toolMode === 'inspect') && !darbar) fetch('/data/pakistan-map/datadarbar.json').then(r => r.json()).then(setDarbar).catch(() => setDarbar(null)); }, [darbar, hasAssignments, toolMode]);
+  useEffect(() => { if ((hasAssignments || toolMode === 'inspect') && !censusDetail) fetch('/data/pakistan-map/census-2023-detail.json').then(r => r.json()).then(setCensusDetail).catch(() => setCensusDetail(null)); }, [censusDetail, hasAssignments, toolMode]);
   useEffect(() => {
     if (!finalized) return;
     let cancelled = false;
@@ -515,13 +544,12 @@ export default function PakistanMapStudio() {
   }, { assembly:{} as Record<string,number>, senate:{} as Record<string,number>, provinces:0 });
   const countryAssemblySeats = Object.values(countryPolitics.assembly).reduce((sum,seats)=>sum+seats,0);
   const countrySenateSeats = Object.values(countryPolitics.senate).reduce((sum,seats)=>sum+seats,0);
-  const selectedTehsil = selectedFeature && level === 'tehsils' ? tehsilDataByFeatureId.get(featureId(selectedFeature, 'tehsils')) : null;
-  const selectedStats = useMemo(() => {
-    if (!selectedFeature) return null;
-    const districtKeys = featureDistrictKeys(selectedFeature).map(key => DISTRICT_ALIASES[key] || key);
+  const statsForFeature = useCallback((feature: Feature) => {
+    const selectedTehsil = level === 'tehsils' ? tehsilDataByFeatureId.get(featureId(feature, 'tehsils')) : null;
+    const districtKeys = featureDistrictKeys(feature).map(key => DISTRICT_ALIASES[key] || key);
     const census = level === 'tehsils' ? null : aggregateCensus(districtKeys, censusDetail);
     const districtRows = districtKeys.map(key => ({ key, data: darbar?.districts[key] }));
-    const area = Number(selectedFeature.properties.area_km2 || 0);
+    const area = Number(feature.properties.area_km2 || 0);
     const tehsilPopulation = selectedTehsil?.p || 0;
     let population = 0, literate = 0, literacyBase = 0, urban = 0, urbanBase = 0;
     let outOfSchool = 0, outOfSchoolMatches = 0;
@@ -592,7 +620,8 @@ export default function PakistanMapStudio() {
       nightLight: selectedTehsil?.nl ?? null,
       census,
     };
-  }, [censusDetail, darbar, level, selectedFeature, selectedTehsil]);
+  }, [censusDetail, darbar, level, tehsilDataByFeatureId]);
+  const selectedStats = useMemo(() => selectedFeature ? statsForFeature(selectedFeature) : null, [selectedFeature, statsForFeature]);
   const formatPercent = (value: number | null) => value == null ? '—' : `${value.toFixed(1)}%`;
   const inspectStats = selectedStats ? [
     { value:selectedStats.area ? Math.round(selectedStats.area).toLocaleString() : '—', label:'area · km²' },
@@ -631,6 +660,27 @@ export default function PakistanMapStudio() {
       { value:selectedStats.nightLight == null ? '—' : selectedStats.nightLight.toFixed(2), label:'night radiance' },
     ] : []),
   ] : [];
+  const inspectMetricMeta = INSPECT_METRICS.find(item => item.key === inspectMetric) || INSPECT_METRICS[0];
+  const inspectValue = useCallback((feature: Feature): number | null => {
+    if (inspectMetric === 'allocation') return null;
+    const stats = statsForFeature(feature);
+    if (inspectMetric === 'growthRate' || inspectMetric === 'householdSize' || inspectMetric === 'under15Share' || inspectMetric === 'workingAgeShare' || inspectMetric === 'dependencyRatio' || inspectMetric === 'improvedWater' || inspectMetric === 'waterInside' || inspectMetric === 'flushToilet' || inspectMetric === 'noToilet' || inspectMetric === 'ownedHousing' || inspectMetric === 'oneRoomHousing') {
+      return stats.census?.[inspectMetric] ?? null;
+    }
+    return stats[inspectMetric] ?? null;
+  }, [inspectMetric, statsForFeature]);
+  const inspectValues = useMemo(() => new Map(features.map(feature => [featureId(feature, level), inspectValue(feature)])), [features, inspectValue, level]);
+  const inspectMaximum = useMemo(() => {
+    if (inspectMetricMeta.scale === 'percent') return 100;
+    if (inspectMetricMeta.scale === 'index') return 1;
+    return Math.max(1, ...[...inspectValues.values()].filter((value): value is number => value != null));
+  }, [inspectMetricMeta.scale, inspectValues]);
+  const formatInspectValue = (value:number|null) => value == null ? 'Unavailable'
+    : inspectMetric === 'population' || inspectMetric === 'density' || inspectMetric === 'outOfSchool' ? Math.round(value).toLocaleString()
+    : inspectMetric === 'consumption' ? `Rs ${Math.round(value).toLocaleString()}`
+    : inspectMetric === 'mpi' ? value.toFixed(3)
+    : inspectMetric === 'householdSize' ? value.toFixed(1)
+    : `${value.toFixed(1)}%`;
   const rankedRows = useMemo(() => finalRows.filter(row => row.members.length && row[rankMetric] != null).sort((a, b) => Number(b[rankMetric]) - Number(a[rankMetric])), [finalRows, rankMetric]);
   const rankMaximum = Math.max(...rankedRows.map(row => Number(row[rankMetric])), 1);
   const formatRankValue = (value: number) => rankMetric === 'population' || rankMetric === 'outOfSchool'
@@ -869,16 +919,24 @@ export default function PakistanMapStudio() {
             <div className="search-wrap"><span>⌕</span><input value={query} onChange={e => setQuery(e.target.value)} placeholder={`Find a ${level === 'divisions' ? 'division' : level === 'districts' ? 'district' : 'tehsil'}…`} aria-label="Search areas"/>
               {matches.length > 0 && <div className="search-results">{matches.map(f => <button key={featureId(f, level)} onClick={() => { setHovered(f); setSelectedFeature(f); setToolMode('inspect'); setQuery(''); }}>{featureName(f, level)}<small>{String(f.properties.district_name)} · {String(f.properties.province_name)}</small></button>)}</div>}
             </div>
-            <div className="map-tools" role="group" aria-label="Map interaction mode"><button className={toolMode === 'paint' ? 'selected' : ''} onClick={() => { setToolMode('paint'); setSelectedFeature(null); }}>Paint</button><button className={toolMode === 'inspect' ? 'selected' : ''} onClick={() => setToolMode('inspect')}>Inspect</button></div>
+            <div className="map-tools" role="group" aria-label="Map interaction mode"><button className={toolMode === 'paint' ? 'selected' : ''} onClick={() => { setToolMode('paint'); setSelectedFeature(null); setInspectMetricOpen(false); }}>Paint</button><button className={toolMode === 'inspect' ? 'selected' : ''} onClick={() => setToolMode('inspect')}>Inspect</button></div>
           </div>
           <div className="map-paper">
+            {toolMode === 'inspect' && <div className={`inspect-map-picker ${inspectMetricOpen ? 'open' : ''}`}>
+              <span>INSPECT MAP</span>
+              <button type="button" aria-haspopup="listbox" aria-expanded={inspectMetricOpen} onClick={() => setInspectMetricOpen(open => !open)}><b>{inspectMetricMeta.label}</b><i>{inspectMetricOpen ? '×' : '⌄'}</i></button>
+              {inspectMetricOpen && <div role="listbox" className="inspect-map-menu">{INSPECT_METRICS.map((item,index) => <button type="button" role="option" aria-selected={item.key === inspectMetric} className={item.key === inspectMetric ? 'selected' : ''} key={item.key} onClick={() => { setInspectMetric(item.key); setInspectMetricOpen(false); }}><span>{String(index + 1).padStart(2,'0')}</span><b>{item.label}</b>{item.key === inspectMetric && <i>✓</i>}</button>)}</div>}
+            </div>}
             {!features.length && <div className="loading">Drawing boundaries…</div>}
             <svg ref={svgRef} viewBox={`${mapView.x} ${mapView.y} ${mapView.width} ${mapView.height}`} role="img" aria-label={`Interactive map of Pakistan ${level}`} onWheel={e=>{e.preventDefault();const rect=e.currentTarget.getBoundingClientRect();zoomMap(e.deltaY>0?1.16:.86,(e.clientX-rect.left)/rect.width,(e.clientY-rect.top)/rect.height)}} onPointerDown={e=>{if(!(e.shiftKey||e.button===1||e.target===e.currentTarget))return;e.currentTarget.setPointerCapture(e.pointerId);panRef.current={pointerId:e.pointerId,clientX:e.clientX,clientY:e.clientY,view:mapView}}} onPointerMove={e=>{const pan=panRef.current;if(!pan||pan.pointerId!==e.pointerId)return;const rect=e.currentTarget.getBoundingClientRect();const x=Math.max(0,Math.min(WIDTH-pan.view.width,pan.view.x-(e.clientX-pan.clientX)/rect.width*pan.view.width));const y=Math.max(0,Math.min(HEIGHT-pan.view.height,pan.view.y-(e.clientY-pan.clientY)/rect.height*pan.view.height));setMapView({...pan.view,x,y})}} onPointerUp={e=>{if(panRef.current?.pointerId===e.pointerId)panRef.current=null}} onPointerCancel={()=>{panRef.current=null}}>
               <g fillRule="evenodd">
                 {paths.map(({ feature, d }) => {
                   const id = featureId(feature, level); const province = provinceById[assignments[id]];
                   const highlighted = hovered && featureId(hovered, level) === id;
-                  return <path key={id} d={d} fill={province?.color || '#e8e1d5'} className={`${level === 'divisions' ? 'region division-region' : 'region'}${highlighted ? ' highlighted' : ''}`} onPointerDown={e => { if (e.shiftKey||e.button===1) return; if (toolMode === 'inspect') { setSelectedFeature(feature); setPainting(false); return; } e.currentTarget.setPointerCapture(e.pointerId); setPainting(true); paint(feature); }} onPointerEnter={() => { setHovered(feature); if (painting && toolMode === 'paint') paint(feature); }} onPointerMove={() => painting && toolMode === 'paint' && paint(feature)} onPointerUp={() => setPainting(false)}/>;
+                  const metricValue = toolMode === 'inspect' && inspectMetric !== 'allocation' ? inspectValues.get(id) ?? null : null;
+                  const metricDepth = metricValue == null ? 1 : .18 + .82 * Math.max(0, Math.min(1, metricValue / inspectMaximum));
+                  const metricMapActive = toolMode === 'inspect' && inspectMetric !== 'allocation';
+                  return <path key={id} d={d} fill={metricMapActive ? metricValue == null ? '#e8e1d5' : '#4c7bd9' : province?.color || '#e8e1d5'} fillOpacity={metricMapActive ? metricDepth : 1} className={`${level === 'divisions' ? 'region division-region' : 'region'}${highlighted ? ' highlighted' : ''}`} onPointerDown={e => { if (e.shiftKey||e.button===1) return; if (toolMode === 'inspect') { setSelectedFeature(feature); setPainting(false); return; } e.currentTarget.setPointerCapture(e.pointerId); setPainting(true); paint(feature); }} onPointerEnter={() => { setHovered(feature); if (painting && toolMode === 'paint') paint(feature); }} onPointerMove={() => painting && toolMode === 'paint' && paint(feature)} onPointerUp={() => setPainting(false)}><title>{metricMapActive ? `${inspectMetricMeta.label}: ${formatInspectValue(metricValue)}${metricValue != null && inspectMetricMeta.unit ? ` ${inspectMetricMeta.unit}` : ''}` : featureName(feature, level)}</title></path>;
                 })}
               </g>
               {divisionPath && <path className="division-boundaries" d={divisionPath}/>}
