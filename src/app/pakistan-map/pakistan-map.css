@@ -216,8 +216,6 @@
 .city-layer { pointer-events:none; }
 .city-halo { fill:#f2f5f5; stroke:#2d5fae; stroke-width:1.5; vector-effect:non-scaling-stroke; }
 .city-dot { fill:#2d5fae; stroke:#172536; stroke-width:.7; vector-effect:non-scaling-stroke; }
-.city-marker text { fill:#20272d; stroke:rgba(238,242,241,.94); stroke-width:2.6px; paint-order:stroke fill; font:700 8px var(--font-mono),monospace; letter-spacing:.01em; }
-.city-tier-2 text { font-size:7px; font-weight:650; }
 .north { right:22px; top:22px; color:#383d41; font:700 14px var(--font-mono),monospace; }
 .north span { color:#303840; font-size:34px; }
 .loading { color:#42474b; font:700 14px var(--font-mono),monospace; }
