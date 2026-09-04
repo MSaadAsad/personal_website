@@ -256,25 +256,29 @@
 }
 
 .depth-ranking li {
+  display: block;
+  padding: 12px 0;
+  border-bottom: 1px solid #858a8d;
+}
+
+.depth-rank-main {
   display: grid;
   grid-template-columns: 32px minmax(0,1fr) auto;
   align-items: center;
   gap: 10px;
-  min-height: 58px;
-  border-bottom: 1px solid #858a8d;
 }
 
-.depth-ranking li > span {
+.depth-rank-main > span {
   color: #5b6165;
   font-size: 10px;
 }
 
-.depth-ranking li > b {
+.depth-rank-main > b {
   min-width: 0;
   font-size: 13px;
 }
 
-.depth-ranking li > b em {
+.depth-rank-main > b em {
   display: block;
   margin-top: 3px;
   color: #5b6165;
@@ -284,9 +288,23 @@
   text-transform: uppercase;
 }
 
-.depth-ranking li > strong {
+.depth-rank-main > strong {
   font-size: 14px;
   text-align: right;
+}
+
+.depth-rank-bar {
+  display: block;
+  height: 8px;
+  margin: 9px 0 0 42px;
+  border: 1px solid #73797d;
+  background: #aeb2b3;
+}
+
+.depth-rank-bar i {
+  display: block;
+  height: 100%;
+  background: var(--color-sky-accent);
 }
 
 .comparison-column-chart {

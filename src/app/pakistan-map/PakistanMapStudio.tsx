@@ -502,10 +502,98 @@ export default function PakistanMapStudio() {
   }, { assembly:{} as Record<string,number>, senate:{} as Record<string,number>, provinces:0 });
   const countryAssemblySeats = Object.values(countryPolitics.assembly).reduce((sum,seats)=>sum+seats,0);
   const countrySenateSeats = Object.values(countryPolitics.senate).reduce((sum,seats)=>sum+seats,0);
-  const selectedDistrictKeyRaw = selectedFeature && level !== 'divisions' ? normalise(selectedFeature.properties.district_name) : '';
-  const selectedDistrictKey = DISTRICT_ALIASES[selectedDistrictKeyRaw] || selectedDistrictKeyRaw;
-  const selectedDistrict = selectedDistrictKey ? darbar?.districts[selectedDistrictKey] : null;
   const selectedTehsil = selectedFeature && level === 'tehsils' ? tehsilDataByFeatureId.get(featureId(selectedFeature, 'tehsils')) : null;
+  const selectedStats = useMemo(() => {
+    if (!selectedFeature) return null;
+    const districtKeys = featureDistrictKeys(selectedFeature).map(key => DISTRICT_ALIASES[key] || key);
+    const districtRows = districtKeys.map(key => ({ key, data: darbar?.districts[key] }));
+    const area = Number(selectedFeature.properties.area_km2 || 0);
+    const tehsilPopulation = selectedTehsil?.p || 0;
+    let population = 0, literate = 0, literacyBase = 0, urban = 0, urbanBase = 0;
+    let outOfSchool = 0, outOfSchoolMatches = 0;
+    const weightedTotals = { mat:0, enrol:0, num:0, lfpr:0, ur:0, cons:0, fi:0, net:0, elec:0, mpi:0 };
+    const weightedBases = { mat:0, enrol:0, num:0, lfpr:0, ur:0, cons:0, fi:0, net:0, elec:0, mpi:0 };
+    const weightedKeys = Object.keys(weightedTotals) as (keyof typeof weightedTotals)[];
+
+    districtRows.forEach(({ key, data }) => {
+      const districtPopulation = data?.p || regionalDistrictPopulation2017(key) || 0;
+      const weight = level === 'tehsils' ? tehsilPopulation : districtPopulation;
+      if (level !== 'tehsils') population += districtPopulation;
+      if (!data || !weight) return;
+      if (data.l != null && data.i != null) {
+        if (level === 'tehsils') {
+          literate += data.l / (data.l + data.i) * weight;
+          literacyBase += weight;
+        } else {
+          literate += data.l;
+          literacyBase += data.l + data.i;
+        }
+      }
+      if (data.u != null && data.p) {
+        urban += data.u / data.p * weight;
+        urbanBase += weight;
+      }
+      if (level !== 'tehsils' && data.oos != null) {
+        outOfSchool += data.oos;
+        outOfSchoolMatches++;
+      }
+      weightedKeys.forEach(key => {
+        const value = data[key];
+        if (value != null) {
+          weightedTotals[key] += value * weight;
+          weightedBases[key] += weight;
+        }
+      });
+    });
+    if (level === 'tehsils') population = tehsilPopulation;
+    else population += completeRegionalPopulation2017(districtKeys);
+    const weighted = (key: keyof typeof weightedTotals) => weightedBases[key] ? weightedTotals[key] / weightedBases[key] : null;
+    const populationYears = new Set(districtKeys.map(key => isRegionalPopulationDistrict(key) ? 2017 : 2023));
+    return {
+      area,
+      population: population || null,
+      populationYear: populationYears.size === 1 ? [...populationYears][0] : null,
+      density: area && population ? population / area : null,
+      literacy: literacyBase ? literate / literacyBase * 100 : null,
+      urbanShare: urbanBase ? urban / urbanBase * 100 : null,
+      matricPlus: weighted('mat'),
+      enrolment: weighted('enrol'),
+      numeracy: weighted('num'),
+      outOfSchool: outOfSchoolMatches ? outOfSchool : null,
+      lfpr: weighted('lfpr'),
+      unemployment: weighted('ur'),
+      consumption: weighted('cons'),
+      foodInsecurity: weighted('fi'),
+      internet: weighted('net'),
+      electricity: weighted('elec'),
+      mpi: weighted('mpi'),
+      wealthPercentile: selectedTehsil?.r ?? null,
+      nightLight: selectedTehsil?.nl ?? null,
+    };
+  }, [darbar, level, selectedFeature, selectedTehsil]);
+  const formatPercent = (value: number | null) => value == null ? '—' : `${value.toFixed(1)}%`;
+  const inspectStats = selectedStats ? [
+    { value:selectedStats.area ? Math.round(selectedStats.area).toLocaleString() : '—', label:'area · km²' },
+    { value:selectedStats.population == null ? '—' : Math.round(selectedStats.population).toLocaleString(), label:`total population${selectedStats.populationYear ? ` · ${selectedStats.populationYear}` : ''}` },
+    { value:selectedStats.density == null ? '—' : Math.round(selectedStats.density).toLocaleString(), label:'population density · people / km²' },
+    { value:formatPercent(selectedStats.urbanShare), label:'urban share' },
+    { value:formatPercent(selectedStats.literacy), label:'literacy' },
+    { value:formatPercent(selectedStats.matricPlus), label:'matric or higher' },
+    { value:selectedStats.outOfSchool == null ? '—' : Math.round(selectedStats.outOfSchool).toLocaleString(), label:'children aged 5–16 out of school' },
+    { value:formatPercent(selectedStats.enrolment), label:'net enrolment' },
+    { value:formatPercent(selectedStats.numeracy), label:'numeracy' },
+    { value:formatPercent(selectedStats.lfpr), label:'labor-force participation' },
+    { value:formatPercent(selectedStats.unemployment), label:'unemployment' },
+    { value:selectedStats.consumption == null ? '—' : `Rs ${Math.round(selectedStats.consumption).toLocaleString()}`, label:'monthly consumption / person' },
+    { value:formatPercent(selectedStats.foodInsecurity), label:'food insecurity' },
+    { value:formatPercent(selectedStats.internet), label:'internet users' },
+    { value:formatPercent(selectedStats.electricity), label:'electricity access' },
+    { value:selectedStats.mpi == null ? '—' : selectedStats.mpi.toFixed(3), label:'multidimensional poverty index' },
+    ...(level === 'tehsils' ? [
+      { value:selectedStats.wealthPercentile == null ? '—' : `${selectedStats.wealthPercentile.toFixed(0)}th`, label:'wealth percentile' },
+      { value:selectedStats.nightLight == null ? '—' : selectedStats.nightLight.toFixed(2), label:'night radiance' },
+    ] : []),
+  ] : [];
   const rankedRows = useMemo(() => finalRows.filter(row => row.members.length && row[rankMetric] != null).sort((a, b) => Number(b[rankMetric]) - Number(a[rankMetric])), [finalRows, rankMetric]);
   const rankMaximum = Math.max(...rankedRows.map(row => Number(row[rankMetric])), 1);
   const formatRankValue = (value: number) => rankMetric === 'population' || rankMetric === 'outOfSchool'
@@ -722,7 +810,12 @@ export default function PakistanMapStudio() {
             <div className="map-navigation" role="group" aria-label="Map zoom controls"><button onClick={()=>zoomMap(.8)} aria-label="Zoom in">+</button><button onClick={()=>zoomMap(1.25)} aria-label="Zoom out">−</button><button onClick={resetMapView} aria-label="Reset map view">⌂</button></div>
             <div className="north">N<span>↑</span></div>
             {hovered && <div className="map-tooltip"><b>{featureName(hovered, level)}</b><span>{level === 'tehsils' && `${String(hovered.properties.district_name)} · `}{String(hovered.properties.province_name)}</span><small>{provinceById[assignments[featureId(hovered, level)]]?.name || 'Unassigned'}</small></div>}
-            {selectedFeature && toolMode === 'inspect' && <aside className="district-drawer"><div className="district-head"><div><small>{level === 'divisions' ? 'DIVISION DETAIL' : level === 'tehsils' ? 'TEHSIL DETAIL' : 'DISTRICT DETAIL'}</small><h2>{featureName(selectedFeature, level)}</h2><p>{level === 'tehsils' && `${String(selectedFeature.properties.district_name)} · `}{String(selectedFeature.properties.province_name)}</p></div><button onClick={() => setSelectedFeature(null)} aria-label="Close district details">×</button></div>{selectedDistrict ? <div className="district-stats"><span><b>{selectedTehsil?.p || selectedDistrict.p ? `${((selectedTehsil?.p || selectedDistrict.p || 0)/1_000_000).toFixed(2)}m` : '—'}</b>{level === 'tehsils' ? 'estimated population' : 'population · 2023'}</span><span><b>{selectedDistrict.l != null && selectedDistrict.i != null ? `${(selectedDistrict.l/(selectedDistrict.l+selectedDistrict.i)*100).toFixed(1)}%` : '—'}</b>literacy</span><span><b>{selectedDistrict.mat==null?'—':`${selectedDistrict.mat.toFixed(1)}%`}</b>matric or higher</span><span><b>{selectedDistrict.enrol==null?'—':`${selectedDistrict.enrol.toFixed(1)}%`}</b>net enrolment</span><span><b>{selectedDistrict.lfpr==null?'—':`${selectedDistrict.lfpr.toFixed(1)}%`}</b>labor-force participation</span><span><b>{selectedDistrict.ur==null?'—':`${selectedDistrict.ur.toFixed(1)}%`}</b>unemployment</span><span><b>{selectedDistrict.cons==null?'—':`Rs ${Math.round(selectedDistrict.cons).toLocaleString()}`}</b>consumption / person</span><span><b>{selectedDistrict.mpi==null?'—':selectedDistrict.mpi.toFixed(3)}</b>MPI</span><span><b>{selectedDistrict.net==null?'—':`${selectedDistrict.net.toFixed(1)}%`}</b>internet users</span><span><b>{selectedDistrict.elec==null?'—':`${selectedDistrict.elec.toFixed(1)}%`}</b>electricity access</span>{selectedTehsil && <><span><b>{selectedTehsil.r==null?'—':`${selectedTehsil.r.toFixed(0)}th`}</b>wealth percentile</span><span><b>{selectedTehsil.nl==null?'—':selectedTehsil.nl.toFixed(2)}</b>night radiance</span></>}</div>:<p className="district-empty">{level === 'divisions' ? 'Assign this division to a map unit to see its aggregated statistics in the summary.' : 'No matched Data Darbar record is available for this area.'}</p>}<footer>Data Darbar · PBS Census 2023 and household surveys</footer></aside>}
+            {selectedFeature && toolMode === 'inspect' && <aside className="district-drawer">
+              <div className="district-head"><div><small>{level === 'divisions' ? 'DIVISION DETAIL' : level === 'tehsils' ? 'TEHSIL DETAIL' : 'DISTRICT DETAIL'}</small><h2>{featureName(selectedFeature, level)}</h2><p>{level === 'tehsils' && `${String(selectedFeature.properties.district_name)} · `}{String(selectedFeature.properties.province_name)}</p></div><button onClick={() => setSelectedFeature(null)} aria-label="Close details">×</button></div>
+              <p className="district-section-label">VITAL STATISTICS</p>
+              <div className="district-stats">{inspectStats.map(stat => <span key={stat.label}><b>{stat.value}</b>{stat.label}</span>)}</div>
+              <footer>PBS Census population and area · Data Darbar household indicators. Missing values are shown as —; tehsil social indicators inherit their matched district estimate.</footer>
+            </aside>}
             <div className="map-caption">PBS 2023 DIVISIONS HEAVY · {level.toUpperCase()} LIGHT · CITY DOTS ARE REFERENCE LOCATIONS</div>
           </div>
         </section>
