@@ -92,6 +92,6 @@ export default function ProvinceComparison(){
       </div>}
       {perCapita&&ranked.length>0&&<p className="comparison-note">Calculated from out-of-school children divided by total 2023 population. This is per 1,000 residents, not per 1,000 children aged 5–16.</p>}
     </section>
-    <footer><span>Statistics include provinces and territories. National Assembly and Senate calculations include provinces only.</span><button onClick={()=>navigator.clipboard.writeText(location.href)}>Copy comparison link</button></footer>
+    <footer><span>Statistics include every map unit. Federal representation includes the provinces and Islamabad; AJK and Gilgit–Baltistan are outside Pakistan’s Parliament.</span><button onClick={()=>navigator.clipboard.writeText(location.href)}>Copy comparison link</button></footer>
   </main>;
 }
