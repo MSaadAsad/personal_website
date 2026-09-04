@@ -7,7 +7,7 @@ import { buildTehsilDataLookup } from '../tehsil-data-match';
 type Level='districts'|'tehsils';
 type Kind='province'|'territory';
 type Config={n:string;l:Level;p:[string,string,string,Kind?,string?][];a:[string,string,number][]};
-type Feature={properties:Record<string,string|number>};
+type Feature={properties:Record<string,string|number>;geometry:{type:'Polygon'|'MultiPolygon';coordinates:number[][][]|number[][][][]}};
 type District={p:number|null;l:number|null;i:number|null;u:number|null;mat:number|null;oos:number|null;cons:number|null;lfpr:number|null;fi:number|null;net:number|null;elec:number|null;mpi:number|null};
 type Darbar={districts:Record<string,District>;tehsils:{n:string;d:string;p:number|null}[]};
 type Metric='population'|'literacy'|'urban'|'matric'|'outOfSchool'|'consumption'|'lfpr'|'food'|'internet'|'electricity'|'mpi';
@@ -31,6 +31,11 @@ const normalise=(v:unknown)=>String(v).toLowerCase().replace(/district|agency/g,
 const decode=(value:string):Config=>{const base=value.replace(/-/g,'+').replace(/_/g,'/');const binary=atob(base+'='.repeat((4-base.length%4)%4));return JSON.parse(new TextDecoder().decode(Uint8Array.from(binary,c=>c.charCodeAt(0))))};
 const format=(key:Metric,value:number)=>key==='population'||key==='outOfSchool'?Math.round(value).toLocaleString():key==='consumption'?`Rs ${Math.round(value).toLocaleString()}`:key==='mpi'?value.toFixed(3):`${value.toFixed(1)}%`;
 const formatAxis=(key:Metric,value:number)=>key==='mpi'?value.toFixed(2):key==='consumption'?`Rs ${Math.round(value/1000)}k`:key==='outOfSchool'?(value>=1_000_000?`${(value/1_000_000).toFixed(1)}m`:`${Math.round(value/1000)}k`):`${Math.round(value)}%`;
+const MAP_EXTENT={minX:60.75,maxX:77.25,minY:23.35,maxY:37.25};
+const MAP_WIDTH=760,MAP_HEIGHT=820;
+const project=([lon,lat]:number[])=>[20+((lon-MAP_EXTENT.minX)/(MAP_EXTENT.maxX-MAP_EXTENT.minX))*720,20+((MAP_EXTENT.maxY-lat)/(MAP_EXTENT.maxY-MAP_EXTENT.minY))*780];
+const ringPath=(ring:number[][])=>ring.map((point,index)=>`${index?'L':'M'}${project(point).map(value=>value.toFixed(1)).join(' ')}`).join(' ')+'Z';
+const geometryPath=(geometry:Feature['geometry'])=>(geometry.type==='Polygon'?[geometry.coordinates as number[][][]]:geometry.coordinates as number[][][][]).map(polygon=>polygon.map(ringPath).join(' ')).join(' ');
 
 export default function ProvinceComparison(){
   const [config,setConfig]=useState<Config|null>(null);
@@ -77,6 +82,9 @@ export default function ProvinceComparison(){
   const unitLabel=perCapita?'children per 1,000 residents':meta.unit;
   let angle=0;
   const pie=ranked.map(r=>{const start=angle;angle+=compositionTotal?metricValue(r)/compositionTotal*360:0;return `${r.color} ${start}deg ${angle}deg`}).join(',');
+  const featureOwners=useMemo(()=>new Map(config?.a.map(([id,,owner])=>[id,owner])||[]),[config]);
+  const rowsByOwner=useMemo(()=>new Map(config?.p.map((province,index)=>[index,rows.find(row=>row.id===province[0])])||[]),[config,rows]);
+  const mapValue=(feature:Feature)=>{const code=String(feature.properties[config?.l==='tehsils'?'tehsil_code':'district_code']);const row=rowsByOwner.get(featureOwners.get(code)??-1);return row&&row[metric]!=null&&(!perCapita||row.population)?metricValue(row):null};
   if(!config)return <main className="compare-shell"><div className="compare-empty"><h1>No map to compare</h1><a href="/pakistan-map">← Build a map</a></div></main>;
   return <main className="compare-shell">
     <header><a href={`/pakistan-map#map=${new URLSearchParams(location.hash.slice(1)).get('map')||''}`}>← Back to map</a><span>NAYA NAQSHA · COMPARISON</span></header>
@@ -96,9 +104,9 @@ export default function ProvinceComparison(){
       {!ranked.length?<div className="comparison-no-data"><b>No comparable data</b><span>This indicator is not available for the selected map level.</span></div>:composition?<div className="population-composition">
         <div className="pie" style={{background:`conic-gradient(${pie})`}} role="img" aria-label={`${meta.label} share by map unit`}><span><b>{compositionCentre}</b>{compositionLabel}</span></div>
         <ol>{ranked.map((r,i)=><li key={r.id}><i style={{background:r.color}}/><span>{String(i+1).padStart(2,'0')}</span><b>{r.name}<em>{r.kind}</em></b><strong>{formatValue(r)}</strong><small>{compositionTotal?(metricValue(r)/compositionTotal*100).toFixed(1):'0.0'}%</small></li>)}</ol>
-      </div>:<div className="comparison-column-chart">
-        <div className="column-axis" aria-hidden="true">{[1,.75,.5,.25,0].map(stop=><b key={stop}>{formatScale(maximum*stop)}</b>)}</div>
-        <ol className="comparison-columns" style={{gridTemplateColumns:`repeat(${ranked.length},minmax(92px,1fr))`}}>{ranked.map((r,i)=><li key={r.id}><strong>{formatValue(r)}</strong><span className="column-track"><i style={{height:`${metricValue(r)/maximum*100}%`}}/></span><div className="column-label"><span>{String(i+1).padStart(2,'0')}</span><b>{r.name}<em>{r.kind}</em></b></div></li>)}</ol>
+      </div>:<div className="depth-map-layout">
+        <div className="depth-map-panel"><svg className="depth-map" viewBox={`0 0 ${MAP_WIDTH} ${MAP_HEIGHT}`} role="img" aria-labelledby="depth-map-title depth-map-description"><title id="depth-map-title">{meta.label} by proposed province</title><desc id="depth-map-description">Darker blue indicates a higher {meta.label.toLowerCase()} value. Areas without comparable data are concrete grey.</desc>{features.map((feature,index)=>{const value=mapValue(feature);const depth=value==null?0:.18+.82*Math.max(0,Math.min(1,value/maximum));return <path key={index} d={geometryPath(feature.geometry)} className={value==null?'depth-region unavailable':'depth-region'} style={value==null?undefined:{fillOpacity:depth}}><title>{value==null?'No comparable data':formatScale(value)}</title></path>})}</svg><div className="depth-legend"><span>Lower</span><i/><span>Higher</span><b>Unavailable</b></div></div>
+        <ol className="depth-ranking">{ranked.map((row,index)=><li key={row.id}><span>{String(index+1).padStart(2,'0')}</span><b>{row.name}<em>{row.kind}</em></b><strong>{formatValue(row)}</strong></li>)}</ol>
       </div>}
       {perCapita&&ranked.length>0&&<p className="comparison-note">Calculated from out-of-school children divided by total 2023 population. This is per 1,000 residents, not per 1,000 children aged 5–16.</p>}
       {unavailable.length>0&&<p className="comparison-note"><b>No comparable {meta.label.toLowerCase()} data:</b> {unavailable.map(row=>row.name).join(', ')}. {metric==='population'?'AJK has district-level 2017 figures; the GB total can only be used when all 14 current map districts remain together because the 2017 census used an older district structure.':'These units are omitted from the chart rather than plotted as zero.'}</p>}
