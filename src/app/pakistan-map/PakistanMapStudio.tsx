@@ -16,6 +16,7 @@ type AssemblyDistrict = { district: string; districts?: string[]; province: stri
 type AssemblyData = { election: string; year?: number; basis: string; source: string; districts: AssemblyDistrict[] };
 type RegionalAssemblyData = { generated: string; sources: Record<string, string>; notes: Record<string, string>; districts: { region: 'AJK' | 'GB'; district: string; parties: Record<string, number> }[] };
 type RankMetric = 'population' | 'literacy' | 'matricPlus' | 'outOfSchool' | 'consumption' | 'lfpr' | 'foodInsecurity' | 'internet' | 'electricity' | 'mpi';
+type CityMarker = { name: string; lon: number; lat: number; tier: 1 | 2; dx?: number; dy?: number; anchor?: 'start' | 'middle' | 'end' };
 
 const RANK_METRICS: { key: RankMetric; label: string; unit: string }[] = [
   { key: 'population', label: 'Population', unit: 'people' },
@@ -49,6 +50,28 @@ const KARACHI = new Set(['centralkarachi', 'eastkarachi', 'korangikarachi', 'mal
 const HAZARA = new Set(['abbottabad', 'batagram', 'battagram', 'haripur', 'kohistanlower', 'kohistanupper', 'kolaipalaskohistan', 'mansehra', 'torghar']);
 const EXTENT = { minX: 60.75, maxX: 77.25, minY: 23.35, maxY: 37.25 };
 const WIDTH = 760, HEIGHT = 820;
+const CITY_MARKERS: CityMarker[] = [
+  { name:'Karachi', lon:67.0099, lat:24.8615, tier:1, dx:7, dy:11 },
+  { name:'Lahore', lon:74.3587, lat:31.5204, tier:1, dx:7, dy:-7 },
+  { name:'Faisalabad', lon:73.0845, lat:31.4504, tier:1, dx:-7, dy:12, anchor:'end' },
+  { name:'Rawalpindi', lon:73.0479, lat:33.5651, tier:1, dx:-8, dy:12, anchor:'end' },
+  { name:'Islamabad', lon:73.0479, lat:33.6844, tier:1, dx:8, dy:-8 },
+  { name:'Multan', lon:71.5249, lat:30.1575, tier:1, dx:7, dy:-7 },
+  { name:'Hyderabad', lon:68.3737, lat:25.3960, tier:1, dx:7, dy:-7 },
+  { name:'Peshawar', lon:71.5249, lat:34.0151, tier:1, dx:7, dy:-7 },
+  { name:'Quetta', lon:66.9750, lat:30.1798, tier:1, dx:7, dy:-7 },
+  { name:'Gujranwala', lon:74.1870, lat:32.1877, tier:2, dx:7, dy:-7 },
+  { name:'Sialkot', lon:74.5310, lat:32.4945, tier:2, dx:7, dy:-7 },
+  { name:'Sargodha', lon:72.6711, lat:32.0836, tier:2, dx:-7, dy:-7, anchor:'end' },
+  { name:'Bahawalpur', lon:71.6833, lat:29.3956, tier:2, dx:7, dy:12 },
+  { name:'Sukkur', lon:68.8574, lat:27.7244, tier:2, dx:7, dy:-7 },
+  { name:'Larkana', lon:68.2141, lat:27.5570, tier:2, dx:-7, dy:12, anchor:'end' },
+  { name:'Mardan', lon:72.0400, lat:34.1980, tier:2, dx:7, dy:12 },
+  { name:'Abbottabad', lon:73.2215, lat:34.1688, tier:2, dx:7, dy:-7 },
+  { name:'Muzaffarabad', lon:73.4711, lat:34.3700, tier:2, dx:7, dy:-7 },
+  { name:'Gilgit', lon:74.3089, lat:35.9208, tier:2, dx:7, dy:-7 },
+  { name:'Gwadar', lon:62.3254, lat:25.1264, tier:2, dx:7, dy:-7 },
+];
 
 function project([lon, lat]: number[]) {
   return [20 + ((lon - EXTENT.minX) / (EXTENT.maxX - EXTENT.minX)) * 720, 20 + ((EXTENT.maxY - lat) / (EXTENT.maxY - EXTENT.minY)) * 780];
@@ -165,6 +188,7 @@ export default function PakistanMapStudio() {
   const hashLoaded = useRef(false);
   const pendingSharedAssignments = useRef<Record<string, string> | null>(null);
   const hasAssignments = Object.keys(assignments).length > 0;
+  const cityZoom = WIDTH / mapView.width;
 
   useEffect(() => {
     if (!hashLoaded.current) {
@@ -499,12 +523,18 @@ export default function PakistanMapStudio() {
                   return <path key={id} d={d} fill={province?.color || '#e8e1d5'} className={highlighted ? 'region highlighted' : 'region'} onPointerDown={e => { if (e.shiftKey||e.button===1) return; if (toolMode === 'inspect') { setSelectedFeature(feature); setPainting(false); return; } e.currentTarget.setPointerCapture(e.pointerId); setPainting(true); paint(feature); }} onPointerEnter={() => { setHovered(feature); if (painting && toolMode === 'paint') paint(feature); }} onPointerMove={() => painting && toolMode === 'paint' && paint(feature)} onPointerUp={() => setPainting(false)}/>;
                 })}
               </g>
+              <g className="city-layer" aria-label="Major cities">
+                {CITY_MARKERS.filter(city => city.tier === 1 || cityZoom >= 1.35).map(city => {
+                  const [x, y] = project([city.lon, city.lat]);
+                  return <g className={`city-marker city-tier-${city.tier}`} key={city.name} transform={`translate(${x} ${y})`}><title>{city.name}</title><circle className="city-halo" r={city.tier === 1 ? 5.5 : 4.5}/><circle className="city-dot" r={city.tier === 1 ? 2.8 : 2.2}/><text x={city.dx ?? 7} y={city.dy ?? -7} textAnchor={city.anchor || 'start'}>{city.name}</text></g>;
+                })}
+              </g>
             </svg>
             <div className="map-navigation" role="group" aria-label="Map zoom controls"><button onClick={()=>zoomMap(.8)} aria-label="Zoom in">+</button><button onClick={()=>zoomMap(1.25)} aria-label="Zoom out">−</button><button onClick={resetMapView} aria-label="Reset map view">⌂</button></div>
             <div className="north">N<span>↑</span></div>
             {hovered && <div className="map-tooltip"><b>{featureName(hovered, level)}</b><span>{level === 'tehsils' && `${String(hovered.properties.district_name)} · `}{String(hovered.properties.province_name)}</span><small>{provinceById[assignments[featureId(hovered, level)]]?.name || 'Unassigned'}</small></div>}
             {selectedFeature && toolMode === 'inspect' && <aside className="district-drawer"><div className="district-head"><div><small>{level === 'tehsils' ? 'TEHSIL DETAIL' : 'DISTRICT DETAIL'}</small><h2>{featureName(selectedFeature, level)}</h2><p>{level === 'tehsils' && `${String(selectedFeature.properties.district_name)} · `}{String(selectedFeature.properties.province_name)}</p></div><button onClick={() => setSelectedFeature(null)} aria-label="Close district details">×</button></div>{selectedDistrict ? <div className="district-stats"><span><b>{selectedTehsil?.p || selectedDistrict.p ? `${((selectedTehsil?.p || selectedDistrict.p || 0)/1_000_000).toFixed(2)}m` : '—'}</b>{level === 'tehsils' ? 'estimated population' : 'population · 2023'}</span><span><b>{selectedDistrict.l != null && selectedDistrict.i != null ? `${(selectedDistrict.l/(selectedDistrict.l+selectedDistrict.i)*100).toFixed(1)}%` : '—'}</b>literacy</span><span><b>{selectedDistrict.mat==null?'—':`${selectedDistrict.mat.toFixed(1)}%`}</b>matric or higher</span><span><b>{selectedDistrict.enrol==null?'—':`${selectedDistrict.enrol.toFixed(1)}%`}</b>net enrolment</span><span><b>{selectedDistrict.lfpr==null?'—':`${selectedDistrict.lfpr.toFixed(1)}%`}</b>labor-force participation</span><span><b>{selectedDistrict.ur==null?'—':`${selectedDistrict.ur.toFixed(1)}%`}</b>unemployment</span><span><b>{selectedDistrict.cons==null?'—':`Rs ${Math.round(selectedDistrict.cons).toLocaleString()}`}</b>consumption / person</span><span><b>{selectedDistrict.mpi==null?'—':selectedDistrict.mpi.toFixed(3)}</b>MPI</span><span><b>{selectedDistrict.net==null?'—':`${selectedDistrict.net.toFixed(1)}%`}</b>internet users</span><span><b>{selectedDistrict.elec==null?'—':`${selectedDistrict.elec.toFixed(1)}%`}</b>electricity access</span>{selectedTehsil && <><span><b>{selectedTehsil.r==null?'—':`${selectedTehsil.r.toFixed(0)}th`}</b>wealth percentile</span><span><b>{selectedTehsil.nl==null?'—':selectedTehsil.nl.toFixed(2)}</b>night radiance</span></>}</div>:<p className="district-empty">No matched Data Darbar record is available for this area.</p>}<footer>Data Darbar · PBS Census 2023 and household surveys</footer></aside>}
-            <div className="map-caption">BOUNDARIES ARE INDICATIVE · {level.toUpperCase()} VIEW</div>
+            <div className="map-caption">BOUNDARIES ARE INDICATIVE · {level.toUpperCase()} VIEW · CITY POINTS ARE REFERENCE LOCATIONS</div>
           </div>
         </section>
 
