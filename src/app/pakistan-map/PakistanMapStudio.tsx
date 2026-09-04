@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { completeRegionalPopulation2017, isRegionalPopulationDistrict, regionalDistrictPopulation2017, regionalSocialStats } from './regional-population';
 import { buildTehsilDataLookup } from './tehsil-data-match';
+import { aggregateCensus, type CensusDetail } from './census-detail';
 
 type Level = 'divisions' | 'districts' | 'tehsils';
 type Props = Record<string, string | number>;
@@ -325,6 +326,7 @@ export default function PakistanMapStudio() {
   const [mapName, setMapName] = useState('My province plan');
   const [shareStatus, setShareStatus] = useState('Share link');
   const [darbar, setDarbar] = useState<DarbarData | null>(null);
+  const [censusDetail, setCensusDetail] = useState<CensusDetail | null>(null);
   const [assembly, setAssembly] = useState<AssemblyData | null>(null);
   const [electionYear, setElectionYear] = useState<ElectionYear>(2024);
   const [regionalAssembly, setRegionalAssembly] = useState<RegionalAssemblyData | null>(null);
@@ -377,6 +379,7 @@ export default function PakistanMapStudio() {
   }, [level]);
 
   useEffect(() => { if (hasAssignments && !darbar) fetch('/data/pakistan-map/datadarbar.json').then(r => r.json()).then(setDarbar).catch(() => setDarbar(null)); }, [darbar, hasAssignments]);
+  useEffect(() => { if ((hasAssignments || selectedFeature) && !censusDetail) fetch('/data/pakistan-map/census-2023-detail.json').then(r => r.json()).then(setCensusDetail).catch(() => setCensusDetail(null)); }, [censusDetail, hasAssignments, selectedFeature]);
   useEffect(() => {
     if (!finalized) return;
     let cancelled = false;
@@ -516,6 +519,7 @@ export default function PakistanMapStudio() {
   const selectedStats = useMemo(() => {
     if (!selectedFeature) return null;
     const districtKeys = featureDistrictKeys(selectedFeature).map(key => DISTRICT_ALIASES[key] || key);
+    const census = level === 'tehsils' ? null : aggregateCensus(districtKeys, censusDetail);
     const districtRows = districtKeys.map(key => ({ key, data: darbar?.districts[key] }));
     const area = Number(selectedFeature.properties.area_km2 || 0);
     const tehsilPopulation = selectedTehsil?.p || 0;
@@ -586,13 +590,21 @@ export default function PakistanMapStudio() {
       mpi: weighted('mpi'),
       wealthPercentile: selectedTehsil?.r ?? null,
       nightLight: selectedTehsil?.nl ?? null,
+      census,
     };
-  }, [darbar, level, selectedFeature, selectedTehsil]);
+  }, [censusDetail, darbar, level, selectedFeature, selectedTehsil]);
   const formatPercent = (value: number | null) => value == null ? '—' : `${value.toFixed(1)}%`;
   const inspectStats = selectedStats ? [
     { value:selectedStats.area ? Math.round(selectedStats.area).toLocaleString() : '—', label:'area · km²' },
     { value:selectedStats.population == null ? '—' : Math.round(selectedStats.population).toLocaleString(), label:`total population${selectedStats.populationYear ? ` · ${selectedStats.populationYear}` : ''}` },
     { value:selectedStats.density == null ? '—' : Math.round(selectedStats.density).toLocaleString(), label:'population density · people / km²' },
+    ...(selectedStats.census ? [
+      { value:formatPercent(selectedStats.census.growthRate), label:'annual population growth · 2017–23' },
+      { value:selectedStats.census.sexRatio == null ? '—' : selectedStats.census.sexRatio.toFixed(1), label:'males per 100 females · 2023' },
+      { value:selectedStats.census.householdSize == null ? '—' : selectedStats.census.householdSize.toFixed(1), label:'average household size · 2023' },
+      { value:formatPercent(selectedStats.census.under15Share), label:'population under 15 · 2023' },
+      { value:formatPercent(selectedStats.census.dependencyRatio), label:'age dependency ratio · 2023' },
+    ] : []),
     { value:formatPercent(selectedStats.urbanShare), label:`urban share · ${selectedStats.urbanYear}` },
     { value:formatPercent(selectedStats.literacy), label:`literacy · ${selectedStats.literacyYear}` },
     { value:formatPercent(selectedStats.matricPlus), label:'matric or higher' },
@@ -606,6 +618,14 @@ export default function PakistanMapStudio() {
     { value:formatPercent(selectedStats.internet), label:'internet users' },
     { value:formatPercent(selectedStats.electricity), label:'electricity access' },
     { value:selectedStats.mpi == null ? '—' : selectedStats.mpi.toFixed(3), label:'multidimensional poverty index' },
+    ...(selectedStats.census ? [
+      { value:formatPercent(selectedStats.census.improvedWater), label:'households with improved water · 2023' },
+      { value:formatPercent(selectedStats.census.waterInside), label:'drinking water inside · 2023' },
+      { value:formatPercent(selectedStats.census.flushToilet), label:'households with flush toilet · 2023' },
+      { value:formatPercent(selectedStats.census.noToilet), label:'households with no toilet · 2023' },
+      { value:formatPercent(selectedStats.census.ownedHousing), label:'owner-occupied housing · 2023' },
+      { value:formatPercent(selectedStats.census.oneRoomHousing), label:'one-room housing · 2023' },
+    ] : []),
     ...(level === 'tehsils' ? [
       { value:selectedStats.wealthPercentile == null ? '—' : `${selectedStats.wealthPercentile.toFixed(0)}th`, label:'wealth percentile' },
       { value:selectedStats.nightLight == null ? '—' : selectedStats.nightLight.toFixed(2), label:'night radiance' },
@@ -877,7 +897,7 @@ export default function PakistanMapStudio() {
               <div className="district-head"><div><small>{level === 'divisions' ? 'DIVISION DETAIL' : level === 'tehsils' ? 'TEHSIL DETAIL' : 'DISTRICT DETAIL'}</small><h2>{featureName(selectedFeature, level)}</h2><p>{level === 'tehsils' && `${String(selectedFeature.properties.district_name)} · `}{String(selectedFeature.properties.province_name)}</p></div><button onClick={() => setSelectedFeature(null)} aria-label="Close details">×</button></div>
               <p className="district-section-label">VITAL STATISTICS</p>
               <div className="district-stats">{inspectStats.map(stat => <span key={stat.label}><b>{stat.value}</b>{stat.label}</span>)}</div>
-              <footer>PBS Census population and area · Data Darbar household indicators. Missing values are shown as —; tehsil social indicators inherit their matched district estimate.</footer>
+              <footer>PBS Census 2023 demographic and housing tables · Data Darbar household indicators. Missing values are shown as —; tehsil social indicators inherit their matched district estimate.</footer>
             </aside>}
             <div className="map-caption">PBS 2023 DIVISIONS HEAVY · {level.toUpperCase()} LIGHT · CITY DOTS ARE REFERENCE LOCATIONS</div>
           </div>

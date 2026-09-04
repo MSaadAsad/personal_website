@@ -94,6 +94,8 @@
   border: 2px solid #555c61;
   background: #bfc1c0;
   box-shadow: 7px 7px 0 rgba(48, 53, 57, .48), inset 1px 1px rgba(255,255,255,.45);
+  max-height: min(560px, 70vh);
+  overflow-y: auto;
 }
 
 .metric-select-menu button {
