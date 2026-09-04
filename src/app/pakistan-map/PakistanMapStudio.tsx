@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { completeRegionalPopulation2017, isRegionalPopulationDistrict, regionalDistrictPopulation2017 } from './regional-population';
 import { buildTehsilDataLookup } from './tehsil-data-match';
 
-type Level = 'districts' | 'tehsils';
+type Level = 'divisions' | 'districts' | 'tehsils';
 type Props = Record<string, string | number>;
 type Feature = { type: 'Feature'; properties: Props; geometry: { type: 'Polygon' | 'MultiPolygon'; coordinates: number[][][] | number[][][][] } };
 type UnitKind = 'province' | 'territory';
@@ -167,11 +167,11 @@ function divisionBoundaryPath(features: Feature[]) {
 }
 
 function featureId(feature: Feature, level: Level) {
-  return String(feature.properties[level === 'districts' ? 'district_code' : 'tehsil_code']);
+  return String(feature.properties[level === 'divisions' ? 'division_code' : level === 'districts' ? 'district_code' : 'tehsil_code']);
 }
 
 function featureName(feature: Feature, level: Level) {
-  return String(feature.properties[level === 'districts' ? 'district_name' : 'tehsil_name']);
+  return String(feature.properties[level === 'divisions' ? 'division_name' : level === 'districts' ? 'district_name' : 'tehsil_name']);
 }
 
 function encodeShare(config: SharedMap) {
@@ -188,13 +188,42 @@ function decodeShare(value: string): SharedMap {
 }
 
 const normalise = (value: unknown) => String(value).toLowerCase().replace(/district|agency/g, '').replace(/[^a-z0-9]/g, '');
+const featureDistrictKeys = (feature: Feature) => String(feature.properties.district_names || feature.properties.district_name).split('|').filter(Boolean).map(normalise);
+
+function buildDivisionFeatures(districts: Feature[]) {
+  const byDistrict = new Map(districts.map(feature => [normalise(feature.properties.district_name), feature]));
+  return Object.entries(DIVISION_DISTRICTS).map(([name, districtKeys]) => {
+    const members = districtKeys.map(key => byDistrict.get(key)).filter((feature): feature is Feature => Boolean(feature));
+    const coordinates = members.flatMap(feature => feature.geometry.type === 'Polygon'
+      ? [feature.geometry.coordinates as number[][][]]
+      : feature.geometry.coordinates as number[][][][]);
+    return {
+      type: 'Feature' as const,
+      properties: {
+        division_code: `division-${normalise(name)}`,
+        division_name: name,
+        province_name: String(members[0]?.properties.province_name || name.split(' · ')[0]),
+        district_name: String(members[0]?.properties.district_name || ''),
+        district_names: members.map(feature => String(feature.properties.district_name)).join('|'),
+        district_codes: members.map(feature => String(feature.properties.district_code)).join('|'),
+        area_km2: members.reduce((sum, feature) => sum + Number(feature.properties.area_km2 || 0), 0),
+      },
+      geometry: { type: 'MultiPolygon' as const, coordinates },
+    } satisfies Feature;
+  }).filter(feature => feature.geometry.coordinates.length);
+}
+
+function featuresForLevel(districtsOrTehsils: Feature[], level: Level) {
+  return level === 'divisions' ? buildDivisionFeatures(districtsOrTehsils) : districtsOrTehsils;
+}
+
 function presetOneAssignments(features: Feature[], level: Level) {
   return Object.fromEntries(features.map(feature => {
-    const district = normalise(feature.properties.district_name);
+    const districts = featureDistrictKeys(feature);
     const origin = String(feature.properties.province_name);
-    let owner = origin === 'Punjab' ? (SOUTH_PUNJAB.has(district) ? 'south-punjab' : 'punjab')
-      : origin === 'Sindh' ? (KARACHI.has(district) ? 'karachi' : 'sindh')
-      : origin === 'Khyber Pakhtunkhwa' ? (HAZARA.has(district) ? 'hazara' : 'kp')
+    let owner = origin === 'Punjab' ? (districts.every(district => SOUTH_PUNJAB.has(district)) ? 'south-punjab' : 'punjab')
+      : origin === 'Sindh' ? (districts.every(district => KARACHI.has(district)) ? 'karachi' : 'sindh')
+      : origin === 'Khyber Pakhtunkhwa' ? (districts.every(district => HAZARA.has(district)) ? 'hazara' : 'kp')
       : origin === 'Balochistan' ? 'balochistan'
       : origin === 'Islamabad' ? 'islamabad'
       : origin === 'Gilgit Baltistan' ? 'gb' : 'ajk';
@@ -280,7 +309,7 @@ export default function PakistanMapStudio() {
       if (raw) {
         try {
           const shared = decodeShare(raw);
-          if (shared.v === 1 && (shared.l === 'districts' || shared.l === 'tehsils')) {
+          if (shared.v === 1 && (shared.l === 'divisions' || shared.l === 'districts' || shared.l === 'tehsils')) {
             const restoredProvinces = shared.p.map(([id, name, color, kind]) => ({ id, name, color, kind: kind || 'province' }));
             const restoredAssignments = Object.fromEntries(shared.a.map(([id, , provinceIndex]) => [id, restoredProvinces[provinceIndex]?.id]).filter(([, id]) => id));
             setMapName(shared.n || 'Shared province plan');
@@ -288,7 +317,7 @@ export default function PakistanMapStudio() {
             setActive(restoredProvinces[0]?.id || '');
             setAssignments(restoredAssignments);
             if (shared.l !== level) { pendingSharedAssignments.current = restoredAssignments; setLevel(shared.l); return; }
-            fetch(`/data/pakistan-map/${shared.l}.geojson`).then(r => r.json()).then(data => setFeatures(data.features));
+            fetch(`/data/pakistan-map/${shared.l === 'divisions' ? 'districts' : shared.l}.geojson`).then(r => r.json()).then(data => setFeatures(featuresForLevel(data.features, shared.l)));
             return;
           }
         } catch { window.history.replaceState(null, '', window.location.pathname + window.location.search); }
@@ -297,12 +326,12 @@ export default function PakistanMapStudio() {
     if (pendingSharedAssignments.current) {
       const restored = pendingSharedAssignments.current;
       pendingSharedAssignments.current = null;
-      fetch(`/data/pakistan-map/${level}.geojson`).then(r => r.json()).then(data => setFeatures(data.features));
+      fetch(`/data/pakistan-map/${level === 'divisions' ? 'districts' : level}.geojson`).then(r => r.json()).then(data => setFeatures(featuresForLevel(data.features, level)));
       setAssignments(restored); setHistory([]); setFuture([]);
       return;
     }
-    fetch(`/data/pakistan-map/${level}.geojson`).then(r => r.json()).then(data => {
-      setFeatures(data.features);
+    fetch(`/data/pakistan-map/${level === 'divisions' ? 'districts' : level}.geojson`).then(r => r.json()).then(data => {
+      setFeatures(featuresForLevel(data.features, level));
       setProvinces([]); setActive(''); setMapName('My province plan'); setAssignments({});
     });
     setHistory([]); setFuture([]);
@@ -320,13 +349,13 @@ export default function PakistanMapStudio() {
 
   const provinceById = useMemo(() => Object.fromEntries(provinces.map(p => [p.id, p])), [provinces]);
   const assignmentCounts = useMemo(() => Object.values(assignments).reduce<Record<string, number>>((counts, id) => { counts[id] = (counts[id] || 0) + 1; return counts; }, {}), [assignments]);
-  const tehsilDataByFeatureId = useMemo(() => buildTehsilDataLookup(features, darbar?.tehsils || []), [darbar, features]);
+  const tehsilDataByFeatureId = useMemo(() => level === 'tehsils' ? buildTehsilDataLookup(features, darbar?.tehsils || []) : new Map<string, TehsilData>(), [darbar, features, level]);
   const paths = useMemo(() => features.map(feature => ({ feature, d: geometryPath(feature.geometry) })), [features]);
   const { divisionPath, nationalPath } = useMemo(() => divisionBoundaryPath(features), [features]);
   const matches = useMemo(() => query.trim() ? features.filter(f => `${featureName(f, level)} ${f.properties.district_name} ${f.properties.province_name}`.toLowerCase().includes(query.toLowerCase())).slice(0, 8) : [], [features, level, query]);
   const totalAssigned = Object.keys(assignments).length;
   const districtOwners = useMemo(() => {
-    if (level === 'districts') return Object.fromEntries(features.map(feature => [normalise(feature.properties.district_name), assignments[featureId(feature, level)]]).filter(([, owner]) => owner));
+    if (level !== 'tehsils') return Object.fromEntries(features.flatMap(feature => featureDistrictKeys(feature).map(district => [district, assignments[featureId(feature, level)]])).filter(([, owner]) => owner));
     const votes: Record<string, Record<string, number>> = {};
     features.forEach(feature => {
       const owner = assignments[featureId(feature, level)]; if (!owner) return;
@@ -369,20 +398,24 @@ export default function PakistanMapStudio() {
       });
     };
     for (const feature of members) {
-      const districtKeyRaw = normalise(feature.properties.district_name);
-      const districtKey = DISTRICT_ALIASES[districtKeyRaw] || districtKeyRaw;
-      const district = darbar?.districts[districtKey];
-      if (level === 'districts') {
-        if (!district) { population += regionalDistrictPopulation2017(districtKey) || 0; continue; }
-        dataMatches++;
-        const pop = district.p || regionalDistrictPopulation2017(districtKey) || 0; population += pop;
-        if (district.l != null && district.i != null) { literate += district.l; literacyBase += district.l + district.i; }
-        if (district.u != null && pop) { urban += district.u; urbanBase += pop; }
-        if (district.ur != null && pop) { weightedUnemployment += district.ur * pop; unemploymentBase += pop; }
-        if (district.mpi != null && pop) { weightedMpi += district.mpi * pop; mpiBase += pop; }
-        if (district.oos != null) { outOfSchool += district.oos; outOfSchoolMatches++; }
-        addExtended(district, pop);
+      if (level !== 'tehsils') {
+        for (const districtKeyRaw of featureDistrictKeys(feature)) {
+          const districtKey = DISTRICT_ALIASES[districtKeyRaw] || districtKeyRaw;
+          const district = darbar?.districts[districtKey];
+          if (!district) { population += regionalDistrictPopulation2017(districtKey) || 0; continue; }
+          dataMatches++;
+          const pop = district.p || regionalDistrictPopulation2017(districtKey) || 0; population += pop;
+          if (district.l != null && district.i != null) { literate += district.l; literacyBase += district.l + district.i; }
+          if (district.u != null && pop) { urban += district.u; urbanBase += pop; }
+          if (district.ur != null && pop) { weightedUnemployment += district.ur * pop; unemploymentBase += pop; }
+          if (district.mpi != null && pop) { weightedMpi += district.mpi * pop; mpiBase += pop; }
+          if (district.oos != null) { outOfSchool += district.oos; outOfSchoolMatches++; }
+          addExtended(district, pop);
+        }
       } else {
+        const districtKeyRaw = normalise(feature.properties.district_name);
+        const districtKey = DISTRICT_ALIASES[districtKeyRaw] || districtKeyRaw;
+        const district = darbar?.districts[districtKey];
         const tehsil = tehsilDataByFeatureId.get(featureId(feature, 'tehsils'));
         if (!tehsil) continue;
         dataMatches++;
@@ -393,8 +426,8 @@ export default function PakistanMapStudio() {
         if (tehsil.nl != null && pop) { weightedNightLight += tehsil.nl * pop; nightLightBase += pop; }
       }
     }
-    const memberDistricts = new Set(members.map(feature => normalise(feature.properties.district_name)));
-    if (level === 'districts') population += completeRegionalPopulation2017(memberDistricts);
+    const memberDistricts = new Set(members.flatMap(feature => featureDistrictKeys(feature)));
+    if (level !== 'tehsils') population += completeRegionalPopulation2017(memberDistricts);
     else if (!population) population = completeRegionalPopulation2017(memberDistricts, true);
     const ownedElectionKeys = new Set(Object.entries(electionOwners).filter(([, owner]) => owner === province.id).map(([key]) => key));
     const partySeats: Record<string, number> = {};
@@ -408,8 +441,8 @@ export default function PakistanMapStudio() {
     const regionalRegions = new Set<string>();
     regionalAssembly?.districts.filter(row => Object.entries(districtOwners).some(([rawKey, owner]) => owner === province.id && (ELECTION_ALIASES[rawKey] || rawKey) === normalise(row.district))).forEach(row => { regionalRegions.add(row.region); Object.entries(row.parties).forEach(([party, seats]) => { regionalSeats[party] = (regionalSeats[party] || 0) + seats; }); });
     const regionalSeatCount = Object.values(regionalSeats).reduce((sum, seats) => sum + seats, 0);
-    const populationYears = new Set(members.map(feature => isRegionalPopulationDistrict(normalise(feature.properties.district_name)) ? 2017 : 2023));
-    return { ...province, members, area, origins, dataMatches, population, populationYear: populationYears.size === 1 ? [...populationYears][0] : null, partySeats, electionSeats, senateSeats, regionalSeats, regionalSeatCount, regionalRegions: [...regionalRegions],
+    const populationYears = new Set([...memberDistricts].map(district => isRegionalPopulationDistrict(district) ? 2017 : 2023));
+    return { ...province, members, area, origins, dataMatches, dataUnitCount: level === 'tehsils' ? members.length : memberDistricts.size, population, populationYear: populationYears.size === 1 ? [...populationYears][0] : null, partySeats, electionSeats, senateSeats, regionalSeats, regionalSeatCount, regionalRegions: [...regionalRegions],
       literacy: literacyBase ? literate / literacyBase * 100 : null,
       urbanShare: urbanBase ? urban / urbanBase * 100 : null,
       unemployment: unemploymentBase ? weightedUnemployment / unemploymentBase : null,
@@ -436,7 +469,7 @@ export default function PakistanMapStudio() {
   }, { assembly:{} as Record<string,number>, senate:{} as Record<string,number>, provinces:0 });
   const countryAssemblySeats = Object.values(countryPolitics.assembly).reduce((sum,seats)=>sum+seats,0);
   const countrySenateSeats = Object.values(countryPolitics.senate).reduce((sum,seats)=>sum+seats,0);
-  const selectedDistrictKeyRaw = selectedFeature ? normalise(selectedFeature.properties.district_name) : '';
+  const selectedDistrictKeyRaw = selectedFeature && level !== 'divisions' ? normalise(selectedFeature.properties.district_name) : '';
   const selectedDistrictKey = DISTRICT_ALIASES[selectedDistrictKeyRaw] || selectedDistrictKeyRaw;
   const selectedDistrict = selectedDistrictKey ? darbar?.districts[selectedDistrictKey] : null;
   const selectedTehsil = selectedFeature && level === 'tehsils' ? tehsilDataByFeatureId.get(featureId(selectedFeature, 'tehsils')) : null;
@@ -532,9 +565,19 @@ export default function PakistanMapStudio() {
 
   const currentShareConfig = (): SharedMap => {
     const provinceIndex = Object.fromEntries(provinces.map((province, index) => [province.id, index]));
-    return { v: 1, n: mapName.trim() || 'Untitled province plan', l: level,
+    const sharedLevel = level === 'divisions' ? 'districts' : level;
+    const sharedAssignments: [string, string, number][] = level === 'divisions'
+      ? features.flatMap(feature => {
+          const owner = provinceIndex[assignments[featureId(feature, level)]];
+          if (owner === undefined) return [];
+          const codes = String(feature.properties.district_codes || '').split('|');
+          const names = String(feature.properties.district_names || '').split('|');
+          return codes.map((code, index) => [code, names[index] || code, owner] as [string, string, number]);
+        })
+      : features.filter(feature => assignments[featureId(feature, level)] !== undefined).map(feature => [featureId(feature, level), featureName(feature, level), provinceIndex[assignments[featureId(feature, level)]]]);
+    return { v: 1, n: mapName.trim() || 'Untitled province plan', l: sharedLevel,
       p: provinces.map(province => [province.id, province.name, province.color, province.kind]),
-      a: features.filter(feature => assignments[featureId(feature, level)] !== undefined).map(feature => [featureId(feature, level), featureName(feature, level), provinceIndex[assignments[featureId(feature, level)]]]),
+      a: sharedAssignments,
     };
   };
 
@@ -567,6 +610,7 @@ export default function PakistanMapStudio() {
         <aside className="control-panel">
           <div className="eyebrow"><span>01</span> CHOOSE THE BUILDING BLOCK</div>
           <div className="segmented" role="group" aria-label="Map detail">
+            <button className={level === 'divisions' ? 'selected' : ''} onClick={() => setLevel('divisions')}>Divisions <b>{Object.keys(DIVISION_DISTRICTS).length}</b></button>
             <button className={level === 'districts' ? 'selected' : ''} onClick={() => setLevel('districts')}>Districts <b>160</b></button>
             <button className={level === 'tehsils' ? 'selected' : ''} onClick={() => setLevel('tehsils')}>Tehsils <b>577</b></button>
           </div>
@@ -609,7 +653,7 @@ export default function PakistanMapStudio() {
 
         <section className="map-stage">
           <div className="map-toolbar">
-            <div className="search-wrap"><span>⌕</span><input value={query} onChange={e => setQuery(e.target.value)} placeholder={`Find a ${level === 'districts' ? 'district' : 'tehsil'}…`} aria-label="Search areas"/>
+            <div className="search-wrap"><span>⌕</span><input value={query} onChange={e => setQuery(e.target.value)} placeholder={`Find a ${level === 'divisions' ? 'division' : level === 'districts' ? 'district' : 'tehsil'}…`} aria-label="Search areas"/>
               {matches.length > 0 && <div className="search-results">{matches.map(f => <button key={featureId(f, level)} onClick={() => { setHovered(f); setSelectedFeature(f); setToolMode('inspect'); setQuery(''); }}>{featureName(f, level)}<small>{String(f.properties.district_name)} · {String(f.properties.province_name)}</small></button>)}</div>}
             </div>
             <div className="map-tools" role="group" aria-label="Map interaction mode"><button className={toolMode === 'paint' ? 'selected' : ''} onClick={() => { setToolMode('paint'); setSelectedFeature(null); }}>Paint</button><button className={toolMode === 'inspect' ? 'selected' : ''} onClick={() => setToolMode('inspect')}>Inspect</button></div>
@@ -621,7 +665,7 @@ export default function PakistanMapStudio() {
                 {paths.map(({ feature, d }) => {
                   const id = featureId(feature, level); const province = provinceById[assignments[id]];
                   const highlighted = hovered && featureId(hovered, level) === id;
-                  return <path key={id} d={d} fill={province?.color || '#e8e1d5'} className={highlighted ? 'region highlighted' : 'region'} onPointerDown={e => { if (e.shiftKey||e.button===1) return; if (toolMode === 'inspect') { setSelectedFeature(feature); setPainting(false); return; } e.currentTarget.setPointerCapture(e.pointerId); setPainting(true); paint(feature); }} onPointerEnter={() => { setHovered(feature); if (painting && toolMode === 'paint') paint(feature); }} onPointerMove={() => painting && toolMode === 'paint' && paint(feature)} onPointerUp={() => setPainting(false)}/>;
+                  return <path key={id} d={d} fill={province?.color || '#e8e1d5'} className={`${level === 'divisions' ? 'region division-region' : 'region'}${highlighted ? ' highlighted' : ''}`} onPointerDown={e => { if (e.shiftKey||e.button===1) return; if (toolMode === 'inspect') { setSelectedFeature(feature); setPainting(false); return; } e.currentTarget.setPointerCapture(e.pointerId); setPainting(true); paint(feature); }} onPointerEnter={() => { setHovered(feature); if (painting && toolMode === 'paint') paint(feature); }} onPointerMove={() => painting && toolMode === 'paint' && paint(feature)} onPointerUp={() => setPainting(false)}/>;
                 })}
               </g>
               {divisionPath && <path className="division-boundaries" d={divisionPath}/>}
@@ -636,7 +680,7 @@ export default function PakistanMapStudio() {
             <div className="map-navigation" role="group" aria-label="Map zoom controls"><button onClick={()=>zoomMap(.8)} aria-label="Zoom in">+</button><button onClick={()=>zoomMap(1.25)} aria-label="Zoom out">−</button><button onClick={resetMapView} aria-label="Reset map view">⌂</button></div>
             <div className="north">N<span>↑</span></div>
             {hovered && <div className="map-tooltip"><b>{featureName(hovered, level)}</b><span>{level === 'tehsils' && `${String(hovered.properties.district_name)} · `}{String(hovered.properties.province_name)}</span><small>{provinceById[assignments[featureId(hovered, level)]]?.name || 'Unassigned'}</small></div>}
-            {selectedFeature && toolMode === 'inspect' && <aside className="district-drawer"><div className="district-head"><div><small>{level === 'tehsils' ? 'TEHSIL DETAIL' : 'DISTRICT DETAIL'}</small><h2>{featureName(selectedFeature, level)}</h2><p>{level === 'tehsils' && `${String(selectedFeature.properties.district_name)} · `}{String(selectedFeature.properties.province_name)}</p></div><button onClick={() => setSelectedFeature(null)} aria-label="Close district details">×</button></div>{selectedDistrict ? <div className="district-stats"><span><b>{selectedTehsil?.p || selectedDistrict.p ? `${((selectedTehsil?.p || selectedDistrict.p || 0)/1_000_000).toFixed(2)}m` : '—'}</b>{level === 'tehsils' ? 'estimated population' : 'population · 2023'}</span><span><b>{selectedDistrict.l != null && selectedDistrict.i != null ? `${(selectedDistrict.l/(selectedDistrict.l+selectedDistrict.i)*100).toFixed(1)}%` : '—'}</b>literacy</span><span><b>{selectedDistrict.mat==null?'—':`${selectedDistrict.mat.toFixed(1)}%`}</b>matric or higher</span><span><b>{selectedDistrict.enrol==null?'—':`${selectedDistrict.enrol.toFixed(1)}%`}</b>net enrolment</span><span><b>{selectedDistrict.lfpr==null?'—':`${selectedDistrict.lfpr.toFixed(1)}%`}</b>labor-force participation</span><span><b>{selectedDistrict.ur==null?'—':`${selectedDistrict.ur.toFixed(1)}%`}</b>unemployment</span><span><b>{selectedDistrict.cons==null?'—':`Rs ${Math.round(selectedDistrict.cons).toLocaleString()}`}</b>consumption / person</span><span><b>{selectedDistrict.mpi==null?'—':selectedDistrict.mpi.toFixed(3)}</b>MPI</span><span><b>{selectedDistrict.net==null?'—':`${selectedDistrict.net.toFixed(1)}%`}</b>internet users</span><span><b>{selectedDistrict.elec==null?'—':`${selectedDistrict.elec.toFixed(1)}%`}</b>electricity access</span>{selectedTehsil && <><span><b>{selectedTehsil.r==null?'—':`${selectedTehsil.r.toFixed(0)}th`}</b>wealth percentile</span><span><b>{selectedTehsil.nl==null?'—':selectedTehsil.nl.toFixed(2)}</b>night radiance</span></>}</div>:<p className="district-empty">No matched Data Darbar record is available for this area.</p>}<footer>Data Darbar · PBS Census 2023 and household surveys</footer></aside>}
+            {selectedFeature && toolMode === 'inspect' && <aside className="district-drawer"><div className="district-head"><div><small>{level === 'divisions' ? 'DIVISION DETAIL' : level === 'tehsils' ? 'TEHSIL DETAIL' : 'DISTRICT DETAIL'}</small><h2>{featureName(selectedFeature, level)}</h2><p>{level === 'tehsils' && `${String(selectedFeature.properties.district_name)} · `}{String(selectedFeature.properties.province_name)}</p></div><button onClick={() => setSelectedFeature(null)} aria-label="Close district details">×</button></div>{selectedDistrict ? <div className="district-stats"><span><b>{selectedTehsil?.p || selectedDistrict.p ? `${((selectedTehsil?.p || selectedDistrict.p || 0)/1_000_000).toFixed(2)}m` : '—'}</b>{level === 'tehsils' ? 'estimated population' : 'population · 2023'}</span><span><b>{selectedDistrict.l != null && selectedDistrict.i != null ? `${(selectedDistrict.l/(selectedDistrict.l+selectedDistrict.i)*100).toFixed(1)}%` : '—'}</b>literacy</span><span><b>{selectedDistrict.mat==null?'—':`${selectedDistrict.mat.toFixed(1)}%`}</b>matric or higher</span><span><b>{selectedDistrict.enrol==null?'—':`${selectedDistrict.enrol.toFixed(1)}%`}</b>net enrolment</span><span><b>{selectedDistrict.lfpr==null?'—':`${selectedDistrict.lfpr.toFixed(1)}%`}</b>labor-force participation</span><span><b>{selectedDistrict.ur==null?'—':`${selectedDistrict.ur.toFixed(1)}%`}</b>unemployment</span><span><b>{selectedDistrict.cons==null?'—':`Rs ${Math.round(selectedDistrict.cons).toLocaleString()}`}</b>consumption / person</span><span><b>{selectedDistrict.mpi==null?'—':selectedDistrict.mpi.toFixed(3)}</b>MPI</span><span><b>{selectedDistrict.net==null?'—':`${selectedDistrict.net.toFixed(1)}%`}</b>internet users</span><span><b>{selectedDistrict.elec==null?'—':`${selectedDistrict.elec.toFixed(1)}%`}</b>electricity access</span>{selectedTehsil && <><span><b>{selectedTehsil.r==null?'—':`${selectedTehsil.r.toFixed(0)}th`}</b>wealth percentile</span><span><b>{selectedTehsil.nl==null?'—':selectedTehsil.nl.toFixed(2)}</b>night radiance</span></>}</div>:<p className="district-empty">{level === 'divisions' ? 'Assign this division to a map unit to see its aggregated statistics in the summary.' : 'No matched Data Darbar record is available for this area.'}</p>}<footer>Data Darbar · PBS Census 2023 and household surveys</footer></aside>}
             <div className="map-caption">PBS 2023 DIVISIONS HEAVY · {level.toUpperCase()} LIGHT · CITY DOTS ARE REFERENCE LOCATIONS</div>
           </div>
         </section>
@@ -645,7 +689,7 @@ export default function PakistanMapStudio() {
           <div className="eyebrow"><span>03</span> YOUR NEW MAP</div>
           {activeRow && <section className="live-vitals" style={{ '--province-color': activeRow.color } as React.CSSProperties}>
             <div className="live-vitals-head"><div><small>{activeRow.kind}</small><h2>{activeRow.name}</h2></div><b>{activeRow.members.length}</b></div>
-            {activeRow.members.length ? <><div className="live-vitals-grid"><span><b>{activeRow.population ? `${(activeRow.population/1_000_000).toFixed(2)}m` : '—'}</b>population</span><span><b>{activeRow.population && finalRows.reduce((sum,row)=>sum+row.population,0) ? `${(activeRow.population/finalRows.reduce((sum,row)=>sum+row.population,0)*100).toFixed(1)}%` : '—'}</b>mapped share</span><span><b>{activeRow.literacy==null?'—':`${activeRow.literacy.toFixed(1)}%`}</b>literacy</span><span><b>{activeRow.matricPlus==null?'—':`${activeRow.matricPlus.toFixed(1)}%`}</b>matric+</span><span><b>{activeRow.urbanShare==null?'—':`${activeRow.urbanShare.toFixed(1)}%`}</b>urban</span><span><b>{activeRow.consumption==null?'—':`Rs ${Math.round(activeRow.consumption).toLocaleString()}`}</b>consumption / person</span></div><button onClick={() => openProfile(activeRow.id)}>Open full profile ↗</button></> : <p>Paint districts or tehsils with {activeRow.name} to see its live statistics.</p>}
+            {activeRow.members.length ? <><div className="live-vitals-grid"><span><b>{activeRow.population ? `${(activeRow.population/1_000_000).toFixed(2)}m` : '—'}</b>population</span><span><b>{activeRow.population && finalRows.reduce((sum,row)=>sum+row.population,0) ? `${(activeRow.population/finalRows.reduce((sum,row)=>sum+row.population,0)*100).toFixed(1)}%` : '—'}</b>mapped share</span><span><b>{activeRow.literacy==null?'—':`${activeRow.literacy.toFixed(1)}%`}</b>literacy</span><span><b>{activeRow.matricPlus==null?'—':`${activeRow.matricPlus.toFixed(1)}%`}</b>matric+</span><span><b>{activeRow.urbanShare==null?'—':`${activeRow.urbanShare.toFixed(1)}%`}</b>urban</span><span><b>{activeRow.consumption==null?'—':`Rs ${Math.round(activeRow.consumption).toLocaleString()}`}</b>consumption / person</span></div><button onClick={() => openProfile(activeRow.id)}>Open full profile ↗</button></> : <p>Paint {level} with {activeRow.name} to see its live statistics.</p>}
           </section>}
           <div className="big-stat"><strong>{provinces.length}</strong><span>MAP UNITS<br/>CREATED</span></div>
           <div className="assignment-stat"><span>{totalAssigned} of {features.length}</span><span>{Math.round(totalAssigned / Math.max(features.length, 1) * 100)}% assigned</span><div><i style={{ width: `${totalAssigned / Math.max(features.length, 1) * 100}%` }}/></div></div>
@@ -680,10 +724,10 @@ export default function PakistanMapStudio() {
               <div className="final-number">{String(index + 1).padStart(2, '0')}</div>
               <div><div className="unit-heading"><div><h2>{row.name}</h2><button className="open-profile" onClick={() => openProfile(row.id)}>Open full profile ↗</button></div><span className="unit-type-line">{row.name} · {row.kind}</span></div>
               <section className="metric-section overview-metrics"><h3>At a glance</h3><div className="final-metrics"><span><b>{row.members.length}</b>{level}</span><span><b>{Math.round(row.area).toLocaleString()}</b>km²</span><span><b>{row.population ? (row.population / 1_000_000).toFixed(2) + 'm' : '—'}</b>{level === 'tehsils' ? `estimated population${row.populationYear ? ` · ${row.populationYear}` : ' · mixed years'}` : `population${row.populationYear ? ` · ${row.populationYear}` : ' · mixed years'}`}</span><span><b>{row.urbanShare == null ? '—' : `${row.urbanShare.toFixed(1)}%`}</b>urban share</span></div></section>
-              <section className="metric-section"><h3>Education</h3><div className="final-metrics"><span><b>{row.literacy == null ? '—' : `${level === 'tehsils' ? '≈' : ''}${row.literacy.toFixed(1)}%`}</b>literacy · 2023</span><span><b>{row.matricPlus == null ? '—' : `≈${row.matricPlus.toFixed(1)}%`}</b>matric or higher</span><span><b>{row.enrolment == null ? '—' : `≈${row.enrolment.toFixed(1)}%`}</b>net enrolment</span><span><b>{row.numeracy == null ? '—' : `≈${row.numeracy.toFixed(1)}%`}</b>numeracy</span>{level === 'districts' && <span className="wide-metric"><b>{row.outOfSchool == null ? '—' : Math.round(row.outOfSchool).toLocaleString()}</b>children aged 5–16 out of school</span>}</div></section>
-              <section className="metric-section"><h3>Economy &amp; living conditions</h3><div className="final-metrics"><span><b>{row.consumption == null ? '—' : `Rs ${Math.round(row.consumption).toLocaleString()}`}</b>monthly consumption / person</span><span><b>{row.lfpr == null ? '—' : `≈${row.lfpr.toFixed(1)}%`}</b>labor-force participation</span><span><b>{row.foodInsecurity == null ? '—' : `≈${row.foodInsecurity.toFixed(1)}%`}</b>food insecurity</span><span><b>{row.internet == null ? '—' : `≈${row.internet.toFixed(1)}%`}</b>internet users</span><span><b>{row.electricity == null ? '—' : `≈${row.electricity.toFixed(1)}%`}</b>electricity access</span>{level === 'districts' ? <><span><b>{row.mpi == null ? '—' : row.mpi.toFixed(3)}</b>MPI · 2019–20</span><span><b>{row.unemployment == null ? '—' : `${row.unemployment.toFixed(1)}%`}</b>unemployment</span></> : <><span><b>{row.rwi == null ? '—' : `${row.rwi.toFixed(0)}th`}</b>wealth percentile</span><span><b>{row.nightLight == null ? '—' : row.nightLight.toFixed(2)}</b>night radiance · 2026</span></>}</div></section>
+              <section className="metric-section"><h3>Education</h3><div className="final-metrics"><span><b>{row.literacy == null ? '—' : `${level === 'tehsils' ? '≈' : ''}${row.literacy.toFixed(1)}%`}</b>literacy · 2023</span><span><b>{row.matricPlus == null ? '—' : `≈${row.matricPlus.toFixed(1)}%`}</b>matric or higher</span><span><b>{row.enrolment == null ? '—' : `≈${row.enrolment.toFixed(1)}%`}</b>net enrolment</span><span><b>{row.numeracy == null ? '—' : `≈${row.numeracy.toFixed(1)}%`}</b>numeracy</span>{level !== 'tehsils' && <span className="wide-metric"><b>{row.outOfSchool == null ? '—' : Math.round(row.outOfSchool).toLocaleString()}</b>children aged 5–16 out of school</span>}</div></section>
+              <section className="metric-section"><h3>Economy &amp; living conditions</h3><div className="final-metrics"><span><b>{row.consumption == null ? '—' : `Rs ${Math.round(row.consumption).toLocaleString()}`}</b>monthly consumption / person</span><span><b>{row.lfpr == null ? '—' : `≈${row.lfpr.toFixed(1)}%`}</b>labor-force participation</span><span><b>{row.foodInsecurity == null ? '—' : `≈${row.foodInsecurity.toFixed(1)}%`}</b>food insecurity</span><span><b>{row.internet == null ? '—' : `≈${row.internet.toFixed(1)}%`}</b>internet users</span><span><b>{row.electricity == null ? '—' : `≈${row.electricity.toFixed(1)}%`}</b>electricity access</span>{level !== 'tehsils' ? <><span><b>{row.mpi == null ? '—' : row.mpi.toFixed(3)}</b>MPI · 2019–20</span><span><b>{row.unemployment == null ? '—' : `${row.unemployment.toFixed(1)}%`}</b>unemployment</span></> : <><span><b>{row.rwi == null ? '—' : `${row.rwi.toFixed(0)}th`}</b>wealth percentile</span><span><b>{row.nightLight == null ? '—' : row.nightLight.toFixed(2)}</b>night radiance · 2026</span></>}</div></section>
               <div className="origin-bar">{row.origins.map(([origin, count]) => <i key={origin} style={{ width: `${count / row.members.length * 100}%` }} title={`${origin}: ${count}`}/>)}</div>
-              <p>Drawn from {row.origins.map(([origin, count]) => `${count} ${origin}`).join(' · ')} · Data matched for {row.dataMatches}/{row.members.length} units</p>
+              <p>Drawn from {row.origins.map(([origin, count]) => `${count} ${origin}`).join(' · ')} · Data matched for {row.dataMatches}/{row.dataUnitCount} source units</p>
               {row.regionalSeatCount > 0 && <div className="politics-block regional-politics"><div className="politics-title"><b>{row.regionalRegions.join(' + ')} 2026 assembly results</b><span>{row.regionalSeatCount} mapped general seats</span></div><div className="party-bar">{Object.entries(row.regionalSeats).filter(([,seats]) => seats > 0).sort((a,b) => b[1] - a[1]).map(([party,seats]) => <i key={party} style={{ width: `${seats / row.regionalSeatCount * 100}%`, background: PARTY_COLORS[party] || '#9b958a' }} title={`${party}: ${seats}`}/>)}</div><div className="party-list">{Object.entries(row.regionalSeats).filter(([,seats]) => seats > 0).sort((a,b) => b[1] - a[1]).map(([party,seats]) => <span key={party}><i style={{ background: PARTY_COLORS[party] || '#9b958a' }}/>{party}<b>{seats}</b></span>)}</div><p>Latest 2026 regional election results follow their districts if AJK or GB is split. Pending AJK seats and non-geographic refugee seats are excluded.</p></div>}
               {row.kind === 'province' && row.electionSeats > 0 && <div className="politics-block">
                 <div className="politics-title"><b>{electionYear} assembly replay</b><span>{row.electionSeats} directly elected seats</span></div>
