@@ -8,6 +8,7 @@ type Level = 'divisions' | 'districts' | 'tehsils';
 type Props = Record<string, string | number>;
 type Feature = { type: 'Feature'; properties: Props; geometry: { type: 'Polygon' | 'MultiPolygon'; coordinates: number[][][] | number[][][][] } };
 type UnitKind = 'province' | 'territory';
+type PanelSide = 'left' | 'right';
 type Province = { id: string; name: string; color: string; kind: UnitKind; capital?: string };
 type SharedMap = { v: 1; n: string; l: Level; p: [string, string, string, UnitKind?, string?][]; a: [string, string, number][] };
 type DistrictData = { n: string; p: number | null; l: number | null; i: number | null; u: number | null; ur: number | null; lfpr: number | null; oos: number | null; mat: number | null; enrol: number | null; num: number | null; cons: number | null; fi: number | null; net: number | null; elec: number | null; mpi: number | null; h: number | null };
@@ -328,8 +329,13 @@ export default function PakistanMapStudio() {
   const [electionYear, setElectionYear] = useState<ElectionYear>(2024);
   const [regionalAssembly, setRegionalAssembly] = useState<RegionalAssemblyData | null>(null);
   const [paletteOpen, setPaletteOpen] = useState<string | null>(null);
+  const [leftPanelOpen, setLeftPanelOpen] = useState(true);
+  const [rightPanelOpen, setRightPanelOpen] = useState(true);
+  const [leftPanelWidth, setLeftPanelWidth] = useState(340);
+  const [rightPanelWidth, setRightPanelWidth] = useState(310);
   const svgRef = useRef<SVGSVGElement>(null);
   const panRef = useRef<{ pointerId:number; clientX:number; clientY:number; view:typeof mapView } | null>(null);
+  const panelResizeRef = useRef<{ side:PanelSide; pointerId:number; startX:number; startWidth:number } | null>(null);
   const hashLoaded = useRef(false);
   const pendingSharedAssignments = useRef<Record<string, string> | null>(null);
   const hasAssignments = Object.keys(assignments).length > 0;
@@ -632,6 +638,47 @@ export default function PakistanMapStudio() {
   }, []);
   const resetMapView = () => setMapView({ x:0, y:0, width:WIDTH, height:HEIGHT });
 
+  const setPanelWidth = (side: PanelSide, width: number) => {
+    const nextWidth = Math.max(220, Math.min(520, width));
+    if (side === 'left') setLeftPanelWidth(nextWidth);
+    else setRightPanelWidth(nextWidth);
+  };
+
+  const beginPanelResize = (side: PanelSide, event: React.PointerEvent<HTMLDivElement>) => {
+    if (event.button !== 0 || (event.target as HTMLElement).closest('button')) return;
+    const isOpen = side === 'left' ? leftPanelOpen : rightPanelOpen;
+    if (!isOpen) return;
+    event.currentTarget.setPointerCapture(event.pointerId);
+    panelResizeRef.current = {
+      side,
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startWidth: side === 'left' ? leftPanelWidth : rightPanelWidth,
+    };
+  };
+
+  const continuePanelResize = (event: React.PointerEvent<HTMLDivElement>) => {
+    const resize = panelResizeRef.current;
+    if (!resize || resize.pointerId !== event.pointerId) return;
+    const direction = resize.side === 'left' ? 1 : -1;
+    setPanelWidth(resize.side, resize.startWidth + (event.clientX - resize.startX) * direction);
+  };
+
+  const endPanelResize = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (panelResizeRef.current?.pointerId === event.pointerId) panelResizeRef.current = null;
+  };
+
+  const resizePanelWithKeyboard = (side: PanelSide, event: React.KeyboardEvent<HTMLElement>) => {
+    const currentWidth = side === 'left' ? leftPanelWidth : rightPanelWidth;
+    const direction = side === 'left' ? 1 : -1;
+    if (event.key === 'Home') setPanelWidth(side, 220);
+    else if (event.key === 'End') setPanelWidth(side, 520);
+    else if (event.key === 'ArrowLeft') setPanelWidth(side, currentWidth - 20 * direction);
+    else if (event.key === 'ArrowRight') setPanelWidth(side, currentWidth + 20 * direction);
+    else return;
+    event.preventDefault();
+  };
+
   const undo = () => setHistory(h => {
     if (!h.length) return h;
     const previous = h[h.length - 1];
@@ -739,8 +786,8 @@ export default function PakistanMapStudio() {
         <div className="header-actions"><button onClick={undo} disabled={!history.length} aria-label="Undo">↶</button><button onClick={redo} disabled={!future.length} aria-label="Redo">↷</button><button className="export" onClick={exportPng}>Export PNG</button><button className="export share-button" disabled={!totalAssigned} onClick={shareMap}>{shareStatus}</button><button className="export dark finalize-button" disabled={!totalAssigned} onClick={() => setFinalized(true)}>Finalize map →</button></div>
       </header>
 
-      <section className="studio">
-        <aside className="control-panel">
+      <section className="studio" style={{ '--left-panel-width': `${leftPanelOpen ? leftPanelWidth : 0}px`, '--right-panel-width': `${rightPanelOpen ? rightPanelWidth : 0}px` } as React.CSSProperties}>
+        <aside id="map-control-panel" className="control-panel" hidden={!leftPanelOpen}>
           <div className="eyebrow"><span>01</span> CHOOSE THE BUILDING BLOCK</div>
           <div className="segmented" role="group" aria-label="Map detail">
             <button className={level === 'divisions' ? 'selected' : ''} onClick={() => setLevel('divisions')}>Divisions <b>{Object.keys(DIVISION_DISTRICTS).length}</b></button>
@@ -792,6 +839,11 @@ export default function PakistanMapStudio() {
           <div className="tip"><b>TIP</b><span>Click and drag across neighbouring areas to paint faster.</span></div>
         </aside>
 
+        <div className={`panel-resizer left ${leftPanelOpen ? '' : 'collapsed'}`} onPointerDown={event => beginPanelResize('left', event)} onPointerMove={continuePanelResize} onPointerUp={endPanelResize} onPointerCancel={endPanelResize}>
+          <button type="button" className="panel-toggle" aria-label={leftPanelOpen ? 'Collapse map controls' : 'Open map controls'} aria-controls="map-control-panel" aria-expanded={leftPanelOpen} onClick={() => setLeftPanelOpen(open => !open)}>{leftPanelOpen ? '‹' : '›'}</button>
+          <span className="panel-grip" role="separator" aria-label="Resize map controls panel" aria-orientation="vertical" aria-valuemin={220} aria-valuemax={520} aria-valuenow={leftPanelWidth} tabIndex={leftPanelOpen ? 0 : -1} onKeyDown={event => resizePanelWithKeyboard('left', event)}/>
+        </div>
+
         <section className="map-stage">
           <div className="map-toolbar">
             <div className="search-wrap"><span>⌕</span><input value={query} onChange={e => setQuery(e.target.value)} placeholder={`Find a ${level === 'divisions' ? 'division' : level === 'districts' ? 'district' : 'tehsil'}…`} aria-label="Search areas"/>
@@ -831,7 +883,12 @@ export default function PakistanMapStudio() {
           </div>
         </section>
 
-        <aside className="summary-panel">
+        <div className={`panel-resizer right ${rightPanelOpen ? '' : 'collapsed'}`} onPointerDown={event => beginPanelResize('right', event)} onPointerMove={continuePanelResize} onPointerUp={endPanelResize} onPointerCancel={endPanelResize}>
+          <button type="button" className="panel-toggle" aria-label={rightPanelOpen ? 'Collapse map summary' : 'Open map summary'} aria-controls="map-summary-panel" aria-expanded={rightPanelOpen} onClick={() => setRightPanelOpen(open => !open)}>{rightPanelOpen ? '›' : '‹'}</button>
+          <span className="panel-grip" role="separator" aria-label="Resize map summary panel" aria-orientation="vertical" aria-valuemin={220} aria-valuemax={520} aria-valuenow={rightPanelWidth} tabIndex={rightPanelOpen ? 0 : -1} onKeyDown={event => resizePanelWithKeyboard('right', event)}/>
+        </div>
+
+        <aside id="map-summary-panel" className="summary-panel" hidden={!rightPanelOpen}>
           <div className="eyebrow"><span>03</span> YOUR NEW MAP</div>
           {activeRow && <section className="live-vitals" style={{ '--province-color': activeRow.color } as React.CSSProperties}>
             <div className="live-vitals-head"><div><small>{activeRow.kind}</small><h2>{activeRow.name}</h2>{activeRow.capital && <span>Capital · {activeRow.capital}</span>}</div><b>{activeRow.members.length}</b></div>
