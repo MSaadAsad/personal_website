@@ -1,0 +1,31 @@
+{
+  "generated": "2026-09-03",
+  "sources": {
+    "GB": "Election Commission of Gilgit-Baltistan / 2026 general election",
+    "AJK": "AJK Election Commission announcements / 2026 general election"
+  },
+  "notes": {
+    "GB": "All 24 directly elected seats.",
+    "AJK": "Completed geographically mappable seats only; postponed or pending Poonch-Sudhnoti contests and refugee seats are excluded."
+  },
+  "districts": [
+    {"region":"GB","district":"Gilgit","parties":{"PPP":2,"PML-N":1}},
+    {"region":"GB","district":"Nagar","parties":{"PPP":2}},
+    {"region":"GB","district":"Hunza","parties":{"IND":1}},
+    {"region":"GB","district":"Skardu","parties":{"PPP":3,"MWM":1}},
+    {"region":"GB","district":"Kharmang","parties":{"PPP":1}},
+    {"region":"GB","district":"Shigar","parties":{"PPP":1}},
+    {"region":"GB","district":"Astore","parties":{"PML-N":2}},
+    {"region":"GB","district":"Diamer","parties":{"IND":2,"PPP":1,"PML-N":1}},
+    {"region":"GB","district":"Ghizer","parties":{"PPP":1,"PML-N":1,"IND":1}},
+    {"region":"GB","district":"Ghanche","parties":{"PML-N":1,"IND":2}},
+    {"region":"AJK","district":"Mirpur","parties":{"PML-N":2,"PPP":2}},
+    {"region":"AJK","district":"Bhimber","parties":{"PML-N":3}},
+    {"region":"AJK","district":"Kotli","parties":{"PML-N":4,"PPP":2}},
+    {"region":"AJK","district":"Bagh","parties":{"ADB":1,"PPP":1,"PML-N":1}},
+    {"region":"AJK","district":"Haveli","parties":{"PPP":1}},
+    {"region":"AJK","district":"Neelum","parties":{"PML-N":1,"PPP":1}},
+    {"region":"AJK","district":"Muzaffarabad","parties":{"PML-N":3,"PPP":2}},
+    {"region":"AJK","district":"Jhelum Valley","parties":{"PML-N":1,"PPP":1}}
+  ]
+}

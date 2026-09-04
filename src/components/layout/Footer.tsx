@@ -2,9 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { Container } from './Container';
 
 export function Footer() {
+  const pathname = usePathname();
   const [variant, setVariant] = useState<'control' | 'test'>('control');
 
   useEffect(() => {
@@ -39,7 +41,7 @@ export function Footer() {
   );
 
   return (
-    <footer className="border-t border-concrete-700/60 bg-[var(--color-concrete-block)] mt-32">
+    <footer className={`border-t border-concrete-700/60 bg-[var(--color-concrete-block)] ${pathname === '/pakistan-map' ? 'mt-0' : 'mt-32'}`}>
       <Container className="py-0 flex flex-col md:flex-row items-stretch">
         {variant === 'test' ? (
           <>
