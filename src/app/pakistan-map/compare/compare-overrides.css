@@ -9,6 +9,60 @@
   text-transform: uppercase;
 }
 
+.metric-picker {
+  display: grid;
+  grid-template-columns: 150px minmax(280px, 560px);
+  align-items: center;
+  gap: 18px;
+  padding: 18px 5vw;
+  border-bottom: 2px solid #777c80;
+  background: #b2b4b3;
+}
+
+.metric-picker label {
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.metric-picker > div {
+  position: relative;
+}
+
+.metric-picker select {
+  width: 100%;
+  min-height: 52px;
+  appearance: none;
+  padding: 10px 56px 10px 17px;
+  border: 2px solid #315da8;
+  border-radius: 0;
+  background: #cececb;
+  color: #292d31;
+  font: 750 15px var(--font-mono), monospace;
+  cursor: pointer;
+}
+
+.metric-picker select:focus-visible {
+  outline: 3px solid var(--color-sky-accent);
+  outline-offset: 3px;
+}
+
+.metric-picker > div > span {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  bottom: 2px;
+  display: grid;
+  width: 48px;
+  place-items: center;
+  border-left: 2px solid #315da8;
+  background: var(--color-sky-accent);
+  color: #fff;
+  font-size: 26px;
+  pointer-events: none;
+}
+
 .comparison-mode {
   display: flex;
   width: fit-content;
@@ -156,6 +210,12 @@
 }
 
 @media (max-width: 760px) {
+  .metric-picker {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    padding: 14px 5vw;
+  }
+
   .comparison-column-chart {
     grid-template-columns: 48px minmax(700px, 1fr);
   }
