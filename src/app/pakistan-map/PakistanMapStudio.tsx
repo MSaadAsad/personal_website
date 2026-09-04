@@ -426,7 +426,7 @@ export default function PakistanMapStudio() {
                 <div className="name-editor"><input className="province-name" value={province.name} aria-label={`Map unit ${index + 1} name`} onChange={e => setProvinces(items => items.map(item => item.id === province.id ? { ...item, name: e.target.value } : item))}/><button onClick={e=>{e.stopPropagation();const input=e.currentTarget.previousElementSibling as HTMLInputElement;input.focus();input.select()}} aria-label={`Rename ${province.name}`} title={`Rename ${province.name}`}>✎</button></div>
                 <button className={`unit-kind ${province.kind}`} onClick={e => { e.stopPropagation(); setProvinces(items => items.map(item => item.id === province.id ? { ...item, kind: item.kind === 'province' ? 'territory' : 'province' } : item)); }} aria-label={`Set ${province.name} as ${province.kind === 'province' ? 'territory' : 'province'}`}>{province.kind}</button>
                 <span className="count">{count}</span>
-                <button className="remove-unit" disabled={provinces.length <= 1} onClick={e => { e.stopPropagation(); removeProvince(province.id); }} aria-label={`Delete ${province.name}`} title={provinces.length <= 1 ? 'At least one map unit is required' : `Delete ${province.name}`}>×</button>
+                <button className="remove-unit" disabled={provinces.length <= 1} onClick={e => { e.stopPropagation(); removeProvince(province.id); }} aria-label={`Delete ${province.name}`} title={provinces.length <= 1 ? 'At least one map unit is required' : `Delete ${province.name}`}><span className="trash-icon" aria-hidden="true"/></button>
               </div>;
             })}
           </div>

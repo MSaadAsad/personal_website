@@ -183,9 +183,12 @@
 .count { color:#44494e; font:600 13px var(--font-mono),monospace; }
 .unit-kind { min-height:30px; padding:5px 7px; border:1px solid #73787c; background:#d0d0cd; color:#34393d; font:750 9px var(--font-mono),monospace !important; text-transform:uppercase; cursor:pointer; }
 .unit-kind.territory { background:#626970; color:#fff; border-color:#3f454a; }
-.remove-unit { width:30px; height:30px; padding:0; border:1px solid #777c80; background:#b8bab9; color:#662f2b; font:750 21px/1 var(--font-mono),monospace; cursor:pointer; }
+.remove-unit { display:grid; place-items:center; width:30px; height:30px; padding:0; border:1px solid #777c80; background:#b8bab9; color:#42494f; cursor:pointer; }
 .remove-unit:hover:not(:disabled) { background:#86483f; border-color:#66342e; color:#fff; }
 .remove-unit:disabled { opacity:.28; cursor:not-allowed; }
+.trash-icon { position:relative; display:block; width:12px; height:13px; margin-top:3px; border:2px solid currentColor; border-top:0; }
+.trash-icon::before { content:""; position:absolute; left:-3px; top:-5px; width:14px; border-top:2px solid currentColor; }
+.trash-icon::after { content:""; position:absolute; left:3px; top:-8px; width:4px; height:3px; border:2px solid currentColor; border-bottom:0; }
 .add-province { min-height:50px; margin-top:13px; border:2px dashed #6d7276; border-radius:2px; background:#c4c4c1; color:#32373b; font:700 14px var(--font-mono),monospace; }
 .tip { margin-top:30px; padding-top:20px; border-top:2px solid #85898d; color:#44494d; font:13px/1.6 var(--font-mono),monospace; }
 .tip b { color:#435267; font-size:13px; }
