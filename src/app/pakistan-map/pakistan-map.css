@@ -193,7 +193,7 @@
 .search-results { top:51px; background:#d8d8d5; border:2px solid #666b70; box-shadow:6px 6px 0 rgba(49,53,57,.3); }
 .search-results button { padding:12px 14px; border-bottom:1px solid #8f9295; font-size:15px; }
 .search-results small { color:#50555a; font:12px var(--font-mono),monospace; }
-.map-tools { display:flex; flex:none; border:2px solid #686d71; }
+.map-tools { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); flex:none; width:220px; border:2px solid #686d71; }
 .map-tools button { min-height:42px; padding:8px 13px; border:0; background:#c7c7c4; color:#34393d; font:750 12px var(--font-mono),monospace; text-transform:uppercase; cursor:pointer; }
 .map-tools button+button { border-left:1px solid #686d71; }
 .map-tools button.selected { background:#435267; color:#fff; }
