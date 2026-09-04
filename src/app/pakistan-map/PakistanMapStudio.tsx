@@ -296,6 +296,14 @@ export default function PakistanMapStudio() {
   }), [assembly, assignments, darbar, districtOwners, features, level, provinces, regionalAssembly, tehsilDataByKey]);
   const assignedArea = finalRows.reduce((sum, row) => sum + row.area, 0);
   const activeRow = finalRows.find(row => row.id === active);
+  const countryPolitics = finalRows.filter(row => row.kind === 'province' && row.members.length).reduce((summary, row) => {
+    Object.entries(row.partySeats).forEach(([party,seats]) => { summary.assembly[party] = (summary.assembly[party] || 0) + seats; });
+    Object.entries(row.senateSeats).forEach(([party,seats]) => { summary.senate[party] = (summary.senate[party] || 0) + seats; });
+    summary.provinces++;
+    return summary;
+  }, { assembly:{} as Record<string,number>, senate:{} as Record<string,number>, provinces:0 });
+  const countryAssemblySeats = Object.values(countryPolitics.assembly).reduce((sum,seats)=>sum+seats,0);
+  const countrySenateSeats = Object.values(countryPolitics.senate).reduce((sum,seats)=>sum+seats,0);
   const selectedDistrictKeyRaw = selectedFeature ? normalise(selectedFeature.properties.district_name) : '';
   const selectedDistrictKey = DISTRICT_ALIASES[selectedDistrictKeyRaw] || selectedDistrictKeyRaw;
   const selectedDistrict = selectedDistrictKey ? darbar?.districts[selectedDistrictKey] : null;
@@ -495,6 +503,13 @@ export default function PakistanMapStudio() {
       {finalized && <div className="final-overlay" role="dialog" aria-modal="true" aria-labelledby="final-title" onMouseDown={e => e.target === e.currentTarget && setFinalized(false)}>
         <section className="final-sheet">
           <div className="final-head"><div><span>PROVINCE PLAN · {level.toUpperCase()}</span><h1 id="final-title">{mapName || 'Untitled province plan'}</h1><p>{totalAssigned} of {features.length} {level} assigned across {provinces.filter(p => finalRows.find(r => r.id === p.id)?.members.length).length} populated provinces and territories.</p></div><div className="final-head-actions"><button className="compare-button" onClick={openComparison}>Compare provinces ↗</button><button onClick={() => setFinalized(false)} aria-label="Close summary">×</button></div></div>
+          <section className="country-politics">
+            <div className="country-politics-head"><div><span>COUNTRY-WIDE OVERVIEW</span><h2>Assembly composition</h2></div><p>{countryPolitics.provinces} provinces counted · territories excluded</p></div>
+            <div className="country-politics-grid">
+              <article><div className="politics-title"><b>2024 National Assembly replay</b><span>{countryAssemblySeats} directly elected seats</span></div><div className="party-bar">{Object.entries(countryPolitics.assembly).sort((a,b)=>b[1]-a[1]).map(([party,seats])=><i key={party} style={{width:`${seats/Math.max(countryAssemblySeats,1)*100}%`,background:PARTY_COLORS[party]||'#9b958a'}} title={`${party}: ${seats}`}/>)}</div><div className="party-list">{Object.entries(countryPolitics.assembly).sort((a,b)=>b[1]-a[1]).map(([party,seats])=><span key={party}><i style={{background:PARTY_COLORS[party]||'#9b958a'}}/>{party}<b>{seats}</b></span>)}</div></article>
+              <article><div className="politics-title"><b>Country-wide Senate projection</b><span>{countrySenateSeats} seats · 23 per proposed province</span></div><div className="party-bar">{Object.entries(countryPolitics.senate).sort((a,b)=>b[1]-a[1]).map(([party,seats])=><i key={party} style={{width:`${seats/Math.max(countrySenateSeats,1)*100}%`,background:PARTY_COLORS[party]||'#9b958a'}} title={`${party}: ${seats}`}/>)}</div><div className="party-list">{Object.entries(countryPolitics.senate).sort((a,b)=>b[1]-a[1]).map(([party,seats])=><span key={party}><i style={{background:PARTY_COLORS[party]||'#9b958a'}}/>{party}<b>{seats}</b></span>)}</div></article>
+            </div>
+          </section>
           {rankedOpen && <aside className="rank-drawer" aria-label="Rank proposed provinces by indicator">
             <div className="rank-head"><div><span>VITAL STATISTICS</span><h2>Compare provinces</h2><p>Ranked highest to lowest for the selected indicator.</p></div><button onClick={() => setRankedOpen(false)} aria-label="Close comparison">×</button></div>
             <div className="rank-picker" role="tablist" aria-label="Choose indicator">{RANK_METRICS.map(metric => <button key={metric.key} className={rankMetric === metric.key ? 'selected' : ''} onClick={() => setRankMetric(metric.key)} role="tab" aria-selected={rankMetric === metric.key}>{metric.label}</button>)}</div>

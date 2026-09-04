@@ -327,6 +327,14 @@
 .final-footer p { max-width:720px; color:#34393d; font:12px/1.65 var(--font-mono),monospace; }
 .final-footer p b { margin-bottom:5px; font-size:13px; }
 .final-footer button { min-height:48px; padding:11px 15px; border:2px solid #676c70; background:#c5c5c2; font:700 12px var(--font-mono),monospace; }
+.country-politics { padding:24px 34px 28px; border-bottom:2px solid #777c80; background:#b8bab9; }
+.country-politics-head { display:flex; align-items:end; justify-content:space-between; gap:20px; margin-bottom:20px; }
+.country-politics-head span { color:var(--color-sky-accent); font:750 11px var(--font-mono),monospace; letter-spacing:.11em; }
+.country-politics-head h2 { margin:6px 0 0; font:750 30px var(--font-serif),serif; }
+.country-politics-head p { margin:0; color:#4b5155; font:11px var(--font-mono),monospace; text-transform:uppercase; }
+.country-politics-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+.country-politics-grid article { padding:18px; border:2px solid #858a8d; background:#c8c8c5; box-shadow:4px 4px 0 #929596; }
+.country-politics-grid .party-list { margin-top:13px; }
 
 .header-actions .dark,
 .final-footer button.dark,
@@ -341,4 +349,4 @@
 }
 
 @media (max-width:1150px) { .studio { height:auto; min-height:calc(100vh - 82px); grid-template-columns:300px 1fr; } .summary-panel { grid-column:1/-1; border-left:0; border-top:2px solid #73777b; display:grid; grid-template-columns:repeat(3,1fr); gap:22px; } .summary-panel .eyebrow,.source-note { grid-column:1/-1; } .naqsha-header { height:82px; padding:0 16px; } .map-name-input { display:none; } }
-@media (max-width:720px) { .naqsha-header { height:76px; } .brand { font-size:14px; } .brand small { font-size:10px; } .brand-mark { width:44px; height:44px; } .header-actions button:not(.dark) { display:none; } .header-actions .export.dark { font-size:0; padding:0 12px; } .header-actions .export.dark:after { content:'SAVE'; font-size:13px; } .studio { display:flex; flex-direction:column; } .control-panel { padding:22px 16px; border-right:0; border-bottom:2px solid #73777b; } .province-title,.hint,.tip { display:none; } .province-list { flex-direction:row; overflow-x:auto; padding:10px 3px; } .province-row { min-width:190px; } .map-stage { height:70vh; min-height:560px; } .summary-panel { display:block; } .final-overlay { padding:8px; } .final-sheet { max-height:calc(100vh - 16px); } .final-head { padding:24px 18px; } .final-grid { display:block; } .final-grid article:nth-child(odd) { border-right:0; } .final-grid article { padding:24px 18px; } .final-metrics { grid-template-columns:repeat(2,minmax(110px,1fr)); } .final-footer { align-items:stretch; flex-direction:column; padding:20px 18px; } .final-footer>div { flex-wrap:wrap; } .final-footer>div button { flex:1; } }
+@media (max-width:720px) { .naqsha-header { height:76px; } .brand { font-size:14px; } .brand small { font-size:10px; } .brand-mark { width:44px; height:44px; } .header-actions button:not(.dark) { display:none; } .header-actions .export.dark { font-size:0; padding:0 12px; } .header-actions .export.dark:after { content:'SAVE'; font-size:13px; } .studio { display:flex; flex-direction:column; } .control-panel { padding:22px 16px; border-right:0; border-bottom:2px solid #73777b; } .province-title,.hint,.tip { display:none; } .province-list { flex-direction:row; overflow-x:auto; padding:10px 3px; } .province-row { min-width:190px; } .map-stage { height:70vh; min-height:560px; } .summary-panel { display:block; } .final-overlay { padding:8px; } .final-sheet { max-height:calc(100vh - 16px); } .final-head { padding:24px 18px; } .country-politics { padding:22px 18px; } .country-politics-head { display:block; } .country-politics-head p { margin-top:8px; } .country-politics-grid { grid-template-columns:1fr; } .final-grid { display:block; } .final-grid article:nth-child(odd) { border-right:0; } .final-grid article { padding:24px 18px; } .final-metrics { grid-template-columns:repeat(2,minmax(110px,1fr)); } .final-footer { align-items:stretch; flex-direction:column; padding:20px 18px; } .final-footer>div { flex-wrap:wrap; } .final-footer>div button { flex:1; } }
