@@ -151,7 +151,7 @@ export default function ProvinceComparison(){
             {features.map((feature,index)=>{const value=mapValue(feature);const depth=value==null?0:.18+.82*Math.max(0,Math.min(1,value/maximum));return <path key={index} d={geometryPath(feature.geometry)} className={value==null?'depth-region unavailable':'depth-region'} style={value==null?undefined:{fillOpacity:depth}}><title>{value==null?'No comparable data':formatScale(value)}</title></path>})}
             {proposedBoundaries&&<path className="proposed-province-boundaries" d={proposedBoundaries}/>}
           </svg>
-          <div className="depth-legend"><span>Lower</span><i/><span>Higher</span><b>Unavailable</b><em>Heavy line · proposed province</em></div>
+          <div className="depth-legend"><span>Lower</span><i/><span>Higher</span><b>Unavailable</b><em>Proposed province</em></div>
         </div>
         <ol className="depth-ranking">{ranked.map((row,index)=><li key={row.id}><div className="depth-rank-main"><span>{String(index+1).padStart(2,'0')}</span><b>{row.name}<em>{row.kind}</em></b><strong>{formatValue(row)}</strong></div><span className="depth-rank-bar"><i style={{width:`${Math.max(0,Math.min(100,metricValue(row)/maximum*100))}%`}}/></span></li>)}</ol>
       </div>}
