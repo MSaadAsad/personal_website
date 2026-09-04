@@ -356,7 +356,13 @@
 /* Resizable, collapsible workspace panels. */
 .studio {
   grid-template-columns:var(--left-panel-width,340px) 14px minmax(360px,1fr) 14px var(--right-panel-width,310px);
+  grid-template-areas:'controls left-rail map right-rail summary';
 }
+.control-panel { grid-area:controls; }
+.panel-resizer.left { grid-area:left-rail; }
+.map-stage { grid-area:map; }
+.panel-resizer.right { grid-area:right-rail; }
+.summary-panel { grid-area:summary; }
 .control-panel,.summary-panel { min-width:0; }
 .control-panel[hidden],.summary-panel[hidden] { display:none; }
 .panel-resizer {
