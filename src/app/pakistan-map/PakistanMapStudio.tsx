@@ -329,6 +329,15 @@ export default function PakistanMapStudio() {
     setProvinces(p => [...p, next]); setActive(id);
   };
 
+  const removeProvince = (id: string) => {
+    if (provinces.length <= 1) return;
+    const remaining = provinces.filter(province => province.id !== id);
+    setProvinces(remaining);
+    setAssignments(current => Object.fromEntries(Object.entries(current).filter(([, owner]) => owner !== id)));
+    if (active === id) setActive(remaining[0].id);
+    setHistory([]); setFuture([]);
+  };
+
   const clearMap = () => {
     setHistory(h => [...h, assignments]); setAssignments({}); setFuture([]);
     localStorage.removeItem(`naya-naqsha-${level}`);
@@ -408,6 +417,7 @@ export default function PakistanMapStudio() {
                 <input className="province-name" value={province.name} aria-label={`Province ${index + 1} name`} onChange={e => setProvinces(items => items.map(item => item.id === province.id ? { ...item, name: e.target.value } : item))}/>
                 <button className={`unit-kind ${province.kind}`} onClick={e => { e.stopPropagation(); setProvinces(items => items.map(item => item.id === province.id ? { ...item, kind: item.kind === 'province' ? 'territory' : 'province' } : item)); }} aria-label={`Set ${province.name} as ${province.kind === 'province' ? 'territory' : 'province'}`}>{province.kind}</button>
                 <span className="count">{count}</span>
+                <button className="remove-unit" disabled={provinces.length <= 1} onClick={e => { e.stopPropagation(); removeProvince(province.id); }} aria-label={`Delete ${province.name}`} title={provinces.length <= 1 ? 'At least one map unit is required' : `Delete ${province.name}`}>×</button>
               </div>;
             })}
           </div>
