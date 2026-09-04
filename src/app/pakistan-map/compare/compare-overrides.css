@@ -35,48 +35,101 @@
   background: #b2b4b3;
 }
 
-.metric-picker label {
+.metric-picker-label {
   font-size: 13px;
   font-weight: 800;
   letter-spacing: .08em;
   text-transform: uppercase;
 }
 
-.metric-picker > div {
+.metric-select {
   position: relative;
+  z-index: 20;
 }
 
-.metric-picker select {
+.metric-select-trigger {
+  display: grid;
+  grid-template-columns: 1fr 48px;
+  align-items: stretch;
   width: 100%;
   min-height: 52px;
-  appearance: none;
-  padding: 10px 56px 10px 17px;
+  padding: 0;
   border: 2px solid #315da8;
   border-radius: 0;
   background: #cececb;
   color: #292d31;
   font: 750 15px var(--font-mono), monospace;
+  text-align: left;
   cursor: pointer;
 }
 
-.metric-picker select:focus-visible {
-  outline: 3px solid var(--color-sky-accent);
-  outline-offset: 3px;
+.metric-select-trigger > span {
+  align-self: center;
+  padding: 10px 17px;
 }
 
-.metric-picker > div > span {
-  position: absolute;
-  top: 2px;
-  right: 2px;
-  bottom: 2px;
+.metric-select-trigger > b {
   display: grid;
-  width: 48px;
   place-items: center;
   border-left: 2px solid #315da8;
   background: var(--color-sky-accent);
   color: #fff;
-  font-size: 26px;
-  pointer-events: none;
+  font-size: 24px;
+}
+
+.metric-select-trigger:focus-visible,
+.metric-select-menu button:focus-visible {
+  outline: 3px solid var(--color-sky-accent);
+  outline-offset: 3px;
+}
+
+.metric-select-menu {
+  position: absolute;
+  top: calc(100% + 7px);
+  left: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  width: min(720px, calc(95vw - 168px));
+  padding: 8px;
+  border: 2px solid #555c61;
+  background: #bfc1c0;
+  box-shadow: 7px 7px 0 rgba(48, 53, 57, .48), inset 1px 1px rgba(255,255,255,.45);
+}
+
+.metric-select-menu button {
+  display: grid;
+  grid-template-columns: 28px 1fr 20px;
+  align-items: center;
+  gap: 8px;
+  min-height: 46px;
+  padding: 8px 10px;
+  border: 1px solid #83888b;
+  background: #d1d1ce;
+  color: #292d31;
+  font: 750 12px var(--font-mono), monospace;
+  text-align: left;
+  cursor: pointer;
+}
+
+.metric-select-menu button:hover {
+  background: #e0e0dc;
+}
+
+.metric-select-menu button.selected {
+  border-color: #315da8;
+  background: var(--color-sky-accent);
+  color: #fff;
+}
+
+.metric-select-menu button > span {
+  opacity: .65;
+  font-size: 10px;
+}
+
+.metric-select-menu button > i {
+  font-size: 15px;
+  font-style: normal;
+  text-align: right;
 }
 
 .comparison-mode {
@@ -234,6 +287,13 @@
     grid-template-columns: 1fr;
     gap: 8px;
     padding: 14px 5vw;
+  }
+
+  .metric-select-menu {
+    grid-template-columns: 1fr;
+    width: 100%;
+    max-height: 60vh;
+    overflow-y: auto;
   }
 
   .comparison-column-chart {

@@ -37,6 +37,7 @@ export default function ProvinceComparison(){
   const [features,setFeatures]=useState<Feature[]>([]);
   const [data,setData]=useState<Darbar|null>(null);
   const [metric,setMetric]=useState<Metric>('population');
+  const [metricOpen,setMetricOpen]=useState(false);
   const [outOfSchoolMode,setOutOfSchoolMode]=useState<'total'|'perCapita'>('total');
   useEffect(()=>{const raw=new URLSearchParams(location.hash.slice(1)).get('map');if(!raw)return;try{const parsed=decode(raw);setConfig(parsed);Promise.all([fetch(`/data/pakistan-map/${parsed.l}.geojson`).then(r=>r.json()),fetch('/data/pakistan-map/datadarbar.json').then(r=>r.json())]).then(([geo,darbar])=>{setFeatures(geo.features);setData(darbar)})}catch{}},[]);
   const rows=useMemo<Row[]>(()=>{
@@ -83,8 +84,11 @@ export default function ProvinceComparison(){
       <div><span>PROVINCE PLAN · {config.l.toUpperCase()}</span><h1>{config.n}</h1><p>{rows.length} populated provinces and territories compared using the same matched source data as the profiles.</p></div>
     </section>
     <section className="metric-picker">
-      <label htmlFor="comparison-metric">Compare by</label>
-      <div><select id="comparison-metric" value={metric} onChange={event=>setMetric(event.target.value as Metric)}>{METRICS.map(item=><option key={item.key} value={item.key}>{item.label}</option>)}</select><span aria-hidden="true">⌄</span></div>
+      <span className="metric-picker-label" id="comparison-metric-label">Compare by</span>
+      <div className={`metric-select ${metricOpen?'open':''}`}>
+        <button className="metric-select-trigger" type="button" aria-labelledby="comparison-metric-label comparison-metric-value" aria-haspopup="listbox" aria-expanded={metricOpen} onClick={()=>setMetricOpen(open=>!open)}><span id="comparison-metric-value">{meta.label}</span><b aria-hidden="true">{metricOpen?'×':'⌄'}</b></button>
+        {metricOpen&&<div className="metric-select-menu" role="listbox" aria-labelledby="comparison-metric-label">{METRICS.map((item,index)=><button type="button" role="option" aria-selected={metric===item.key} className={metric===item.key?'selected':''} key={item.key} onClick={()=>{setMetric(item.key);setMetricOpen(false)}}><span>{String(index+1).padStart(2,'0')}</span><b>{item.label}</b>{metric===item.key&&<i aria-hidden="true">✓</i>}</button>)}</div>}
+      </div>
     </section>
     <section className="comparison-view">
       <div className="comparison-title"><div><span>{kicker}</span><h2>{meta.label}</h2></div><p>{unitLabel}{meta.lowBetter?' · lower is better':''}</p></div>
