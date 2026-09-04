@@ -201,10 +201,17 @@
 .search-results { top:51px; background:#d8d8d5; border:2px solid #666b70; box-shadow:6px 6px 0 rgba(49,53,57,.3); }
 .search-results button { padding:12px 14px; border-bottom:1px solid #8f9295; font-size:15px; }
 .search-results small { color:#50555a; font:12px var(--font-mono),monospace; }
-.map-tools { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); flex:none; width:220px; border:2px solid #686d71; }
+.map-tools { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); flex:none; width:270px; border:2px solid #686d71; }
 .map-tools button { min-height:42px; padding:8px 13px; border:0; background:#c7c7c4; color:#34393d; font:750 12px var(--font-mono),monospace; text-transform:uppercase; cursor:pointer; }
 .map-tools button+button { border-left:1px solid #686d71; }
 .map-tools button.selected { background:#435267; color:#fff; }
+.map-paper svg.pannable { cursor:grab; touch-action:none; }
+.map-paper svg.pannable:active { cursor:grabbing; }
+.map-navigation { position:absolute; z-index:6; top:22px; left:22px; display:grid; grid-template-columns:repeat(3,42px); border:2px solid #315da8; box-shadow:4px 4px 0 rgba(43,50,57,.34); }
+.map-navigation button { width:42px; height:42px; padding:0; border:0; border-right:1px solid #315da8; background:var(--color-sky-accent); color:#fff; font:750 22px/1 var(--font-mono),monospace; cursor:pointer; }
+.map-navigation button:last-child { border-right:0; font-size:17px; }
+.map-navigation button:hover { filter:brightness(1.08); }
+.map-navigation button:focus-visible { position:relative; outline:3px solid #fff; outline-offset:-5px; }
 .map-paper { background-color:#dbe7ed; background-image:linear-gradient(rgba(218,226,230,.38),rgba(218,226,230,.38)),linear-gradient(rgba(67,82,103,.12) 1px,transparent 1px),linear-gradient(90deg,rgba(67,82,103,.12) 1px,transparent 1px),url('/assets/site-background.webp'); background-size:auto,28px 28px,28px 28px,cover; background-position:center,0 0,0 0,top center; background-repeat:no-repeat,repeat,repeat,no-repeat; box-shadow:inset 0 0 22px rgba(42,58,70,.16); }
 .region { stroke:#555b60; stroke-width:.9; }
 .north { right:22px; top:22px; color:#383d41; font:700 14px var(--font-mono),monospace; }

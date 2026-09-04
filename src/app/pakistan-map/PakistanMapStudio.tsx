@@ -139,7 +139,8 @@ export default function PakistanMapStudio() {
   const [query, setQuery] = useState('');
   const [hovered, setHovered] = useState<Feature | null>(null);
   const [painting, setPainting] = useState(false);
-  const [toolMode, setToolMode] = useState<'paint' | 'inspect'>('paint');
+  const [toolMode, setToolMode] = useState<'paint' | 'inspect' | 'pan'>('paint');
+  const [mapView, setMapView] = useState({ x: 0, y: 0, width: WIDTH, height: HEIGHT });
   const [selectedFeature, setSelectedFeature] = useState<Feature | null>(null);
   const [finalized, setFinalized] = useState(false);
   const [rankedOpen, setRankedOpen] = useState(false);
@@ -151,6 +152,7 @@ export default function PakistanMapStudio() {
   const [regionalAssembly, setRegionalAssembly] = useState<RegionalAssemblyData | null>(null);
   const [paletteOpen, setPaletteOpen] = useState<string | null>(null);
   const svgRef = useRef<SVGSVGElement>(null);
+  const panRef = useRef<{ pointerId:number; clientX:number; clientY:number; view:typeof mapView } | null>(null);
   const hashLoaded = useRef(false);
   const pendingSharedAssignments = useRef<Record<string, string> | null>(null);
   const hasAssignments = Object.keys(assignments).length > 0;
@@ -313,6 +315,17 @@ export default function PakistanMapStudio() {
     setAssignments(current => ({ ...current, [id]: active }));
   }, [active, assignments, level]);
 
+  const zoomMap = useCallback((factor:number, anchorX = .5, anchorY = .5) => {
+    setMapView(view => {
+      const width = Math.max(220, Math.min(WIDTH, view.width * factor));
+      const height = width * HEIGHT / WIDTH;
+      const x = Math.max(0, Math.min(WIDTH - width, view.x + (view.width - width) * anchorX));
+      const y = Math.max(0, Math.min(HEIGHT - height, view.y + (view.height - height) * anchorY));
+      return { x, y, width, height };
+    });
+  }, []);
+  const resetMapView = () => setMapView({ x:0, y:0, width:WIDTH, height:HEIGHT });
+
   const undo = () => setHistory(h => {
     if (!h.length) return h;
     const previous = h[h.length - 1];
@@ -364,6 +377,7 @@ export default function PakistanMapStudio() {
     if (!svgRef.current) return;
     const clone = svgRef.current.cloneNode(true) as SVGSVGElement;
     clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+    clone.setAttribute('viewBox', `0 0 ${WIDTH} ${HEIGHT}`);
     const canvas = document.createElement('canvas'); canvas.width = 1520; canvas.height = 1800;
     const context = canvas.getContext('2d'); if (!context) return;
     context.fillStyle = '#f5f0e7'; context.fillRect(0, 0, canvas.width, canvas.height);
@@ -439,19 +453,20 @@ export default function PakistanMapStudio() {
             <div className="search-wrap"><span>⌕</span><input value={query} onChange={e => setQuery(e.target.value)} placeholder={`Find a ${level === 'districts' ? 'district' : 'tehsil'}…`} aria-label="Search areas"/>
               {matches.length > 0 && <div className="search-results">{matches.map(f => <button key={featureId(f, level)} onClick={() => { setHovered(f); setSelectedFeature(f); setToolMode('inspect'); setQuery(''); }}>{featureName(f, level)}<small>{String(f.properties.district_name)} · {String(f.properties.province_name)}</small></button>)}</div>}
             </div>
-            <div className="map-tools" role="group" aria-label="Map interaction mode"><button className={toolMode === 'paint' ? 'selected' : ''} onClick={() => { setToolMode('paint'); setSelectedFeature(null); }}>Paint</button><button className={toolMode === 'inspect' ? 'selected' : ''} onClick={() => setToolMode('inspect')}>Inspect</button></div>
+            <div className="map-tools" role="group" aria-label="Map interaction mode"><button className={toolMode === 'paint' ? 'selected' : ''} onClick={() => { setToolMode('paint'); setSelectedFeature(null); }}>Paint</button><button className={toolMode === 'inspect' ? 'selected' : ''} onClick={() => setToolMode('inspect')}>Inspect</button><button className={toolMode === 'pan' ? 'selected' : ''} onClick={() => { setToolMode('pan'); setSelectedFeature(null); }}>Move</button></div>
           </div>
           <div className="map-paper">
             {!features.length && <div className="loading">Drawing boundaries…</div>}
-            <svg ref={svgRef} viewBox={`0 0 ${WIDTH} ${HEIGHT}`} role="img" aria-label={`Interactive map of Pakistan ${level}`}>
+            <svg ref={svgRef} className={toolMode === 'pan' ? 'pannable' : ''} viewBox={`${mapView.x} ${mapView.y} ${mapView.width} ${mapView.height}`} role="img" aria-label={`Interactive map of Pakistan ${level}`} onWheel={e=>{e.preventDefault();const rect=e.currentTarget.getBoundingClientRect();zoomMap(e.deltaY>0?1.16:.86,(e.clientX-rect.left)/rect.width,(e.clientY-rect.top)/rect.height)}} onPointerDown={e=>{if(toolMode!=='pan')return;e.currentTarget.setPointerCapture(e.pointerId);panRef.current={pointerId:e.pointerId,clientX:e.clientX,clientY:e.clientY,view:mapView}}} onPointerMove={e=>{const pan=panRef.current;if(!pan||pan.pointerId!==e.pointerId)return;const rect=e.currentTarget.getBoundingClientRect();const x=Math.max(0,Math.min(WIDTH-pan.view.width,pan.view.x-(e.clientX-pan.clientX)/rect.width*pan.view.width));const y=Math.max(0,Math.min(HEIGHT-pan.view.height,pan.view.y-(e.clientY-pan.clientY)/rect.height*pan.view.height));setMapView({...pan.view,x,y})}} onPointerUp={e=>{if(panRef.current?.pointerId===e.pointerId)panRef.current=null}} onPointerCancel={()=>{panRef.current=null}}>
               <g fillRule="evenodd">
                 {paths.map(({ feature, d }) => {
                   const id = featureId(feature, level); const province = provinceById[assignments[id]];
                   const highlighted = hovered && featureId(hovered, level) === id;
-                  return <path key={id} d={d} fill={province?.color || '#e8e1d5'} className={highlighted ? 'region highlighted' : 'region'} onPointerDown={e => { if (toolMode === 'inspect') { setSelectedFeature(feature); setPainting(false); return; } e.currentTarget.setPointerCapture(e.pointerId); setPainting(true); paint(feature); }} onPointerEnter={() => { setHovered(feature); if (painting && toolMode === 'paint') paint(feature); }} onPointerMove={() => painting && toolMode === 'paint' && paint(feature)} onPointerUp={() => setPainting(false)}/>;
+                  return <path key={id} d={d} fill={province?.color || '#e8e1d5'} className={highlighted ? 'region highlighted' : 'region'} onPointerDown={e => { if (toolMode === 'pan') return; if (toolMode === 'inspect') { setSelectedFeature(feature); setPainting(false); return; } e.currentTarget.setPointerCapture(e.pointerId); setPainting(true); paint(feature); }} onPointerEnter={() => { setHovered(feature); if (painting && toolMode === 'paint') paint(feature); }} onPointerMove={() => painting && toolMode === 'paint' && paint(feature)} onPointerUp={() => setPainting(false)}/>;
                 })}
               </g>
             </svg>
+            <div className="map-navigation" role="group" aria-label="Map zoom controls"><button onClick={()=>zoomMap(.8)} aria-label="Zoom in">+</button><button onClick={()=>zoomMap(1.25)} aria-label="Zoom out">−</button><button onClick={resetMapView} aria-label="Reset map view">⌂</button></div>
             <div className="north">N<span>↑</span></div>
             {hovered && <div className="map-tooltip"><b>{featureName(hovered, level)}</b><span>{level === 'tehsils' && `${String(hovered.properties.district_name)} · `}{String(hovered.properties.province_name)}</span><small>{provinceById[assignments[featureId(hovered, level)]]?.name || 'Unassigned'}</small></div>}
             {selectedFeature && toolMode === 'inspect' && <aside className="district-drawer"><div className="district-head"><div><small>{level === 'tehsils' ? 'TEHSIL DETAIL' : 'DISTRICT DETAIL'}</small><h2>{featureName(selectedFeature, level)}</h2><p>{level === 'tehsils' && `${String(selectedFeature.properties.district_name)} · `}{String(selectedFeature.properties.province_name)}</p></div><button onClick={() => setSelectedFeature(null)} aria-label="Close district details">×</button></div>{selectedDistrict ? <div className="district-stats"><span><b>{selectedTehsil?.p || selectedDistrict.p ? `${((selectedTehsil?.p || selectedDistrict.p || 0)/1_000_000).toFixed(2)}m` : '—'}</b>{level === 'tehsils' ? 'estimated population' : 'population · 2023'}</span><span><b>{selectedDistrict.l != null && selectedDistrict.i != null ? `${(selectedDistrict.l/(selectedDistrict.l+selectedDistrict.i)*100).toFixed(1)}%` : '—'}</b>literacy</span><span><b>{selectedDistrict.mat==null?'—':`${selectedDistrict.mat.toFixed(1)}%`}</b>matric or higher</span><span><b>{selectedDistrict.enrol==null?'—':`${selectedDistrict.enrol.toFixed(1)}%`}</b>net enrolment</span><span><b>{selectedDistrict.lfpr==null?'—':`${selectedDistrict.lfpr.toFixed(1)}%`}</b>labor-force participation</span><span><b>{selectedDistrict.ur==null?'—':`${selectedDistrict.ur.toFixed(1)}%`}</b>unemployment</span><span><b>{selectedDistrict.cons==null?'—':`Rs ${Math.round(selectedDistrict.cons).toLocaleString()}`}</b>consumption / person</span><span><b>{selectedDistrict.mpi==null?'—':selectedDistrict.mpi.toFixed(3)}</b>MPI</span><span><b>{selectedDistrict.net==null?'—':`${selectedDistrict.net.toFixed(1)}%`}</b>internet users</span><span><b>{selectedDistrict.elec==null?'—':`${selectedDistrict.elec.toFixed(1)}%`}</b>electricity access</span>{selectedTehsil && <><span><b>{selectedTehsil.r==null?'—':`${selectedTehsil.r.toFixed(0)}th`}</b>wealth percentile</span><span><b>{selectedTehsil.nl==null?'—':selectedTehsil.nl.toFixed(2)}</b>night radiance</span></>}</div>:<p className="district-empty">No matched Data Darbar record is available for this area.</p>}<footer>Data Darbar · PBS Census 2023 and household surveys</footer></aside>}
