@@ -1,0 +1,10 @@
+.population-composition li b em,
+.comparison-bars header b em {
+  display: block;
+  margin-top: 3px;
+  color: #5a6064;
+  font-size: 9px;
+  font-style: normal;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}

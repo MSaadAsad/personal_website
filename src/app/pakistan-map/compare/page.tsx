@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import ProvinceComparison from './ProvinceComparison';
 import './compare.css';
+import './compare-overrides.css';
 
 export const metadata: Metadata = {
   title: 'Compare Provinces — Naya Naqsha',
