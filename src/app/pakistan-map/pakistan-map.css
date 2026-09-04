@@ -333,6 +333,11 @@
 .rank-result>span { display:block; height:7px; margin-top:9px; overflow:hidden; background:#999d9e; border:1px solid #7c8184; }
 .rank-result>span i { display:block; height:100%; min-width:3px; }
 .rank-note { margin:17px 0 0; padding-top:14px; border-top:1px solid #83878a; color:#44494d; font:11px/1.6 var(--font-mono),monospace; }
+.province-details-head { display:flex; align-items:center; justify-content:space-between; gap:20px; padding:22px 30px; border-top:2px solid #74797d; border-bottom:2px solid #74797d; background:#b5b7b6; }
+.province-details-head span { color:var(--color-sky-accent); font:750 12px var(--font-mono),monospace; letter-spacing:.11em; }
+.province-details-head h2 { margin:5px 0 0; color:#292d31; font:750 28px/1 var(--font-sans),sans-serif; }
+.province-details-head button { min-height:42px; padding:8px 14px; border:2px solid #646a6f; background:#c9c9c6; color:#292d31; font:750 12px var(--font-mono),monospace; text-transform:uppercase; cursor:pointer; }
+.province-details-head button:hover { background:#4c7bd9; border-color:#315da8; color:#fff; }
 .final-grid article { grid-template-columns:48px 1fr; gap:14px; min-height:470px; padding:30px; border-bottom:2px solid #7c8083; background:#c4c4c1; box-shadow:inset 0 2px rgba(255,255,255,.28); }
 .final-grid article:nth-child(odd) { border-right:2px solid #7c8083; }
 .final-grid article:before { width:8px; }

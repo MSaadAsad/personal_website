@@ -351,6 +351,7 @@ export default function PakistanMapStudio() {
   const [selectedFeature, setSelectedFeature] = useState<Feature | null>(null);
   const [finalized, setFinalized] = useState(false);
   const [politicsOpen, setPoliticsOpen] = useState(true);
+  const [detailsOpen, setDetailsOpen] = useState(true);
   const [rankedOpen, setRankedOpen] = useState(false);
   const [rankMetric, setRankMetric] = useState<RankMetric>('population');
   const [mapName, setMapName] = useState('My province plan');
@@ -1009,7 +1010,8 @@ export default function PakistanMapStudio() {
             <ol className="rank-list">{rankedRows.map((row, index) => <li key={row.id}><div className="rank-place">{String(index + 1).padStart(2, '0')}</div><div className="rank-result"><div><b>{row.name}</b><strong>{formatRankValue(Number(row[rankMetric]))}</strong></div><span><i style={{ width: `${Number(row[rankMetric]) / rankMaximum * 100}%`, background: row.color }}/></span></div></li>)}</ol>
             <p className="rank-note">Figures marked as estimates in the province cards use the same underlying district-weighted method here. Higher MPI and food insecurity indicate worse outcomes.</p>
           </aside>}
-          <div className="final-grid">
+          <div className="province-details-head"><div><span>MAP UNIT PROFILES</span><h2>Vital statistics</h2></div><button type="button" aria-expanded={detailsOpen} aria-controls="province-details" onClick={() => setDetailsOpen(open => !open)}>{detailsOpen ? 'Collapse ↑' : 'Expand ↓'}</button></div>
+          {detailsOpen && <div id="province-details" className="final-grid">
             {finalRows.filter(row => row.members.length).map((row, index) => <article key={row.id} style={{ '--province-color': row.color } as React.CSSProperties}>
               <div className="final-number">{String(index + 1).padStart(2, '0')}</div>
               <div><div className="unit-heading"><div><h2>{row.name}</h2><button className="open-profile" onClick={() => openProfile(row.id)}>Open full profile ↗</button></div><span className="unit-type-line">{row.kind}{row.capital ? ` · capital: ${row.capital}` : ' · capital not selected'}</span></div>
@@ -1020,7 +1022,7 @@ export default function PakistanMapStudio() {
               <p>Drawn from {row.origins.map(([origin, count]) => `${count} ${origin}`).join(' · ')} · Data matched for {row.dataMatches}/{row.dataUnitCount} source units</p>
               </div>
             </article>)}
-          </div>
+          </div>}
           <footer className="final-footer"><p><b>Data & method</b> <a href="https://darbar.adaad.org/" target="_blank" rel="noreferrer">Data Darbar</a>: PBS Census 2023, PSLM/HIES education, employment and living-conditions measures, Meta/WorldPop wealth and population, and VIIRS night lights. Custom-province GDP is not published, so monthly household consumption, wealth and night lights are shown as economic proxies—not GDP estimates. Tehsil figures marked ≈ apply district rates to tehsil populations. Politics replays {electionYear} provincial general-seat winners grouped by election-era districts from the <a href={electionYear === 2018 ? 'https://www.ecp.gov.pk/storage/files/3/03-ECP%20Annual%20Report%202018.pdf' : 'https://www.ecp.gov.pk/storage/files/3/General%20Election%20Report%202024%20Vol-II-compressed.pdf'} target="_blank" rel="noreferrer">Election Commission of Pakistan</a>; reserved seats are excluded. Islamabad is omitted only from provincial-assembly replays: it remains federally represented, including four Senate seats. AJK and Gilgit–Baltistan are outside Pakistan’s federal Parliament. The 2018 view explicitly rolls later district splits back to their historical parents. The Senate line is a 23-seat proportional scenario for proposed provinces, not a legal prediction.</p><div><button onClick={exportPng}>Export PNG</button><button onClick={shareMap}>{shareStatus}</button><button className="dark" onClick={exportPlan}>Download plan</button></div></footer>
         </section>
       </div>}
