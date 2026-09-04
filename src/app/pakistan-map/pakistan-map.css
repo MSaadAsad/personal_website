@@ -23,11 +23,6 @@
 .segmented button+button { border-left:1px solid #bdb5a8; }
 .segmented button.selected { background:#30372e; color:#fff; }
 .segmented b { font-size:8px; font-weight:400; opacity:.6; margin-left:3px; }
-.preset-button { width:100%; margin-top:10px; display:grid; grid-template-columns:18px 1fr; gap:2px 7px; align-items:center; text-align:left; padding:10px 11px; border:1px solid #bdb5a8; border-radius:4px; background:#eee8dd; color:#3f433c; cursor:pointer; }
-.preset-button:hover { background:#e8e1d5; border-color:#8f897e; }
-.preset-button span { grid-row:1/3; color:#a15a45; font-size:9px; }
-.preset-button b { font:500 9px 'DM Mono'; text-transform:uppercase; letter-spacing:.05em; }
-.preset-button small { color:#817d74; font:7px 'DM Mono'; }
 .province-title { margin-top:34px; }
 .hint { font:400 10px/1.5 'DM Mono'; color:#8a8479; margin:11px 0 12px 32px; }
 .province-list { display:flex; flex-direction:column; gap:7px; }
@@ -151,11 +146,16 @@
 .segmented button+button { border-left:2px solid #686d71; }
 .segmented button.selected { background:#435267; color:#fff; }
 .segmented b { font-size:12px; }
-.preset-button { margin-top:14px; padding:14px; border:2px solid #74787b; border-radius:2px; background:#c9c9c6; color:#303438; box-shadow:inset 1px 1px rgba(255,255,255,.45),3px 3px 0 #85888a; }
-.preset-button:hover { background:#d1d1ce; border-color:#50555a; }
-.preset-button span { color:var(--color-sky-accent); font-size:14px; }
-.preset-button b { font:700 13px var(--font-mono),monospace; }
-.preset-button small { color:#50555a; font:12px/1.45 var(--font-mono),monospace; }
+.preset-control { margin-top:14px; padding:13px; border:2px solid #74787b; border-radius:2px; background:#c9c9c6; color:#303438; box-shadow:inset 1px 1px rgba(255,255,255,.45),3px 3px 0 #85888a; }
+.preset-control>label { display:block; margin-bottom:8px; font:750 11px var(--font-mono),monospace; letter-spacing:.09em; text-transform:uppercase; }
+.preset-actions { display:grid; grid-template-columns:minmax(0,1fr) 62px; gap:7px; }
+.preset-select { position:relative; min-width:0; }
+.preset-select select { width:100%; min-height:44px; appearance:none; padding:8px 38px 8px 10px; border:2px solid #656b70; border-radius:0; background:#dededb; color:#292e32; font:700 11px/1.3 var(--font-mono),monospace; cursor:pointer; }
+.preset-select>span { position:absolute; top:2px; right:2px; bottom:2px; display:grid; width:32px; place-items:center; border-left:2px solid #315da8; background:var(--color-sky-accent); color:#fff; font-size:19px; pointer-events:none; }
+.preset-actions>button { min-height:44px; padding:7px; border:2px solid #315da8; background:var(--color-sky-accent); color:#fff; font:750 11px var(--font-mono),monospace; text-transform:uppercase; cursor:pointer; }
+.preset-select select:focus-visible,.preset-actions>button:focus-visible { outline:3px solid #fff; outline-offset:2px; }
+.preset-actions>button:hover { filter:brightness(1.08); }
+.preset-control>small { display:block; margin-top:9px; color:#50555a; font:10px/1.45 var(--font-mono),monospace; }
 .province-title { margin-top:38px; }
 .hint { margin:14px 0 16px 44px; color:#51565a; font:13px/1.55 var(--font-mono),monospace; }
 .province-list { gap:10px; }

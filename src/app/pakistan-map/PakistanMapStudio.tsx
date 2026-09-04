@@ -12,6 +12,7 @@ type DistrictData = { n: string; p: number | null; l: number | null; i: number |
 type TehsilData = { n: string; d: string; p: number | null; r: number | null; nl: number | null };
 type DarbarData = { source: string; generated: string; methodology: string; districts: Record<string, DistrictData>; tehsils: TehsilData[] };
 type ElectionYear = 2018 | 2024;
+type PresetId = 'current' | 'preset-1';
 type AssemblyDistrict = { district: string; districts?: string[]; province: string; seats: number; parties: Record<string, number> };
 type AssemblyData = { election: string; year?: number; basis: string; source: string; districts: AssemblyDistrict[] };
 type RegionalAssemblyData = { generated: string; sources: Record<string, string>; notes: Record<string, string>; districts: { region: 'AJK' | 'GB'; district: string; parties: Record<string, number> }[] };
@@ -33,7 +34,7 @@ const RANK_METRICS: { key: RankMetric; label: string; unit: string }[] = [
 
 const PALETTE = ['#ef6351', '#f4b942', '#48a9a6', '#5b70d6', '#a267c7', '#3c9d60', '#e27d3f', '#d85b8b'];
 const PAINT_COLORS = ['#000000','#464646','#787878','#b4b4b4','#ffffff','#880015','#ed1c24','#ff7f27','#fff200','#22b14c','#00a2e8','#3f48cc','#a349a4','#b97a57','#ffaec9','#ffc90e','#b5e61d','#99d9ea','#7092be','#c8bfe7','#65915f','#d99b42','#b76d57','#435267'];
-const CANONICAL: Province[] = [
+const PRESET_1: Province[] = [
   { id: 'punjab', name: 'Punjab', color: '#65915f', kind: 'province' },
   { id: 'south-punjab', name: 'South Punjab', color: '#d99b42', kind: 'province' },
   { id: 'sindh', name: 'Sindh', color: '#b76d57', kind: 'province' },
@@ -45,6 +46,16 @@ const CANONICAL: Province[] = [
   { id: 'gb', name: 'Gilgit–Baltistan', color: '#829b73', kind: 'territory' },
   { id: 'ajk', name: 'Azad Kashmir', color: '#418674', kind: 'territory' },
 ];
+const CURRENT_STRUCTURE: Province[] = PRESET_1.filter(province => !['south-punjab', 'karachi', 'hazara'].includes(province.id));
+const CURRENT_OWNER_BY_SOURCE: Record<string, string> = {
+  Punjab: 'punjab',
+  Sindh: 'sindh',
+  'Khyber Pakhtunkhwa': 'kp',
+  Balochistan: 'balochistan',
+  Islamabad: 'islamabad',
+  'Gilgit Baltistan': 'gb',
+  'Azad Kashmir': 'ajk',
+};
 const SOUTH_PUNJAB = new Set(['bahawalnagar', 'bahawalpur', 'deraghazikhan', 'khanewal', 'layyah', 'leiah', 'lodhran', 'multan', 'muzaffargarh', 'rahimyarkhan', 'rajanpur', 'vehari']);
 const KARACHI = new Set(['centralkarachi', 'eastkarachi', 'korangikarachi', 'malirkarachi', 'southkarachi', 'westkarachi', 'keamari']);
 const HAZARA = new Set(['abbottabad', 'batagram', 'battagram', 'haripur', 'kohistanlower', 'kohistanupper', 'kolaipalaskohistan', 'mansehra', 'torghar']);
@@ -108,7 +119,7 @@ function decodeShare(value: string): SharedMap {
 }
 
 const normalise = (value: unknown) => String(value).toLowerCase().replace(/district|agency/g, '').replace(/[^a-z0-9]/g, '');
-function canonicalAssignments(features: Feature[], level: Level) {
+function presetOneAssignments(features: Feature[], level: Level) {
   return Object.fromEntries(features.map(feature => {
     const district = normalise(feature.properties.district_name);
     const origin = String(feature.properties.province_name);
@@ -120,6 +131,9 @@ function canonicalAssignments(features: Feature[], level: Level) {
       : origin === 'Gilgit Baltistan' ? 'gb' : 'ajk';
     return [featureId(feature, level), owner];
   }));
+}
+function currentStructureAssignments(features: Feature[], level: Level) {
+  return Object.fromEntries(features.map(feature => [featureId(feature, level), CURRENT_OWNER_BY_SOURCE[String(feature.properties.province_name)]]).filter(([, owner]) => owner));
 }
 const DISTRICT_ALIASES: Record<string, string> = {
   chagai: 'chaghi', sudhnoti: 'sudhnutti', leiah: 'layyah', dikhan: 'deraismailkhan',
@@ -181,6 +195,7 @@ export default function PakistanMapStudio() {
   const [darbar, setDarbar] = useState<DarbarData | null>(null);
   const [assembly, setAssembly] = useState<AssemblyData | null>(null);
   const [electionYear, setElectionYear] = useState<ElectionYear>(2024);
+  const [selectedPreset, setSelectedPreset] = useState<PresetId>('current');
   const [regionalAssembly, setRegionalAssembly] = useState<RegionalAssemblyData | null>(null);
   const [paletteOpen, setPaletteOpen] = useState<string | null>(null);
   const svgRef = useRef<SVGSVGElement>(null);
@@ -414,11 +429,13 @@ export default function PakistanMapStudio() {
     localStorage.removeItem(`naya-naqsha-${level}`);
   };
 
-  const loadCanonical = () => {
+  const loadPreset = () => {
+    const isCurrent = selectedPreset === 'current';
+    const nextProvinces = isCurrent ? CURRENT_STRUCTURE : PRESET_1;
     setHistory(h => [...h, assignments]); setFuture([]);
-    setProvinces(CANONICAL); setActive(CANONICAL[0].id);
-    setMapName('Canonical province split');
-    setAssignments(canonicalAssignments(features, level));
+    setProvinces(nextProvinces); setActive(nextProvinces[0].id);
+    setMapName(isCurrent ? 'Current provincial structure' : 'Preset 1');
+    setAssignments(isCurrent ? currentStructureAssignments(features, level) : presetOneAssignments(features, level));
   };
 
   const exportPlan = () => {
@@ -481,7 +498,14 @@ export default function PakistanMapStudio() {
             <button className={level === 'districts' ? 'selected' : ''} onClick={() => setLevel('districts')}>Districts <b>160</b></button>
             <button className={level === 'tehsils' ? 'selected' : ''} onClick={() => setLevel('tehsils')}>Tehsils <b>577</b></button>
           </div>
-          <button className="preset-button" onClick={loadCanonical}><span>◆</span><b>Load canonical split</b><small>Karachi · South Punjab · Hazara</small></button>
+          <div className="preset-control">
+            <label htmlFor="map-preset">Presets</label>
+            <div className="preset-actions">
+              <div className="preset-select"><select id="map-preset" value={selectedPreset} onChange={event => setSelectedPreset(event.target.value as PresetId)}><option value="current">Current structure — default</option><option value="preset-1">Preset 1 — proposed split</option></select><span aria-hidden="true">⌄</span></div>
+              <button type="button" onClick={loadPreset}>Load</button>
+            </div>
+            <small>{selectedPreset === 'current' ? 'Punjab · Sindh · Khyber Pakhtunkhwa · Balochistan · federal territories' : 'Karachi · South Punjab · Hazara'}</small>
+          </div>
 
           <div className="eyebrow province-title"><span>02</span> YOUR MAP UNITS</div>
           <p className="hint">Set each unit as a province or territory, then paint.</p>
