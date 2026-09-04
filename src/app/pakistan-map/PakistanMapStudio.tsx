@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { completeRegionalPopulation2017, isRegionalPopulationDistrict, regionalDistrictPopulation2017 } from './regional-population';
 
 type Level = 'districts' | 'tehsils';
 type Props = Record<string, string | number>;
@@ -368,9 +369,9 @@ export default function PakistanMapStudio() {
       const districtKey = DISTRICT_ALIASES[districtKeyRaw] || districtKeyRaw;
       const district = darbar?.districts[districtKey];
       if (level === 'districts') {
-        if (!district) continue;
+        if (!district) { population += regionalDistrictPopulation2017(districtKey) || 0; continue; }
         dataMatches++;
-        const pop = district.p || 0; population += pop;
+        const pop = district.p || regionalDistrictPopulation2017(districtKey) || 0; population += pop;
         if (district.l != null && district.i != null) { literate += district.l; literacyBase += district.l + district.i; }
         if (district.u != null && pop) { urban += district.u; urbanBase += pop; }
         if (district.ur != null && pop) { weightedUnemployment += district.ur * pop; unemploymentBase += pop; }
@@ -389,6 +390,9 @@ export default function PakistanMapStudio() {
         if (tehsil.nl != null && pop) { weightedNightLight += tehsil.nl * pop; nightLightBase += pop; }
       }
     }
+    const memberDistricts = new Set(members.map(feature => normalise(feature.properties.district_name)));
+    if (level === 'districts') population += completeRegionalPopulation2017(memberDistricts);
+    else if (!population) population = completeRegionalPopulation2017(memberDistricts, true);
     const ownedElectionKeys = new Set(Object.entries(electionOwners).filter(([, owner]) => owner === province.id).map(([key]) => key));
     const partySeats: Record<string, number> = {};
     if (province.kind === 'province') assembly?.districts.filter(row => (row.districts || [row.district]).every(district => {
@@ -401,7 +405,8 @@ export default function PakistanMapStudio() {
     const regionalRegions = new Set<string>();
     regionalAssembly?.districts.filter(row => Object.entries(districtOwners).some(([rawKey, owner]) => owner === province.id && (ELECTION_ALIASES[rawKey] || rawKey) === normalise(row.district))).forEach(row => { regionalRegions.add(row.region); Object.entries(row.parties).forEach(([party, seats]) => { regionalSeats[party] = (regionalSeats[party] || 0) + seats; }); });
     const regionalSeatCount = Object.values(regionalSeats).reduce((sum, seats) => sum + seats, 0);
-    return { ...province, members, area, origins, dataMatches, population, partySeats, electionSeats, senateSeats, regionalSeats, regionalSeatCount, regionalRegions: [...regionalRegions],
+    const populationYears = new Set(members.map(feature => isRegionalPopulationDistrict(normalise(feature.properties.district_name)) ? 2017 : 2023));
+    return { ...province, members, area, origins, dataMatches, population, populationYear: populationYears.size === 1 ? [...populationYears][0] : null, partySeats, electionSeats, senateSeats, regionalSeats, regionalSeatCount, regionalRegions: [...regionalRegions],
       literacy: literacyBase ? literate / literacyBase * 100 : null,
       urbanShare: urbanBase ? urban / urbanBase * 100 : null,
       unemployment: unemploymentBase ? weightedUnemployment / unemploymentBase : null,
@@ -639,6 +644,7 @@ export default function PakistanMapStudio() {
           <div className="unassigned"><i/>Unassigned <b>{features.length - totalAssigned}</b></div>
           <button className="clear" onClick={clearMap}>Clear map</button>
           <p className="source-note">Boundary data: <a href="https://github.com/abdullahumer1101/pkmapr" target="_blank" rel="noreferrer">pkmapr / OCHA</a>. Administrative boundaries and names may change.</p>
+          <p className="source-note">AJK population uses its government’s 2017 district table. GB uses its official 2017 total only when all current GB districts stay together; missing indicators remain blank, never zero.</p>
         </aside>
       </section>
       {finalized && <div className="final-overlay" role="dialog" aria-modal="true" aria-labelledby="final-title" onMouseDown={e => e.target === e.currentTarget && setFinalized(false)}>
@@ -664,7 +670,7 @@ export default function PakistanMapStudio() {
             {finalRows.filter(row => row.members.length).map((row, index) => <article key={row.id} style={{ '--province-color': row.color } as React.CSSProperties}>
               <div className="final-number">{String(index + 1).padStart(2, '0')}</div>
               <div><div className="unit-heading"><div><h2>{row.name}</h2><button className="open-profile" onClick={() => openProfile(row.id)}>Open full profile ↗</button></div><span className="unit-type-line">{row.name} · {row.kind}</span></div>
-              <section className="metric-section overview-metrics"><h3>At a glance</h3><div className="final-metrics"><span><b>{row.members.length}</b>{level}</span><span><b>{Math.round(row.area).toLocaleString()}</b>km²</span><span><b>{row.population ? (row.population / 1_000_000).toFixed(2) + 'm' : '—'}</b>{level === 'tehsils' ? 'estimated population' : 'population · 2023'}</span><span><b>{row.urbanShare == null ? '—' : `${row.urbanShare.toFixed(1)}%`}</b>urban share</span></div></section>
+              <section className="metric-section overview-metrics"><h3>At a glance</h3><div className="final-metrics"><span><b>{row.members.length}</b>{level}</span><span><b>{Math.round(row.area).toLocaleString()}</b>km²</span><span><b>{row.population ? (row.population / 1_000_000).toFixed(2) + 'm' : '—'}</b>{level === 'tehsils' ? `estimated population${row.populationYear ? ` · ${row.populationYear}` : ' · mixed years'}` : `population${row.populationYear ? ` · ${row.populationYear}` : ' · mixed years'}`}</span><span><b>{row.urbanShare == null ? '—' : `${row.urbanShare.toFixed(1)}%`}</b>urban share</span></div></section>
               <section className="metric-section"><h3>Education</h3><div className="final-metrics"><span><b>{row.literacy == null ? '—' : `${level === 'tehsils' ? '≈' : ''}${row.literacy.toFixed(1)}%`}</b>literacy · 2023</span><span><b>{row.matricPlus == null ? '—' : `≈${row.matricPlus.toFixed(1)}%`}</b>matric or higher</span><span><b>{row.enrolment == null ? '—' : `≈${row.enrolment.toFixed(1)}%`}</b>net enrolment</span><span><b>{row.numeracy == null ? '—' : `≈${row.numeracy.toFixed(1)}%`}</b>numeracy</span>{level === 'districts' && <span className="wide-metric"><b>{row.outOfSchool == null ? '—' : Math.round(row.outOfSchool).toLocaleString()}</b>children aged 5–16 out of school</span>}</div></section>
               <section className="metric-section"><h3>Economy &amp; living conditions</h3><div className="final-metrics"><span><b>{row.consumption == null ? '—' : `Rs ${Math.round(row.consumption).toLocaleString()}`}</b>monthly consumption / person</span><span><b>{row.lfpr == null ? '—' : `≈${row.lfpr.toFixed(1)}%`}</b>labor-force participation</span><span><b>{row.foodInsecurity == null ? '—' : `≈${row.foodInsecurity.toFixed(1)}%`}</b>food insecurity</span><span><b>{row.internet == null ? '—' : `≈${row.internet.toFixed(1)}%`}</b>internet users</span><span><b>{row.electricity == null ? '—' : `≈${row.electricity.toFixed(1)}%`}</b>electricity access</span>{level === 'districts' ? <><span><b>{row.mpi == null ? '—' : row.mpi.toFixed(3)}</b>MPI · 2019–20</span><span><b>{row.unemployment == null ? '—' : `${row.unemployment.toFixed(1)}%`}</b>unemployment</span></> : <><span><b>{row.rwi == null ? '—' : `${row.rwi.toFixed(0)}th`}</b>wealth percentile</span><span><b>{row.nightLight == null ? '—' : row.nightLight.toFixed(2)}</b>night radiance · 2026</span></>}</div></section>
               <div className="origin-bar">{row.origins.map(([origin, count]) => <i key={origin} style={{ width: `${count / row.members.length * 100}%` }} title={`${origin}: ${count}`}/>)}</div>

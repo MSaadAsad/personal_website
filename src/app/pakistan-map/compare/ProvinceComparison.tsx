@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { completeRegionalPopulation2017, REGIONAL_POPULATION_SOURCES, regionalDistrictPopulation2017 } from '../regional-population';
 
 type Level='districts'|'tehsils';
 type Kind='province'|'territory';
@@ -9,7 +10,7 @@ type Feature={properties:Record<string,string|number>};
 type District={p:number|null;l:number|null;i:number|null;u:number|null;mat:number|null;oos:number|null;cons:number|null;lfpr:number|null;fi:number|null;net:number|null;elec:number|null;mpi:number|null};
 type Darbar={districts:Record<string,District>;tehsils:{n:string;d:string;p:number|null}[]};
 type Metric='population'|'literacy'|'urban'|'matric'|'outOfSchool'|'consumption'|'lfpr'|'food'|'internet'|'electricity'|'mpi';
-type Row={id:string;name:string;color:string;kind:Kind;members:number;population:number;literacy:number|null;urban:number|null;matric:number|null;outOfSchool:number|null;consumption:number|null;lfpr:number|null;food:number|null;internet:number|null;electricity:number|null;mpi:number|null};
+type Row={id:string;name:string;color:string;kind:Kind;members:number;population:number|null;literacy:number|null;urban:number|null;matric:number|null;outOfSchool:number|null;consumption:number|null;lfpr:number|null;food:number|null;internet:number|null;electricity:number|null;mpi:number|null};
 
 const METRICS:{key:Metric;label:string;unit:string;kind:'share'|'rate'|'absolute'|'index';lowBetter?:boolean}[]=[
   {key:'population',label:'Population',unit:'people',kind:'share'},
@@ -46,19 +47,23 @@ export default function ProvinceComparison(){
       let population=0,literate=0,literacyBase=0,urban=0,urbanBase=0,outOfSchool=0,oosMatches=0;
       const totals={matric:0,consumption:0,lfpr:0,food:0,internet:0,electricity:0,mpi:0};
       const bases={...totals};
-      members.forEach(f=>{const districtKey=aliases[normalise(f.properties.district_name)]||normalise(f.properties.district_name);const district=data.districts[districtKey];if(!district)return;const tehsil=config.l==='tehsils'?tehsils.get(`${districtKey}:${normalise(f.properties.tehsil_name)}`):null;const pop=config.l==='tehsils'?(tehsil?.p||0):(district.p||0);population+=pop;if(district.l!=null&&district.i!=null&&pop){literate+=district.l/(district.l+district.i)*pop;literacyBase+=pop}if(district.u!=null&&district.p&&pop){urban+=district.u/district.p*pop;urbanBase+=pop}if(config.l==='districts'&&district.oos!=null){outOfSchool+=district.oos;oosMatches++}const source:{[K in keyof typeof totals]:number|null}={matric:district.mat,consumption:district.cons,lfpr:district.lfpr,food:district.fi,internet:district.net,electricity:district.elec,mpi:district.mpi};(Object.keys(totals) as (keyof typeof totals)[]).forEach(k=>{if(source[k]!=null&&pop){totals[k]+=Number(source[k])*pop;bases[k]+=pop}})});
+      if(config.l==='districts')population+=members.reduce((sum,f)=>{const raw=normalise(f.properties.district_name);const key=aliases[raw]||raw;return data.districts[key]?sum:sum+(regionalDistrictPopulation2017(key)||0)},0);
+      members.forEach(f=>{const districtKey=aliases[normalise(f.properties.district_name)]||normalise(f.properties.district_name);const district=data.districts[districtKey];if(!district)return;const tehsil=config.l==='tehsils'?tehsils.get(`${districtKey}:${normalise(f.properties.tehsil_name)}`):null;const pop=config.l==='tehsils'?(tehsil?.p||0):(district.p||regionalDistrictPopulation2017(districtKey)||0);population+=pop;if(district.l!=null&&district.i!=null&&pop){literate+=district.l/(district.l+district.i)*pop;literacyBase+=pop}if(district.u!=null&&district.p&&pop){urban+=district.u/district.p*pop;urbanBase+=pop}if(config.l==='districts'&&district.oos!=null){outOfSchool+=district.oos;oosMatches++}const source:{[K in keyof typeof totals]:number|null}={matric:district.mat,consumption:district.cons,lfpr:district.lfpr,food:district.fi,internet:district.net,electricity:district.elec,mpi:district.mpi};(Object.keys(totals) as (keyof typeof totals)[]).forEach(k=>{if(source[k]!=null&&pop){totals[k]+=Number(source[k])*pop;bases[k]+=pop}})});
+      const memberDistricts=new Set(members.map(f=>normalise(f.properties.district_name)));
+      if(config.l==='districts')population+=completeRegionalPopulation2017(memberDistricts);else if(!population)population=completeRegionalPopulation2017(memberDistricts,true);
       const weighted=(k:keyof typeof totals)=>bases[k]?totals[k]/bases[k]:null;
-      return{id,name,color,kind:kind||'province',members:members.length,population,literacy:literacyBase?literate/literacyBase*100:null,urban:urbanBase?urban/urbanBase*100:null,matric:weighted('matric'),outOfSchool:oosMatches?outOfSchool:null,consumption:weighted('consumption'),lfpr:weighted('lfpr'),food:weighted('food'),internet:weighted('internet'),electricity:weighted('electricity'),mpi:weighted('mpi')};
+      return{id,name,color,kind:kind||'province',members:members.length,population:population||null,literacy:literacyBase?literate/literacyBase*100:null,urban:urbanBase?urban/urbanBase*100:null,matric:weighted('matric'),outOfSchool:oosMatches?outOfSchool:null,consumption:weighted('consumption'),lfpr:weighted('lfpr'),food:weighted('food'),internet:weighted('internet'),electricity:weighted('electricity'),mpi:weighted('mpi')};
     }).filter(r=>r.members);
   },[config,data,features]);
   const meta=METRICS.find(m=>m.key===metric)!;
   const perCapita=metric==='outOfSchool'&&outOfSchoolMode==='perCapita';
   const metricValue=(row:Row)=>perCapita&&row.outOfSchool!=null&&row.population?row.outOfSchool/row.population*1_000:Number(row[metric]);
   const composition=metric==='population'||(metric==='outOfSchool'&&!perCapita);
-  const ranked=[...rows].filter(r=>r[metric]!=null&&(!perCapita||r.population>0)).sort((a,b)=>{
+  const ranked=[...rows].filter(r=>r[metric]!=null&&(!perCapita||(r.population??0)>0)).sort((a,b)=>{
     const difference=metricValue(b)-metricValue(a);
     return meta.lowBetter&&!composition?-difference:difference;
   });
+  const unavailable=rows.filter(row=>row[metric]==null||(perCapita&&!row.population));
   const observedMaximum=Math.max(...ranked.map(metricValue),1);
   const maximum=meta.kind==='rate'?100:metric==='mpi'?1:metric==='consumption'?Math.ceil(observedMaximum/5_000)*5_000:perCapita?Math.ceil(observedMaximum/10)*10:observedMaximum;
   const compositionTotal=ranked.reduce((sum,row)=>sum+metricValue(row),0);
@@ -91,7 +96,8 @@ export default function ProvinceComparison(){
         <ol className="comparison-columns" style={{gridTemplateColumns:`repeat(${ranked.length},minmax(92px,1fr))`}}>{ranked.map((r,i)=><li key={r.id}><strong>{formatValue(r)}</strong><span className="column-track"><i style={{height:`${metricValue(r)/maximum*100}%`}}/></span><div className="column-label"><span>{String(i+1).padStart(2,'0')}</span><b>{r.name}<em>{r.kind}</em></b></div></li>)}</ol>
       </div>}
       {perCapita&&ranked.length>0&&<p className="comparison-note">Calculated from out-of-school children divided by total 2023 population. This is per 1,000 residents, not per 1,000 children aged 5–16.</p>}
+      {unavailable.length>0&&<p className="comparison-note"><b>No comparable {meta.label.toLowerCase()} data:</b> {unavailable.map(row=>row.name).join(', ')}. {metric==='population'?'AJK has district-level 2017 figures; the GB total can only be used when all 14 current map districts remain together because the 2017 census used an older district structure.':'These units are omitted from the chart rather than plotted as zero.'}</p>}
     </section>
-    <footer><span>Statistics include every map unit. Federal representation includes the provinces and Islamabad; AJK and Gilgit–Baltistan are outside Pakistan’s Parliament.</span><button onClick={()=>navigator.clipboard.writeText(location.href)}>Copy comparison link</button></footer>
+    <footer><span>Population fallback sources: <a href={REGIONAL_POPULATION_SOURCES.ajk} target="_blank" rel="noreferrer">AJK Government district table (2017) ↗</a> · <a href={REGIONAL_POPULATION_SOURCES.gb} target="_blank" rel="noreferrer">GB at a Glance / Census 2017 ↗</a>. Unavailable indicators are omitted, never treated as zero.</span><button onClick={()=>navigator.clipboard.writeText(location.href)}>Copy comparison link</button></footer>
   </main>;
 }
