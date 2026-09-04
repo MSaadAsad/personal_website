@@ -25,6 +25,8 @@ export function Footer() {
     }
   }, []);
 
+  if (pathname.startsWith('/pakistan-map')) return null;
+
   const copyright = (
     <div className="font-mono text-[0.78rem] text-concrete-600 tracking-wider px-6 py-4 flex items-center justify-center flex-1">
       &copy; {new Date().getFullYear()} SAAD
@@ -41,7 +43,7 @@ export function Footer() {
   );
 
   return (
-    <footer className={`border-t border-concrete-700/60 bg-[var(--color-concrete-block)] ${pathname === '/pakistan-map' ? 'mt-0' : 'mt-32'}`}>
+    <footer className="border-t border-concrete-700/60 bg-[var(--color-concrete-block)] mt-32">
       <Container className="py-0 flex flex-col md:flex-row items-stretch">
         {variant === 'test' ? (
           <>
