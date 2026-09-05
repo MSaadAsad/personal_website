@@ -727,6 +727,16 @@ export default function PakistanMapStudio() {
     if (inspectMetricMeta.scale === 'index') return 1;
     return Math.max(1, ...[...inspectValues.values()].filter((value): value is number => value != null));
   }, [inspectMetricMeta.scale, inspectValues]);
+  const inspectColorDepth = useCallback((value: number | null) => {
+    if (value == null) return 1;
+    const bounded = Math.max(0, Math.min(value, inspectMaximum));
+    // District density is extremely right-skewed (Lahore is the dominant
+    // outlier), so a linear ramp makes nearly every other district identical.
+    const ratio = inspectMetric === 'density'
+      ? Math.log1p(bounded) / Math.log1p(inspectMaximum)
+      : bounded / inspectMaximum;
+    return .12 + .88 * ratio;
+  }, [inspectMaximum, inspectMetric]);
   const formatInspectValue = (value:number|null) => value == null ? 'Unavailable'
     : inspectMetric === 'population' || inspectMetric === 'density' || inspectMetric === 'outOfSchool' ? Math.round(value).toLocaleString()
     : inspectMetric === 'consumption' ? `Rs ${Math.round(value).toLocaleString()}`
@@ -997,7 +1007,7 @@ export default function PakistanMapStudio() {
                   const id = featureId(feature, level); const province = provinceById[assignments[id]];
                   const highlighted = hovered && featureId(hovered, level) === id;
                   const metricValue = toolMode === 'inspect' && inspectMetric !== 'allocation' ? inspectValues.get(id) ?? null : null;
-                  const metricDepth = metricValue == null ? 1 : .18 + .82 * Math.max(0, Math.min(1, metricValue / inspectMaximum));
+                  const metricDepth = inspectColorDepth(metricValue);
                   const metricMapActive = toolMode === 'inspect' && inspectMetric !== 'allocation';
                   return <path key={id} d={d} fill={metricMapActive ? metricValue == null ? '#e8e1d5' : '#4c7bd9' : province?.color || '#e8e1d5'} fillOpacity={metricMapActive ? metricDepth : 1} className={`${level === 'divisions' ? 'region division-region' : 'region'}${highlighted ? ' highlighted' : ''}`} aria-label={metricMapActive ? `${featureName(feature, level)} · ${inspectMetricMeta.label}: ${formatInspectValue(metricValue)}${metricValue != null && inspectMetricMeta.unit ? ` ${inspectMetricMeta.unit}` : ''}` : featureName(feature, level)} onPointerDown={e => { if (e.shiftKey||e.button===1) return; if (toolMode === 'inspect') { setSelectedFeature(feature); setPainting(false); return; } e.currentTarget.setPointerCapture(e.pointerId); setPainting(true); paint(feature); }} onPointerEnter={() => { setHovered(feature); if (painting && toolMode === 'paint') paint(feature); }} onPointerMove={() => painting && toolMode === 'paint' && paint(feature)} onPointerUp={() => setPainting(false)}/>;
                 })}
