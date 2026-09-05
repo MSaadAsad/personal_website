@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { completeRegionalPopulation2017, REGIONAL_POPULATION_SOURCES, regionalDistrictPopulation2017, regionalSocialStats } from '../regional-population';
+import { completeRegionalPopulation2017, isRegionalPopulationDistrict, REGIONAL_POPULATION_SOURCES, regionalDistrictPopulation2017, regionalSocialStats } from '../regional-population';
 import { buildTehsilDataLookup } from '../tehsil-data-match';
 import { aggregateCensus, type CensusDetail } from '../census-detail';
 
@@ -12,7 +12,7 @@ type Feature={properties:Record<string,string|number>;geometry:{type:'Polygon'|'
 type District={p:number|null;l:number|null;i:number|null;u:number|null;mat:number|null;oos:number|null;cons:number|null;lfpr:number|null;fi:number|null;net:number|null;elec:number|null;mpi:number|null};
 type Darbar={districts:Record<string,District>;tehsils:{n:string;d:string;p:number|null}[]};
 type Metric='population'|'density'|'growth'|'householdSize'|'under15'|'workingAge'|'dependency'|'literacy'|'urban'|'matric'|'outOfSchool'|'consumption'|'lfpr'|'food'|'internet'|'electricity'|'mpi'|'improvedWater'|'waterInside'|'flushToilet'|'noToilet'|'ownedHousing'|'oneRoomHousing';
-type Row={id:string;name:string;color:string;kind:Kind;members:number;population:number|null;density:number|null;growth:number|null;householdSize:number|null;under15:number|null;workingAge:number|null;dependency:number|null;literacy:number|null;urban:number|null;matric:number|null;outOfSchool:number|null;consumption:number|null;lfpr:number|null;food:number|null;internet:number|null;electricity:number|null;mpi:number|null;improvedWater:number|null;waterInside:number|null;flushToilet:number|null;noToilet:number|null;ownedHousing:number|null;oneRoomHousing:number|null};
+type Row={id:string;name:string;color:string;kind:Kind;members:number;population:number|null;populationYear:number|null;density:number|null;growth:number|null;householdSize:number|null;under15:number|null;workingAge:number|null;dependency:number|null;literacy:number|null;urban:number|null;matric:number|null;outOfSchool:number|null;consumption:number|null;lfpr:number|null;food:number|null;internet:number|null;electricity:number|null;mpi:number|null;improvedWater:number|null;waterInside:number|null;flushToilet:number|null;noToilet:number|null;ownedHousing:number|null;oneRoomHousing:number|null};
 
 const METRICS:{key:Metric;label:string;unit:string;kind:'share'|'rate'|'absolute'|'index';lowBetter?:boolean}[]=[
   {key:'population',label:'Population',unit:'people',kind:'share'},
@@ -24,14 +24,14 @@ const METRICS:{key:Metric;label:string;unit:string;kind:'share'|'rate'|'absolute
   {key:'dependency',label:'Age dependency ratio',unit:'dependants / 100 working-age',kind:'rate'},
   {key:'literacy',label:'Literacy',unit:'%',kind:'rate'},
   {key:'urban',label:'Urban share',unit:'%',kind:'rate'},
-  {key:'matric',label:'Matric or higher',unit:'%',kind:'rate'},
+  {key:'matric',label:'Matric or higher (estimate)',unit:'%',kind:'rate'},
   {key:'outOfSchool',label:'Out of school',unit:'children',kind:'absolute',lowBetter:true},
-  {key:'consumption',label:'Monthly consumption',unit:'Rs / person',kind:'absolute'},
-  {key:'lfpr',label:'Labor-force participation',unit:'%',kind:'rate'},
-  {key:'food',label:'Food insecurity',unit:'%',kind:'rate',lowBetter:true},
-  {key:'internet',label:'Internet users',unit:'%',kind:'rate'},
-  {key:'electricity',label:'Electricity access',unit:'%',kind:'rate'},
-  {key:'mpi',label:'Multidimensional poverty',unit:'MPI',kind:'index',lowBetter:true},
+  {key:'consumption',label:'Rural monthly consumption estimate',unit:'Rs / person',kind:'absolute'},
+  {key:'lfpr',label:'Census LFPR estimate',unit:'%',kind:'rate'},
+  {key:'food',label:'Rural food-insecurity estimate',unit:'%',kind:'rate',lowBetter:true},
+  {key:'internet',label:'Rural internet-use estimate',unit:'%',kind:'rate'},
+  {key:'electricity',label:'Rural electricity estimate',unit:'%',kind:'rate'},
+  {key:'mpi',label:'Data Darbar deprivation index',unit:'index',kind:'index',lowBetter:true},
   {key:'improvedWater',label:'Improved drinking water',unit:'% households',kind:'rate'},
   {key:'waterInside',label:'Water inside the home',unit:'% households',kind:'rate'},
   {key:'flushToilet',label:'Flush toilet',unit:'% households',kind:'rate'},
@@ -105,17 +105,20 @@ export default function ProvinceComparison(){
       if(regionalSocial?.literacy!=null&&regionalSocial.literacyWeight){literate+=regionalSocial.literacy/100*regionalSocial.literacyWeight;literacyBase+=regionalSocial.literacyWeight}
       if(regionalSocial?.urbanShare!=null&&regionalSocial.urbanWeight){urban+=regionalSocial.urbanShare/100*regionalSocial.urbanWeight;urbanBase+=regionalSocial.urbanWeight}
       const weighted=(k:keyof typeof totals)=>bases[k]?totals[k]/bases[k]:null;
-      return{id,name,color,kind:kind||'province',members:members.length,population:population||null,density:census?.density??null,growth:census?.growthRate??null,householdSize:census?.householdSize??null,under15:census?.under15Share??null,workingAge:census?.workingAgeShare??null,dependency:census?.dependencyRatio??null,literacy:literacyBase?literate/literacyBase*100:null,urban:urbanBase?urban/urbanBase*100:null,matric:weighted('matric'),outOfSchool:oosMatches?outOfSchool:null,consumption:weighted('consumption'),lfpr:weighted('lfpr'),food:weighted('food'),internet:weighted('internet'),electricity:weighted('electricity'),mpi:weighted('mpi'),improvedWater:census?.improvedWater??null,waterInside:census?.waterInside??null,flushToilet:census?.flushToilet??null,noToilet:census?.noToilet??null,ownedHousing:census?.ownedHousing??null,oneRoomHousing:census?.oneRoomHousing??null};
+      const populationYears=new Set([...memberDistricts].map(key=>isRegionalPopulationDistrict(key)?2017:2023));
+      return{id,name,color,kind:kind||'province',members:members.length,population:population||null,populationYear:config.l==='tehsils'?null:populationYears.size===1?[...populationYears][0]:null,density:census?.density??null,growth:census?.growthRate??null,householdSize:census?.householdSize??null,under15:census?.under15Share??null,workingAge:census?.workingAgeShare??null,dependency:census?.dependencyRatio??null,literacy:literacyBase?literate/literacyBase*100:null,urban:urbanBase?urban/urbanBase*100:null,matric:weighted('matric'),outOfSchool:oosMatches?outOfSchool:null,consumption:weighted('consumption'),lfpr:weighted('lfpr'),food:weighted('food'),internet:weighted('internet'),electricity:weighted('electricity'),mpi:weighted('mpi'),improvedWater:census?.improvedWater??null,waterInside:census?.waterInside??null,flushToilet:census?.flushToilet??null,noToilet:census?.noToilet??null,ownedHousing:census?.ownedHousing??null,oneRoomHousing:census?.oneRoomHousing??null};
     }).filter(r=>r.members);
   },[censusDetail,config,data,features]);
   const meta=METRICS.find(m=>m.key===metric)!;
   const perCapita=metric==='outOfSchool'&&outOfSchoolMode==='perCapita';
   const metricValue=(row:Row)=>perCapita&&row.outOfSchool!=null&&row.population?row.outOfSchool/row.population*1_000:Number(row[metric]);
-  const composition=metric==='population'||(metric==='outOfSchool'&&!perCapita);
+  const compositionCandidate=metric==='population'||(metric==='outOfSchool'&&!perCapita);
   const ranked=[...rows].filter(r=>r[metric]!=null&&(!perCapita||(r.population??0)>0)).sort((a,b)=>{
     const difference=metricValue(b)-metricValue(a);
-    return meta.lowBetter&&!composition?-difference:difference;
+    return meta.lowBetter&&!compositionCandidate?-difference:difference;
   });
+  const populationYears=new Set(ranked.map(row=>row.populationYear).filter((year):year is number=>year!=null));
+  const composition=(metric==='population'&&populationYears.size===1&&ranked.every(row=>row.populationYear!=null))||(metric==='outOfSchool'&&!perCapita);
   const unavailable=rows.filter(row=>row[metric]==null||(perCapita&&!row.population));
   const observedMaximum=Math.max(...ranked.map(metricValue),1);
   const maximum=meta.kind==='rate'?100:metric==='mpi'?1:metric==='consumption'?Math.ceil(observedMaximum/5_000)*5_000:perCapita?Math.ceil(observedMaximum/10)*10:observedMaximum;
@@ -171,8 +174,10 @@ export default function ProvinceComparison(){
         <ol className="depth-ranking">{ranked.map((row,index)=><li key={row.id}><div className="depth-rank-main"><span>{String(index+1).padStart(2,'0')}</span><b>{row.name}<em>{row.kind}</em></b><strong>{formatValue(row)}</strong></div><span className="depth-rank-bar"><i style={{width:`${Math.max(0,Math.min(100,metricValue(row)/maximum*100))}%`}}/></span></li>)}</ol>
       </div>}
       {perCapita&&ranked.length>0&&<p className="comparison-note">Calculated from out-of-school children divided by total 2023 population. This is per 1,000 residents, not per 1,000 children aged 5–16.</p>}
+      {metric==='population'&&populationYears.size>1&&<p className="comparison-note"><b>Different census years:</b> Pakistan units use PBS Census 2023; AJK and Gilgit–Baltistan use their latest compatible official 2017 figures. They are ranked but not combined into a composition total.</p>}
+      {metric==='population'&&config.l==='tehsils'&&<p className="comparison-note"><b>Modeled tehsil population:</b> tehsil values allocate district geography. They may be ranked, but are not combined into a Census 2023 composition total.</p>}
       {unavailable.length>0&&<p className="comparison-note"><b>No comparable {meta.label.toLowerCase()} data:</b> {unavailable.map(row=>row.name).join(', ')}. {metric==='population'?'AJK has district-level 2017 figures; the GB total can only be used when all 14 current map districts remain together because the 2017 census used an older district structure.':'These units are omitted from the chart rather than plotted as zero.'}</p>}
     </section>
-    <footer><span><a href="https://www.pbs.gov.pk/result-excel/" target="_blank" rel="noreferrer">PBS Census 2023 district tables 1, 5, 23, 24 and 25 ↗</a> provide demography, water, sanitation and housing. Regional sources: <a href={REGIONAL_POPULATION_SOURCES.ajk} target="_blank" rel="noreferrer">AJK population (2017) ↗</a> · <a href={REGIONAL_POPULATION_SOURCES.ajkSocial} target="_blank" rel="noreferrer">AJK literacy / primary enrolment (PSLM 2019–20) ↗</a> · <a href={REGIONAL_POPULATION_SOURCES.gb} target="_blank" rel="noreferrer">GB population / urban share (2017), literacy (MICS 2016–17), primary enrolment (2022) ↗</a>. Historical parent figures require all successor districts; unavailable indicators are omitted, never treated as zero.</span><button onClick={()=>navigator.clipboard.writeText(location.href)}>Copy comparison link</button></footer>
+    <footer><span><a href="/pakistan-map/methodology">Read the full data methodology →</a> · <a href="https://www.pbs.gov.pk/result-excel/" target="_blank" rel="noreferrer">PBS Census 2023 district tables ↗</a>. Exact counts use summed numerators and denominators; district-rate and rural HIES estimates are labelled.</span><button onClick={()=>navigator.clipboard.writeText(location.href)}>Copy comparison link</button></footer>
   </main>;
 }

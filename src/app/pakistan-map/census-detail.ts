@@ -28,12 +28,13 @@ const censusAliases:Record<string,string> = {
 export function aggregateCensus(keys:Iterable<string>, census:CensusDetail|null|undefined):CensusAggregate {
   const rows = [...new Set(keys)].map(key=>census?.districts[censusAliases[key]||key]).filter((row):row is CensusDistrict=>Boolean(row));
   const sum = (field:keyof CensusDistrict) => rows.reduce((total,row)=>total+(typeof row[field]==='number'?Number(row[field]):0),0);
-  const weighted = (field:keyof CensusDistrict, weight:keyof CensusDistrict) => {
-    let total=0,base=0;
-    rows.forEach(row=>{const value=row[field],weightValue=row[weight];if(typeof value==='number'&&typeof weightValue==='number'){total+=value*weightValue;base+=weightValue;}});
-    return base?total/base:null;
-  };
   const population=sum('population'),areaKm2=sum('areaKm2'),male=sum('male'),female=sum('female');
+  // Averages must be reconstructed from their proper implied denominators. A
+  // population-weighted mean of district household sizes or growth rates is not
+  // the corresponding aggregate statistic.
+  const impliedHouseholds=rows.reduce((total,row)=>total+(row.population&&row.householdSize?row.population/row.householdSize:0),0);
+  const growthYears=6;
+  const implied2017Population=rows.reduce((total,row)=>total+(row.population!=null&&row.growthRate!=null?row.population/Math.pow(1+row.growthRate/100,growthYears):0),0);
   const agePopulation=sum('agePopulation'),under15=sum('under15'),workingAge=sum('age15to64'),senior=sum('age65plus');
   const waterHouseholds=sum('waterHouseholds'),sanitationHouseholds=sum('sanitationHouseholds'),housingHouseholds=sum('housingHouseholds');
   return {
@@ -42,8 +43,8 @@ export function aggregateCensus(keys:Iterable<string>, census:CensusDetail|null|
     population:population||null,
     density:population&&areaKm2?population/areaKm2:null,
     sexRatio:female?male/female*100:null,
-    householdSize:weighted('householdSize','population'),
-    growthRate:weighted('growthRate','population'),
+    householdSize:population&&impliedHouseholds?population/impliedHouseholds:null,
+    growthRate:population&&implied2017Population?(Math.pow(population/implied2017Population,1/growthYears)-1)*100:null,
     under15Share:ratio(under15,agePopulation),
     workingAgeShare:ratio(workingAge,agePopulation),
     seniorShare:ratio(senior,agePopulation),

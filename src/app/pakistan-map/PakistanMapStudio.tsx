@@ -28,12 +28,12 @@ const RANK_METRICS: { key: RankMetric; label: string; unit: string }[] = [
   { key: 'literacy', label: 'Literacy', unit: '%' },
   { key: 'matricPlus', label: 'Matric or higher', unit: '%' },
   { key: 'outOfSchool', label: 'Out of school', unit: 'children' },
-  { key: 'consumption', label: 'Monthly consumption', unit: 'Rs / person' },
-  { key: 'lfpr', label: 'Labor-force participation', unit: '%' },
-  { key: 'foodInsecurity', label: 'Food insecurity', unit: '%' },
-  { key: 'internet', label: 'Internet users', unit: '%' },
-  { key: 'electricity', label: 'Electricity access', unit: '%' },
-  { key: 'mpi', label: 'Multidimensional poverty', unit: 'MPI' },
+  { key: 'consumption', label: 'Rural consumption estimate', unit: 'Rs / person' },
+  { key: 'lfpr', label: 'Census LFPR estimate', unit: '%' },
+  { key: 'foodInsecurity', label: 'Rural food-insecurity estimate', unit: '%' },
+  { key: 'internet', label: 'Rural internet-use estimate', unit: '%' },
+  { key: 'electricity', label: 'Rural electricity estimate', unit: '%' },
+  { key: 'mpi', label: 'Data Darbar deprivation index', unit: 'index' },
 ];
 const INSPECT_METRICS: { key: InspectMetric; label: string; unit: string; scale: 'allocation' | 'percent' | 'index' | 'observed' }[] = [
   { key:'allocation', label:'Province allocation', unit:'', scale:'allocation' },
@@ -48,18 +48,25 @@ const INSPECT_METRICS: { key: InspectMetric; label: string; unit: string; scale:
   { key:'urbanShare', label:'Urban share', unit:'%', scale:'percent' },
   { key:'matricPlus', label:'Matric or higher', unit:'%', scale:'percent' },
   { key:'outOfSchool', label:'Out of school', unit:'children', scale:'observed' },
-  { key:'consumption', label:'Monthly consumption', unit:'Rs / person', scale:'observed' },
-  { key:'lfpr', label:'Labor-force participation', unit:'%', scale:'percent' },
-  { key:'foodInsecurity', label:'Food insecurity', unit:'%', scale:'percent' },
-  { key:'internet', label:'Internet users', unit:'%', scale:'percent' },
-  { key:'electricity', label:'Electricity access', unit:'%', scale:'percent' },
-  { key:'mpi', label:'Multidimensional poverty', unit:'MPI', scale:'index' },
+  { key:'consumption', label:'Rural consumption estimate', unit:'Rs / person', scale:'observed' },
+  { key:'lfpr', label:'Census LFPR estimate', unit:'%', scale:'percent' },
+  { key:'foodInsecurity', label:'Rural food-insecurity estimate', unit:'%', scale:'percent' },
+  { key:'internet', label:'Rural internet-use estimate', unit:'%', scale:'percent' },
+  { key:'electricity', label:'Rural electricity estimate', unit:'%', scale:'percent' },
+  { key:'mpi', label:'Data Darbar deprivation index', unit:'index', scale:'index' },
   { key:'improvedWater', label:'Improved drinking water', unit:'% households', scale:'percent' },
   { key:'waterInside', label:'Water inside the home', unit:'% households', scale:'percent' },
   { key:'flushToilet', label:'Flush toilet', unit:'% households', scale:'percent' },
   { key:'noToilet', label:'No toilet', unit:'% households', scale:'percent' },
   { key:'ownedHousing', label:'Owner-occupied housing', unit:'% households', scale:'percent' },
   { key:'oneRoomHousing', label:'One-room housing', unit:'% households', scale:'percent' },
+];
+const BASIC_INSPECT_METRIC_KEYS: InspectMetric[] = ['allocation','population','density','literacy','urbanShare','consumption','mpi'];
+const OTHER_INSPECT_METRIC_GROUPS: { label: string; keys: InspectMetric[] }[] = [
+  { label:'Population & households', keys:['growthRate','householdSize','under15Share','workingAgeShare','dependencyRatio'] },
+  { label:'Education', keys:['matricPlus','outOfSchool'] },
+  { label:'Work & living conditions', keys:['lfpr','foodInsecurity','internet','electricity'] },
+  { label:'Housing & services', keys:['improvedWater','waterInside','flushToilet','noToilet','ownedHousing','oneRoomHousing'] },
 ];
 
 const PALETTE = ['#ef6351', '#f4b942', '#48a9a6', '#5b70d6', '#a267c7', '#3c9d60', '#e27d3f', '#d85b8b'];
@@ -347,6 +354,7 @@ export default function PakistanMapStudio() {
   const [toolMode, setToolMode] = useState<'paint' | 'inspect'>('paint');
   const [inspectMetric, setInspectMetric] = useState<InspectMetric>('allocation');
   const [inspectMetricOpen, setInspectMetricOpen] = useState(false);
+  const [inspectOtherOpen, setInspectOtherOpen] = useState(false);
   const [mapView, setMapView] = useState({ x: 0, y: 0, width: WIDTH, height: HEIGHT });
   const [selectedFeature, setSelectedFeature] = useState<Feature | null>(null);
   const [finalized, setFinalized] = useState(false);
@@ -519,7 +527,7 @@ export default function PakistanMapStudio() {
     regionalAssembly?.districts.filter(row => Object.entries(districtOwners).some(([rawKey, owner]) => owner === province.id && (ELECTION_ALIASES[rawKey] || rawKey) === normalise(row.district))).forEach(row => { regionalRegions.add(row.region); Object.entries(row.parties).forEach(([party, seats]) => { regionalSeats[party] = (regionalSeats[party] || 0) + seats; }); });
     const regionalSeatCount = Object.values(regionalSeats).reduce((sum, seats) => sum + seats, 0);
     const populationYears = new Set([...memberDistricts].map(district => isRegionalPopulationDistrict(district) ? 2017 : 2023));
-    return { ...province, members, area, origins, dataMatches:dataMatches + (regionalSocial?.matchedDistricts || 0), dataUnitCount: level === 'tehsils' ? members.length : memberDistricts.size, population, populationYear: populationYears.size === 1 ? [...populationYears][0] : null, literacyYear:regionalSocial?.literacyYear || '2023', enrolmentYear:regionalSocial?.enrolmentYear || '2019–20', urbanYear:regionalSocial?.urbanYear || '2023', partySeats, electionSeats, senateSeats, regionalSeats, regionalSeatCount, regionalRegions: [...regionalRegions],
+    return { ...province, members, area, origins, dataMatches:dataMatches + (regionalSocial?.matchedDistricts || 0), dataUnitCount: level === 'tehsils' ? members.length : memberDistricts.size, population, populationYear: level === 'tehsils' ? null : populationYears.size === 1 ? [...populationYears][0] : null, literacyYear:regionalSocial?.literacyYear || '2023', enrolmentYear:regionalSocial?.enrolmentYear || '2019–20', urbanYear:regionalSocial?.urbanYear || '2023', partySeats, electionSeats, senateSeats, regionalSeats, regionalSeatCount, regionalRegions: [...regionalRegions],
       literacy: literacyBase ? literate / literacyBase * 100 : null,
       urbanShare: urbanBase ? urban / urbanBase * 100 : null,
       unemployment: unemploymentBase ? weightedUnemployment / unemploymentBase : null,
@@ -538,6 +546,11 @@ export default function PakistanMapStudio() {
   }), [assembly, assignments, darbar, districtOwners, electionOwners, features, level, provinces, regionalAssembly, tehsilDataByFeatureId]);
   const assignedArea = finalRows.reduce((sum, row) => sum + row.area, 0);
   const activeRow = finalRows.find(row => row.id === active);
+  const populatedRows = finalRows.filter(row => row.population != null);
+  const mappedPopulationYears = new Set(populatedRows.map(row => row.populationYear).filter((year): year is number => year != null));
+  const comparableMappedPopulation = populatedRows.length && mappedPopulationYears.size === 1 && populatedRows.every(row => row.populationYear != null)
+    ? populatedRows.reduce((sum,row)=>sum+(row.population||0),0)
+    : null;
   const countryPolitics = finalRows.filter(row => row.kind === 'province' && row.members.length).reduce((summary, row) => {
     Object.entries(row.partySeats).forEach(([party,seats]) => { summary.assembly[party] = (summary.assembly[party] || 0) + seats; });
     Object.entries(row.senateSeats).forEach(([party,seats]) => { summary.senate[party] = (summary.senate[party] || 0) + seats; });
@@ -600,7 +613,7 @@ export default function PakistanMapStudio() {
     return {
       area,
       population: population || null,
-      populationYear: populationYears.size === 1 ? [...populationYears][0] : null,
+      populationYear: level === 'tehsils' ? null : populationYears.size === 1 ? [...populationYears][0] : null,
       literacyYear: regionalSocial?.literacyYear || '2023',
       enrolmentYear: regionalSocial?.enrolmentYear || '2019–20',
       urbanYear: regionalSocial?.urbanYear || '2023',
@@ -642,13 +655,13 @@ export default function PakistanMapStudio() {
     { value:selectedStats.outOfSchool == null ? '—' : Math.round(selectedStats.outOfSchool).toLocaleString(), label:'children aged 5–16 out of school' },
     { value:formatPercent(selectedStats.enrolment), label:`net enrolment · ${selectedStats.enrolmentYear}` },
     { value:formatPercent(selectedStats.numeracy), label:'numeracy' },
-    { value:formatPercent(selectedStats.lfpr), label:'labor-force participation' },
+    { value:formatPercent(selectedStats.lfpr), label:'labor-force participation · Census district estimate' },
     { value:formatPercent(selectedStats.unemployment), label:'unemployment' },
-    { value:selectedStats.consumption == null ? '—' : `Rs ${Math.round(selectedStats.consumption).toLocaleString()}`, label:'monthly consumption / person' },
-    { value:formatPercent(selectedStats.foodInsecurity), label:'food insecurity' },
-    { value:formatPercent(selectedStats.internet), label:'internet users' },
-    { value:formatPercent(selectedStats.electricity), label:'electricity access' },
-    { value:selectedStats.mpi == null ? '—' : selectedStats.mpi.toFixed(3), label:'multidimensional poverty index' },
+    { value:selectedStats.consumption == null ? '—' : `≈Rs ${Math.round(selectedStats.consumption).toLocaleString()}`, label:'monthly consumption / person · rural estimate' },
+    { value:formatPercent(selectedStats.foodInsecurity), label:'food insecurity · rural estimate' },
+    { value:formatPercent(selectedStats.internet), label:'internet use · rural estimate' },
+    { value:formatPercent(selectedStats.electricity), label:'electricity · rural estimate' },
+    { value:selectedStats.mpi == null ? '—' : selectedStats.mpi.toFixed(3), label:'Data Darbar deprivation index · not official MPI' },
     ...(selectedStats.census ? [
       { value:formatPercent(selectedStats.census.improvedWater), label:'households with improved water · 2023' },
       { value:formatPercent(selectedStats.census.waterInside), label:'drinking water inside · 2023' },
@@ -926,7 +939,12 @@ export default function PakistanMapStudio() {
           <div className="map-paper">
             {toolMode === 'inspect' && <div className={`inspect-map-picker ${inspectMetricOpen ? 'open' : ''}`}>
               <button type="button" aria-label={`Inspect map: ${inspectMetricMeta.label}`} aria-haspopup="listbox" aria-expanded={inspectMetricOpen} onClick={() => setInspectMetricOpen(open => !open)}><b><small>MAP</small>{inspectMetricMeta.label}</b><i>{inspectMetricOpen ? '×' : '⌄'}</i></button>
-              {inspectMetricOpen && <div role="listbox" className="inspect-map-menu">{INSPECT_METRICS.map((item,index) => <button type="button" role="option" aria-selected={item.key === inspectMetric} className={item.key === inspectMetric ? 'selected' : ''} key={item.key} onClick={() => { setInspectMetric(item.key); setInspectMetricOpen(false); }}><span>{String(index + 1).padStart(2,'0')}</span><b>{item.label}</b>{item.key === inspectMetric && <i>✓</i>}</button>)}</div>}
+              {inspectMetricOpen && <div className="inspect-map-menu">
+                <span className="inspect-menu-heading">Basic maps</span>
+                {BASIC_INSPECT_METRIC_KEYS.map((key,index) => { const item=INSPECT_METRICS.find(candidate=>candidate.key===key)!; return <button type="button" aria-pressed={item.key === inspectMetric} className={item.key === inspectMetric ? 'selected' : ''} key={item.key} onClick={() => { setInspectMetric(item.key); setInspectMetricOpen(false); }}><span>{String(index + 1).padStart(2,'0')}</span><b>{item.label}</b>{item.key === inspectMetric && <i>✓</i>}</button>; })}
+                <button type="button" className={`inspect-other-toggle ${inspectOtherOpen ? 'open' : ''}`} aria-expanded={inspectOtherOpen} onClick={() => setInspectOtherOpen(open => !open)}><span>+</span><b>{inspectOtherOpen ? 'Hide other statistics' : 'Other statistics'}</b><i>{inspectOtherOpen ? '−' : '⌄'}</i></button>
+                {inspectOtherOpen && <div className="inspect-other-groups">{OTHER_INSPECT_METRIC_GROUPS.map(group => <section key={group.label}><span className="inspect-menu-heading">{group.label}</span>{group.keys.map(key => { const item=INSPECT_METRICS.find(candidate=>candidate.key===key)!; return <button type="button" aria-pressed={item.key === inspectMetric} className={item.key === inspectMetric ? 'selected' : ''} key={item.key} onClick={() => { setInspectMetric(item.key); setInspectMetricOpen(false); }}><span aria-hidden="true">•</span><b>{item.label}</b>{item.key === inspectMetric && <i>✓</i>}</button>; })}</section>)}</div>}
+              </div>}
             </div>}
             {!features.length && <div className="loading">Drawing boundaries…</div>}
             <svg ref={svgRef} viewBox={`${mapView.x} ${mapView.y} ${mapView.width} ${mapView.height}`} role="img" aria-label={`Interactive map of Pakistan ${level}`} onWheel={e=>{e.preventDefault();const rect=e.currentTarget.getBoundingClientRect();zoomMap(e.deltaY>0?1.16:.86,(e.clientX-rect.left)/rect.width,(e.clientY-rect.top)/rect.height)}} onPointerDown={e=>{if(!(e.shiftKey||e.button===1||e.target===e.currentTarget))return;e.currentTarget.setPointerCapture(e.pointerId);panRef.current={pointerId:e.pointerId,clientX:e.clientX,clientY:e.clientY,view:mapView}}} onPointerMove={e=>{const pan=panRef.current;if(!pan||pan.pointerId!==e.pointerId)return;const rect=e.currentTarget.getBoundingClientRect();const x=Math.max(0,Math.min(WIDTH-pan.view.width,pan.view.x-(e.clientX-pan.clientX)/rect.width*pan.view.width));const y=Math.max(0,Math.min(HEIGHT-pan.view.height,pan.view.y-(e.clientY-pan.clientY)/rect.height*pan.view.height));setMapView({...pan.view,x,y})}} onPointerUp={e=>{if(panRef.current?.pointerId===e.pointerId)panRef.current=null}} onPointerCancel={()=>{panRef.current=null}}>
@@ -956,7 +974,7 @@ export default function PakistanMapStudio() {
               <div className="district-head"><div><small>{level === 'divisions' ? 'DIVISION DETAIL' : level === 'tehsils' ? 'TEHSIL DETAIL' : 'DISTRICT DETAIL'}</small><h2>{featureName(selectedFeature, level)}</h2><p>{level === 'tehsils' && `${String(selectedFeature.properties.district_name)} · `}{String(selectedFeature.properties.province_name)}</p></div><button onClick={() => setSelectedFeature(null)} aria-label="Close details">×</button></div>
               <p className="district-section-label">VITAL STATISTICS</p>
               <div className="district-stats">{inspectStats.map(stat => <span key={stat.label}><b>{stat.value}</b>{stat.label}</span>)}</div>
-              <footer>PBS Census 2023 demographic and housing tables · Data Darbar household indicators. Missing values are shown as —; tehsil social indicators inherit their matched district estimate.</footer>
+              <footer>PBS Census 2023 demographic and housing tables · Data Darbar modeled indicators. HIES district observations are rural-only. Missing values are shown as —; tehsil social indicators inherit their matched district estimate.</footer>
             </aside>}
             <div className="map-caption">PBS 2023 DIVISIONS HEAVY · {level.toUpperCase()} LIGHT · CITY DOTS ARE REFERENCE LOCATIONS</div>
           </div>
@@ -971,14 +989,14 @@ export default function PakistanMapStudio() {
           <div className="eyebrow"><span>03</span> YOUR NEW MAP</div>
           {activeRow && <section className="live-vitals" style={{ '--province-color': activeRow.color } as React.CSSProperties}>
             <div className="live-vitals-head"><div><small>{activeRow.kind}</small><h2>{activeRow.name}</h2>{activeRow.capital && <span>Capital · {activeRow.capital}</span>}</div><b>{activeRow.members.length}</b></div>
-            {activeRow.members.length ? <><div className="live-vitals-grid"><span><b>{activeRow.population ? `${(activeRow.population/1_000_000).toFixed(2)}m` : '—'}</b>population</span><span><b>{activeRow.population && finalRows.reduce((sum,row)=>sum+row.population,0) ? `${(activeRow.population/finalRows.reduce((sum,row)=>sum+row.population,0)*100).toFixed(1)}%` : '—'}</b>mapped share</span><span><b>{activeRow.literacy==null?'—':`${activeRow.literacy.toFixed(1)}%`}</b>literacy</span><span><b>{activeRow.matricPlus==null?'—':`${activeRow.matricPlus.toFixed(1)}%`}</b>matric+</span><span><b>{activeRow.urbanShare==null?'—':`${activeRow.urbanShare.toFixed(1)}%`}</b>urban</span><span><b>{activeRow.consumption==null?'—':`Rs ${Math.round(activeRow.consumption).toLocaleString()}`}</b>consumption / person</span></div><button onClick={() => openProfile(activeRow.id)}>Open full profile ↗</button></> : <p>Paint {level} with {activeRow.name} to see its live statistics.</p>}
+            {activeRow.members.length ? <><div className="live-vitals-grid"><span><b>{activeRow.population ? `${(activeRow.population/1_000_000).toFixed(2)}m` : '—'}</b>population · {level==='tehsils'?'modeled estimate':activeRow.populationYear||'mixed years'}</span><span><b>{activeRow.population && comparableMappedPopulation ? `${(activeRow.population/comparableMappedPopulation*100).toFixed(1)}%` : '—'}</b>{comparableMappedPopulation?'mapped share':'share not comparable across years'}</span><span><b>{activeRow.literacy==null?'—':`${activeRow.literacy.toFixed(1)}%`}</b>literacy</span><span><b>{activeRow.matricPlus==null?'—':`≈${activeRow.matricPlus.toFixed(1)}%`}</b>matric+ · district estimate</span><span><b>{activeRow.urbanShare==null?'—':`${activeRow.urbanShare.toFixed(1)}%`}</b>urban</span><span><b>{activeRow.consumption==null?'—':`≈Rs ${Math.round(activeRow.consumption).toLocaleString()}`}</b>consumption / person · rural estimate</span></div><button onClick={() => openProfile(activeRow.id)}>Open full profile ↗</button></> : <p>Paint {level} with {activeRow.name} to see its live statistics.</p>}
           </section>}
           <div className="big-stat"><strong>{provinces.length}</strong><span>MAP UNITS<br/>CREATED</span></div>
           <div className="assignment-stat"><span>{totalAssigned} of {features.length}</span><span>{Math.round(totalAssigned / Math.max(features.length, 1) * 100)}% assigned</span><div><i style={{ width: `${totalAssigned / Math.max(features.length, 1) * 100}%` }}/></div></div>
           <div className="summary-list">{provinces.map(p => { const count = assignmentCounts[p.id] || 0; return <div key={p.id}><i style={{ background: p.color }}/><span>{p.name}</span><b>{count}</b></div>; })}</div>
           <div className="unassigned"><i/>Unassigned <b>{features.length - totalAssigned}</b></div>
           <button className="clear" onClick={clearMap}>Clear map</button>
-          <p className="source-note">Boundary data: <a href="https://github.com/abdullahumer1101/pkmapr" target="_blank" rel="noreferrer">pkmapr / OCHA</a>. Administrative boundaries and names may change.</p>
+          <p className="source-note">Boundary data: <a href="https://github.com/abdullahumer1101/pkmapr" target="_blank" rel="noreferrer">pkmapr / OCHA</a>. Administrative boundaries and names may change. <a href="/pakistan-map/methodology">Data methodology →</a></p>
           <p className="source-note">AJK uses government 2017 district population plus territory-wide PSLM 2019–20 literacy and primary enrolment. GB uses official 2017 census population, MICS 2016–17 district literacy, and territory-wide 2017 urban share / 2022 primary enrolment. Historical parent figures appear only when all successor districts stay together; missing indicators remain blank, never zero.</p>
         </aside>
       </section>
@@ -1008,7 +1026,7 @@ export default function PakistanMapStudio() {
             <div className="rank-picker" role="tablist" aria-label="Choose indicator">{RANK_METRICS.map(metric => <button key={metric.key} className={rankMetric === metric.key ? 'selected' : ''} onClick={() => setRankMetric(metric.key)} role="tab" aria-selected={rankMetric === metric.key}>{metric.label}</button>)}</div>
             <div className="rank-context"><b>{RANK_METRICS.find(metric => metric.key === rankMetric)?.label}</b><span>{RANK_METRICS.find(metric => metric.key === rankMetric)?.unit}</span></div>
             <ol className="rank-list">{rankedRows.map((row, index) => <li key={row.id}><div className="rank-place">{String(index + 1).padStart(2, '0')}</div><div className="rank-result"><div><b>{row.name}</b><strong>{formatRankValue(Number(row[rankMetric]))}</strong></div><span><i style={{ width: `${Number(row[rankMetric]) / rankMaximum * 100}%`, background: row.color }}/></span></div></li>)}</ol>
-            <p className="rank-note">Figures marked as estimates in the province cards use the same underlying district-weighted method here. Higher MPI and food insecurity indicate worse outcomes.</p>
+            <p className="rank-note">Figures marked as estimates use the same population-weighted district method here. HIES district observations are rural-only. Higher deprivation-index and food-insecurity values indicate worse outcomes.</p>
           </aside>}
           <div className="province-details-head"><div><span>MAP UNIT PROFILES</span><h2>Vital statistics</h2></div><button type="button" aria-expanded={detailsOpen} aria-controls="province-details" onClick={() => setDetailsOpen(open => !open)}>{detailsOpen ? 'Collapse ↑' : 'Expand ↓'}</button></div>
           {detailsOpen && <div id="province-details" className="final-grid">
@@ -1017,13 +1035,13 @@ export default function PakistanMapStudio() {
               <div><div className="unit-heading"><div><h2>{row.name}</h2><button className="open-profile" onClick={() => openProfile(row.id)}>Open full profile ↗</button></div><span className="unit-type-line">{row.kind}{row.capital ? ` · capital: ${row.capital}` : ' · capital not selected'}</span></div>
               <section className="metric-section overview-metrics"><h3>At a glance</h3><div className="final-metrics"><span><b>{row.members.length}</b>{level}</span><span><b>{Math.round(row.area).toLocaleString()}</b>km²</span><span><b>{row.population ? (row.population / 1_000_000).toFixed(2) + 'm' : '—'}</b>{level === 'tehsils' ? `estimated population${row.populationYear ? ` · ${row.populationYear}` : ' · mixed years'}` : `population${row.populationYear ? ` · ${row.populationYear}` : ' · mixed years'}`}</span><span><b>{row.urbanShare == null ? '—' : `${row.urbanShare.toFixed(1)}%`}</b>urban share · {row.urbanYear}</span></div></section>
               <section className="metric-section"><h3>Education</h3><div className="final-metrics"><span><b>{row.literacy == null ? '—' : `${level === 'tehsils' ? '≈' : ''}${row.literacy.toFixed(1)}%`}</b>literacy · {row.literacyYear}</span><span><b>{row.matricPlus == null ? '—' : `≈${row.matricPlus.toFixed(1)}%`}</b>matric or higher</span><span><b>{row.enrolment == null ? '—' : `≈${row.enrolment.toFixed(1)}%`}</b>net enrolment · {row.enrolmentYear}</span><span><b>{row.numeracy == null ? '—' : `≈${row.numeracy.toFixed(1)}%`}</b>numeracy</span>{level !== 'tehsils' && <span className="wide-metric"><b>{row.outOfSchool == null ? '—' : Math.round(row.outOfSchool).toLocaleString()}</b>children aged 5–16 out of school</span>}</div></section>
-              <section className="metric-section"><h3>Economy &amp; living conditions</h3><div className="final-metrics"><span><b>{row.consumption == null ? '—' : `Rs ${Math.round(row.consumption).toLocaleString()}`}</b>monthly consumption / person</span><span><b>{row.lfpr == null ? '—' : `≈${row.lfpr.toFixed(1)}%`}</b>labor-force participation</span><span><b>{row.foodInsecurity == null ? '—' : `≈${row.foodInsecurity.toFixed(1)}%`}</b>food insecurity</span><span><b>{row.internet == null ? '—' : `≈${row.internet.toFixed(1)}%`}</b>internet users</span><span><b>{row.electricity == null ? '—' : `≈${row.electricity.toFixed(1)}%`}</b>electricity access</span>{level !== 'tehsils' ? <><span><b>{row.mpi == null ? '—' : row.mpi.toFixed(3)}</b>MPI · 2019–20</span><span><b>{row.unemployment == null ? '—' : `${row.unemployment.toFixed(1)}%`}</b>unemployment</span></> : <><span><b>{row.rwi == null ? '—' : `${row.rwi.toFixed(0)}th`}</b>wealth percentile</span><span><b>{row.nightLight == null ? '—' : row.nightLight.toFixed(2)}</b>night radiance · 2026</span></>}</div></section>
+              <section className="metric-section"><h3>Economy &amp; living conditions</h3><div className="final-metrics"><span><b>{row.consumption == null ? '—' : `≈Rs ${Math.round(row.consumption).toLocaleString()}`}</b>monthly consumption / person · rural model</span><span><b>{row.lfpr == null ? '—' : `≈${row.lfpr.toFixed(1)}%`}</b>labor-force participation · Census estimate</span><span><b>{row.foodInsecurity == null ? '—' : `≈${row.foodInsecurity.toFixed(1)}%`}</b>food insecurity · rural model</span><span><b>{row.internet == null ? '—' : `≈${row.internet.toFixed(1)}%`}</b>internet use · rural model</span><span><b>{row.electricity == null ? '—' : `≈${row.electricity.toFixed(1)}%`}</b>electricity · rural model</span>{level !== 'tehsils' ? <><span><b>{row.mpi == null ? '—' : row.mpi.toFixed(3)}</b>Data Darbar deprivation index · 2019–20</span><span><b>{row.unemployment == null ? '—' : `${row.unemployment.toFixed(1)}%`}</b>unemployment · Census estimate</span></> : <><span><b>{row.rwi == null ? '—' : `${row.rwi.toFixed(0)}th`}</b>wealth percentile</span><span><b>{row.nightLight == null ? '—' : row.nightLight.toFixed(2)}</b>night radiance · 2026</span></>}</div></section>
               <div className="origin-bar">{row.origins.map(([origin, count]) => <i key={origin} style={{ width: `${count / row.members.length * 100}%` }} title={`${origin}: ${count}`}/>)}</div>
               <p>Drawn from {row.origins.map(([origin, count]) => `${count} ${origin}`).join(' · ')} · Data matched for {row.dataMatches}/{row.dataUnitCount} source units</p>
               </div>
             </article>)}
           </div>}
-          <footer className="final-footer"><p><b>Data & method</b> <a href="https://darbar.adaad.org/" target="_blank" rel="noreferrer">Data Darbar</a>: PBS Census 2023, PSLM/HIES education, employment and living-conditions measures, Meta/WorldPop wealth and population, and VIIRS night lights. Custom-province GDP is not published, so monthly household consumption, wealth and night lights are shown as economic proxies—not GDP estimates. Tehsil figures marked ≈ apply district rates to tehsil populations. Politics replays {electionYear} provincial general-seat winners grouped by election-era districts from the <a href={electionYear === 2018 ? 'https://www.ecp.gov.pk/storage/files/3/03-ECP%20Annual%20Report%202018.pdf' : 'https://www.ecp.gov.pk/storage/files/3/General%20Election%20Report%202024%20Vol-II-compressed.pdf'} target="_blank" rel="noreferrer">Election Commission of Pakistan</a>; reserved seats are excluded. Islamabad is omitted only from provincial-assembly replays: it remains federally represented, including four Senate seats. AJK and Gilgit–Baltistan are outside Pakistan’s federal Parliament. The 2018 view explicitly rolls later district splits back to their historical parents. The Senate line is a 23-seat proportional scenario for proposed provinces, not a legal prediction.</p><div><button onClick={exportPng}>Export PNG</button><button onClick={shareMap}>{shareStatus}</button><button className="dark" onClick={exportPlan}>Download plan</button></div></footer>
+          <footer className="final-footer"><p><b>Data & method</b> PBS Census 2023 counts are kept separate from district-rate estimates, rural-only HIES observations, and modeled proxies. Missing values are never zero. <a href="/pakistan-map/methodology">Read sources, formulas and assumptions →</a> Politics replays {electionYear} provincial general-seat winners grouped by election-era districts from the <a href={electionYear === 2018 ? 'https://www.ecp.gov.pk/storage/files/3/03-ECP%20Annual%20Report%202018.pdf' : 'https://www.ecp.gov.pk/storage/files/3/General%20Election%20Report%202024%20Vol-II-compressed.pdf'} target="_blank" rel="noreferrer">Election Commission of Pakistan</a>; reserved seats are excluded.</p><div><button onClick={exportPng}>Export PNG</button><button onClick={shareMap}>{shareStatus}</button><button className="dark" onClick={exportPlan}>Download plan</button></div></footer>
         </section>
       </div>}
     </main>

@@ -78,6 +78,11 @@ def parse_table_5(path: Path, result: dict):
         if re.search(r"\bDISTRICT$", label, re.I):
             current = district_key(label)
             continue
+        # District blocks are followed by tehsil/taluka detail with the same
+        # age labels. Stop there so subdistrict rows cannot overwrite totals.
+        if re.search(r"\b(?:TEHSIL|TALUKA|SUB-?DIVISION)$", label, re.I):
+            current = None
+            continue
         if current not in result:
             continue
         value = number(row[1])
@@ -91,6 +96,10 @@ def parse_table_5(path: Path, result: dict):
             result[current]["age15to64"] = value
         elif label == "65 &  ABOVE":
             result[current]["age65plus"] = value
+            # The district age block is complete. Some workbooks insert
+            # de-excluded areas or sub-divisions before the first tehsil, so
+            # do not rely only on a particular subdistrict heading spelling.
+            current = None
 
 
 def parse_households(path: Path, result: dict, columns: dict[str, int]):
@@ -104,6 +113,9 @@ def parse_households(path: Path, result: dict, columns: dict[str, int]):
             continue
         for field, column in columns.items():
             result[current][field] = number(row[column])
+        # The first ALL LOCALITIES row is the district total. Subsequent rows
+        # in the workbook block are its constituent tehsils/talukas.
+        current = None
 
 
 def main():

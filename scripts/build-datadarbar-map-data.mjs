@@ -44,6 +44,6 @@ const tehsils = Object.values(context.window.DD_POV.tehsils).map(row => ({
 fs.writeFileSync(outputPath, JSON.stringify({
   source: 'Data Darbar (darbar.adaad.org)',
   generated: '2026-09-03',
-  methodology: 'PBS Census 2023; PSLM 2019-20 MPI; Meta RWI; WorldPop; VIIRS night lights',
+  methodology: 'PBS Census 2023 counts; district social rates are population-weighted estimates; HIES district observations are rural-only; the Data Darbar deprivation index is not the official national MPI; Meta RWI, WorldPop and VIIRS night lights are modeled proxies',
   districts, tehsils,
 }));
