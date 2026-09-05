@@ -968,9 +968,12 @@ export default function PakistanMapStudio() {
                       {(capitalCitiesByProvince[province.id] || []).length ? <><button className={!province.capital ? 'selected' : ''} onClick={() => { setProvinces(items => items.map(item => item.id === province.id ? { ...item, capital: '' } : item)); setCapitalPickerOpen(null); }}>No capital</button>{capitalCitiesByProvince[province.id].map(city => <button className={province.capital === city.name ? 'selected' : ''} role="option" aria-selected={province.capital === city.name} key={city.name} onClick={() => { setProvinces(items => items.map(item => item.id === province.id ? { ...item, capital: city.name } : item)); setCapitalPickerOpen(null); }}>{city.name}</button>)}</> : <p>Shade an area containing a marked city first.</p>}
                     </div>}
                   </div>
+                  <button className="delete-unit-text" disabled={provinces.length <= 1} onClick={() => removeProvince(province.id)}>{provinces.length <= 1 ? 'At least one unit required' : 'Delete unit'}</button>
                 </div>}
-                <span className="count">{count}</span>
-                <button className="remove-unit" disabled={provinces.length <= 1} onClick={e => { e.stopPropagation(); removeProvince(province.id); }} aria-label={`Delete ${province.name}`} title={provinces.length <= 1 ? 'At least one map unit is required' : `Delete ${province.name}`}><span className="trash-icon" aria-hidden="true"/></button>
+                <div className="unit-row-meta">
+                  <span className="count">{count} areas</span>
+                  <button className="unit-edit" onClick={event => { event.stopPropagation(); setActive(province.id); setPaletteOpen(null); setCapitalPickerOpen(null); setUnitEditorOpen(open => open === province.id ? null : province.id); }} aria-expanded={unitEditorOpen === province.id} aria-controls={`unit-editor-${province.id}`}>Edit ›</button>
+                </div>
               </div>;
             })}
           </div>
