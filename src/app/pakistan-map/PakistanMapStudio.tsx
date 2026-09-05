@@ -200,6 +200,20 @@ function geometryPath(geometry: Feature['geometry']) {
   return polygons.map(polygon => polygon.map(ringPath).join(' ')).join(' ');
 }
 
+function pointInRing(point: [number, number], ring: number[][]) {
+  let inside = false;
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    const [xi, yi] = ring[i], [xj, yj] = ring[j];
+    if ((yi > point[1]) !== (yj > point[1]) && point[0] < (xj - xi) * (point[1] - yi) / (yj - yi) + xi) inside = !inside;
+  }
+  return inside;
+}
+
+function featureContainsPoint(feature: Feature, point: [number, number]) {
+  const polygons = feature.geometry.type === 'Polygon' ? [feature.geometry.coordinates as number[][][]] : feature.geometry.coordinates as number[][][][];
+  return polygons.some(polygon => pointInRing(point, polygon[0]) && !polygon.slice(1).some(ring => pointInRing(point, ring)));
+}
+
 function divisionBoundaryPath(features: Feature[]) {
   const segments = new Map<string, { start:number[]; end:number[]; divisions:Set<string>; uses:number }>();
   features.forEach(feature => {
@@ -370,6 +384,8 @@ export default function PakistanMapStudio() {
   const [electionYear, setElectionYear] = useState<ElectionYear>(2024);
   const [regionalAssembly, setRegionalAssembly] = useState<RegionalAssemblyData | null>(null);
   const [paletteOpen, setPaletteOpen] = useState<string | null>(null);
+  const [capitalPickerOpen, setCapitalPickerOpen] = useState<string | null>(null);
+  const [unitEditorOpen, setUnitEditorOpen] = useState<string | null>(null);
   const [leftPanelOpen, setLeftPanelOpen] = useState(true);
   const [rightPanelOpen, setRightPanelOpen] = useState(true);
   const [leftPanelWidth, setLeftPanelWidth] = useState(340);
@@ -432,6 +448,20 @@ export default function PakistanMapStudio() {
   const assignmentCounts = useMemo(() => Object.values(assignments).reduce<Record<string, number>>((counts, id) => { counts[id] = (counts[id] || 0) + 1; return counts; }, {}), [assignments]);
   const tehsilDataByFeatureId = useMemo(() => level === 'tehsils' ? buildTehsilDataLookup(features, darbar?.tehsils || []) : new Map<string, TehsilData>(), [darbar, features, level]);
   const paths = useMemo(() => features.map(feature => ({ feature, d: geometryPath(feature.geometry) })), [features]);
+  const capitalCitiesByProvince = useMemo(() => Object.fromEntries(provinces.map(province => [province.id, CITY_MARKERS.filter(city => features.some(feature => assignments[featureId(feature, level)] === province.id && featureContainsPoint(feature, [city.lon, city.lat])))])), [assignments, features, level, provinces]);
+
+  useEffect(() => {
+    if (!features.length || !Object.keys(assignments).length) return;
+    setProvinces(items => {
+      let changed = false;
+      const next = items.map(item => {
+        if (!item.capital || (capitalCitiesByProvince[item.id] || []).some(city => city.name === item.capital)) return item;
+        changed = true;
+        return { ...item, capital: '' };
+      });
+      return changed ? next : items;
+    });
+  }, [assignments, capitalCitiesByProvince, features.length]);
   const { divisionPath, nationalPath } = useMemo(() => divisionBoundaryPath(features), [features]);
   const matches = useMemo(() => query.trim() ? features.filter(f => `${featureName(f, level)} ${f.properties.district_name} ${f.properties.province_name}`.toLowerCase().includes(query.toLowerCase())).slice(0, 8) : [], [features, level, query]);
   const totalAssigned = Object.keys(assignments).length;
@@ -903,23 +933,30 @@ export default function PakistanMapStudio() {
             {provinces.map((province, index) => {
               const count = assignmentCounts[province.id] || 0;
               return <div className={`province-row ${active === province.id ? 'active' : ''}`} key={province.id} onClick={() => setActive(province.id)}>
-                <button className="swatch" style={{ background: province.color }} aria-label={`Choose ${province.name} colour`} aria-expanded={paletteOpen === province.id} onClick={e => { e.stopPropagation(); setPaletteOpen(open => open === province.id ? null : province.id); }}/>
+                <button className="swatch" style={{ background: province.color }} aria-label={`Choose ${province.name} colour`} aria-expanded={paletteOpen === province.id} onClick={e => { e.stopPropagation(); setUnitEditorOpen(null); setCapitalPickerOpen(null); setPaletteOpen(open => open === province.id ? null : province.id); }}/>
                 {paletteOpen === province.id && <div className="paint-palette" onClick={e => e.stopPropagation()}>
                   <div className="paint-palette-head"><span className="paint-wells"><i style={{background:province.color}}/><i/></span><b>COLOURS</b><button onClick={()=>setPaletteOpen(null)} aria-label="Close colour palette">×</button></div>
                   <div className="paint-color-grid">{PAINT_COLORS.map(color=><button key={color} className={color.toLowerCase()===province.color.toLowerCase()?'selected':''} style={{background:color}} onClick={()=>{setProvinceColor(province.id,color);setPaletteOpen(null)}} aria-label={`Use colour ${color}`}/>)}</div>
                   <label className="custom-color"><span>EDIT COLOUR</span><input type="color" value={province.color} aria-label={`Custom colour for ${province.name}`} onChange={e=>setProvinceColor(province.id,e.target.value)}/></label>
                 </div>}
-                <div className="unit-fields">
-                  <div className="name-editor"><input className="province-name" value={province.name} aria-label={`Map unit ${index + 1} name`} onChange={e => setProvinces(items => items.map(item => item.id === province.id ? { ...item, name: e.target.value } : item))}/></div>
-                  <label className="capital-editor"><span>Capital</span><input list="capital-options" value={province.capital || ''} placeholder="Select or type" aria-label={`Capital of ${province.name}`} onChange={e => setProvinces(items => items.map(item => item.id === province.id ? { ...item, capital: e.target.value } : item))}/></label>
-                </div>
-                <button className={`unit-kind ${province.kind}`} onClick={e => { e.stopPropagation(); setProvinces(items => items.map(item => item.id === province.id ? { ...item, kind: item.kind === 'province' ? 'territory' : 'province' } : item)); }} aria-label={`Set ${province.name} as ${province.kind === 'province' ? 'territory' : 'province'}`}>{province.kind}</button>
+                <button className="unit-name" onClick={event => { event.stopPropagation(); setActive(province.id); setPaletteOpen(null); setCapitalPickerOpen(null); setUnitEditorOpen(open => open === province.id ? null : province.id); }} aria-expanded={unitEditorOpen === province.id} aria-controls={`unit-editor-${province.id}`}>{province.name}</button>
+                {unitEditorOpen === province.id && <div id={`unit-editor-${province.id}`} className="unit-editor" onClick={event => event.stopPropagation()}>
+                  <div className="unit-editor-head"><b>EDIT MAP UNIT</b><button onClick={() => { setUnitEditorOpen(null); setCapitalPickerOpen(null); }} aria-label="Close map unit editor">×</button></div>
+                  <label><span>Name</span><input autoFocus className="province-name" value={province.name} aria-label={`Map unit ${index + 1} name`} onChange={e => setProvinces(items => items.map(item => item.id === province.id ? { ...item, name: e.target.value } : item))}/></label>
+                  <button className={`unit-kind ${province.kind}`} onClick={() => setProvinces(items => items.map(item => item.id === province.id ? { ...item, kind: item.kind === 'province' ? 'territory' : 'province' } : item))} aria-label={`Set ${province.name} as ${province.kind === 'province' ? 'territory' : 'province'}`}>{province.kind} · click to change</button>
+                  <div className="capital-editor">
+                    <span>Capital</span>
+                    <button type="button" aria-label={`Choose capital of ${province.name}`} aria-haspopup="listbox" aria-expanded={capitalPickerOpen === province.id} onClick={() => setCapitalPickerOpen(open => open === province.id ? null : province.id)}>{province.capital || 'Choose city'}<i aria-hidden="true">⌄</i></button>
+                    {capitalPickerOpen === province.id && <div className="capital-menu" role="listbox" aria-label={`Cities inside ${province.name}`}>
+                      {(capitalCitiesByProvince[province.id] || []).length ? <><button className={!province.capital ? 'selected' : ''} onClick={() => { setProvinces(items => items.map(item => item.id === province.id ? { ...item, capital: '' } : item)); setCapitalPickerOpen(null); }}>No capital</button>{capitalCitiesByProvince[province.id].map(city => <button className={province.capital === city.name ? 'selected' : ''} role="option" aria-selected={province.capital === city.name} key={city.name} onClick={() => { setProvinces(items => items.map(item => item.id === province.id ? { ...item, capital: city.name } : item)); setCapitalPickerOpen(null); }}>{city.name}</button>)}</> : <p>Shade an area containing a marked city first.</p>}
+                    </div>}
+                  </div>
+                </div>}
                 <span className="count">{count}</span>
                 <button className="remove-unit" disabled={provinces.length <= 1} onClick={e => { e.stopPropagation(); removeProvince(province.id); }} aria-label={`Delete ${province.name}`} title={provinces.length <= 1 ? 'At least one map unit is required' : `Delete ${province.name}`}><span className="trash-icon" aria-hidden="true"/></button>
               </div>;
             })}
           </div>
-          <datalist id="capital-options">{CITY_MARKERS.map(city => <option value={city.name} key={city.name}/>)}</datalist>
           <button className="add-province" onClick={addProvince}>＋ Add a map unit</button>
           <div className="tip"><b>TIP</b><span>Click and drag across neighbouring areas to paint faster.</span></div>
         </aside>
