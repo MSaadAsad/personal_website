@@ -69,7 +69,14 @@ const OTHER_INSPECT_METRIC_GROUPS: { label: string; keys: InspectMetric[] }[] = 
   { label:'Housing & services', keys:['improvedWater','waterInside','flushToilet','noToilet','ownedHousing','oneRoomHousing'] },
 ];
 
-const PALETTE = ['#ef6351', '#f4b942', '#48a9a6', '#5b70d6', '#a267c7', '#3c9d60', '#e27d3f', '#d85b8b'];
+// Ordered so consecutive map units differ strongly in both hue and lightness.
+// Keep this longer than the usual unit list so colours do not repeat early.
+const PALETTE = [
+  '#4f7bd9', '#ef6a55', '#42a66c', '#a967c7', '#f2b93f', '#2e9daa',
+  '#d65392', '#8c6b4f', '#78a950', '#e68235', '#5964bd', '#b84848',
+  '#56b6d2', '#8463a9', '#c8952f', '#397f68', '#e35d68', '#648a3f',
+  '#b85c9a', '#3e8fbd', '#ba7041', '#6e73cf', '#9a8138', '#278b83',
+];
 const PAINT_COLORS = ['#000000','#464646','#787878','#b4b4b4','#ffffff','#880015','#ed1c24','#ff7f27','#fff200','#22b14c','#00a2e8','#3f48cc','#a349a4','#b97a57','#ffaec9','#ffc90e','#b5e61d','#99d9ea','#7092be','#c8bfe7','#65915f','#d99b42','#b76d57','#435267'];
 const PRESET_1: Province[] = [
   { id: 'punjab', name: 'Punjab', color: '#65915f', kind: 'province', capital: 'Lahore' },
