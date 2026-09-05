@@ -868,7 +868,7 @@ export default function PakistanMapStudio() {
       <header className="naqsha-header">
         <a className="brand" href="/" aria-label="Back to saad’s website"><span className="brand-mark">ن</span><span>NAYA NAQSHA<small>PROVINCE BUILDER</small></span></a>
         <input className="map-name-input" value={mapName} onChange={e => setMapName(e.target.value)} aria-label="Map name" placeholder="Name your map" />
-        <div className="header-actions"><button onClick={undo} disabled={!history.length} aria-label="Undo">↶</button><button onClick={redo} disabled={!future.length} aria-label="Redo">↷</button><button className="export" onClick={exportPng}>Export PNG</button><button className="export share-button" disabled={!totalAssigned} onClick={shareMap}>{shareStatus}</button><button className="export dark finalize-button" disabled={!totalAssigned} onClick={() => setFinalized(true)}>Finalize map →</button></div>
+        <div className="header-actions"><button onClick={undo} disabled={!history.length} aria-label="Undo">↶</button><button onClick={redo} disabled={!future.length} aria-label="Redo">↷</button><button className="export" onClick={exportPng}>Export PNG</button><button className="export share-button" disabled={!totalAssigned} onClick={shareMap}>{shareStatus}</button><a className="export method-link" href="/pakistan-map/methodology">Data &amp; method</a><button className="export dark finalize-button" disabled={!totalAssigned} onClick={() => setFinalized(true)}>Finalize map →</button></div>
       </header>
 
       <section className="studio" style={{ '--left-panel-width': `${leftPanelOpen ? leftPanelWidth : 0}px`, '--right-panel-width': `${rightPanelOpen ? rightPanelWidth : 0}px` } as React.CSSProperties}>
