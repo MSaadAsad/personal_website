@@ -39,6 +39,13 @@ const METRICS:{key:Metric;label:string;unit:string;kind:'share'|'rate'|'absolute
   {key:'ownedHousing',label:'Owner-occupied housing',unit:'% households',kind:'rate'},
   {key:'oneRoomHousing',label:'One-room housing',unit:'% households',kind:'rate',lowBetter:true},
 ];
+const BASIC_METRIC_KEYS:Metric[]=['population','density','literacy','urban','consumption','mpi'];
+const MORE_METRIC_GROUPS:{label:string;keys:Metric[]}[]=[
+  {label:'Population & households',keys:['growth','householdSize','under15','workingAge','dependency']},
+  {label:'Education',keys:['matric','outOfSchool']},
+  {label:'Work & living conditions',keys:['lfpr','food','internet','electricity']},
+  {label:'Housing & services',keys:['improvedWater','waterInside','flushToilet','noToilet','ownedHousing','oneRoomHousing']},
+];
 const aliases:Record<string,string>={chagai:'chaghi',sudhnoti:'sudhnutti',leiah:'layyah',dikhan:'deraismailkhan',centralkarachi:'karachicentral',eastkarachi:'karachieast',southkarachi:'karachisouth',westkarachi:'karachiwest',malirkarachi:'karachimalir',korangikarachi:'karachikorangi'};
 const normalise=(v:unknown)=>String(v).toLowerCase().replace(/district|agency/g,'').replace(/[^a-z0-9]/g,'');
 const decode=(value:string):Config=>{const base=value.replace(/-/g,'+').replace(/_/g,'/');const binary=atob(base+'='.repeat((4-base.length%4)%4));return JSON.parse(new TextDecoder().decode(Uint8Array.from(binary,c=>c.charCodeAt(0))))};
@@ -77,6 +84,7 @@ export default function ProvinceComparison(){
   const [censusDetail,setCensusDetail]=useState<CensusDetail|null>(null);
   const [metric,setMetric]=useState<Metric>('population');
   const [metricOpen,setMetricOpen]=useState(false);
+  const [moreMetricsOpen,setMoreMetricsOpen]=useState(false);
   const [outOfSchoolMode,setOutOfSchoolMode]=useState<'total'|'perCapita'>('total');
   useEffect(()=>{const raw=new URLSearchParams(location.hash.slice(1)).get('map');if(!raw)return;try{const parsed=decode(raw);setConfig(parsed);Promise.all([fetch(`/data/pakistan-map/${parsed.l}.geojson`).then(r=>r.json()),fetch('/data/pakistan-map/datadarbar.json').then(r=>r.json()),fetch('/data/pakistan-map/census-2023-detail.json').then(r=>r.json())]).then(([geo,darbar,census])=>{setFeatures(geo.features);setData(darbar);setCensusDetail(census)})}catch{}},[]);
   const rows=useMemo<Row[]>(()=>{
@@ -134,7 +142,14 @@ export default function ProvinceComparison(){
       <span className="metric-picker-label" id="comparison-metric-label">Compare by</span>
       <div className={`metric-select ${metricOpen?'open':''}`}>
         <button className="metric-select-trigger" type="button" aria-labelledby="comparison-metric-label comparison-metric-value" aria-haspopup="listbox" aria-expanded={metricOpen} onClick={()=>setMetricOpen(open=>!open)}><span id="comparison-metric-value">{meta.label}</span><b className={metricOpen?'close':'chevron'} aria-hidden="true">{metricOpen?'×':''}</b></button>
-        {metricOpen&&<div className="metric-select-menu" role="listbox" aria-labelledby="comparison-metric-label">{METRICS.map((item,index)=><button type="button" role="option" aria-selected={metric===item.key} className={metric===item.key?'selected':''} key={item.key} onClick={()=>{setMetric(item.key);setMetricOpen(false)}}><span>{String(index+1).padStart(2,'0')}</span><b>{item.label}</b>{metric===item.key&&<i aria-hidden="true">✓</i>}</button>)}</div>}
+        {metricOpen&&<div className="metric-select-menu" role="listbox" aria-labelledby="comparison-metric-label">
+          <div className="metric-menu-group basic-metrics">
+            <span className="metric-menu-heading">Basic statistics</span>
+            <div className="metric-menu-options">{BASIC_METRIC_KEYS.map((key,index)=>{const item=METRICS.find(candidate=>candidate.key===key)!;return <button type="button" role="option" aria-selected={metric===item.key} className={metric===item.key?'selected':''} key={item.key} onClick={()=>{setMetric(item.key);setMetricOpen(false)}}><span>{String(index+1).padStart(2,'0')}</span><b>{item.label}</b>{metric===item.key&&<i aria-hidden="true">✓</i>}</button>})}</div>
+          </div>
+          <button className={`more-metrics-toggle ${moreMetricsOpen?'open':''}`} type="button" aria-expanded={moreMetricsOpen} onClick={()=>setMoreMetricsOpen(open=>!open)}><b>{moreMetricsOpen?'Fewer statistics':'More statistics'}</b><i aria-hidden="true">{moreMetricsOpen?'−':'+'}</i></button>
+          {moreMetricsOpen&&<div className="more-metric-groups">{MORE_METRIC_GROUPS.map(group=><div className="metric-menu-group" key={group.label}><span className="metric-menu-heading">{group.label}</span><div className="metric-menu-options">{group.keys.map(key=>{const item=METRICS.find(candidate=>candidate.key===key)!;return <button type="button" role="option" aria-selected={metric===item.key} className={metric===item.key?'selected':''} key={item.key} onClick={()=>{setMetric(item.key);setMetricOpen(false)}}><span aria-hidden="true">•</span><b>{item.label}</b>{metric===item.key&&<i aria-hidden="true">✓</i>}</button>})}</div></div>)}</div>}
+        </div>}
       </div>
     </section>
     <section className="comparison-view">
