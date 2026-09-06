@@ -399,7 +399,7 @@ export default function PakistanMapStudio() {
     if (!hashLoaded.current) {
       hashLoaded.current = true;
       const raw = window.location.hash.startsWith('#map=') ? window.location.hash.slice(5)
-        : window.location.pathname === '/p' && window.location.hash.length > 1 ? window.location.hash.slice(1) : '';
+        : window.location.pathname === '/naqsha' && window.location.hash.length > 1 ? window.location.hash.slice(1) : '';
       if (raw) {
         void (async () => {
           try {
@@ -911,7 +911,7 @@ export default function PakistanMapStudio() {
 
   const shareMap = async () => {
     const config = currentShareConfig();
-    const url = `${window.location.origin}/p#${await encodeShare(config)}`;
+    const url = `${window.location.origin}/naqsha#${await encodeShare(config)}`;
     window.history.replaceState(null, '', url);
     try { await navigator.clipboard.writeText(url); setShareStatus('Link copied!'); }
     catch { setShareStatus('Link ready'); }
