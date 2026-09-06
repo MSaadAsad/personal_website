@@ -319,7 +319,7 @@
 .depth-legend > i {
   height: 18px;
   border: 1px solid #62686c;
-  background: linear-gradient(90deg, rgba(76,123,217,.18), var(--color-sky-accent));
+  background: linear-gradient(90deg,#dce8ff 0 16.67%,#b6cdf7 16.67% 33.33%,#88abea 33.33% 50%,#5f8ddd 50% 66.67%,#356dc9 66.67% 83.33%,#17499f 83.33% 100%);
 }
 
 .depth-legend > b {

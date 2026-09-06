@@ -54,6 +54,7 @@ const format=(key:Metric,value:number)=>key==='population'||key==='outOfSchool'|
 const formatAxis=(key:Metric,value:number)=>key==='mpi'?value.toFixed(2):key==='consumption'?`Rs ${Math.round(value/1000)}k`:key==='outOfSchool'?(value>=1_000_000?`${(value/1_000_000).toFixed(1)}m`:`${Math.round(value/1000)}k`):key==='density'?Math.round(value).toLocaleString():key==='householdSize'?value.toFixed(1):key==='growth'?`${value.toFixed(1)}%`:`${Math.round(value)}%`;
 const MAP_EXTENT={minX:60.75,maxX:77.25,minY:23.35,maxY:37.25};
 const MAP_WIDTH=760,MAP_HEIGHT=820;
+const DEPTH_COLOURS=['#dce8ff','#b6cdf7','#88abea','#5f8ddd','#356dc9','#17499f'] as const;
 const project=([lon,lat]:number[])=>[20+((lon-MAP_EXTENT.minX)/(MAP_EXTENT.maxX-MAP_EXTENT.minX))*720,20+((MAP_EXTENT.maxY-lat)/(MAP_EXTENT.maxY-MAP_EXTENT.minY))*780];
 const ringPath=(ring:number[][])=>ring.map((point,index)=>`${index?'L':'M'}${project(point).map(value=>value.toFixed(1)).join(' ')}`).join(' ')+'Z';
 const geometryPath=(geometry:Feature['geometry'])=>(geometry.type==='Polygon'?[geometry.coordinates as number[][][]]:geometry.coordinates as number[][][][]).map(polygon=>polygon.map(ringPath).join(' ')).join(' ');
@@ -122,6 +123,7 @@ export default function ProvinceComparison(){
   const composition=(metric==='population'&&populationYears.size===1&&ranked.every(row=>row.populationYear!=null))||(metric==='outOfSchool'&&!perCapita);
   const unavailable=rows.filter(row=>row[metric]==null||(perCapita&&!row.population));
   const observedMaximum=Math.max(...ranked.map(metricValue),1);
+  const observedMinimum=Math.min(...ranked.map(metricValue),observedMaximum);
   const maximum=meta.kind==='rate'?100:metric==='mpi'?1:metric==='consumption'?Math.ceil(observedMaximum/5_000)*5_000:perCapita?Math.ceil(observedMaximum/10)*10:observedMaximum;
   const compositionTotal=ranked.reduce((sum,row)=>sum+metricValue(row),0);
   const formatValue=(row:Row)=>perCapita?`${metricValue(row).toFixed(1)} / 1k`:format(metric,metricValue(row));
@@ -137,6 +139,7 @@ export default function ProvinceComparison(){
   const rowsByOwner=useMemo(()=>new Map(config?.p.map((province,index)=>[index,rows.find(row=>row.id===province[0])])||[]),[config,rows]);
   const ownerByRowId=useMemo(()=>new Map(config?.p.map((province,index)=>[province[0],index])||[]),[config]);
   const mapValue=(feature:Feature)=>{const code=String(feature.properties[config?.l==='tehsils'?'tehsil_code':'district_code']);const row=rowsByOwner.get(featureOwners.get(code)??-1);return row&&row[metric]!=null&&(!perCapita||row.population)?metricValue(row):null};
+  const mapColour=(value:number)=>{const range=observedMaximum-observedMinimum;const position=range?Math.max(0,Math.min(1,(value-observedMinimum)/range)):.5;return DEPTH_COLOURS[Math.round(position*(DEPTH_COLOURS.length-1))]};
   if(!config)return <main className="compare-shell"><div className="compare-empty"><h1>No map to compare</h1><a href="/pakistan-map">← Build a map</a></div></main>;
   return <main className="compare-shell">
     <header><a href={`/pakistan-map#map=${new URLSearchParams(location.hash.slice(1)).get('map')||''}`}>← Back to map</a><span>NAYA NAQSHA · COMPARISON</span></header>
@@ -167,11 +170,11 @@ export default function ProvinceComparison(){
         <div className="depth-map-panel">
           <svg className="depth-map" viewBox={`0 0 ${MAP_WIDTH} ${MAP_HEIGHT}`} role="img" aria-labelledby="depth-map-title depth-map-description" onPointerLeave={()=>setHoveredOwner(null)}>
             <title id="depth-map-title">{meta.label} by proposed province</title>
-            <desc id="depth-map-description">Darker blue indicates a higher {meta.label.toLowerCase()} value. Heavy lines show the proposed provincial boundaries; areas without comparable data are concrete grey.</desc>
-            {features.map((feature,index)=>{const code=String(feature.properties[config.l==='tehsils'?'tehsil_code':'district_code']);const owner=featureOwners.get(code)??-1;const value=mapValue(feature);const depth=value==null?0:.18+.82*Math.max(0,Math.min(1,value/maximum));const hoverClass=hoveredOwner===null?'':owner===hoveredOwner?' province-hovered':' province-muted';return <path key={index} d={geometryPath(feature.geometry)} className={`${value==null?'depth-region unavailable':'depth-region'}${hoverClass}`} style={value==null?undefined:{fillOpacity:depth}} onPointerEnter={()=>setHoveredOwner(owner>=0?owner:null)}><title>{rowsByOwner.get(owner)?.name||'Unassigned'} · {value==null?'No comparable data':formatScale(value)}</title></path>})}
+            <desc id="depth-map-description">Six distinct blue steps span the lowest to highest values among the displayed provinces. Heavy lines show proposed provincial boundaries; areas without comparable data are concrete grey.</desc>
+            {features.map((feature,index)=>{const code=String(feature.properties[config.l==='tehsils'?'tehsil_code':'district_code']);const owner=featureOwners.get(code)??-1;const value=mapValue(feature);const hoverClass=hoveredOwner===null?'':owner===hoveredOwner?' province-hovered':' province-muted';return <path key={index} d={geometryPath(feature.geometry)} className={`${value==null?'depth-region unavailable':'depth-region'}${hoverClass}`} style={value==null?undefined:{fill:mapColour(value)}} onPointerEnter={()=>setHoveredOwner(owner>=0?owner:null)}><title>{rowsByOwner.get(owner)?.name||'Unassigned'} · {value==null?'No comparable data':formatScale(value)}</title></path>})}
             {proposedBoundaries&&<path className="proposed-province-boundaries" d={proposedBoundaries}/>}
           </svg>
-          <div className="depth-legend"><span>Lower</span><i/><span>Higher</span><b>Unavailable</b><em>Proposed province</em></div>
+          <div className="depth-legend"><span>{formatScale(observedMinimum)}</span><i/><span>{formatScale(observedMaximum)}</span><b>Unavailable</b><em>Proposed province</em></div>
         </div>
         <ol className="depth-ranking">{ranked.map((row,index)=>{const owner=ownerByRowId.get(row.id)??-1;return <li key={row.id} className={hoveredOwner===owner?'province-hovered':''} onPointerEnter={()=>setHoveredOwner(owner)} onPointerLeave={()=>setHoveredOwner(null)}><div className="depth-rank-main"><span>{String(index+1).padStart(2,'0')}</span><b>{row.name}<em>{row.kind}</em></b><strong>{formatValue(row)}</strong></div><span className="depth-rank-bar"><i style={{width:`${Math.max(0,Math.min(100,metricValue(row)/maximum*100))}%`}}/></span></li>})}</ol>
       </div>}
