@@ -396,6 +396,18 @@ export default function PakistanMapStudio() {
   const cityZoom = WIDTH / mapView.width;
 
   useEffect(() => {
+    const loadCurrentStructure = () => {
+      fetch(`/data/pakistan-map/${level === 'divisions' ? 'districts' : level}.geojson`).then(r => r.json()).then(data => {
+        const nextFeatures = featuresForLevel(data.features, level);
+        setFeatures(nextFeatures);
+        setProvinces(CURRENT_STRUCTURE);
+        setActive(CURRENT_STRUCTURE[0].id);
+        setMapName('Current provincial structure');
+        setAssignments(currentStructureAssignments(nextFeatures, level));
+      });
+      setHistory([]);
+      setFuture([]);
+    };
     if (!hashLoaded.current) {
       hashLoaded.current = true;
       const raw = window.location.hash.startsWith('#map=') ? window.location.hash.slice(5)
@@ -418,7 +430,10 @@ export default function PakistanMapStudio() {
             });
             return;
           }
-          } catch { window.history.replaceState(null, '', window.location.pathname + window.location.search); }
+          } catch {
+            window.history.replaceState(null, '', window.location.pathname + window.location.search);
+            loadCurrentStructure();
+          }
         })();
         return;
       }
@@ -435,11 +450,7 @@ export default function PakistanMapStudio() {
       setHistory([]); setFuture([]);
       return;
     }
-    fetch(`/data/pakistan-map/${level === 'divisions' ? 'districts' : level}.geojson`).then(r => r.json()).then(data => {
-      setFeatures(featuresForLevel(data.features, level));
-      setProvinces([]); setActive(''); setMapName('My province plan'); setAssignments({});
-    });
-    setHistory([]); setFuture([]);
+    loadCurrentStructure();
   }, [level]);
 
   useEffect(() => { if ((hasAssignments || toolMode === 'inspect') && !darbar) fetch('/data/pakistan-map/datadarbar.json').then(r => r.json()).then(setDarbar).catch(() => setDarbar(null)); }, [darbar, hasAssignments, toolMode]);
