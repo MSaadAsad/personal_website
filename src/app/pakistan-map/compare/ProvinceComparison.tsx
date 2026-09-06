@@ -87,6 +87,7 @@ export default function ProvinceComparison(){
   const [metricOpen,setMetricOpen]=useState(false);
   const [moreMetricsOpen,setMoreMetricsOpen]=useState(false);
   const [outOfSchoolMode,setOutOfSchoolMode]=useState<'total'|'perCapita'>('total');
+  const [hoveredOwner,setHoveredOwner]=useState<number|null>(null);
   useEffect(()=>{const raw=new URLSearchParams(location.hash.slice(1)).get('map');if(!raw)return;void(async()=>{try{const parsed=await decodeShare(raw);const[geo,darbar,census]=await Promise.all([fetch(`/data/pakistan-map/${parsed.l}.geojson`).then(r=>r.json()),fetch('/data/pakistan-map/datadarbar.json').then(r=>r.json()),fetch('/data/pakistan-map/census-2023-detail.json').then(r=>r.json())]);const idField=parsed.l==='districts'?'district_code':'tehsil_code';setConfig(expandShare(parsed,geo.features.map((feature:Feature)=>String(feature.properties[idField]))));setFeatures(geo.features);setData(darbar);setCensusDetail(census)}catch{}})()},[]);
   const rows=useMemo<Row[]>(()=>{
     if(!config||!data)return[];
@@ -134,6 +135,7 @@ export default function ProvinceComparison(){
   const featureOwners=useMemo(()=>new Map(config?.a.map(([id,,owner])=>[id,owner])||[]),[config]);
   const proposedBoundaries=useMemo(()=>config?proposedBoundaryPath(features,featureOwners,config.l):'',[config,featureOwners,features]);
   const rowsByOwner=useMemo(()=>new Map(config?.p.map((province,index)=>[index,rows.find(row=>row.id===province[0])])||[]),[config,rows]);
+  const ownerByRowId=useMemo(()=>new Map(config?.p.map((province,index)=>[province[0],index])||[]),[config]);
   const mapValue=(feature:Feature)=>{const code=String(feature.properties[config?.l==='tehsils'?'tehsil_code':'district_code']);const row=rowsByOwner.get(featureOwners.get(code)??-1);return row&&row[metric]!=null&&(!perCapita||row.population)?metricValue(row):null};
   if(!config)return <main className="compare-shell"><div className="compare-empty"><h1>No map to compare</h1><a href="/pakistan-map">← Build a map</a></div></main>;
   return <main className="compare-shell">
@@ -163,15 +165,15 @@ export default function ProvinceComparison(){
         <ol>{ranked.map((r,i)=><li key={r.id}><i style={{background:r.color}}/><span>{String(i+1).padStart(2,'0')}</span><b>{r.name}<em>{r.kind}</em></b><strong>{formatValue(r)}</strong><small>{compositionTotal?(metricValue(r)/compositionTotal*100).toFixed(1):'0.0'}%</small></li>)}</ol>
       </div>:<div className="depth-map-layout">
         <div className="depth-map-panel">
-          <svg className="depth-map" viewBox={`0 0 ${MAP_WIDTH} ${MAP_HEIGHT}`} role="img" aria-labelledby="depth-map-title depth-map-description">
+          <svg className="depth-map" viewBox={`0 0 ${MAP_WIDTH} ${MAP_HEIGHT}`} role="img" aria-labelledby="depth-map-title depth-map-description" onPointerLeave={()=>setHoveredOwner(null)}>
             <title id="depth-map-title">{meta.label} by proposed province</title>
             <desc id="depth-map-description">Darker blue indicates a higher {meta.label.toLowerCase()} value. Heavy lines show the proposed provincial boundaries; areas without comparable data are concrete grey.</desc>
-            {features.map((feature,index)=>{const value=mapValue(feature);const depth=value==null?0:.18+.82*Math.max(0,Math.min(1,value/maximum));return <path key={index} d={geometryPath(feature.geometry)} className={value==null?'depth-region unavailable':'depth-region'} style={value==null?undefined:{fillOpacity:depth}}><title>{value==null?'No comparable data':formatScale(value)}</title></path>})}
+            {features.map((feature,index)=>{const code=String(feature.properties[config.l==='tehsils'?'tehsil_code':'district_code']);const owner=featureOwners.get(code)??-1;const value=mapValue(feature);const depth=value==null?0:.18+.82*Math.max(0,Math.min(1,value/maximum));const hoverClass=hoveredOwner===null?'':owner===hoveredOwner?' province-hovered':' province-muted';return <path key={index} d={geometryPath(feature.geometry)} className={`${value==null?'depth-region unavailable':'depth-region'}${hoverClass}`} style={value==null?undefined:{fillOpacity:depth}} onPointerEnter={()=>setHoveredOwner(owner>=0?owner:null)}><title>{rowsByOwner.get(owner)?.name||'Unassigned'} · {value==null?'No comparable data':formatScale(value)}</title></path>})}
             {proposedBoundaries&&<path className="proposed-province-boundaries" d={proposedBoundaries}/>}
           </svg>
           <div className="depth-legend"><span>Lower</span><i/><span>Higher</span><b>Unavailable</b><em>Proposed province</em></div>
         </div>
-        <ol className="depth-ranking">{ranked.map((row,index)=><li key={row.id}><div className="depth-rank-main"><span>{String(index+1).padStart(2,'0')}</span><b>{row.name}<em>{row.kind}</em></b><strong>{formatValue(row)}</strong></div><span className="depth-rank-bar"><i style={{width:`${Math.max(0,Math.min(100,metricValue(row)/maximum*100))}%`}}/></span></li>)}</ol>
+        <ol className="depth-ranking">{ranked.map((row,index)=>{const owner=ownerByRowId.get(row.id)??-1;return <li key={row.id} className={hoveredOwner===owner?'province-hovered':''} onPointerEnter={()=>setHoveredOwner(owner)} onPointerLeave={()=>setHoveredOwner(null)}><div className="depth-rank-main"><span>{String(index+1).padStart(2,'0')}</span><b>{row.name}<em>{row.kind}</em></b><strong>{formatValue(row)}</strong></div><span className="depth-rank-bar"><i style={{width:`${Math.max(0,Math.min(100,metricValue(row)/maximum*100))}%`}}/></span></li>})}</ol>
       </div>}
       {perCapita&&ranked.length>0&&<p className="comparison-note">Calculated from out-of-school children divided by total 2023 population. This is per 1,000 residents, not per 1,000 children aged 5–16.</p>}
       {metric==='population'&&populationYears.size>1&&<p className="comparison-note"><b>Different census years:</b> Pakistan units use PBS Census 2023; AJK and Gilgit–Baltistan use their latest compatible official 2017 figures. They are ranked but not combined into a composition total.</p>}

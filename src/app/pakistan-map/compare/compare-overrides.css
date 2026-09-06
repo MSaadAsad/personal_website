@@ -276,6 +276,17 @@
   stroke: #51585d;
   stroke-width: .8;
   vector-effect: non-scaling-stroke;
+  transition: opacity 120ms ease, filter 120ms ease, stroke-width 120ms ease;
+}
+
+.depth-region.province-muted {
+  opacity: .2;
+}
+
+.depth-region.province-hovered {
+  filter: brightness(1.18) saturate(1.18);
+  stroke: #11161a;
+  stroke-width: 1.6;
 }
 
 .depth-region.unavailable {
@@ -339,6 +350,12 @@
   display: block;
   padding: 12px 0;
   border-bottom: 1px solid #858a8d;
+  transition: background-color 120ms ease, box-shadow 120ms ease;
+}
+
+.depth-ranking li.province-hovered {
+  background: #d7d8d5;
+  box-shadow: inset 5px 0 var(--color-sky-accent);
 }
 
 .depth-rank-main {

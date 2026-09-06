@@ -128,7 +128,46 @@ const CITY_MARKERS: CityMarker[] = [
   { name:'Muzaffarabad', lon:73.4711, lat:34.3700, tier:2, dx:7, dy:-7 },
   { name:'Gilgit', lon:74.3089, lat:35.9208, tier:2, dx:7, dy:-7 },
   { name:'Gwadar', lon:62.3254, lat:25.1264, tier:2, dx:7, dy:-7 },
+  { name:'Khuzdar', lon:66.6434, lat:27.8119, tier:2, dx:7, dy:-7 },
 ];
+
+const REGIONAL_PRESET: Province[] = [
+  { id:'regional-punjab', name:'Punjab', color:'#65915f', kind:'province', capital:'Lahore' },
+  { id:'regional-sahil', name:'SAHIL', color:'#99d9ea', kind:'territory', capital:'Karachi' },
+  { id:'regional-kp', name:'Khyber Pakhtunkhwa', color:'#5577ad', kind:'territory', capital:'Peshawar' },
+  { id:'regional-balochistan', name:'Balochistan', color:'#a97b50', kind:'territory', capital:'Khuzdar' },
+  { id:'regional-islamabad', name:'Islamabad', color:'#786999', kind:'territory', capital:'Islamabad' },
+  { id:'regional-gb', name:'Gilgit–Baltistan', color:'#829b73', kind:'territory', capital:'Gilgit' },
+  { id:'regional-ajk', name:'Azad Kashmir', color:'#418674', kind:'territory', capital:'Muzaffarabad' },
+  { id:'regional-riyasatab', name:'RIYASATAB', color:'#8c6b4f', kind:'territory', capital:'Bahawalpur' },
+  { id:'regional-panjnad', name:'PANJNAD', color:'#78a950', kind:'province', capital:'Multan' },
+  { id:'regional-pothowar', name:'POTHOWAR', color:'#e68235', kind:'province', capital:'Rawalpindi' },
+  { id:'regional-sindh', name:'SINDH', color:'#00a2e8', kind:'province', capital:'Hyderabad' },
+  { id:'regional-mehran', name:'MEHRAN', color:'#3f48cc', kind:'province', capital:'Sukkur' },
+  { id:'regional-makkran', name:'MAKKRAN', color:'#65915f', kind:'territory', capital:'Gwadar' },
+  { id:'regional-bolan', name:'BOLAN', color:'#8463a9', kind:'territory', capital:'Quetta' },
+  { id:'regional-hazarah', name:'HAZARAH', color:'#c8952f', kind:'province', capital:'Abbottabad' },
+  { id:'regional-galyaat', name:'GALYAAT', color:'#397f68', kind:'territory', capital:'Mardan' },
+];
+const REGIONAL_PRESET_DISTRICTS: Record<string, string[]> = {
+  'regional-punjab': ['chiniot','faisalabad','gujranwala','gujrat','hafizabad','jhang','kasur','lahore','mandibahauddin','nankanasahib','narowal','okara','pakpattan','sahiwal','sargodha','sheikhupura','sialkot','tobateksingh'],
+  'regional-sahil': ['centralkarachi','eastkarachi','korangikarachi','malirkarachi','southkarachi','westkarachi','keamari'],
+  'regional-kp': ['bannu','charsadda','dikhan','hangu','karak','khyber','kohat','kurram','lakkimarwat','mohmand','northwaziristan','nowshera','orakzai','peshawar','southwaziristan','tank'],
+  'regional-balochistan': ['chagai','kalat','kharan','khuzdar','nushki','washuk','shaheedsikandarabad'],
+  'regional-islamabad': ['islamabad'],
+  'regional-gb': ['astore','darel','diamir','ghanche','ghizer','gilgit','gupisyasin','hunza','kharmang','nagar','rondu','shigar','skardu','tangir'],
+  'regional-ajk': ['bagh','bhimber','haveli','jhelumvalley','kotli','mirpur','muzaffarabad','neelum','poonch','sudhnoti'],
+  'regional-riyasatab': ['bahawalnagar','bahawalpur','lodhran','rahimyarkhan','vehari'],
+  'regional-panjnad': ['deraghazikhan','khanewal','leiah','multan','muzaffargarh','rajanpur'],
+  'regional-pothowar': ['attock','bhakkar','chakwal','jhelum','khushab','mianwali','rawalpindi'],
+  'regional-sindh': ['badin','hyderabad','jamshoro','matiari','mirpurkhas','sanghar','shaheedbenazirabad','sujawal','tandoallahyar','tandomuhammadkhan','tharparkar','thatta','umerkot'],
+  'regional-mehran': ['dadu','ghotki','jacobabad','kambarshahdadkot','kashmore','khairpur','larkana','naushahroferoze','shikarpur','sukkur'],
+  'regional-makkran': ['awaran','gwadar','kech','lasbela','panjgur'],
+  'regional-bolan': ['barkhan','derabugti','harnai','jaffarabad','jhalmagsi','kachhi','killaabdullah','killasaifullah','kohlu','lehri','loralai','mastung','musakhel','nasirabad','pishin','quetta','sherani','sibi','sohbatpur','zhob','ziarat','duki','chaman'],
+  'regional-hazarah': ['abbottabad','batagram','haripur','kohistanlower','kohistanupper','kolaipalaskohistan','mansehra','torghar'],
+  'regional-galyaat': ['bajaur','buner','chitrallower','chitralupper','lowerdir','malakand','mardan','shangla','swabi','swat','upperdir'],
+};
+const REGIONAL_PRESET_OWNER = Object.fromEntries(Object.entries(REGIONAL_PRESET_DISTRICTS).flatMap(([owner, districts]) => districts.map(district => [district, owner])));
 
 const DIVISION_DISTRICTS: Record<string, string[]> = {
   'KP · Malakand': ['chitralupper','chitrallower','upperdir','lowerdir','swat','shangla','buner','malakand','bajaur'],
@@ -316,6 +355,12 @@ function divisionProvinceAssignments(features: Feature[], level: Level) {
       ? String(feature.properties.division_name)
       : featureDistrictKeys(feature).map(district => DIVISION_BY_DISTRICT[district] || DIVISION_BY_DISTRICT[DIVISION_DISTRICT_ALIASES[district]]).find(Boolean);
     return division ? [[featureId(feature, level), `division-${normalise(division)}`]] : [];
+  }));
+}
+function regionalPresetAssignments(features: Feature[], level: Level) {
+  return Object.fromEntries(features.flatMap(feature => {
+    const owners = [...new Set(featureDistrictKeys(feature).map(district => REGIONAL_PRESET_OWNER[district]).filter(Boolean))];
+    return owners.length === 1 ? [[featureId(feature, level), owners[0]]] : [];
   }));
 }
 const DISTRICT_ALIASES: Record<string, string> = {
@@ -869,14 +914,15 @@ export default function PakistanMapStudio() {
     localStorage.removeItem(`naya-naqsha-${level}`);
   };
 
-  const loadPreset = (preset: 'current' | 'preset-1' | 'preset-2') => {
+  const loadPreset = (preset: 'current' | 'preset-1' | 'preset-2' | 'preset-3') => {
     const isCurrent = preset === 'current';
     const isDivisions = preset === 'preset-2';
-    const nextProvinces = isCurrent ? CURRENT_STRUCTURE : isDivisions ? DIVISION_PROVINCES : PRESET_1;
+    const isRegional = preset === 'preset-3';
+    const nextProvinces = isCurrent ? CURRENT_STRUCTURE : isDivisions ? DIVISION_PROVINCES : isRegional ? REGIONAL_PRESET : PRESET_1;
     setHistory(h => [...h, assignments]); setFuture([]);
     setProvinces(nextProvinces); setActive(nextProvinces[0].id);
-    setMapName(isCurrent ? 'Current provincial structure' : isDivisions ? 'Preset 2 · Division provinces' : 'Preset 1');
-    setAssignments(isCurrent ? currentStructureAssignments(features, level) : isDivisions ? divisionProvinceAssignments(features, level) : presetOneAssignments(features, level));
+    setMapName(isCurrent ? 'Current provincial structure' : isDivisions ? 'Preset 2 · Division provinces' : isRegional ? 'Preset 3 · Regional proposal' : 'Preset 1');
+    setAssignments(isCurrent ? currentStructureAssignments(features, level) : isDivisions ? divisionProvinceAssignments(features, level) : isRegional ? regionalPresetAssignments(features, level) : presetOneAssignments(features, level));
   };
 
   const exportPlan = () => {
@@ -970,6 +1016,10 @@ export default function PakistanMapStudio() {
               <button type="button" onClick={() => loadPreset('preset-2')}>
                 <b>Preset 2</b>
                 <small>Every administrative division becomes a province · Islamabad remains a territory</small>
+              </button>
+              <button type="button" onClick={() => loadPreset('preset-3')}>
+                <b>Preset 3</b>
+                <small>Regional proposal · SAHIL · PANJNAD · POTHOWAR · MEHRAN · MAKKRAN · BOLAN</small>
               </button>
             </div>
           </div>

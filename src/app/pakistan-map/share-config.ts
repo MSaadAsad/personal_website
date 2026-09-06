@@ -17,7 +17,7 @@ const SHARE_COLOURS = [
   '#65915f','#d99b42','#b76d57','#435267','#4f7bd9','#ef6a55','#42a66c','#a967c7','#f2b93f','#2e9daa','#d65392','#8c6b4f','#78a950','#e68235','#5964bd','#b84848','#56b6d2','#8463a9','#c8952f','#397f68','#e35d68','#648a3f','#b85c9a','#3e8fbd','#ba7041','#6e73cf','#9a8138','#278b83',
   '#cf5d87','#5577ad','#75a6bc','#a97b50','#786999','#829b73','#418674',
 ] as const;
-const SHARE_CAPITALS = ['Karachi','Lahore','Faisalabad','Rawalpindi','Islamabad','Multan','Hyderabad','Peshawar','Quetta','Gujranwala','Sialkot','Sargodha','Bahawalpur','Sukkur','Larkana','Mardan','Abbottabad','Muzaffarabad','Gilgit','Gwadar'] as const;
+const SHARE_CAPITALS = ['Karachi','Lahore','Faisalabad','Rawalpindi','Islamabad','Multan','Hyderabad','Peshawar','Quetta','Gujranwala','Sialkot','Sargodha','Bahawalpur','Sukkur','Larkana','Mardan','Abbottabad','Muzaffarabad','Gilgit','Gwadar','Khuzdar'] as const;
 
 const SPLIT_PROVINCES: SharedProvince[] = [
   ['punjab','Punjab','#65915f','province','Lahore'], ['south-punjab','South Punjab','#d99b42','province',''],
@@ -41,8 +41,27 @@ const DIVISION_PROVINCES: SharedProvince[] = DIVISION_LABELS.map((label,index) =
   label === 'ICT' ? 'Islamabad' : `${label.split(' · ')[1]} Division`,
   divisionColour(index), label === 'ICT' ? 'territory' : 'province', '',
 ]);
-const PRESET_PROVINCES = [CURRENT_PROVINCES, SPLIT_PROVINCES, DIVISION_PROVINCES] as const;
-type PresetIndex = 0 | 1 | 2;
+const REGIONAL_PROVINCES: SharedProvince[] = [
+  ['regional-punjab','Punjab','#65915f','province','Lahore'],
+  ['regional-sahil','SAHIL','#99d9ea','territory','Karachi'],
+  ['regional-kp','Khyber Pakhtunkhwa','#5577ad','territory','Peshawar'],
+  ['regional-balochistan','Balochistan','#a97b50','territory','Khuzdar'],
+  ['regional-islamabad','Islamabad','#786999','territory','Islamabad'],
+  ['regional-gb','Gilgit–Baltistan','#829b73','territory','Gilgit'],
+  ['regional-ajk','Azad Kashmir','#418674','territory','Muzaffarabad'],
+  ['regional-riyasatab','RIYASATAB','#8c6b4f','territory','Bahawalpur'],
+  ['regional-panjnad','PANJNAD','#78a950','province','Multan'],
+  ['regional-pothowar','POTHOWAR','#e68235','province','Rawalpindi'],
+  ['regional-sindh','SINDH','#00a2e8','province','Hyderabad'],
+  ['regional-mehran','MEHRAN','#3f48cc','province','Sukkur'],
+  ['regional-makkran','MAKKRAN','#65915f','territory','Gwadar'],
+  ['regional-bolan','BOLAN','#8463a9','territory','Quetta'],
+  ['regional-hazarah','HAZARAH','#c8952f','province','Abbottabad'],
+  ['regional-galyaat','GALYAAT','#397f68','territory','Mardan'],
+];
+const REGIONAL_CODE_GROUPS = ['3gQCAQEBAQIDAwQBAQEEAQEBAQ','vgUCCAIHCA','9wMDAwECAQEEAQUBAQEBAgM','ywEHAgEKBwM','kQM','rQIBAQEBAQEBAQEBAQEB','ZQEBAQEBAQEBAQ','2gQBEAkI','3wQIAwQBBg','2QQDAQgDBQk','vQUFAgcBAgEDAgEBAQE','vwUCAgIBAQIEAwM','yQEEBgYH','ygECAgEBAQUBAQIBAQEBAwEBAQECAQIB','9QMDBwQBAQUM','9gMDAgEMAQIGAgED'] as const;
+const PRESET_PROVINCES = [CURRENT_PROVINCES, SPLIT_PROVINCES, DIVISION_PROVINCES, REGIONAL_PROVINCES] as const;
+type PresetIndex = 0 | 1 | 2 | 3;
 
 // version, title, level, names, colours, territories, capitals, district/default groups,
 // optional tehsil overrides by owner, optional explicitly unassigned tehsil overrides
@@ -123,12 +142,17 @@ const SOUTH_PUNJAB_CODES = new Set([602,603,607,615,618,619,622,623,628,629,636]
 const KARACHI_CODES = new Set([702,704,712,714,721,729]);
 const HAZARA_CODES = new Set([501,504,511,515,516,517,522,534]);
 let divisionOwnerByDistrict: Map<number, number> | undefined;
+let regionalOwnerByDistrict: Map<number, number> | undefined;
 
 function presetOwner(preset: PresetIndex, geographyCode: number) {
   const district = geographyCode >= 10000 ? Math.floor(geographyCode / 100) : geographyCode;
   if (preset === 2) {
     divisionOwnerByDistrict ||= new Map(DIVISION_CODE_GROUPS.flatMap((group, owner) => decodeCodes(group).map(code => [code, owner] as [number, number])));
     return divisionOwnerByDistrict.get(district);
+  }
+  if (preset === 3) {
+    regionalOwnerByDistrict ||= new Map(REGIONAL_CODE_GROUPS.flatMap((group, owner) => decodeCodes(group).map(code => [code, owner] as [number, number])));
+    return regionalOwnerByDistrict.get(district);
   }
   const source = Math.floor(district / 100);
   if (preset === 0) return ({ 6:0, 7:1, 5:2, 2:3, 4:4, 3:5, 1:6 } as Record<number,number>)[source];
@@ -230,7 +254,7 @@ export async function encodeShare(config: SharedMap) {
     encodeCodes([...new Set(unassignedOverrides || [])].sort((left, right) => left - right)),
   ] : compactBase;
   const candidates: Array<CompactSharedMap | DeltaSharedMap> = [compact];
-  ([0,1,2] as PresetIndex[]).forEach(preset => {
+  ([0,1,2,3] as PresetIndex[]).forEach(preset => {
     const delta = deltaCandidate(config, preset);
     if (delta) candidates.push(delta);
   });
