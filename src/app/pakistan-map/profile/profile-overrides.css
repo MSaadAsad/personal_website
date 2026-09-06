@@ -23,3 +23,32 @@ body:has(.profile-shell) nav button {
 .section-title > span {
   color: var(--color-sky-accent);
 }
+
+@media (max-width: 760px) {
+  .profile-shell > header { position:sticky; top:56px; z-index:10; height:58px; padding:0 14px; background:#aaacab; font-size:11px; }
+  .profile-hero { padding:28px 14px 24px; border-bottom-width:6px; }
+  .profile-hero h1 { margin:9px 0; font-size:clamp(44px,15vw,64px); overflow-wrap:anywhere; }
+  .profile-hero p { margin-bottom:0; font-size:12px; line-height:1.55; }
+  .profile-hero small { display:block; margin-top:10px; font-size:10px; line-height:1.5; }
+  .hero-stat { min-width:0; margin-top:20px; padding:16px; grid-template-columns:1fr 1fr; column-gap:14px; }
+  .hero-stat b,.hero-stat strong { font-size:26px; }
+  .hero-stat span { margin:3px 0 0; font-size:9px; line-height:1.4; }
+  .profile-grid { padding:14px 12px 28px; }
+  .profile-grid article { margin-bottom:12px; padding:18px 14px; box-shadow:4px 4px 0 #929596; }
+  .section-title h2 { margin:6px 0 15px; font-size:27px; }
+  .section-title > span { font-size:10px; }
+  .chart-tabs { gap:0; overflow-x:auto; margin:0 0 18px; }
+  .chart-tabs button { flex:1 0 auto; min-height:46px; padding:8px 12px; border-width:2px 1px; }
+  .bars { gap:16px; }
+  .bars b,.breakdown-row header b { font-size:12px; line-height:1.4; }
+  .bars strong,.breakdown-row header strong { font-size:15px; }
+  .cities-card li { grid-template-columns:28px minmax(0,1fr) auto; padding:13px 2px; }
+  .cities-card li b { overflow-wrap:anywhere; font-size:15px; }
+  .cities-card li strong { font-size:16px; }
+  .facts { grid-template-columns:1fr 1fr; gap:7px; }
+  .facts span { min-height:92px; padding:12px 10px; font-size:10px; line-height:1.45; }
+  .facts b { font-size:19px; }
+  .demographic-columns { gap:24px; }
+  .profile-shell > footer { align-items:stretch; flex-direction:column; gap:14px; padding:18px 14px; font-size:10px; line-height:1.5; }
+  .profile-shell > footer button { width:100%; min-height:48px; }
+}

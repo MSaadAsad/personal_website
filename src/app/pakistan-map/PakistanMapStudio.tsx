@@ -396,6 +396,12 @@ export default function PakistanMapStudio() {
   const cityZoom = WIDTH / mapView.width;
 
   useEffect(() => {
+    if (!window.matchMedia('(max-width: 720px)').matches) return;
+    setLeftPanelOpen(false);
+    setRightPanelOpen(false);
+  }, []);
+
+  useEffect(() => {
     const loadCurrentStructure = () => {
       fetch(`/data/pakistan-map/${level === 'divisions' ? 'districts' : level}.geojson`).then(r => r.json()).then(data => {
         const nextFeatures = featuresForLevel(data.features, level);
@@ -1023,7 +1029,7 @@ export default function PakistanMapStudio() {
               </div>}
             </div>}
             {!features.length && <div className="loading">Drawing boundaries…</div>}
-            <svg ref={svgRef} viewBox={`${mapView.x} ${mapView.y} ${mapView.width} ${mapView.height}`} role="img" aria-label={`Interactive map of Pakistan ${level}`} onWheel={e=>{e.preventDefault();const rect=e.currentTarget.getBoundingClientRect();zoomMap(e.deltaY>0?1.16:.86,(e.clientX-rect.left)/rect.width,(e.clientY-rect.top)/rect.height)}} onPointerDown={e=>{if(!(e.shiftKey||e.button===1||e.target===e.currentTarget))return;e.currentTarget.setPointerCapture(e.pointerId);panRef.current={pointerId:e.pointerId,clientX:e.clientX,clientY:e.clientY,view:mapView}}} onPointerMove={e=>{const pan=panRef.current;if(!pan||pan.pointerId!==e.pointerId)return;const rect=e.currentTarget.getBoundingClientRect();const x=Math.max(0,Math.min(WIDTH-pan.view.width,pan.view.x-(e.clientX-pan.clientX)/rect.width*pan.view.width));const y=Math.max(0,Math.min(HEIGHT-pan.view.height,pan.view.y-(e.clientY-pan.clientY)/rect.height*pan.view.height));setMapView({...pan.view,x,y})}} onPointerUp={e=>{if(panRef.current?.pointerId===e.pointerId)panRef.current=null}} onPointerCancel={()=>{panRef.current=null}}>
+            <svg ref={svgRef} viewBox={`${mapView.x} ${mapView.y} ${mapView.width} ${mapView.height}`} role="img" aria-label={`Interactive map of Pakistan ${level}`} onWheel={e=>{e.preventDefault();const rect=e.currentTarget.getBoundingClientRect();zoomMap(e.deltaY>0?1.16:.86,(e.clientX-rect.left)/rect.width,(e.clientY-rect.top)/rect.height)}} onPointerDown={e=>{if(!(e.shiftKey||e.button===1||(e.pointerType==='touch'&&toolMode==='inspect')||e.target===e.currentTarget))return;e.currentTarget.setPointerCapture(e.pointerId);panRef.current={pointerId:e.pointerId,clientX:e.clientX,clientY:e.clientY,view:mapView}}} onPointerMove={e=>{const pan=panRef.current;if(!pan||pan.pointerId!==e.pointerId)return;const rect=e.currentTarget.getBoundingClientRect();const x=Math.max(0,Math.min(WIDTH-pan.view.width,pan.view.x-(e.clientX-pan.clientX)/rect.width*pan.view.width));const y=Math.max(0,Math.min(HEIGHT-pan.view.height,pan.view.y-(e.clientY-pan.clientY)/rect.height*pan.view.height));setMapView({...pan.view,x,y})}} onPointerUp={e=>{if(panRef.current?.pointerId===e.pointerId)panRef.current=null}} onPointerCancel={()=>{panRef.current=null}}>
               <g fillRule="evenodd">
                 {paths.map(({ feature, d }) => {
                   const id = featureId(feature, level); const province = provinceById[assignments[id]];

@@ -522,4 +522,30 @@
   .comparison-columns li {
     grid-template-rows: 28px 272px minmax(72px, auto);
   }
+
+  .compare-shell > header { position:sticky; top:56px; z-index:30; height:58px; padding:0 14px; font-size:11px; }
+  .compare-head { padding:26px 14px 22px; }
+  .compare-head h1 { margin-top:8px; font-size:clamp(42px,14vw,62px); overflow-wrap:anywhere; }
+  .compare-head p { font-size:11px; line-height:1.55; }
+  .metric-picker { position:sticky; top:114px; z-index:25; padding:10px 12px; }
+  .metric-picker-label { font-size:9px; }
+  .metric-select-trigger { min-height:48px; grid-template-columns:1fr 48px; font-size:13px; }
+  .metric-select-menu { max-height:calc(100svh - 190px); }
+  .metric-menu-options button { min-height:48px; }
+  .comparison-view { padding:22px 12px 34px; }
+  .comparison-title { display:block; margin-bottom:18px; padding-bottom:13px; }
+  .comparison-title h2 { font-size:32px; }
+  .comparison-title p { margin-top:8px; font-size:10px; }
+  .population-composition { gap:24px; }
+  .population-composition li { gap:8px; padding:13px 0; }
+  .population-composition li > b,.population-composition li > strong { font-size:14px; }
+  .comparison-bars { gap:9px; }
+  .comparison-bars li { gap:10px; padding:12px 10px; }
+  .depth-map-panel { min-width:0; }
+  .depth-map { width:100%; height:auto; max-height:58svh; }
+  .depth-legend { flex-wrap:wrap; gap:8px; font-size:9px; }
+  .depth-ranking li { padding:12px 10px; }
+  .comparison-column-chart { overflow-x:auto; padding-bottom:10px; }
+  .compare-shell > footer { gap:14px; padding:18px 14px; font-size:10px; line-height:1.5; }
+  .compare-shell > footer button { width:100%; min-height:48px; }
 }

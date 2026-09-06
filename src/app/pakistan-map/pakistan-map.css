@@ -554,29 +554,74 @@
   .header-actions .method-link { display:none; }
 }
 @media (max-width:720px) {
-  .naqsha-header { height:76px; }
-  .brand { font-size:14px; }
-  .brand small { font-size:10px; }
-  .brand-mark { width:44px; height:44px; }
-  .header-actions button:not(.dark) { display:none; }
-  .header-actions .export.dark { font-size:0; padding:0 12px; }
-  .header-actions .export.dark:after { content:'SAVE'; font-size:13px; }
-  .studio { display:flex; flex-direction:column; }
-  .control-panel { padding:22px 16px; border-right:0; border-bottom:0; }
-  .panel-resizer { flex:0 0 38px; min-height:38px; width:100%; transform:none; border:0; border-top:2px solid #73777b; border-bottom:2px solid #73777b; cursor:default; }
+  .naqsha-shell { min-height:calc(100svh - 56px); font-size:14px; }
+  .naqsha-header { position:sticky; top:56px; z-index:20; height:66px; padding:0 10px; }
+  .brand { min-width:0; gap:9px; font-size:11px; letter-spacing:.08em; }
+  .brand small { margin-top:4px; font-size:8px; letter-spacing:.1em; }
+  .brand-mark { flex:none; width:40px; height:40px; }
+  .brand-mark::before { font-size:23px; }
+  .header-actions { gap:7px; }
+  .header-actions>button { display:none; }
+  .header-actions button.export.share-button,.header-actions button.export.dark.finalize-button { display:block; min-width:61px; height:42px; padding:0 8px; font-size:0; }
+  .header-actions button.export.share-button::after { content:'SHARE'; font:750 10px var(--font-mono),monospace; }
+  .header-actions button.export.dark.finalize-button::after { content:'FINISH'; font:750 10px var(--font-mono),monospace; }
+  .studio { display:flex; min-height:0; flex-direction:column; border-top-width:6px; }
+  .control-panel { order:2; padding:18px 14px 22px; border-right:0; border-bottom:0; }
+  .panel-resizer.left { order:1; }
+  .map-stage { order:0; height:calc(100svh - 166px); min-height:500px; }
+  .panel-resizer.right { order:3; }
+  .summary-panel { order:4; }
+  .panel-resizer { flex:0 0 44px; min-height:44px; width:100%; transform:none; border:0; border-top:2px solid #73777b; border-bottom:2px solid #73777b; background:#b8b9b8; cursor:default; }
   .panel-resizer .panel-grip { display:none; }
-  .panel-resizer .panel-toggle,.panel-resizer.right .panel-toggle { top:50%; left:auto; right:18px; width:50px; height:30px; transform:translateY(-50%); }
+  .panel-resizer .panel-toggle,.panel-resizer.right .panel-toggle { top:50%; left:8px; right:8px; display:flex; width:auto; height:32px; align-items:center; justify-content:flex-end; padding:0 12px; transform:translateY(-50%); font-size:18px; }
+  .panel-resizer .panel-toggle::before { margin-right:auto; font:750 10px var(--font-mono),monospace; letter-spacing:.08em; }
+  .panel-resizer.left .panel-toggle::before { content:'MAP CONTROLS'; }
+  .panel-resizer.right .panel-toggle::before { content:'MAP SUMMARY'; }
   .panel-resizer .panel-toggle:active,.panel-resizer.right .panel-toggle:active { transform:translate(2px,calc(-50% + 2px)); }
-  .province-title,.hint,.tip { display:none; }
-  .province-list { flex-direction:row; overflow-x:auto; padding:10px 3px; }
-  .province-row { min-width:190px; }
-  .map-stage { height:70vh; min-height:560px; }
-  .summary-panel { display:block; }
+  .segmented { margin-top:12px; }
+  .segmented button { min-height:58px; font-size:11px; }
+  .preset-control { margin-top:12px; padding:10px; }
+  .preset-list { display:flex; gap:8px; overflow-x:auto; padding:2px 2px 7px; scroll-snap-type:x mandatory; }
+  .preset-list button { flex:0 0 240px; min-height:74px; scroll-snap-align:start; }
+  .province-title { display:flex; margin-top:24px; }
+  .hint { display:block; margin:11px 0 10px; font-size:11px; }
+  .tip { display:none; }
+  .province-list { flex-direction:row; overflow-x:auto; padding:8px 3px 12px; scroll-snap-type:x mandatory; }
+  .province-row { flex:0 0 225px; min-width:225px; scroll-snap-align:start; }
+  .paint-palette { position:fixed; z-index:60; top:auto; right:12px; bottom:12px; left:12px; width:auto; }
+  .paint-color-grid { grid-template-columns:repeat(8,1fr); }
+  .paint-color-grid button { width:100%; aspect-ratio:1; height:auto; }
+  .unit-editor { position:fixed; z-index:60; top:auto; right:12px; bottom:12px; left:12px; width:auto; }
+  .capital-menu { position:static; width:100%; margin-top:7px; }
+  .map-toolbar { flex:none; height:58px; padding:7px 8px; gap:7px; }
+  .search-wrap { width:auto; min-width:0; flex:1; height:42px; padding:0 9px; }
+  .search-wrap input { min-width:0; font-size:11px; }
+  .map-tools { flex:none; }
+  .map-tools button { min-width:64px; min-height:42px; padding:7px 8px; font-size:10px; }
+  .map-paper svg { max-width:none; }
+  .map-navigation { top:10px; left:10px; }
+  .map-navigation button { width:44px; height:44px; font-size:20px; }
+  .north { top:13px; right:12px; transform:scale(.8); transform-origin:top right; }
+  .map-tooltip { display:none; }
+  .map-caption { right:8px; bottom:5px; left:8px; overflow:hidden; font-size:8px; text-align:center; text-overflow:ellipsis; white-space:nowrap; }
+  .inspect-map-picker { top:62px; right:10px; left:10px; width:auto; min-width:0; }
+  .inspect-map-menu { width:100%; max-width:none; max-height:52svh; }
+  .district-drawer { top:auto; right:0; bottom:0; left:0; width:100%; max-height:76%; padding:16px; border:0; border-top:5px solid var(--color-sky-accent); box-shadow:0 -8px 0 rgba(47,52,56,.28); }
+  .district-stats { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .summary-panel { display:block; padding:20px 14px 28px; }
   .summary-panel[hidden] { display:none; }
-  .final-overlay { padding:8px; }
-  .final-sheet { max-height:calc(100vh - 16px); }
-  .final-head { padding:24px 18px; }
-  .country-politics { padding:22px 18px; }
+  .live-vitals { padding:16px; }
+  .live-vitals-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .summary-list { max-height:280px; overflow:auto; }
+  .final-overlay { padding:0; }
+  .final-sheet { width:100%; height:100dvh; max-height:100dvh; border:0; box-shadow:none; }
+  .final-head { position:sticky; top:0; z-index:5; align-items:flex-start; padding:16px 12px; background:#c8c8c5; }
+  .final-head h1 { font-size:30px; }
+  .final-head p { font-size:10px; }
+  .final-head-actions { align-items:flex-end; gap:7px; }
+  .final-head-actions .compare-button { min-height:40px; padding:6px 8px; font-size:9px; }
+  .final-head-actions>button:last-child { width:40px; height:40px; }
+  .country-politics { padding:18px 12px; }
   .country-politics-head { display:block; }
   .election-controls { align-items:flex-start; flex-direction:column; margin-top:14px; gap:8px; }
   .country-politics-head p { margin-top:0; }
@@ -584,9 +629,10 @@
   .province-politics-grid { grid-template-columns:1fr; }
   .final-grid { display:block; }
   .final-grid article:nth-child(odd) { border-right:0; }
-  .final-grid article { padding:24px 18px; }
+  .final-grid article { min-height:0; padding:20px 14px; }
   .final-metrics { grid-template-columns:repeat(2,minmax(110px,1fr)); }
-  .final-footer { align-items:stretch; flex-direction:column; padding:20px 18px; }
+  .final-footer { align-items:stretch; flex-direction:column; padding:18px 12px; }
   .final-footer>div { flex-wrap:wrap; }
   .final-footer>div button { flex:1; }
+  .naqsha-shell *::-webkit-scrollbar { width:10px; height:10px; }
 }
