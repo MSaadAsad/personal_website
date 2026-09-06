@@ -25,7 +25,7 @@ export function Footer() {
     }
   }, []);
 
-  if (pathname.startsWith('/pakistan-map')) return null;
+  if (pathname.startsWith('/pakistan-map') || pathname.startsWith('/naqsha')) return null;
 
   const copyright = (
     <div className="font-mono text-[0.78rem] text-concrete-700 tracking-wider px-6 py-4 flex items-center justify-center flex-1">

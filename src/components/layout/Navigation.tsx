@@ -15,6 +15,7 @@ const links = [
 
 export function Navigation() {
   const pathname = usePathname();
+  const isMapRoute = pathname.startsWith('/pakistan-map') || pathname.startsWith('/naqsha');
   const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
@@ -23,7 +24,7 @@ export function Navigation() {
 
   return (
     <>
-      <nav className={cn("fixed top-0 left-0 right-0 z-50 bg-[var(--color-concrete-block)] border-b border-concrete-700/60 shadow-[0_6px_16px_rgba(46,46,44,0.18)]", pathname === '/pakistan-map' && 'map-route-nav')}>
+      <nav className={cn("fixed top-0 left-0 right-0 z-50 bg-[var(--color-concrete-block)] border-b border-concrete-700/60 shadow-[0_6px_16px_rgba(46,46,44,0.18)]", isMapRoute && 'map-route-nav')}>
         <div className="mx-auto max-w-6xl px-4 md:px-8 h-14 flex items-stretch">
           <div className="hidden md:flex w-full items-stretch">
             <Link
