@@ -23,6 +23,8 @@ const ratio = (numerator:number, denominator:number) => denominator ? numerator 
 const censusAliases:Record<string,string> = {
   killaabdullah:'qillaabdullah',
   killasaifullah:'qillasaifullah',
+  malir:'karachimalir',
+  korangi:'karachikorangi',
 };
 
 export function aggregateCensus(keys:Iterable<string>, census:CensusDetail|null|undefined):CensusAggregate {

@@ -257,7 +257,12 @@ function featureName(feature: Feature, level: Level) {
 }
 
 const normalise = (value: unknown) => String(value).toLowerCase().replace(/district|agency/g, '').replace(/[^a-z0-9]/g, '');
-const featureDistrictKeys = (feature: Feature) => String(feature.properties.district_names || feature.properties.district_name).split('|').filter(Boolean).map(normalise);
+// The boundary layer predates Keamari district. Keep its figures attached to
+// the West Karachi polygon so current Census totals reconcile without
+// pretending that we have a separate Keamari shape.
+const featureDistrictKeys = (feature: Feature) => String(feature.properties.district_names || feature.properties.district_name)
+  .split('|').filter(Boolean).map(normalise)
+  .flatMap(key => key === 'westkarachi' ? [key, 'keamari'] : [key]);
 
 function buildDivisionFeatures(districts: Feature[]) {
   const byDistrict = new Map(districts.flatMap(feature => {
@@ -316,7 +321,7 @@ function divisionProvinceAssignments(features: Feature[], level: Level) {
 const DISTRICT_ALIASES: Record<string, string> = {
   chagai: 'chaghi', sudhnoti: 'sudhnutti', leiah: 'layyah', dikhan: 'deraismailkhan',
   centralkarachi: 'karachicentral', eastkarachi: 'karachieast', southkarachi: 'karachisouth',
-  westkarachi: 'karachiwest', malirkarachi: 'karachimalir', korangikarachi: 'karachikorangi',
+  westkarachi: 'karachiwest', malirkarachi: 'malir', korangikarachi: 'korangi',
 };
 const ELECTION_ALIASES: Record<string, string> = {
   leiah: 'layyah', kambershahdadkot: 'qambarshahdadkot', kambarshahdadkot: 'qambarshahdadkot',

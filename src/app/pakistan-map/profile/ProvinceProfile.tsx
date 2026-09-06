@@ -17,9 +17,10 @@ type Demographics = { source:string; districts:Record<string,DemographicRow> };
 type ChartKey = 'people'|'education'|'development';
 
 const normalise=(v:unknown)=>String(v).toLowerCase().replace(/district|agency/g,'').replace(/[^a-z0-9]/g,'');
-const aliases:Record<string,string>={chagai:'chaghi',sudhnoti:'sudhnutti',leiah:'layyah',dikhan:'deraismailkhan',centralkarachi:'karachicentral',eastkarachi:'karachieast',southkarachi:'karachisouth',westkarachi:'karachiwest',malirkarachi:'karachimalir',korangikarachi:'karachikorangi'};
+const aliases:Record<string,string>={chagai:'chaghi',sudhnoti:'sudhnutti',leiah:'layyah',dikhan:'deraismailkhan',centralkarachi:'karachicentral',eastkarachi:'karachieast',southkarachi:'karachisouth',westkarachi:'karachiwest',malirkarachi:'malir',korangikarachi:'korangi'};
+const districtKeys=(feature:Feature)=>{const raw=normalise(feature.properties.district_name);return [raw,...(raw==='westkarachi'?['keamari']:[])].map(key=>aliases[key]||key)};
 const CITIES=[
-  ['Karachi',18868021,['centralkarachi','eastkarachi','southkarachi','westkarachi','malirkarachi','korangikarachi','keamari']],['Lahore',13004135,['lahore']],['Faisalabad',3691999,['faisalabad']],['Rawalpindi',3357612,['rawalpindi']],['Gujranwala',2668047,['gujranwala']],['Multan',2215381,['multan']],['Hyderabad',1921275,['hyderabad']],['Peshawar',1905975,['peshawar']],['Quetta',1565546,['quetta']],['Islamabad',1108872,['islamabad']],['Sargodha',975886,['sargodha']],['Sialkot',911817,['sialkot']],['Bahawalpur',903795,['bahawalpur']]
+  ['Karachi',18868021,['karachicentral','karachieast','karachisouth','karachiwest','malir','korangi','keamari']],['Lahore',13004135,['lahore']],['Faisalabad',3691999,['faisalabad']],['Rawalpindi',3357612,['rawalpindi']],['Gujranwala',2668047,['gujranwala']],['Multan',2215381,['multan']],['Hyderabad',1921275,['hyderabad']],['Peshawar',1905975,['peshawar']],['Quetta',1565546,['quetta']],['Islamabad',1108872,['islamabad']],['Sargodha',975886,['sargodha']],['Sialkot',911817,['sialkot']],['Bahawalpur',903795,['bahawalpur']]
 ] as const;
 
 const PAKISTAN_CENSUS_2023_POPULATION=241499431;
@@ -43,12 +44,14 @@ export default function ProvinceProfile(){
     features.forEach(feature=>{
       const owner=assigned.get(String(feature.properties[idField]));
       if(owner==null)return;
-      const raw=normalise(feature.properties.district_name),key=aliases[raw]||raw;
-      const weight=config.l==='tehsils'?(tehsilLookup.get(String(feature.properties.tehsil_code))?.p||0):(data.districts[key]?.p||regionalDistrictPopulation2017(key)||0);
-      const weights=ownerWeights.get(key)||new Map<number,number>();
-      weights.set(owner,(weights.get(owner)||0)+weight);
-      ownerWeights.set(key,weights);
-      if(owner===unitIndex)districtWeights.set(key,(districtWeights.get(key)||0)+weight);
+      const keys=config.l==='tehsils'?[aliases[normalise(feature.properties.district_name)]||normalise(feature.properties.district_name)]:districtKeys(feature);
+      keys.forEach(key=>{
+        const weight=config.l==='tehsils'?(tehsilLookup.get(String(feature.properties.tehsil_code))?.p||0):(data.districts[key]?.p||regionalDistrictPopulation2017(key)||0);
+        const weights=ownerWeights.get(key)||new Map<number,number>();
+        weights.set(owner,(weights.get(owner)||0)+weight);
+        ownerWeights.set(key,weights);
+        if(owner===unitIndex)districtWeights.set(key,(districtWeights.get(key)||0)+weight);
+      });
     });
     const owners=new Map([...ownerWeights].map(([key,weights])=>[key,[...weights].sort((a,b)=>b[1]-a[1])[0][0]]));
     const keys=[...districtWeights.keys()];
