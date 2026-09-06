@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { completeRegionalPopulation2017, isRegionalPopulationDistrict, REGIONAL_POPULATION_SOURCES, regionalDistrictPopulation2017, regionalSocialStats } from '../regional-population';
 import { aggregateCensus, type CensusDetail } from '../census-detail';
 import { buildTehsilDataLookup } from '../tehsil-data-match';
+import { decodeShare, expandShare } from '../share-config';
 
 type Kind = 'province' | 'territory';
 type Config = { n:string; l:'districts'|'tehsils'; p:[string,string,string,Kind?,string?][]; a:[string,string,number][] };
@@ -23,14 +24,13 @@ const CITIES=[
 
 const PAKISTAN_CENSUS_2023_POPULATION=241499431;
 
-function decode(value:string):Config { const b=value.replace(/-/g,'+').replace(/_/g,'/'); const raw=atob(b+'='.repeat((4-b.length%4)%4)); return JSON.parse(new TextDecoder().decode(Uint8Array.from(raw,c=>c.charCodeAt(0)))); }
 const fmt=(v:number|null,suffix='%')=>v==null?'—':`${v.toFixed(1)}${suffix}`;
 const makeBreakdown=(counts:Record<string,number>,limit:number)=>{const merged:Record<string,number>={};let explicitOther=0;Object.entries(counts).forEach(([label,n])=>{/^all other$|^other(s)?$/i.test(label)?explicitOther+=n:merged[label]=(merged[label]||0)+n});const total=Object.values(merged).reduce((sum,n)=>sum+n,explicitOther);if(!total)return [];const sorted=Object.entries(merged).filter(([,n])=>n>0).sort((a,b)=>b[1]-a[1]);const shown=sorted.slice(0,limit);const remainder=explicitOther+sorted.slice(limit).reduce((sum,[,n])=>sum+n,0);if(remainder)shown.push(['All other',remainder]);return shown.map(([label,n])=>[label,n/total*100] as const);};
 const breakdownPercent=(value:number)=>value>0&&value<.05?'<0.1%':`${value.toFixed(1)}%`;
 
 export default function ProvinceProfile(){
   const [config,setConfig]=useState<Config|null>(null); const [unitId,setUnitId]=useState(''); const [features,setFeatures]=useState<Feature[]>([]); const [data,setData]=useState<Darbar|null>(null); const [demographics,setDemographics]=useState<Demographics|null>(null); const [censusDetail,setCensusDetail]=useState<CensusDetail|null>(null); const [chart,setChart]=useState<ChartKey>('people');
-  useEffect(()=>{ const params=new URLSearchParams(location.hash.slice(1)); const raw=params.get('map'); if(raw){try{const c=decode(raw);setConfig(c);setUnitId(params.get('unit')||c.p[0]?.[0]||'');fetch(`/data/pakistan-map/${c.l}.geojson`).then(r=>r.json()).then(x=>setFeatures(x.features));fetch('/data/pakistan-map/datadarbar.json').then(r=>r.json()).then(setData);fetch('/data/pakistan-map/demographics-2023.json').then(r=>r.json()).then(setDemographics);fetch('/data/pakistan-map/census-2023-detail.json').then(r=>r.json()).then(setCensusDetail);}catch{}} },[]);
+  useEffect(()=>{ const params=new URLSearchParams(location.hash.slice(1)); const raw=params.get('map'); if(raw)void(async()=>{try{const shared=await decodeShare(raw);const requestedIndex=Number(params.get('unit'));setUnitId(shared.p[Number.isInteger(requestedIndex)?requestedIndex:0]?.[0]||'');const[x,darbar,demographicData,census]=await Promise.all([fetch(`/data/pakistan-map/${shared.l}.geojson`).then(r=>r.json()),fetch('/data/pakistan-map/datadarbar.json').then(r=>r.json()),fetch('/data/pakistan-map/demographics-2023.json').then(r=>r.json()),fetch('/data/pakistan-map/census-2023-detail.json').then(r=>r.json())]);const idField=shared.l==='districts'?'district_code':'tehsil_code';setConfig(expandShare(shared,x.features.map((feature:Feature)=>String(feature.properties[idField]))));setFeatures(x.features);setData(darbar);setDemographics(demographicData);setCensusDetail(census);}catch{}})(); },[]);
   const report=useMemo(()=>{
     if(!config||!data)return null;
     const unitIndex=config.p.findIndex(p=>p[0]===unitId);

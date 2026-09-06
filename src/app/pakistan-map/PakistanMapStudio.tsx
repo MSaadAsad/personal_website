@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { completeRegionalPopulation2017, isRegionalPopulationDistrict, regionalDistrictPopulation2017, regionalSocialStats } from './regional-population';
 import { buildTehsilDataLookup } from './tehsil-data-match';
 import { aggregateCensus, type CensusDetail } from './census-detail';
+import { assignmentOwners, decodeShare, encodeShare, type DecodedSharedMap, type SharedMap, type ShareLevel } from './share-config';
 
 type Level = 'divisions' | 'districts' | 'tehsils';
 type Props = Record<string, string | number>;
@@ -11,7 +12,6 @@ type Feature = { type: 'Feature'; properties: Props; geometry: { type: 'Polygon'
 type UnitKind = 'province' | 'territory';
 type PanelSide = 'left' | 'right';
 type Province = { id: string; name: string; color: string; kind: UnitKind; capital?: string };
-type SharedMap = { v: 1; n: string; l: Level; p: [string, string, string, UnitKind?, string?][]; a: [string, string, number][] };
 type DistrictData = { n: string; p: number | null; l: number | null; i: number | null; u: number | null; ur: number | null; lfpr: number | null; oos: number | null; mat: number | null; enrol: number | null; num: number | null; cons: number | null; fi: number | null; net: number | null; elec: number | null; mpi: number | null; h: number | null };
 type TehsilData = { n: string; d: string; p: number | null; r: number | null; nl: number | null };
 type DarbarData = { source: string; generated: string; methodology: string; districts: Record<string, DistrictData>; tehsils: TehsilData[] };
@@ -256,24 +256,14 @@ function featureName(feature: Feature, level: Level) {
   return String(feature.properties[level === 'divisions' ? 'division_name' : level === 'districts' ? 'district_name' : 'tehsil_name']);
 }
 
-function encodeShare(config: SharedMap) {
-  const bytes = new TextEncoder().encode(JSON.stringify(config));
-  let binary = '';
-  bytes.forEach(byte => { binary += String.fromCharCode(byte); });
-  return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-}
-
-function decodeShare(value: string): SharedMap {
-  const base64 = value.replace(/-/g, '+').replace(/_/g, '/');
-  const binary = atob(base64 + '='.repeat((4 - base64.length % 4) % 4));
-  return JSON.parse(new TextDecoder().decode(Uint8Array.from(binary, character => character.charCodeAt(0))));
-}
-
 const normalise = (value: unknown) => String(value).toLowerCase().replace(/district|agency/g, '').replace(/[^a-z0-9]/g, '');
 const featureDistrictKeys = (feature: Feature) => String(feature.properties.district_names || feature.properties.district_name).split('|').filter(Boolean).map(normalise);
 
 function buildDivisionFeatures(districts: Feature[]) {
-  const byDistrict = new Map(districts.map(feature => [normalise(feature.properties.district_name), feature]));
+  const byDistrict = new Map(districts.flatMap(feature => {
+    const district = normalise(feature.properties.district_name);
+    return [[district, feature], ...(DIVISION_DISTRICT_ALIASES[district] ? [[DIVISION_DISTRICT_ALIASES[district], feature]] : [])] as [string, Feature][];
+  }));
   return Object.entries(DIVISION_DISTRICTS).map(([name, districtKeys]) => {
     const members = districtKeys.map(key => byDistrict.get(key)).filter((feature): feature is Feature => Boolean(feature));
     const coordinates = members.flatMap(feature => feature.geometry.type === 'Polygon'
@@ -401,36 +391,48 @@ export default function PakistanMapStudio() {
   const panRef = useRef<{ pointerId:number; clientX:number; clientY:number; view:typeof mapView } | null>(null);
   const panelResizeRef = useRef<{ side:PanelSide; pointerId:number; startX:number; startWidth:number } | null>(null);
   const hashLoaded = useRef(false);
-  const pendingSharedAssignments = useRef<Record<string, string> | null>(null);
+  const pendingSharedMap = useRef<DecodedSharedMap | null>(null);
   const hasAssignments = Object.keys(assignments).length > 0;
   const cityZoom = WIDTH / mapView.width;
 
   useEffect(() => {
     if (!hashLoaded.current) {
       hashLoaded.current = true;
-      const raw = window.location.hash.startsWith('#map=') ? window.location.hash.slice(5) : '';
+      const raw = window.location.hash.startsWith('#map=') ? window.location.hash.slice(5)
+        : window.location.pathname === '/p' && window.location.hash.length > 1 ? window.location.hash.slice(1) : '';
       if (raw) {
-        try {
-          const shared = decodeShare(raw);
-          if (shared.v === 1 && (shared.l === 'divisions' || shared.l === 'districts' || shared.l === 'tehsils')) {
+        void (async () => {
+          try {
+          const shared = await decodeShare(raw);
+          if (shared.l === 'districts' || shared.l === 'tehsils') {
             const restoredProvinces = shared.p.map(([id, name, color, kind, capital]) => ({ id, name, color, kind: kind || 'province', capital: capital || '' }));
-            const restoredAssignments = Object.fromEntries(shared.a.map(([id, , provinceIndex]) => [id, restoredProvinces[provinceIndex]?.id]).filter(([, id]) => id));
             setMapName(shared.n || 'Shared province plan');
             setProvinces(restoredProvinces);
             setActive(restoredProvinces[0]?.id || '');
-            setAssignments(restoredAssignments);
-            if (shared.l !== level) { pendingSharedAssignments.current = restoredAssignments; setLevel(shared.l); return; }
-            fetch(`/data/pakistan-map/${shared.l === 'divisions' ? 'districts' : shared.l}.geojson`).then(r => r.json()).then(data => setFeatures(featuresForLevel(data.features, shared.l)));
+            if (shared.l !== level) { pendingSharedMap.current = shared; setLevel(shared.l); return; }
+            fetch(`/data/pakistan-map/${shared.l}.geojson`).then(r => r.json()).then(data => {
+              const restoredFeatures = featuresForLevel(data.features, shared.l);
+              const owners = assignmentOwners(shared, restoredFeatures.map(feature => featureId(feature, shared.l)));
+              setFeatures(restoredFeatures);
+              setAssignments(Object.fromEntries([...owners].map(([id, owner]) => [id, restoredProvinces[owner]?.id]).filter(([, id]) => id)));
+            });
             return;
           }
-        } catch { window.history.replaceState(null, '', window.location.pathname + window.location.search); }
+          } catch { window.history.replaceState(null, '', window.location.pathname + window.location.search); }
+        })();
+        return;
       }
     }
-    if (pendingSharedAssignments.current) {
-      const restored = pendingSharedAssignments.current;
-      pendingSharedAssignments.current = null;
-      fetch(`/data/pakistan-map/${level === 'divisions' ? 'districts' : level}.geojson`).then(r => r.json()).then(data => setFeatures(featuresForLevel(data.features, level)));
-      setAssignments(restored); setHistory([]); setFuture([]);
+    if (pendingSharedMap.current) {
+      const shared = pendingSharedMap.current;
+      pendingSharedMap.current = null;
+      fetch(`/data/pakistan-map/${level}.geojson`).then(r => r.json()).then(data => {
+        const restoredFeatures = featuresForLevel(data.features, level);
+        const owners = assignmentOwners(shared, restoredFeatures.map(feature => featureId(feature, level)));
+        setFeatures(restoredFeatures);
+        setAssignments(Object.fromEntries([...owners].map(([id, owner]) => [id, shared.p[owner]?.[0]]).filter(([, id]) => id)));
+      });
+      setHistory([]); setFuture([]);
       return;
     }
     fetch(`/data/pakistan-map/${level === 'divisions' ? 'districts' : level}.geojson`).then(r => r.json()).then(data => {
@@ -877,33 +879,39 @@ export default function PakistanMapStudio() {
 
   const currentShareConfig = (): SharedMap => {
     const provinceIndex = Object.fromEntries(provinces.map((province, index) => [province.id, index]));
-    const sharedLevel = level === 'divisions' ? 'districts' : level;
+    const sharedLevel: ShareLevel = level === 'divisions' ? 'districts' : level;
     const sharedAssignments: [string, string, number][] = level === 'divisions'
       ? features.flatMap(feature => {
           const owner = provinceIndex[assignments[featureId(feature, level)]];
-          if (owner === undefined) return [];
           const codes = String(feature.properties.district_codes || '').split('|');
           const names = String(feature.properties.district_names || '').split('|');
-          return codes.map((code, index) => [code, names[index] || code, owner] as [string, string, number]);
+          return codes.map((code, index) => [code, names[index] || code, owner ?? -1] as [string, string, number]);
         })
-      : features.filter(feature => assignments[featureId(feature, level)] !== undefined).map(feature => [featureId(feature, level), featureName(feature, level), provinceIndex[assignments[featureId(feature, level)]]]);
+      : features.map(feature => [featureId(feature, level), featureName(feature, level), provinceIndex[assignments[featureId(feature, level)]] ?? -1]);
     return { v: 1, n: mapName.trim() || 'Untitled province plan', l: sharedLevel,
       p: provinces.map(province => [province.id, province.name, province.color, province.kind, province.capital || '']),
       a: sharedAssignments,
     };
   };
 
-  const openProfile = (unitId: string) => {
-    window.open(`/pakistan-map/profile#map=${encodeShare(currentShareConfig())}&unit=${encodeURIComponent(unitId)}`, '_blank', 'noopener,noreferrer');
+  const openProfile = async (unitId: string) => {
+    const unitIndex = provinces.findIndex(province => province.id === unitId);
+    const target = window.open('', '_blank');
+    if (!target) return;
+    target.opener = null;
+    target.location.replace(`${window.location.origin}/pakistan-map/profile#map=${await encodeShare(currentShareConfig())}&unit=${unitIndex}`);
   };
 
-  const openComparison = () => {
-    window.open(`/pakistan-map/compare#map=${encodeShare(currentShareConfig())}`, '_blank', 'noopener,noreferrer');
+  const openComparison = async () => {
+    const target = window.open('', '_blank');
+    if (!target) return;
+    target.opener = null;
+    target.location.replace(`${window.location.origin}/pakistan-map/compare#map=${await encodeShare(currentShareConfig())}`);
   };
 
   const shareMap = async () => {
     const config = currentShareConfig();
-    const url = `${window.location.origin}${window.location.pathname}${window.location.search}#map=${encodeShare(config)}`;
+    const url = `${window.location.origin}/p#${await encodeShare(config)}`;
     window.history.replaceState(null, '', url);
     try { await navigator.clipboard.writeText(url); setShareStatus('Link copied!'); }
     catch { setShareStatus('Link ready'); }

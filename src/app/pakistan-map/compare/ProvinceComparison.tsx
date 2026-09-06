@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { completeRegionalPopulation2017, isRegionalPopulationDistrict, REGIONAL_POPULATION_SOURCES, regionalDistrictPopulation2017, regionalSocialStats } from '../regional-population';
 import { buildTehsilDataLookup } from '../tehsil-data-match';
 import { aggregateCensus, type CensusDetail } from '../census-detail';
+import { decodeShare, expandShare } from '../share-config';
 
 type Level='districts'|'tehsils';
 type Kind='province'|'territory';
@@ -48,7 +49,6 @@ const MORE_METRIC_GROUPS:{label:string;keys:Metric[]}[]=[
 ];
 const aliases:Record<string,string>={chagai:'chaghi',sudhnoti:'sudhnutti',leiah:'layyah',dikhan:'deraismailkhan',centralkarachi:'karachicentral',eastkarachi:'karachieast',southkarachi:'karachisouth',westkarachi:'karachiwest',malirkarachi:'karachimalir',korangikarachi:'karachikorangi'};
 const normalise=(v:unknown)=>String(v).toLowerCase().replace(/district|agency/g,'').replace(/[^a-z0-9]/g,'');
-const decode=(value:string):Config=>{const base=value.replace(/-/g,'+').replace(/_/g,'/');const binary=atob(base+'='.repeat((4-base.length%4)%4));return JSON.parse(new TextDecoder().decode(Uint8Array.from(binary,c=>c.charCodeAt(0))))};
 const format=(key:Metric,value:number)=>key==='population'||key==='outOfSchool'||key==='density'?Math.round(value).toLocaleString():key==='consumption'?`Rs ${Math.round(value).toLocaleString()}`:key==='mpi'?value.toFixed(3):key==='householdSize'?value.toFixed(1):`${value.toFixed(1)}%`;
 const formatAxis=(key:Metric,value:number)=>key==='mpi'?value.toFixed(2):key==='consumption'?`Rs ${Math.round(value/1000)}k`:key==='outOfSchool'?(value>=1_000_000?`${(value/1_000_000).toFixed(1)}m`:`${Math.round(value/1000)}k`):key==='density'?Math.round(value).toLocaleString():key==='householdSize'?value.toFixed(1):key==='growth'?`${value.toFixed(1)}%`:`${Math.round(value)}%`;
 const MAP_EXTENT={minX:60.75,maxX:77.25,minY:23.35,maxY:37.25};
@@ -86,7 +86,7 @@ export default function ProvinceComparison(){
   const [metricOpen,setMetricOpen]=useState(false);
   const [moreMetricsOpen,setMoreMetricsOpen]=useState(false);
   const [outOfSchoolMode,setOutOfSchoolMode]=useState<'total'|'perCapita'>('total');
-  useEffect(()=>{const raw=new URLSearchParams(location.hash.slice(1)).get('map');if(!raw)return;try{const parsed=decode(raw);setConfig(parsed);Promise.all([fetch(`/data/pakistan-map/${parsed.l}.geojson`).then(r=>r.json()),fetch('/data/pakistan-map/datadarbar.json').then(r=>r.json()),fetch('/data/pakistan-map/census-2023-detail.json').then(r=>r.json())]).then(([geo,darbar,census])=>{setFeatures(geo.features);setData(darbar);setCensusDetail(census)})}catch{}},[]);
+  useEffect(()=>{const raw=new URLSearchParams(location.hash.slice(1)).get('map');if(!raw)return;void(async()=>{try{const parsed=await decodeShare(raw);const[geo,darbar,census]=await Promise.all([fetch(`/data/pakistan-map/${parsed.l}.geojson`).then(r=>r.json()),fetch('/data/pakistan-map/datadarbar.json').then(r=>r.json()),fetch('/data/pakistan-map/census-2023-detail.json').then(r=>r.json())]);const idField=parsed.l==='districts'?'district_code':'tehsil_code';setConfig(expandShare(parsed,geo.features.map((feature:Feature)=>String(feature.properties[idField]))));setFeatures(geo.features);setData(darbar);setCensusDetail(census)}catch{}})()},[]);
   const rows=useMemo<Row[]>(()=>{
     if(!config||!data)return[];
     const assigned=new Map(config.a.map(([id,,owner])=>[id,owner]));
