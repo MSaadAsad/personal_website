@@ -16,7 +16,7 @@ export function ProjectCard({ project }: { project: Project }) {
               alt={project.title}
               fill
               sizes="(min-width: 1024px) 30vw, (min-width: 768px) 45vw, 90vw"
-              className="object-cover"
+              className={`object-cover ${project.slug === 'naya-naqsha' ? 'object-top' : ''}`}
             />
           </div>
         ) : (
