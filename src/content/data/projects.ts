@@ -8,7 +8,7 @@ export const projects: Project[] = [
     description:
       'Redraw Pakistan’s provinces and compare the demographic, economic, and electoral picture using PBS, ECP, Data Darbar, and OCHA data.',
     image: '/assets/projects/naya-naqsha/cover.png',
-    tags: ['Pakistan', 'Data visualisation'],
+    tags: ['Data visualisation'],
     techStack: ['TypeScript', 'React'],
     url: '/naqsha',
   },
