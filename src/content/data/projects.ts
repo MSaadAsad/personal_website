@@ -5,8 +5,7 @@ export const projects: Project[] = [
     slug: 'naya-naqsha',
     title: 'Naya Naqsha',
     date: '2026-09-05',
-    description:
-      'Redraw Pakistan’s provinces and compare the demographic, economic, and electoral picture using PBS, ECP, Data Darbar, and OCHA data.',
+    description: 'Redraw Pakistan’s provinces and compare the results.',
     image: '/assets/projects/naya-naqsha/cover.png',
     tags: ['Data visualisation'],
     techStack: ['TypeScript', 'React'],
@@ -16,8 +15,7 @@ export const projects: Project[] = [
     slug: 'lahore-neighbourhoods',
     title: 'Lahore Neighbourhoods',
     date: '2026-08-03',
-    description:
-      'Connected parts of Lahore, grouped by similarities in streets, buildings, destinations, vegetation, and sampled travel times.',
+    description: 'A new map of Lahore, built from how the city works.',
     image: '/assets/projects/lahore-neighbourhoods/cover.png',
     tags: [],
     techStack: ['JavaScript', 'Leaflet', 'OpenStreetMap'],
@@ -27,8 +25,7 @@ export const projects: Project[] = [
     slug: 'indus-atlas',
     title: 'Indus Atlas',
     date: '2026-06-04',
-    description:
-      'A digital humanities project for cataloguing, digitizing, and mapping historical sources related to Pakistan’s past.',
+    description: 'Mapping historical sources about Pakistan’s past.',
     image: '/assets/projects/indus-atlas/cover.png',
     tags: [],
     techStack: [],
