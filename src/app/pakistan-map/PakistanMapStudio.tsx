@@ -936,12 +936,50 @@ export default function PakistanMapStudio() {
     const clone = svgRef.current.cloneNode(true) as SVGSVGElement;
     clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
     clone.setAttribute('viewBox', `0 0 ${WIDTH} ${HEIGHT}`);
-    const canvas = document.createElement('canvas'); canvas.width = 1520; canvas.height = 1800;
+    const exportedUnits = provinces.filter(province => assignmentCounts[province.id]);
+    const exportedPaths = clone.querySelectorAll<SVGPathElement>('g[fill-rule="evenodd"] > path');
+    paths.forEach(({ feature }, index) => {
+      const path = exportedPaths[index];
+      if (!path) return;
+      const province = provinceById[assignments[featureId(feature, level)]];
+      path.setAttribute('fill', province?.color || '#e8e1d5');
+      path.setAttribute('fill-opacity', '1');
+      path.setAttribute('stroke', '#56606a');
+      path.setAttribute('stroke-width', level === 'tehsils' ? '.45' : '.7');
+      path.classList.remove('highlighted');
+    });
+    clone.querySelector<SVGPathElement>('.division-boundaries')?.setAttribute('style', 'fill:none;stroke:#252b31;stroke-width:2.1;stroke-linecap:round;stroke-linejoin:round');
+    clone.querySelector<SVGPathElement>('.national-boundary')?.setAttribute('style', 'fill:none;stroke:#252b31;stroke-width:3.2;stroke-linecap:round;stroke-linejoin:round');
+    const legendColumns = Math.min(4, Math.max(1, exportedUnits.length));
+    const legendRows = Math.ceil(exportedUnits.length / legendColumns);
+    const legendTop = 158;
+    const mapTop = legendTop + (exportedUnits.length ? legendRows * 38 + 34 : 0);
+    const mapHeight = 1640;
+    const canvas = document.createElement('canvas'); canvas.width = 1520; canvas.height = mapTop + mapHeight;
     const context = canvas.getContext('2d'); if (!context) return;
     context.fillStyle = '#f5f0e7'; context.fillRect(0, 0, canvas.width, canvas.height);
     context.fillStyle = '#293027'; context.font = '600 58px sans-serif'; context.fillText(mapName.trim() || 'My province plan', 70, 82);
     context.fillStyle = '#77766f'; context.font = '24px monospace'; context.fillText(`PAKISTAN · ${level.toUpperCase()} · NAYA NAQSHA`, 72, 126);
-    const image = new Image(); image.onload = () => { context.drawImage(image, 0, 160, canvas.width, 1640); const link = document.createElement('a'); link.download = `${(mapName.trim() || `pakistan-${level}-map`).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}.png`; link.href = canvas.toDataURL('image/png'); link.click(); };
+    if (exportedUnits.length) {
+      const columnWidth = (canvas.width - 140) / legendColumns;
+      context.font = '600 22px monospace';
+      context.textBaseline = 'middle';
+      exportedUnits.forEach((province, index) => {
+        const column = index % legendColumns;
+        const row = Math.floor(index / legendColumns);
+        const x = 72 + column * columnWidth;
+        const y = legendTop + row * 38;
+        context.fillStyle = province.color;
+        context.fillRect(x, y - 11, 22, 22);
+        context.strokeStyle = '#56606a';
+        context.lineWidth = 2;
+        context.strokeRect(x, y - 11, 22, 22);
+        context.fillStyle = '#293027';
+        context.fillText(province.name, x + 34, y + 1, columnWidth - 42);
+      });
+      context.textBaseline = 'alphabetic';
+    }
+    const image = new Image(); image.onload = () => { context.drawImage(image, 0, mapTop, canvas.width, mapHeight); const link = document.createElement('a'); link.download = `${(mapName.trim() || `pakistan-${level}-map`).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}.png`; link.href = canvas.toDataURL('image/png'); link.click(); };
     image.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(new XMLSerializer().serializeToString(clone))}`;
   };
 
