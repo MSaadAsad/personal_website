@@ -2,6 +2,16 @@ import { Project } from '@/types/content';
 
 export const projects: Project[] = [
   {
+    slug: 'naya-naqsha',
+    title: 'Naya Naqsha',
+    date: '2026-09-05',
+    description:
+      'Redraw Pakistan’s provinces and compare the demographic, economic, and electoral picture using PBS, ECP, Data Darbar, and OCHA data.',
+    tags: ['Pakistan', 'Data visualisation'],
+    techStack: ['TypeScript', 'React'],
+    url: '/naqsha',
+  },
+  {
     slug: 'lahore-neighbourhoods',
     title: 'Lahore Neighbourhoods',
     date: '2026-08-03',
