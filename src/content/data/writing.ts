@@ -37,6 +37,7 @@ export const writing: WritingFrontmatter[] = [
     category: 'historical',
     tags: [],
     excerpt: 'How Mirpur became a part of Dogra Jammu and Kashmir.',
+    published: false,
     readingTime: 5,
   },
   {
