@@ -18,10 +18,10 @@ export const metadata: Metadata = {
     type: 'website',
     images: [
       {
-        url: 'https://www.msaadasad.com/assets/projects/naya-naqsha/cover.png',
-        width: 1520,
-        height: 1984,
-        alt: 'Naya Naqsha regional proposal map',
+        url: 'https://www.msaadasad.com/assets/projects/naya-naqsha/social-preview.png',
+        width: 2936,
+        height: 1572,
+        alt: 'Naya Naqsha province builder',
       },
     ],
   },
@@ -30,7 +30,7 @@ export const metadata: Metadata = {
     title: 'Naya Naqsha | Redraw Pakistan’s Provinces',
     description:
       'Draw new provincial boundaries, compare demographic and socioeconomic outcomes, and share your map.',
-    images: ['https://www.msaadasad.com/assets/projects/naya-naqsha/cover.png'],
+    images: ['https://www.msaadasad.com/assets/projects/naya-naqsha/social-preview.png'],
   },
 };
 
