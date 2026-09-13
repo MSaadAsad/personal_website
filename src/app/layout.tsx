@@ -11,8 +11,8 @@ const jetbrains = JetBrains_Mono({ subsets: ['latin'], variable: '--font-jetbrai
 const sourceSerif = Source_Serif_4({ subsets: ['latin'], variable: '--font-serif', display: 'swap' });
 
 export const metadata: Metadata = {
-  title: { default: 'SAAD', template: '%s — SAAD' },
-  description: 'M. Saad Asad',
+  title: { default: 'M. Saad Asad — AI, Projects & Writing', template: '%s — M. Saad Asad' },
+  description: 'Personal website of M. Saad Asad. Explore projects in AI and machine learning, interactive maps, and writing on technology, history, and culture.',
   icons: { icon: '/assets/c-blue.png' },
 };
 
