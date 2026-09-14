@@ -30,10 +30,6 @@ export default function Home() {
             <h1 className="mt-7 mb-2 font-mono text-[0.9rem] text-concrete-200 tracking-[0.3em]">
               M. SAAD ASAD
             </h1>
-            <p className="mt-2 max-w-xl font-serif text-sm text-concrete-200 leading-relaxed">
-              I build AI systems and interactive maps, and write about technology,
-              history, and culture.
-            </p>
           </div>
         </Container>
       </section>
