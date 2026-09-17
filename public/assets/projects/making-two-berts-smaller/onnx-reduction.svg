@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 500" role="img" aria-labelledby="title desc">
+  <title id="title">Model size and CPU latency shrink through ONNX and quantization</title>
+  <desc id="desc">Relative to merged PyTorch, optimized ONNX retains 76 percent of model size and 64 percent of CPU latency; quantized ONNX retains 29 percent of size and 32 percent of latency.</desc>
+  <rect width="900" height="500" fill="#d2d1cd" stroke="#5f5e5b" stroke-width="2"/>
+  <text x="46" y="55" fill="#2e2e2c" font-family="monospace" font-size="24" font-weight="700">MODEL SIZE AND CPU LATENCY</text>
+  <text x="46" y="83" fill="#5f5e5b" font-family="monospace" font-size="14">Size and CPU latency as % of merged PyTorch · lower is better</text>
+  <g stroke="#9b9a97" stroke-width="1">
+    <line x1="108" y1="136" x2="786" y2="136"/>
+    <line x1="108" y1="209" x2="786" y2="209"/>
+    <line x1="108" y1="282" x2="786" y2="282"/>
+    <line x1="108" y1="355" x2="786" y2="355"/>
+  </g>
+  <g fill="#5f5e5b" font-family="monospace" font-size="14" text-anchor="end">
+    <text x="95" y="141">100%</text><text x="95" y="214">75%</text><text x="95" y="287">50%</text><text x="95" y="360">25%</text>
+  </g>
+  <polyline points="160,136 447,206 734,345" fill="none" stroke="#0000ee" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="160,136 447,241 734,336" fill="none" stroke="#3e4f66" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <g fill="#0000ee" stroke="#d2d1cd" stroke-width="4">
+    <circle cx="160" cy="136" r="9"/><circle cx="447" cy="206" r="9"/><circle cx="734" cy="345" r="10"/>
+  </g>
+  <g fill="#3e4f66" stroke="#d2d1cd" stroke-width="4">
+    <circle cx="160" cy="136" r="5"/><circle cx="447" cy="241" r="9"/><circle cx="734" cy="336" r="7"/>
+  </g>
+  <rect x="553" y="107" width="14" height="14" fill="#0000ee"/><text x="575" y="120" fill="#2e2e2c" font-family="monospace" font-size="14">Size</text>
+  <rect x="650" y="107" width="14" height="14" fill="#3e4f66"/><text x="672" y="120" fill="#2e2e2c" font-family="monospace" font-size="14">Latency</text>
+  <text x="466" y="197" fill="#0000ee" font-family="monospace" font-size="14" font-weight="700">76%</text>
+  <text x="466" y="275" fill="#3e4f66" font-family="monospace" font-size="14" font-weight="700">64%</text>
+  <text x="751" y="316" fill="#3e4f66" font-family="monospace" font-size="14" font-weight="700">32%</text>
+  <text x="751" y="356" fill="#0000ee" font-family="monospace" font-size="14" font-weight="700">29%</text>
+  <g fill="#2e2e2c" font-family="monospace" text-anchor="middle">
+    <text x="160" y="410" font-size="16" font-weight="700">PyTorch</text><text x="160" y="435" font-size="14">769 MB · 180 ms</text>
+    <text x="447" y="410" font-size="16" font-weight="700">ONNX</text><text x="447" y="435" font-size="14">586 MB · 115 ms</text>
+    <text x="734" y="410" font-size="16" font-weight="700">INT8 ONNX</text><text x="734" y="435" font-size="14">219 MB · 57 ms</text>
+  </g>
+</svg>

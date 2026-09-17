@@ -14,6 +14,15 @@ const withMDX = createMDX({
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   pageExtensions: ['js', 'jsx', 'mdx', 'ts', 'tsx'],
+  async redirects() {
+    return [
+      {
+        source: '/projects/making-two-berts-smaller',
+        destination: '/projects/two-berts-one-stone',
+        permanent: true,
+      },
+    ];
+  },
   async headers() {
     return [
       {

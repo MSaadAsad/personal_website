@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 500" role="img" aria-labelledby="title desc">
+  <title id="title">Ranking preservation by number of shared layers</title>
+  <desc id="desc">Tone Kendall tau values are 0.966, 0.934, 0.896, 0.841, and 0.741. FLS values are 0.952, 0.911, 0.875, 0.837, and 0.779 for two, four, six, eight, and ten shared layers.</desc>
+  <rect width="900" height="500" fill="#d2d1cd" stroke="#5f5e5b" stroke-width="2"/>
+  <text x="46" y="55" fill="#2e2e2c" font-family="monospace" font-size="24" font-weight="700">HOW MUCH RANKING SURVIVES?</text>
+  <text x="46" y="83" fill="#5f5e5b" font-family="monospace" font-size="14">Kendall's τ versus the two unmerged models · higher is closer</text>
+  <rect x="402" y="113" width="76" height="286" fill="#0000ee" opacity="0.07"/>
+  <text x="440" y="128" text-anchor="middle" fill="#0000ee" font-family="monospace" font-size="14" font-weight="700">CHOSEN</text>
+  <g stroke="#9b9a97" stroke-width="1">
+    <line x1="116" y1="148" x2="760" y2="148"/>
+    <line x1="116" y1="207" x2="760" y2="207"/>
+    <line x1="116" y1="266" x2="760" y2="266"/>
+    <line x1="116" y1="325" x2="760" y2="325"/>
+    <line x1="116" y1="384" x2="760" y2="384"/>
+  </g>
+  <g fill="#5f5e5b" font-family="monospace" font-size="14" text-anchor="end">
+    <text x="103" y="153">1.00</text><text x="103" y="212">0.92</text><text x="103" y="271">0.84</text><text x="103" y="330">0.76</text><text x="103" y="389">0.68</text>
+  </g>
+  <g fill="#2e2e2c" font-family="monospace" font-size="16" text-anchor="middle">
+    <text x="150" y="419">2</text><text x="295" y="419">4</text><text x="440" y="419">6</text><text x="585" y="419">8</text><text x="730" y="419">10</text>
+  </g>
+  <text x="440" y="455" text-anchor="middle" fill="#5f5e5b" font-family="monospace" font-size="15">SHARED ENCODER LAYERS</text>
+  <polyline points="150,173 295,197 440,225 585,266 730,340" fill="none" stroke="#0000ee" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="150,183 295,214 440,240 585,269 730,311" fill="none" stroke="#3e4f66" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <g fill="#0000ee" stroke="#d2d1cd" stroke-width="3">
+    <circle cx="150" cy="173" r="7"/><circle cx="295" cy="197" r="7"/><circle cx="440" cy="225" r="9"/><circle cx="585" cy="266" r="7"/><circle cx="730" cy="340" r="7"/>
+  </g>
+  <g fill="#3e4f66" stroke="#d2d1cd" stroke-width="3">
+    <circle cx="150" cy="183" r="7"/><circle cx="295" cy="214" r="7"/><circle cx="440" cy="240" r="9"/><circle cx="585" cy="269" r="7"/><circle cx="730" cy="311" r="7"/>
+  </g>
+  <rect x="575" y="104" width="14" height="14" fill="#0000ee"/><text x="597" y="117" fill="#2e2e2c" font-family="monospace" font-size="14">Tone</text>
+  <rect x="664" y="104" width="14" height="14" fill="#3e4f66"/><text x="686" y="117" fill="#2e2e2c" font-family="monospace" font-size="14">FLS</text>
+  <text x="476" y="215" fill="#0000ee" font-family="monospace" font-size="15" font-weight="700">0.896</text>
+  <text x="476" y="284" fill="#3e4f66" font-family="monospace" font-size="15" font-weight="700">0.875</text>
+</svg>

@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" role="img" aria-labelledby="title desc">
+  <title id="title">Two BERTs, One Stone</title>
+  <desc id="desc">Two separate twelve-layer stacks on the left. On the right, one shared six-layer stack branches into two six-layer task-specific stacks and heads.</desc>
+  <defs>
+    <g id="stack-twelve">
+      <rect y="0" width="140" height="24"/><rect y="30" width="140" height="24"/>
+      <rect y="60" width="140" height="24"/><rect y="90" width="140" height="24"/>
+      <rect y="120" width="140" height="24"/><rect y="150" width="140" height="24"/>
+      <rect y="180" width="140" height="24"/><rect y="210" width="140" height="24"/>
+      <rect y="240" width="140" height="24"/><rect y="270" width="140" height="24"/>
+      <rect y="300" width="140" height="24"/><rect y="330" width="140" height="24"/>
+    </g>
+    <g id="stack-six">
+      <rect y="0" width="140" height="24"/><rect y="30" width="140" height="24"/>
+      <rect y="60" width="140" height="24"/><rect y="90" width="140" height="24"/>
+      <rect y="120" width="140" height="24"/><rect y="150" width="140" height="24"/>
+    </g>
+  </defs>
+  <rect width="1200" height="800" fill="#e2e1dd"/>
+  <rect x="24" y="24" width="1152" height="752" fill="none" stroke="#5f5e5b" stroke-width="2"/>
+  <path d="M600 90 V710" stroke="#9b9a97" stroke-width="2" stroke-dasharray="7 10"/>
+  <text x="320" y="82" text-anchor="middle" fill="#5f5e5b" font-family="monospace" font-size="22" font-weight="700" letter-spacing="3">BEFORE</text>
+  <text x="890" y="82" text-anchor="middle" fill="#5f5e5b" font-family="monospace" font-size="22" font-weight="700" letter-spacing="3">AFTER</text>
+
+  <path d="M320 658 V602 H220 V548 M320 602 H440 V548" fill="none" stroke="#0000ee" stroke-width="5"/>
+  <rect x="280" y="658" width="80" height="56" fill="#f2f2ef" stroke="#5f5e5b" stroke-width="2"/>
+  <use href="#stack-twelve" x="150" y="190" fill="#b4b3b4" stroke="#5f5e5b" stroke-width="2"/>
+  <use href="#stack-twelve" x="370" y="190" fill="#b4b3b4" stroke="#5f5e5b" stroke-width="2"/>
+  <path d="M220 190 V160 M440 190 V160" fill="none" stroke="#0000ee" stroke-width="5"/>
+  <rect x="190" y="112" width="60" height="48" fill="#3e4f66"/>
+  <rect x="410" y="112" width="60" height="48" fill="#3e4f66"/>
+
+  <path d="M890 672 V634 M890 460 V416 H760 V380 M890 416 H1020 V380" fill="none" stroke="#0000ee" stroke-width="5"/>
+  <rect x="850" y="672" width="80" height="56" fill="#f2f2ef" stroke="#5f5e5b" stroke-width="2"/>
+  <use href="#stack-six" x="820" y="460" fill="#0000ee" stroke="#1717c0" stroke-width="2"/>
+  <text x="800" y="556" text-anchor="end" fill="#0000ee" font-family="monospace" font-size="17" font-weight="700" letter-spacing="2">SHARED</text>
+  <use href="#stack-six" x="690" y="200" fill="#b4b3b4" stroke="#5f5e5b" stroke-width="2"/>
+  <use href="#stack-six" x="950" y="200" fill="#b4b3b4" stroke="#5f5e5b" stroke-width="2"/>
+  <path d="M760 200 V160 M1020 200 V160" fill="none" stroke="#0000ee" stroke-width="5"/>
+  <rect x="730" y="112" width="60" height="48" fill="#3e4f66"/>
+  <rect x="990" y="112" width="60" height="48" fill="#3e4f66"/>
+</svg>

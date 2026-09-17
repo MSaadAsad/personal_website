@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 420" role="img" aria-labelledby="title desc">
+  <title id="title">Two independent BERTs become a shared trunk with two branches</title>
+  <desc id="desc">Before, one text input flows through separate twelve-layer tone and FLS models. After, one shared six-layer trunk flows into two six-layer task-specific branches.</desc>
+  <rect width="900" height="420" fill="#d2d1cd" stroke="#5f5e5b" stroke-width="2"/>
+  <text x="34" y="48" fill="#2e2e2c" font-family="monospace" font-size="19" font-weight="700">BEFORE</text>
+  <text x="474" y="48" fill="#2e2e2c" font-family="monospace" font-size="19" font-weight="700">AFTER · SIX SHARED LAYERS</text>
+  <line x1="450" y1="24" x2="450" y2="396" stroke="#7e7d7a" stroke-width="2" stroke-dasharray="7 7"/>
+  <rect x="34" y="174" width="84" height="56" fill="#e2e1dd" stroke="#5f5e5b" stroke-width="2"/>
+  <text x="76" y="209" text-anchor="middle" fill="#2e2e2c" font-family="monospace" font-size="16">text</text>
+  <path d="M118 202 H145 V112 H168 M145 202 V292 H168" fill="none" stroke="#0000ee" stroke-width="3"/>
+  <rect x="168" y="76" width="180" height="72" fill="#b4b3b4" stroke="#5f5e5b" stroke-width="2"/>
+  <text x="258" y="108" text-anchor="middle" fill="#2e2e2c" font-family="monospace" font-size="17" font-weight="700">TONE BERT</text>
+  <text x="258" y="132" text-anchor="middle" fill="#3f3e3b" font-family="monospace" font-size="14">12 layers</text>
+  <rect x="168" y="256" width="180" height="72" fill="#b4b3b4" stroke="#5f5e5b" stroke-width="2"/>
+  <text x="258" y="288" text-anchor="middle" fill="#2e2e2c" font-family="monospace" font-size="17" font-weight="700">FLS BERT</text>
+  <text x="258" y="312" text-anchor="middle" fill="#3f3e3b" font-family="monospace" font-size="14">12 layers</text>
+  <text x="368" y="118" fill="#0000ee" font-family="monospace" font-size="15">tone</text>
+  <text x="368" y="298" fill="#0000ee" font-family="monospace" font-size="15">FLS</text>
+  <path d="M348 112 H359 M348 292 H359" stroke="#0000ee" stroke-width="3"/>
+  <rect x="474" y="174" width="72" height="56" fill="#e2e1dd" stroke="#5f5e5b" stroke-width="2"/>
+  <text x="510" y="209" text-anchor="middle" fill="#2e2e2c" font-family="monospace" font-size="16">text</text>
+  <path d="M546 202 H567" stroke="#0000ee" stroke-width="3"/>
+  <rect x="567" y="161" width="135" height="82" fill="#0000ee"/>
+  <text x="634.5" y="193" text-anchor="middle" fill="white" font-family="monospace" font-size="16" font-weight="700">SHARED</text>
+  <text x="634.5" y="217" text-anchor="middle" fill="white" font-family="monospace" font-size="14">6 layers</text>
+  <path d="M702 202 H720 V112 H738 M720 202 V292 H738" fill="none" stroke="#0000ee" stroke-width="3"/>
+  <rect x="738" y="76" width="128" height="72" fill="#b4b3b4" stroke="#5f5e5b" stroke-width="2"/>
+  <text x="802" y="106" text-anchor="middle" fill="#2e2e2c" font-family="monospace" font-size="15" font-weight="700">TONE</text>
+  <text x="802" y="129" text-anchor="middle" fill="#3f3e3b" font-family="monospace" font-size="13">6 + head</text>
+  <rect x="738" y="256" width="128" height="72" fill="#b4b3b4" stroke="#5f5e5b" stroke-width="2"/>
+  <text x="802" y="286" text-anchor="middle" fill="#2e2e2c" font-family="monospace" font-size="15" font-weight="700">FLS</text>
+  <text x="802" y="309" text-anchor="middle" fill="#3f3e3b" font-family="monospace" font-size="13">6 + head</text>
+  <text x="34" y="379" fill="#5f5e5b" font-family="monospace" font-size="14">24 encoder passes per sentence</text>
+  <text x="474" y="379" fill="#5f5e5b" font-family="monospace" font-size="14">18 encoder passes per sentence</text>
+</svg>

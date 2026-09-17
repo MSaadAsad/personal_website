@@ -145,6 +145,21 @@ export default function AboutPage() {
                 <li className="font-mono text-[0.75rem] text-concrete-800 flex items-baseline gap-4">
                   <span className="text-[#0000EE]">→</span>
                   <span>
+                    Listening to{' '}
+                    <a
+                      href="https://open.spotify.com/album/3opxnLFfMiMJzkiJxwZ6za"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[#0000EE] underline underline-offset-4 transition-colors duration-150"
+                    >
+                      George Clanton
+                    </a>
+                    .
+                  </span>
+                </li>
+                <li className="font-mono text-[0.75rem] text-concrete-800 flex items-baseline gap-4">
+                  <span className="text-[#0000EE]">→</span>
+                  <span>
                     Reading{' '}
                     <a
                       href="https://en.wikipedia.org/wiki/Invisible_Cities"

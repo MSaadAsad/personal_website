@@ -79,6 +79,26 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
         {children}
       </ol>
     ),
+    table: ({ children }) => (
+      <div className="my-10 overflow-x-auto border border-concrete-700/60">
+        <table className="w-full border-collapse font-mono text-sm text-concrete-800">
+          {children}
+        </table>
+      </div>
+    ),
+    thead: ({ children }) => (
+      <thead className="bg-concrete-300 text-left">{children}</thead>
+    ),
+    th: ({ children }) => (
+      <th className="border-b border-r border-concrete-700/60 px-4 py-3 font-semibold last:border-r-0">
+        {children}
+      </th>
+    ),
+    td: ({ children }) => (
+      <td className="border-b border-r border-concrete-700/40 px-4 py-3 first:bg-concrete-300 last:border-r-0">
+        {children}
+      </td>
+    ),
     hr: () => (
       <hr className="border-concrete-400/70 my-14" />
     ),

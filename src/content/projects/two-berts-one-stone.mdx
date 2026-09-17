@@ -1,0 +1,103 @@
+*There is no normal reason to do this.*
+
+For my capstone project, I needed to run two BERT models over the same financial text. One classified sentiment; the other identified forward-looking statements. I planned to deploy the system in the cloud, so the combined model's size and startup time mattered as well as inference speed. That led me to ask whether I could share some of their computation, shrink the result, and simplify what had to load before a prediction.
+
+The models were [finbert-tone](https://huggingface.co/yiyanghkust/finbert-tone) and [finbert-fls](https://huggingface.co/yiyanghkust/finbert-fls). Both use a 12-layer BERT architecture with a hidden size of 768 and 109,754,115 parameters each. Every sentence therefore passed through two full encoders before reaching two different classification heads.
+
+<figure className="my-10">
+  <img src="/assets/projects/making-two-berts-smaller/shared-trunk.svg" alt="Before: text runs through two separate twelve-layer BERT models. After: a shared lower trunk branches into task-specific upper layers and classification heads." className="w-full h-auto" />
+  <figcaption className="mt-3 font-mono text-sm text-concrete-700">The experiment: replace two complete forward passes with one shared lower trunk.</figcaption>
+</figure>
+
+## Sharing Is Caring
+
+At first I hoped the early layers might still be identical. Both models came from the same FinBERT base, and freezing lower pretrained layers is a common way to reduce the number of trainable parameters during fine-tuning. If those layers had been frozen, I could run them once and branch afterward.
+
+I tried a quick check in the notebook. For one sentence, the models' layer-2 output summaries differed. But I hadn't switched the freshly loaded models to evaluation mode, so dropout could have contributed to that difference; I also hadn't compared their weights directly. The check didn't prove the early layers were different, and I couldn't assume they were identical either.
+
+But it was too late: I decided to share them anyway.
+
+The idea was not unprecedented. [BERT and PALs](https://arxiv.org/abs/1902.02671) and [adapter modules](https://arxiv.org/abs/1902.00751) show how much of a pretrained model can be shared across tasks when small task-specific parts are retained. Both would have required task data and another training run; I had neither the original data nor much time.
+
+There are more sophisticated ways to merge already-fine-tuned models. [Task Arithmetic](https://arxiv.org/abs/2212.04089) combines their changes relative to a shared base, while [TIES-Merging](https://arxiv.org/abs/2306.01708) tries to resolve conflicting changes. I didn't test either. What I tried resembles [model soups](https://arxiv.org/abs/2203.05482) in one respect: averaging corresponding weights. But I averaged only the embeddings and lower encoder layers I wanted to share. For encoder layer $l$, I took the corresponding weights from the tone and FLS models and averaged them element by element:
+
+$$
+W_l^{\text{shared}}=\frac{W_l^{\text{tone}}+W_l^{\text{FLS}}}{2},\qquad l\leq L.
+$$
+
+Here, $W_l^{\text{tone}}$ and $W_l^{\text{FLS}}$ are the two sets of weights at layer $l$, $W_l^{\text{shared}}$ is their average, and $L$ is the number of encoder layers shared. The upper layers and classifiers stayed task-specific. This wasn't a novel merging method. It was partial weight averaging because it required no training data and took almost no time to implement. The question was how many layers I could share before the predictions moved too much.
+
+## How Many Layers Can Be Shared?
+
+I tried sharing 2, 4, 6, 8, and 10 of the 12 layers. For the comparison, I used 500 unique passages from a [financial-text classification dataset](https://huggingface.co/datasets/nickmuchi/financial-text-combo-classification). I first sampled 600 rows without replacement, giving longer passages a higher chance of selection because they are more demanding inference cases. Some rows contained the same text, so I removed those duplicates and kept the first 500 distinct passages. This deliberately favors longer inputs rather than reproducing the dataset's natural length distribution. I didn't set a random seed, so the results are from one sample.
+
+I cared less about reproducing exact logits or probabilities than about preserving the ordering of examples. Averaging weights can change the scale of a score without changing which sentence the model considers more positive or more forward-looking. What mattered was whether merging reversed which of two passages the original model scored as more positive or more forward-looking.
+
+So I ranked texts primarily by positive-sentiment probability for tone and specific-FLS probability for FLS, then compared those rankings with the original models using Kendall's $\tau$. For two rankings with no tied positions, count $C$ pairs that appear in the same order in both and $D$ pairs whose order is reversed:
+
+$$
+\tau=\frac{C-D}{C+D}=1-2\frac{D}{C+D}.
+$$
+
+That means the fraction of pairs that swapped order is $(1-\tau)/2$. A $\tau$ of 1 means identical rankings; lower values mean more reversals. This measures agreement with the original models, **not** accuracy against ground-truth labels.
+
+<figure className="my-10 overflow-x-auto">
+  <img src="/assets/projects/making-two-berts-smaller/ranking-preservation.svg" alt="Line chart of Kendall's tau against shared layers. Tone falls from 0.966 at two layers to 0.741 at ten; FLS falls from 0.952 to 0.779. Six shared layers give 0.896 and 0.875." className="w-full min-w-[640px] h-auto" />
+  <figcaption className="mt-3 font-mono text-sm text-concrete-700">Agreement with the original models falls as more layers are shared.</figcaption>
+</figure>
+
+| Shared layers | Relative speedup | Tone $\tau$ | FLS $\tau$ | Size |
+|---:|---:|---:|---:|---:|
+| 2 | 1.11× | 0.966 | 0.952 | 877.6 MB |
+| 4 | 1.23× | 0.934 | 0.911 | 823.6 MB |
+| **6** | **1.39×** | **0.896** | **0.875** | **769.5 MB** |
+| 8 | 1.55× | 0.841 | 0.837 | 715.4 MB |
+| 10 | 1.65× | 0.741 | 0.779 | 661.3 MB |
+
+For the six-layer model, an FLS $\tau$ of 0.875 means roughly 94% of pairs of passages stayed in the same order as in the original model, while about 6% swapped places. Tone's 0.896 means about 5% of pairs swapped. These are comparisons with the original models' rankings, not claims that 87.5% or 89.6% of classifications were correct.
+
+<figure className="my-10 overflow-x-auto">
+  <img src="/assets/projects/making-two-berts-smaller/speed-size-tradeoff.svg" alt="Scatter chart: model size decreases from 877.6 to 661.3 MB as the reported speedup rises from 1.11 to 1.65 times when sharing two through ten layers. The chosen six-layer point is 769.5 MB and 1.39 times." className="w-full min-w-[640px] h-auto" />
+  <figcaption className="mt-3 font-mono text-sm text-concrete-700">Each point is one trunk length; the blue point is the six-layer choice.</figcaption>
+</figure>
+
+Sharing two layers barely changed the rankings. After six, the degradation became more noticeable; at ten, almost the entire encoder was being forced into the same weights despite the different fine-tuning tasks. I chose six shared layers: about 202 million combined parameters and a reported 1.39× speedup, with Kendall's $\tau$ of 0.896 for tone and 0.875 for FLS.
+
+There is nothing special about six. If prediction fidelity mattered more, I might have stopped at two or four. For the capstone, it was a reasonable way to collapse a meaningful amount of computation without the two tasks immediately falling apart.
+
+The speedup is directional rather than a controlled apples-to-apples benchmark: in this notebook, the original-model timer covers only the two forward passes, while the merged-model timer also includes tokenization and probability conversion. I would rerun both through the same timing boundary before making a stronger performance claim.
+
+## ONNX and Quantization
+
+The shared model was faster, but it was still about 769 MB. The next steps were more conventional: export the merged PyTorch model to ONNX, optimize it, and dynamically quantize it to INT8.
+
+<figure className="my-10 overflow-x-auto">
+  <img src="/assets/projects/making-two-berts-smaller/onnx-reduction.svg" alt="Slope chart comparing size and CPU latency as percentages of merged PyTorch. Optimized ONNX is 76 percent of the size and 64 percent of the latency; quantized ONNX is 29 percent of the size and 32 percent of the latency. Exact measurements are 769, 586, 219 MB and 180, 115, 57 milliseconds per text." className="w-full min-w-[640px] h-auto" />
+  <figcaption className="mt-3 font-mono text-sm text-concrete-700">Size and CPU latency, each normalized to the merged PyTorch model.</figcaption>
+</figure>
+
+Here, the notebook timed the first 100 sampled texts on CPU, warming each model twice per text and excluding tokenization from all three measurements. From merged PyTorch to quantized ONNX, inference went from 180.37 to 56.91 ms per text and size from 769.34 to 219.32 MB: about 3.2× faster and 3.5× smaller. This was a larger improvement than sharing layers alone.
+
+I didn't complete a controlled quality comparison for the quantized model, so the ONNX results here are size and latency results only.
+
+I also replaced the Hugging Face tokenizer with a small JSON-backed implementation to reduce setup overhead, although I didn't benchmark that change.
+
+<span id="in-the-end" />
+<span id="averaging-the-weights-and-calling-it-a-day" />
+
+## A One-Off Hack
+
+I needed these two models smaller and faster for a cloud deployment, and I couldn't retrain them. I worked backward from what I knew about how [BERT's layers specialize](https://aclanthology.org/2022.emnlp-main.97/) and looked at similar techniques for clues. Both checkpoints came from the same FinBERT base, which gave me a reason to try something I wouldn't try with two arbitrary BERTs.
+
+That was the fun part for me: drawing on existing interpretability research to think about what the layers might have learned instead of treating each model as a black box. I then developed a methodology to test that intuition on this particular pair.
+
+It isn't the sort of thing I would have found in a blog post, because the use case was unusual and the approach isn't standard. Well, until now.
+
+## References
+
+- [Houlsby et al., 2019: Parameter-Efficient Transfer Learning for NLP](https://arxiv.org/abs/1902.00751)
+- [Stickland and Murray, 2019: BERT and PALs](https://arxiv.org/abs/1902.02671)
+- [Wortsman et al., 2022: Model Soups](https://arxiv.org/abs/2203.05482)
+- [Ilharco et al., 2022: Editing Models with Task Arithmetic](https://arxiv.org/abs/2212.04089)
+- [Yadav et al., 2023: TIES-Merging](https://arxiv.org/abs/2306.01708)
+- [On the Transformation of Latent Space in Fine-Tuned NLP Models, 2022](https://aclanthology.org/2022.emnlp-main.97/)

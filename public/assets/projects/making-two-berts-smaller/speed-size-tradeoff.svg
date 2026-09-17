@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 500" role="img" aria-labelledby="title desc">
+  <title id="title">Reported speedup versus saved model size</title>
+  <desc id="desc">Five candidate trunk lengths range from 877.6 megabytes at 1.11 times speedup for two shared layers to 661.3 megabytes at 1.65 times speedup for ten. The chosen six-layer model is 769.5 megabytes at 1.39 times speedup.</desc>
+  <rect width="900" height="500" fill="#d2d1cd" stroke="#5f5e5b" stroke-width="2"/>
+  <text x="46" y="55" fill="#2e2e2c" font-family="monospace" font-size="24" font-weight="700">SMALLER, FASTER, LESS FAITHFUL</text>
+  <text x="46" y="83" fill="#5f5e5b" font-family="monospace" font-size="14">Each point is one shared-trunk length · blue = the six-layer choice</text>
+  <g stroke="#9b9a97" stroke-width="1">
+    <line x1="124" y1="385" x2="790" y2="385"/>
+    <line x1="124" y1="312" x2="790" y2="312"/>
+    <line x1="124" y1="239" x2="790" y2="239"/>
+    <line x1="124" y1="166" x2="790" y2="166"/>
+    <line x1="124" y1="112" x2="124" y2="385"/>
+  </g>
+  <g fill="#5f5e5b" font-family="monospace" font-size="14" text-anchor="end">
+    <text x="110" y="390">1.0×</text><text x="110" y="317">1.2×</text><text x="110" y="244">1.4×</text><text x="110" y="171">1.6×</text>
+  </g>
+  <g fill="#2e2e2c" font-family="monospace" font-size="14" text-anchor="middle">
+    <text x="165" y="415">660</text><text x="335" y="415">720</text><text x="505" y="415">780</text><text x="675" y="415">840</text><text x="790" y="415">880</text>
+  </g>
+  <text x="455" y="454" text-anchor="middle" fill="#5f5e5b" font-family="monospace" font-size="15">MODEL SIZE (MB) →</text>
+  <text x="46" y="118" fill="#5f5e5b" font-family="monospace" font-size="14">SPEEDUP ↑</text>
+  <polyline points="786,345 633,301 480,243 326,184 173,148" fill="none" stroke="#5f5e5b" stroke-width="2" stroke-dasharray="5 7"/>
+  <g fill="#3e4f66" stroke="#d2d1cd" stroke-width="4">
+    <circle cx="786" cy="345" r="12"/><circle cx="633" cy="301" r="12"/><circle cx="326" cy="184" r="12"/><circle cx="173" cy="148" r="12"/>
+  </g>
+  <circle cx="480" cy="243" r="17" fill="#0000ee" stroke="#d2d1cd" stroke-width="5"/>
+  <g fill="#2e2e2c" font-family="monospace" font-size="15" font-weight="700">
+    <text x="748" y="327">2 layers</text>
+    <text x="630" y="330">4 layers</text>
+    <text x="343" y="172">8 layers</text>
+    <text x="190" y="137">10 layers</text>
+  </g>
+  <rect x="505" y="206" width="166" height="68" fill="#0000ee"/>
+  <text x="519" y="231" fill="white" font-family="monospace" font-size="15" font-weight="700">6 LAYERS</text>
+  <text x="519" y="257" fill="white" font-family="monospace" font-size="14">769.5 MB · 1.39×</text>
+</svg>
