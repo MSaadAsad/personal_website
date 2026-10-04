@@ -21,14 +21,21 @@ const photoRatios: Record<keyof typeof photos, number> = {
 export type FortPhotoId = keyof typeof photos;
 
 export function FortPhotos({ images }: { images: FortPhotoId[] }) {
+  const ratios = images.map((id) => photoRatios[id]);
+  // Side-by-side photos of the same orientation share one crop ratio and width.
+  const shared =
+    images.length > 1 && ratios.every((r) => r >= 1 === ratios[0] >= 1)
+      ? Math.min(...ratios)
+      : undefined;
+  const columns = ratios.map((r) => `${shared ? 1 : r}fr`).join(" ");
   return (
-    <div className="fort-photos" style={{ "--photo-columns": images.map(id => `${photoRatios[id]}fr`).join(" ") } as CSSProperties}>
+    <div className="fort-photos" style={{ "--photo-columns": columns } as CSSProperties}>
       {images.map(id => {
         const [file, caption] = photos[id];
         const src = `/assets/writing/bhimber-forts/${file}`;
         return <figure key={id} className={photoRatios[id] < 1 ? "fort-photo-portrait" : undefined}>
           <a href={src} target="_blank" rel="noopener noreferrer" aria-label={`Open photograph: ${caption}`}>
-            <img src={src} alt={caption} loading="lazy" />
+            <img src={src} alt={caption} loading="lazy" style={shared ? { aspectRatio: shared, objectFit: "cover" } : undefined} />
           </a>
           <figcaption>{caption}</figcaption>
         </figure>;

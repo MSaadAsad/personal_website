@@ -130,16 +130,17 @@
 }
 
 /* Natural image proportions give paired photographs a shared height without padding. */
-.fort-photos { display: grid; grid-template-columns: var(--photo-columns); gap: 16px; align-items: start; margin: 28px 0; }
-.fort-photos figure { margin: 0; min-width: 0; border: 1px solid var(--color-concrete-600); background: var(--color-concrete-block); }
+.fort-photos { display: grid; grid-template-columns: var(--photo-columns); gap: 16px; align-items: stretch; margin: 28px 0; }
+.fort-photos figure { display: flex; flex-direction: column; margin: 0; min-width: 0; border: 1px solid var(--color-concrete-600); background: var(--color-concrete-block); }
 .fort-photos a { display: block; }
 .fort-photos a:focus-visible { outline: 2px solid #0000ee; outline-offset: 3px; }
 .fort-photos img { display: block; width: 100%; height: auto; margin: 0; }
-.fort-photos figcaption { margin: 0; padding: 12px 14px; border-top: 1px solid var(--color-concrete-600); color: var(--color-concrete-800); font: 13px/1.6 var(--font-mono); }
+.fort-photos figcaption { margin: 0; padding: 12px 14px; border-top: 1px solid var(--color-concrete-600); color: var(--color-concrete-800); font: 13px/1.6 var(--font-mono); flex: 1; }
 .fort-photos > .fort-photo-portrait:only-child { width: min(100%, 440px); justify-self: center; }
 .pf-detail .fort-photos { grid-template-columns: 1fr; margin: 0; }
 .pf-detail .fort-photo-portrait { width: min(100%, 300px); justify-self: center; }
 @media (max-width: 600px) {
   .fort-photos { grid-template-columns: 1fr; }
-  .fort-photos .fort-photo-portrait { width: min(100%, 360px); justify-self: center; }
+  /* Stacked rows with a portrait photo keep every photo at the same width. */
+  .fort-photos .fort-photo-portrait, .fort-photos:has(.fort-photo-portrait) > figure { width: min(100%, 360px); justify-self: center; }
 }
