@@ -155,7 +155,7 @@ const featureCaptions: Record<string,string> = {"gate": "A projection from the n
 const features: FortSite["features"] = [
   {
     id: "gate",
-    photos: ["gate", "gateContext"],
+    photos: ["gate"],
     title: "Gatehouse",
     kind: "Photographed · plan inferred",
     ...GATE_POSITION,
