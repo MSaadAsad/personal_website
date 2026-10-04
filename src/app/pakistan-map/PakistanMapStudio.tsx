@@ -957,12 +957,13 @@ export default function PakistanMapStudio() {
     const mapHeight = 1640;
     const canvas = document.createElement('canvas'); canvas.width = 1520; canvas.height = mapTop + mapHeight;
     const context = canvas.getContext('2d'); if (!context) return;
+    const exportFont = getComputedStyle(document.body).fontFamily;
     context.fillStyle = '#f5f0e7'; context.fillRect(0, 0, canvas.width, canvas.height);
-    context.fillStyle = '#293027'; context.font = '600 58px sans-serif'; context.fillText(mapName.trim() || 'My province plan', 70, 82);
-    context.fillStyle = '#77766f'; context.font = '24px monospace'; context.fillText(`PAKISTAN · ${level.toUpperCase()} · NAYA NAQSHA`, 72, 126);
+    context.fillStyle = '#293027'; context.font = `600 58px ${exportFont}`; context.fillText(mapName.trim() || 'My province plan', 70, 82);
+    context.fillStyle = '#77766f'; context.font = `24px ${exportFont}`; context.fillText(`PAKISTAN · ${level.toUpperCase()} · NAYA NAQSHA`, 72, 126);
     if (exportedUnits.length) {
       const columnWidth = (canvas.width - 140) / legendColumns;
-      context.font = '600 22px monospace';
+      context.font = `600 22px ${exportFont}`;
       context.textBaseline = 'middle';
       exportedUnits.forEach((province, index) => {
         const column = index % legendColumns;

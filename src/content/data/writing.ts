@@ -2,6 +2,15 @@ import { WritingFrontmatter } from '@/types/content';
 
 export const writing: WritingFrontmatter[] = [
   {
+    title: 'Forts in Bhimber',
+    slug: 'documenting-new-forts-in-the-bhimber-district',
+    date: '2026-10-01',
+    category: 'historical',
+    tags: [],
+    excerpt: 'Padhar and Batala, reconstructed from field photographs and satellite images.',
+    contentWidth: 'wide',
+  },
+  {
     title: 'Under the Bay',
     slug: 'under-the-bay',
     date: '2026-04-23',

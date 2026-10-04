@@ -1,4 +1,5 @@
 export interface WritingFrontmatter {
+  contentWidth?: 'wide';
   title: string;
   slug: string;
   date: string;

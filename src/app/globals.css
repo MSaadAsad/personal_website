@@ -30,7 +30,7 @@
   --color-glass-hover: rgba(255, 255, 255, 0.75);
   --color-glass-glow: rgba(77, 94, 118, 0.15);
 
-  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  --font-mono: var(--font-jetbrains), ui-monospace, monospace;
   --font-serif: 'Source Serif 4', Georgia, serif;
 
   --text-display: clamp(3rem, 8vw, 7rem);

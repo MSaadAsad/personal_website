@@ -1,0 +1,145 @@
+/* Blog plan embeds use the site's concrete palette and monospace typography. */
+.pf-page {
+  --pf-ink: var(--color-concrete-900);
+  --pf-paper: var(--color-concrete-200);
+  --pf-line: var(--color-concrete-600);
+  margin: 0 0 3rem;
+  color: var(--pf-ink);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.5;
+}
+.pf-page button { cursor: pointer; }
+.pf-page button:focus-visible, .pf-page input:focus-visible, .pf-pin:focus-visible {
+  outline: 2px solid #0000ee;
+  outline-offset: 3px;
+}
+.pf-workspace { border: 1px solid var(--pf-line); background: var(--pf-paper); }
+.pf-view-switch { display: flex; border-bottom: 1px solid var(--pf-line); }
+.pf-site-name { margin: 0 0 0 auto; align-self: center; padding: 0 20px; font: 600 18px var(--font-mono); white-space: nowrap; }
+.pf-view-switch button {
+  padding: 14px 18px;
+  border-right: 1px solid var(--pf-line);
+  color: var(--color-concrete-700);
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  font-size: 10px;
+}
+.pf-view-switch button[aria-pressed="true"] {
+  color: #0000ee;
+  background: var(--color-concrete-300);
+  box-shadow: inset 0 -2px #0000ee;
+}
+.pf-toolbar { padding: 18px 20px; border-bottom: 1px solid var(--pf-line); }
+.pf-overlay-control { display: flex; align-items: center; gap: 14px; }
+.pf-overlay-control label { text-transform: uppercase; font-size: 14px; letter-spacing: .06em; }
+.pf-overlay-control input { flex: 1; min-width: 50px; max-width: 240px; accent-color: #0000ee; cursor: pointer; }
+.pf-overlay-control output { width: 4ch; font-size: 14px; font-variant-numeric: tabular-nums; }
+
+.pf-map-controls {
+  position: absolute; left: 12px; bottom: 16px; display: flex; flex-direction: column;
+  border: 1px solid var(--pf-line); background: var(--pf-paper);
+}
+.pf-map-controls button { width: 32px; height: 32px; border-bottom: 1px solid var(--pf-line); font-size: 18px; }
+.pf-map-controls button:last-child { border-bottom: 0; font-size: 11px; }
+.pf-map-controls button:disabled { color: var(--color-concrete-500); cursor: default; }
+.pf-map-controls button[aria-pressed="true"] { color: #0000ee; background: var(--color-concrete-300); }
+
+.pf-feature-nav button { flex: 1; min-width: 0; height: 64px; border: 0; border-right: 1px solid var(--pf-line); font-size: 16px; }
+.pf-feature-nav button:last-child { border-right: 0; }
+.pf-feature-nav button.active { color: #0000ee; background: var(--color-concrete-300); box-shadow: inset 0 -2px #0000ee; }
+
+.pf-kind { font-size: 9px; color: var(--color-concrete-700); }
+
+.pf-photo img { width: 100%; height: 100%; object-fit: cover; object-position: center 70%; }
+.pf-photo span { position: absolute; right: 0; bottom: 0; background: var(--pf-paper); padding: 5px 7px; font-size: 8px; color: #0000ee; }
+.pf-pin { cursor: pointer; }
+.pf-pin circle { fill: #f2f2ef; stroke: #7e7d7a; stroke-width: 1.5; }
+.pf-pin .pf-pin-halo { fill: #f2f2ef; opacity: 0; stroke: none; }
+.pf-pin text { font: 600 11px var(--font-mono); fill: #3f3e3b; }
+.pf-pin.is-selected circle:not(.pf-pin-halo) { fill: #0000ee; stroke: #f2f2ef; stroke-width: 2; }
+.pf-pin.is-selected text { fill: white; }
+.pf-pin.is-selected .pf-pin-halo, .pf-pin:hover .pf-pin-halo { opacity: .65; }
+.pf-map-labels { font: 20px var(--font-mono); letter-spacing: 3px; fill: #777362; }
+.pf-map-labels .pf-map-small { font-size: 10px; letter-spacing: 1px; }
+.pf-scale { font-family: var(--font-mono); fill: #5f5e5b; }
+.pf-scale text { font: inherit; }
+.pf-place { font-family: var(--font-mono); fill: #111111; pointer-events: none; }
+.pf-place text { font: inherit; }
+.pf-place .pf-place-sub { fill: #5f5e5b; }
+.dv-map-type { font: 14px var(--font-mono); letter-spacing: 1px; fill: #3f3e3b; }
+.dv-map-small { font-size: 7px; }
+.pf-dialog { position: fixed; inset: 0; margin: auto; background: var(--pf-paper); color: var(--pf-ink); border: 1px solid var(--pf-line); width: min(1000px, 94vw); max-height: 92vh; padding: 0; overflow: auto; }
+.pf-dialog::backdrop { background: #1f1f1ee0; }
+.pf-dialog-bar { position: sticky; top: 0; display: flex; justify-content: space-between; align-items: center; gap: 12px; background: var(--pf-paper); border-bottom: 1px solid var(--pf-line); padding: 12px; font-size: 11px; }
+.pf-dialog-bar button { border: 1px solid var(--pf-line); padding: 6px 10px; }
+.pf-dialog > img { display: block; width: 100%; height: auto; }
+@media (max-width: 900px) {
+  
+  
+  
+  
+  
+}
+@media (max-width: 480px) {
+  .pf-view-switch button { flex: 1; padding: 12px 8px; font-size: 9px; }
+  .pf-view-switch { flex-wrap: wrap; }
+  .pf-view-switch button:last-of-type { border-right: 0; }
+  .pf-site-name { order: -1; flex-basis: 100%; margin: 0; padding: 10px 12px; font-size: 14px; border-bottom: 1px solid var(--pf-line); }
+  .pf-toolbar { padding: 10px; }
+}
+
+.pf-map-labels, .dv-map-type { fill: #444441; }
+
+/* Compact map, then numbered feature navigation and its source image. */
+.pf-explorer-body { display: block; }
+.pf-map-wrap { position: relative; overflow: hidden; background: #f2f2ef; }
+.pf-drawing { display: block; width: 100%; height: auto; }
+.pf-detail { border-top: 1px solid var(--pf-line); }
+.pf-feature-nav { display: flex; gap: 0; padding: 0; border-bottom: 1px solid var(--pf-line); }
+.pf-detail-copy { display: grid; grid-template-columns: minmax(0, 1fr) minmax(180px, 320px); gap: 20px; padding: 18px; align-items: start; }
+.pf-detail h2 { font: 600 22px/1.4 var(--font-mono); margin: 0 0 8px; }
+.pf-feature-summary p { font: 17px/1.7 var(--font-mono); color: var(--color-concrete-700); max-width: 45ch; }
+.pf-photo { position: relative; display: block; width: 100%; height: 210px; border: 1px solid var(--pf-line); overflow: hidden; background: var(--color-concrete-100); }
+.pf-photo img { object-fit: contain; object-position: center; }
+@media(max-width:600px) {
+  .pf-detail-copy { grid-template-columns: 1fr; gap: 12px; padding: 14px; }
+  .pf-photo { height: 190px; max-width: 360px; }
+}
+
+/* Each fort gets its own row: plan on the left, references on the right. */
+.pf-page.pf-embed { width: 100%; max-width: none; margin: 0 auto 3rem; }
+.pf-workspace { margin-inline: auto; box-sizing: border-box; }
+.pf-comparison { display: block; max-width: 1100px; margin-inline: auto; }
+.pf-comparison > section { min-width: 0; }
+.pf-comparison .pf-detail-copy { grid-template-columns: 1fr; gap: 16px; padding: 24px; }
+.pf-comparison .pf-photo { height: 280px; max-width: none; }
+.pf-comparison .pf-view-switch button { padding: 18px 14px; font-size: 14px; }
+@media (min-width: 900px) {
+  .pf-comparison .pf-workspace { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); }
+  .pf-comparison .pf-view-switch, .pf-comparison .pf-toolbar { grid-column: 1 / -1; }
+  .pf-comparison .pf-explorer-body { min-width: 0; }
+  .pf-comparison .pf-map-wrap { aspect-ratio: 920 / 1340; }
+  .pf-comparison .pf-drawing { height: 100%; }
+  .pf-comparison .pf-detail { min-width: 0; border-top: 0; border-left: 1px solid var(--pf-line); }
+}
+
+@media (max-width: 480px) {
+  .pf-comparison .pf-view-switch button { padding: 16px 8px; font-size: 12px; }
+  .pf-comparison .pf-detail-copy { padding: 20px; }
+}
+
+/* Natural image proportions give paired photographs a shared height without padding. */
+.fort-photos { display: grid; grid-template-columns: var(--photo-columns); gap: 16px; align-items: start; margin: 28px 0; }
+.fort-photos figure { margin: 0; min-width: 0; border: 1px solid var(--color-concrete-600); background: var(--color-concrete-block); }
+.fort-photos a { display: block; }
+.fort-photos a:focus-visible { outline: 2px solid #0000ee; outline-offset: 3px; }
+.fort-photos img { display: block; width: 100%; height: auto; margin: 0; }
+.fort-photos figcaption { margin: 0; padding: 12px 14px; border-top: 1px solid var(--color-concrete-600); color: var(--color-concrete-800); font: 13px/1.6 var(--font-mono); }
+.fort-photos > .fort-photo-portrait:only-child { width: min(100%, 440px); justify-self: center; }
+.pf-detail .fort-photos { grid-template-columns: 1fr; margin: 0; }
+.pf-detail .fort-photo-portrait { width: min(100%, 300px); justify-self: center; }
+@media (max-width: 600px) {
+  .fort-photos { grid-template-columns: 1fr; }
+  .fort-photos .fort-photo-portrait { width: min(100%, 360px); justify-self: center; }
+}
