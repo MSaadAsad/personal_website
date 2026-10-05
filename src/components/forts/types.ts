@@ -19,6 +19,7 @@ export interface SceneProps {
 }
 /** A place beyond the map, given as a true bearing and distance from the fort. */
 export interface NearbyPlace {
+  hiddenInRemains?: boolean;
   name: string;
   metres: number;
   bearing: number;

@@ -489,7 +489,7 @@ export function PadarScene({ remains, labels }: SceneProps) {
           fillOpacity=".3"
         />
       )}
-      <g transform={PLAN_TRANSFORM} data-old-river="true" aria-label="Approximate former course of the Doara">
+      {!remains && <g transform={PLAN_TRANSFORM} data-old-river="true" aria-label="Approximate former course of the Doara">
         <path
           d={OLD_RIVER}
           fill="none"
@@ -505,7 +505,7 @@ export function PadarScene({ remains, labels }: SceneProps) {
           strokeWidth=".35"
           strokeDasharray="2 1.5"
         />
-      </g>
+      </g>}
       {remains ? (
         <g transform={PLAN_TRANSFORM}>
           <PartialRemains labels={labels} />
@@ -613,7 +613,7 @@ export const padarSite: FortSite = {
   features: features.map((f) => ({
     ...f,
     caption: featureCaptions[f.id],
-    hiddenInRemains: f.id === "bastions",
+    hiddenInRemains: f.id === "bastions" || f.id === "river",
   })),
   side: 70,
   ppm: METRES_TO_MAP,
@@ -631,6 +631,7 @@ export const padarSite: FortSite = {
     { name: "Hir", metres: 2000, bearing: 135 },
     {
       name: "Doara River",
+      hiddenInRemains: true,
       metres: 2000,
       bearing: 270,
       note: "Old course ran adjacent to Padhar and Hir",

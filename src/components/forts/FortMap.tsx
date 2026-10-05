@@ -87,7 +87,7 @@ export function FortMap({
       </g>
       {/* Nearby places sit on the map edge along their true bearing; the image is north-up. */}
       {site.centre &&
-        site.nearby?.map((p) => {
+        site.nearby?.filter((p) => !remains || !p.hiddenInRemains).map((p) => {
           const c = site.centre!;
           const rad = (p.bearing * Math.PI) / 180;
           const dx = Math.sin(rad),

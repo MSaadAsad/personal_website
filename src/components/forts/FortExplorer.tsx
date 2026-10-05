@@ -64,7 +64,7 @@ export default function FortExplorer({ site, title = site.name }: { site: FortSi
           </div>
         </div>
           <aside className="pf-detail">
-            <nav className="pf-feature-nav" aria-label="Site features">
+            <nav className="pf-feature-nav" aria-label="Site features" style={{ gridTemplateColumns: `repeat(${features.length}, minmax(0, 1fr))` }}>
               {features.map((v, i) =>
                 remains && v.hiddenInRemains ? null : (
                   <button
