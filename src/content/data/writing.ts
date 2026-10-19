@@ -2,9 +2,8 @@ import { WritingFrontmatter } from '@/types/content';
 
 export const writing: WritingFrontmatter[] = [
   {
-    title: "Looped System 1 Models",
+    title: "Looped System 1 Models: Part 1",
     slug: "looped-system-1-models",
-    seriesLabel: "Part I: What can one pass do?",
     date: "2026-10-14",
     category: "technical",
     tags: [],
