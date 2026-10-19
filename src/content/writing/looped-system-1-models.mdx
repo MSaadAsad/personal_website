@@ -1,0 +1,112 @@
+import ResearchExplorer from '../../components/writing/ResearchExplorer'
+import { InferenceDiagram, JevK5Diagram } from '../../components/writing/ModelDiagrams'
+
+TypeSafe introduced [Jev](https://typesafe.ai/blog/introducing-system-one-models-and-jev) as a *System One* model: a model that makes decisions in a single forward pass rather than generating an answer token by token. Single-pass classification isn't new; BERT and other encoder models have been doing it for years. What interests me about Jev is the general-purpose decision interface, with the possible answers defined at inference time rather than fixed to one classification task.
+
+Jev takes context, questions, and a definition of the possible outputs. That makes it useful for a wide range of problems that can be expressed as a choice, a score, or a probability. There are two advantages to this approach:
+
+1. We avoid autoregressive answer generation and the cost of evaluating the model again for each additional output token. (Who wants to pay a model to type `{"` every time they need JSON?)
+2. We define the output type in advance. The result arrives in the expected structure, without having to extract it from generated text.
+
+<InferenceDiagram />
+
+The tradeoff is that each decision gets a fixed number of model layers of computation. Input length still affects the cost, but a difficult decision doesn't automatically receive more internal updates than an easy one. Autoregressive reasoning models can spend more computation by generating intermediate tokens. I want to explore whether a decision model could instead update its hidden states repeatedly before producing its answer.
+
+That is the idea behind **recurrent depth**: reuse a neural-network block across several passes, sharing its weights while allowing the state to change. [Huginn](https://arxiv.org/abs/2502.05171) and [Ouro](https://arxiv.org/abs/2510.25741) investigate this approach; [HRM](https://arxiv.org/abs/2506.21734) and [LOTUS](https://arxiv.org/abs/2606.31779) explore related recurrent computations with different architectures and training objectives.
+
+I've been experimenting with [JevK5](https://github.com/allebee/jevk5), an independently developed, open-weight decision model based on Qwen3.5-4B. Access to the weights lets me inspect its internal states and eventually modify the computation itself.
+
+This is Part One of that project. Before adding a loop, I wanted to establish what the existing models can do in one pass, where they fail, and which internal states affect their answers. The experiments here establish that baseline; the recurrence experiments come in Part Two.
+
+## 1. How far does one pass get us?
+
+I used a synthetic transitive-reasoning task. Given “A is older than B” and “B is older than C,” the model must decide whether A is older than C. A hop means following one stated relation, so this example requires two hops. Adding intermediate entities gives us questions requiring one to six hops.
+
+I generated 300 questions at each depth, balanced between 150 true and 150 false answers. Every prompt contained 25 shuffled premises: 23 facts connecting a main chain of 24 entities, plus two facts forming a separate three-entity distractor chain. Entity names and premise wording came from a seeded Python generator. The code is in [my Jev depth study repository](https://github.com/MSaadAsad/jev-depth-study).
+
+JevK5 v0.3 and base Qwen3.5-4B received identical formatted prompts and choice labels. Both were scored from their next-token answer logits, using A for true and B for false, without generating an answer. This holds the readout format constant; it doesn't make the base checkpoint decision-trained.
+
+JevK5 scored 75% at one hop and 72.7% at two; Qwen scored 74% and 60.3%. At three hops, the scores were 55.7% and 54.0%, and through six hops both remained near the 50% chance reference.
+
+<ResearchExplorer view="depth" />
+
+The one-hop result was the surprise. The answer is directly stated in the prompt, yet both models were only about 75% accurate. On the same JevK5 questions, removing the other 24 premises and leaving just the relevant fact increased accuracy from 75% to 100%. A separate 48-question diagnostic showed the same pattern: 48/48 with the relevant fact alone, compared with 35/48 in the full context.
+
+### Separating depth from context
+
+To examine this more systematically, I ran a second experiment with 300 questions at each of one to four hops, adding 0, 4, 12 or 24 off-path premises to each question. Both models received the same items at every context level, for 9,600 evaluations in total. At one hop, both scored 100% with the relevant fact alone, falling to 75% for JevK5 and 74% for Qwen with 24 off-path facts.
+
+The two designs aren't identical: the original experiment fixes the total at 25 premises, while this follow-up fixes the number of off-path premises. Four hops plus 24 off-path facts means 28 total premises; one hop plus 24 means 25.
+
+Without off-path facts, the nominal four-hop scores were also high: 98.0% for JevK5 and 93.7% for Qwen. Those numbers are not four-hop reasoning scores. In a bare chain A > B > C > D > E, A appears only as the greater entity and E only as the lesser. Those endpoint roles can reveal the answer to A > E without traversing all four links. The audit establishes that this cue is available, not that the models used it.
+
+With 24 off-path facts, four-hop accuracy fell to 48.7% for JevK5 and 53.3% for Qwen. The additional context makes the task harder, but these results still don't tell us how much of the decline comes from finding relevant facts versus combining them.
+
+<ResearchExplorer view="context" />
+
+In dense context, then, one-pass performance is already imperfect at direct lookup and approaches chance on longer chains. The clean one-hop result shows that even the first failure needn't be a failure of composition: the model answers correctly when the fact is presented alone, but additional facts throw it off. We have evidence of context sensitivity and a depth-related decline, without a pure measure of how many relations the model can compose.
+
+## 2. Looking inside the model
+
+That left another question: where in the network can changing a representation change the answer? I used **activation patching** to investigate it. Each pair contains a source prompt and a counterfactual prompt with opposite correct answers. At decoder layer $\ell$, I replace the counterfactual states at selected token positions $P$ with the corresponding source states:
+
+$$
+\mathbf{h}_{\ell,i}^{\mathrm{patched}} =
+\begin{cases}
+\mathbf{h}_{\ell,\pi(i)}^{\mathrm{source}}, & i \in P, \\
+\mathbf{h}_{\ell,i}^{\mathrm{counterfactual}}, & i \notin P.
+\end{cases}
+$$
+
+Here, $\mathbf{h}$ is a hidden-state vector and $\pi(i)$ identifies the corresponding token position in the source prompt. Positions outside $P$ retain their counterfactual states at that layer. The model then continues from the patched states, recomputing the downstream layers.
+
+The readout is the change in the counterfactual run's **source-answer logit margin**: the logit for the source's correct answer minus the logit for the other option. I compare that margin before and after patching. A positive change means the patch moved the output toward the source's correct answer. The margin can move without flipping the choice; it is not an accuracy or probability-point gain.
+
+### From two layers to all 32
+
+The initial study found answer-sensitive question-name states at layer 16 and answer-position states at layer 20. These were selected locations where I first tested the intervention, not an established peak across the network.
+
+I extended the study using a fresh cohort of 40 balanced pairs at each of one to four hops, testing all 32 decoder layers in both models. Source and counterfactual prompts now have the same hop depth. I first screened the eight full-attention blocks, then the 24 Gated DeltaNet blocks, keeping the prompts and controls identical between runs. Across the tested position groups, layers, depths, pairs and models, that amounts to **48,640 primary patches**.
+
+Replacing the question-name states could move the recipient's scores toward the source prompt's answer, even though the recipient's input remained unchanged.
+
+Layer 12 gave the largest mean question-name effect at one and two hops in both models. At one hop, the changes were +1.495 logit-margin units toward the source answer for JevK5 and +1.304 for Qwen. At two hops, they were +0.825 and +0.328. The diagram aligns each layer with its measured effect; select a layer or hop count to inspect it.
+
+<JevK5Diagram />
+
+<details className="my-8 border-l-2 border-concrete-600 pl-5 [&_p]:text-base [&_p]:leading-relaxed">
+  <summary className="cursor-pointer font-mono text-sm font-semibold text-link-blue">Patching protocol and checks</summary>
+
+The **question-name patch replaces both queried names together**, at their occurrences in the question. For each name, only the last overlapping token is patched, even if the name spans several tokens; it is not a whole-name-span intervention. Source and target token mappings are checked before running. All layers use one-based decoder-block numbering.
+
+Effects are averaged over all 40 pairs per depth regardless of baseline correctness. Intervals are pointwise 95% answer-stratified bootstrap intervals, without a multiple-comparison adjustment.
+
+Other interventions patch the decision position, source-path bridge mentions, source-path premise endings, and disconnected distractor premise endings. The bridge group is absent at one hop. Path-premise states map to the same premise slots in the recipient; bridge mentions map to the same entity names.
+
+Self patches reproduced the original scores, cached-prefix interventions matched full-forward interventions on the sentinel pairs, and repeated baselines matched exactly between the two layer sweeps. The final-layer decision patch also passed its positive control. These checks validate the intervention implementation, not a hypothesis about relational composition. The initial selected-layer study used a separate, larger cohort; the all-layer figures here use the fresh 40-pair-per-depth cohort.
+
+</details>
+
+### What the patches tell us
+
+Changing the queried-entity states can change the answer margin, with the strongest short-chain mean effect at layer 12. Bridge-entity and premise-ending interventions had much smaller effects at the positions tested. The question-name effects become less consistent at greater depth, where baseline answers are also less reliable.
+
+The completed sweep matches source and counterfactual hop depth, but the name swap still changes four premise records. It therefore doesn't isolate one fact or establish that the model stores a relation at a name's position. These patches locate answer-sensitive states; they don't identify the computation that finds or combines the facts. Layer 12 gives us a candidate region for a recurrence prototype, while the selected peak remains exploratory on this cohort.
+
+<ResearchExplorer view="patching" />
+
+## 3. Did decision training help?
+
+In the original 25-premise evaluation, JevK5 answered 218/300 two-hop questions correctly, compared with 181/300 for base Qwen (72.7% versus 60.3%). The unrounded counts give a 12.3-percentage-point advantage. Their one-hop results were nearly identical, at 75% and 74%.
+
+That is an observed behavioral difference between the checkpoints, but it doesn't identify what training changed. Better selection of relevant premises, better composition, and adaptation to the decision format could all contribute. The shared prompt and readout make the comparison useful, but neither the scores nor the patching results establish a training mechanism.
+
+For now, JevK5 performs better on this particular two-hop test. That makes the effects of decision training worth investigating, without establishing a general improvement in multi-hop reasoning or a causal explanation for the difference.
+
+## 4. Building the loop
+
+The baseline and completed layer sweep give me enough to begin a recurrence prototype. In Part Two, I'll choose a shared block around a candidate region, train JevK5 to use repeated hidden-state updates, and test whether more passes improve its decisions. The comparison will include the original model and alternatives using the same inference-compute budget.
+
+I'll vary hop depth and off-path context separately, and examine the states across passes. On a chain such as A > B > C > D, the question is whether a later update makes the implied A > D relation usable when an earlier one did not. Patches between iterations can test whether those changed states contribute to an improved answer, alongside the accuracy measurements.
+
+Part One has established a useful starting point: direct lookup works when the fact is presented alone, surrounding context can disrupt it, and certain internal states can move the answer. Part Two will test whether another pass helps the model use more of the relevant information, or merely makes it more confident in the answer it already had.

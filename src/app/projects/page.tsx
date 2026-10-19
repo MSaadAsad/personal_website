@@ -1,6 +1,5 @@
 import { Container } from '@/components/layout/Container';
-import { ProjectCard } from '@/components/projects/ProjectCard';
-import { ToLetCard } from '@/components/ToLetCard';
+import { ProjectList } from '@/components/projects/ProjectList';
 import { projects } from '@/content/data/projects';
 
 export const metadata = {
@@ -23,18 +22,6 @@ export default function ProjectsPage() {
     return a.title.localeCompare(b.title);
   });
 
-  const groupedProjects = sortedProjects.reduce((acc, project) => {
-    const time = Date.parse(project.date);
-    const year = Number.isFinite(time) ? String(new Date(time).getFullYear()) : 'Other';
-
-    if (!acc.has(year)) {
-      acc.set(year, []);
-    }
-
-    acc.get(year)?.push(project);
-    return acc;
-  }, new Map<string, typeof projects>());
-
   return (
     <Container className="pt-14 min-h-screen">
       <div className="concrete-block concrete-edge concrete-header mt-32">
@@ -48,35 +35,7 @@ export default function ProjectsPage() {
           </p>
         </div>
       </div>
-      <div className="concrete-block concrete-edge" style={{ backgroundColor: 'transparent', borderColor: 'rgba(74,74,72,1)', boxShadow: '0 16px 22px rgba(46,46,44,0.28)' }}>
-        <div className="space-y-0">
-          {Array.from(groupedProjects.entries()).map(([year, yearProjects], index, array) => (
-            <div
-              key={year}
-              className={[
-                'border-b border-concrete-700',
-                index === array.length - 1 && 'border-b-0',
-              ]
-                .filter(Boolean)
-                .join(' ')}
-            >
-              <div className="px-6 py-4 font-mono text-[0.65rem] tracking-[0.35em] uppercase text-concrete-700 bg-concrete-300">
-                {year}
-              </div>
-              <div className="grid gap-0 md:grid-cols-2 lg:grid-cols-3">
-                {yearProjects.map((project) => (
-                  <div key={project.slug} style={{ backgroundColor: 'var(--color-concrete-block)' }}>
-                    <ProjectCard project={project} />
-                  </div>
-                ))}
-                {Array.from({ length: (3 - (yearProjects.length % 3)) % 3 }, (_, i) => (
-                  <ToLetCard key={`to-let-${i}`} />
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
+      <ProjectList projects={sortedProjects} />
     </Container>
   );
 }

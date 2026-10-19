@@ -8,11 +8,12 @@ export default function Home() {
   const featuredSlugs = [
     'x-raying-multi-head-attention',
     'efficient-transformers-gqa-mod',
-    'readmeplease-ai',
+    'two-berts-one-stone',
   ];
   const featuredProjects = featuredSlugs
     .map((slug) => projects.find((p) => p.slug === slug)!)
-    .filter(Boolean);
+    .filter(Boolean)
+    .sort((a, b) => Date.parse(b.date) - Date.parse(a.date));
   const recentWriting = getAllWriting().slice(0, 3);
 
   return (

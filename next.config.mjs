@@ -1,12 +1,13 @@
 import createMDX from '@next/mdx';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
+import remarkNumberHeadings from './src/lib/heading-numbering.mjs';
 import rehypeKatex from 'rehype-katex';
 
 const withMDX = createMDX({
   extension: /\.mdx?$/,
   options: {
-    remarkPlugins: [remarkGfm, remarkMath],
+    remarkPlugins: [remarkGfm, remarkMath, remarkNumberHeadings],
     rehypePlugins: [rehypeKatex],
   },
 });

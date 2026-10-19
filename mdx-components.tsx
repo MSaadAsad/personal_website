@@ -19,19 +19,19 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
         {children}
       </h1>
     ),
-    h2: ({ children }) => {
-      const id = slugify(extractText(children));
+    h2: ({ children, id: anchor }) => {
+      const id = anchor ?? slugify(extractText(children));
       return (
-        <h2 id={id} className="scroll-mt-20 font-mono text-xl font-bold tracking-tight text-[#0000EE] mb-6 mt-12 border-l-[6px] border-[#0000EE] pl-5">
-          {children}
+        <h2 id={id} className="scroll-mt-20 font-mono text-xl font-bold tracking-tight text-link-blue mb-6 mt-12 border-l-[6px] border-link-blue pl-5">
+          <a href={`#${id}`} className="text-link-blue visited:text-link-blue hover:underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4">{children}</a>
         </h2>
       );
     },
-    h3: ({ children }) => {
-      const id = slugify(extractText(children));
+    h3: ({ children, id: anchor }) => {
+      const id = anchor ?? slugify(extractText(children));
       return (
-        <h3 id={id} className="scroll-mt-20 font-mono text-lg font-semibold text-concrete-800 mb-4 mt-10">
-          {children}
+        <h3 id={id} className="scroll-mt-20 font-mono text-lg font-semibold tracking-tight text-link-blue mb-4 mt-10">
+          <a href={`#${id}`} className="text-link-blue visited:text-link-blue hover:underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4">{children}</a>
         </h3>
       );
     },

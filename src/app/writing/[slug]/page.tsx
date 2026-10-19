@@ -62,6 +62,11 @@ export default async function WritingDetailPage({ params }: { params: Promise<{ 
           <h1 className="text-heading font-mono font-bold text-concrete-900 tracking-tight">
             {frontmatter.title}
           </h1>
+          {frontmatter.seriesLabel && (
+            <p className="mt-3 font-mono text-sm font-semibold text-link-blue">
+              {frontmatter.seriesLabel}
+            </p>
+          )}
           <p className="mt-5 font-serif text-xl text-concrete-800 leading-relaxed">
             {frontmatter.excerpt}
           </p>

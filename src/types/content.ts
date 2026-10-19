@@ -1,4 +1,5 @@
 export interface WritingFrontmatter {
+  seriesLabel?: string;
   contentWidth?: 'wide';
   title: string;
   slug: string;

@@ -74,17 +74,6 @@ export const projects: Project[] = [
     repoUrl: 'https://github.com/MSaadAsad/Annealing-Geom-Median',
   },
   {
-    slug: 'readmeplease-ai',
-    title: 'READMEplease.ai',
-    date: '2024-08-20',
-    description:
-      'A Flask app that generates Markdown docs from videos or GitHub repos.',
-    image: '/assets/projects/readmeplease-ai/cover.png',
-    tags: [],
-    techStack: ['Python', 'Flask', 'OpenAI API'],
-    repoUrl: 'https://github.com/shivamrawat1/READMEplease.ai',
-  },
-  {
     slug: 'washbot',
     title: 'Washbot',
     date: '2025-01-15',

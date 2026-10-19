@@ -2,6 +2,18 @@ import { WritingFrontmatter } from '@/types/content';
 
 export const writing: WritingFrontmatter[] = [
   {
+    title: "Looped System 1 Models",
+    slug: "looped-system-1-models",
+    seriesLabel: "Part I: What can one pass do?",
+    date: "2026-10-14",
+    category: "technical",
+    tags: [],
+    excerpt: "Reasoning so good, we decided to do it again.",
+    contentWidth: "wide",
+    published: true,
+    readingTime: 9,
+  },
+  {
     title: 'Forts in Bhimber',
     slug: 'documenting-new-forts-in-the-bhimber-district',
     date: '2026-10-01',
