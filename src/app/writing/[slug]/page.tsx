@@ -79,7 +79,7 @@ export default async function WritingDetailPage({ params }: { params: Promise<{ 
           )}
         </header>
 
-        <div className={frontmatter.contentWidth === 'wide' ? 'w-full' : 'max-w-3xl'}>
+        <div className={frontmatter.contentWidth === 'wide' ? 'writing-content-wide w-full' : 'max-w-3xl'}>
           <TableOfContents headings={headings} />
           <MDXContent />
         </div>

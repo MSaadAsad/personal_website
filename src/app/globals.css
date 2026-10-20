@@ -229,6 +229,11 @@
     border-left-color: #0000EE !important;
   }
 
+  /* Keep prose consistent while allowing article visuals to use the full panel. */
+  .writing-content-wide > :is(p, h1, h2, h3, h4, h5, h6, ul, ol, blockquote, details, nav, section[data-footnotes]) {
+    @apply max-w-3xl;
+  }
+
   .section-divider {
     margin-top: 2rem;
     height: 1px;
