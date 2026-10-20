@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { Container } from '@/components/layout/Container';
@@ -11,13 +12,34 @@ export function generateStaticParams() {
   return getWritingSlugs().map((slug) => ({ slug }));
 }
 
-export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
   const result = getWritingBySlug(slug);
   if (!result) return {};
+  const { frontmatter } = result;
+  const image = frontmatter.coverImage
+    ? new URL(frontmatter.coverImage, 'https://www.msaadasad.com').href
+    : undefined;
+
   return {
-    title: result.frontmatter.title,
-    description: result.frontmatter.excerpt,
+    title: frontmatter.title,
+    description: frontmatter.excerpt,
+    ...(image && {
+      openGraph: {
+        type: 'article',
+        title: frontmatter.title,
+        description: frontmatter.excerpt,
+        url: `https://www.msaadasad.com/writing/${slug}`,
+        publishedTime: frontmatter.date,
+        images: [{ url: image, alt: frontmatter.title }],
+      },
+      twitter: {
+        card: 'summary_large_image',
+        title: frontmatter.title,
+        description: frontmatter.excerpt,
+        images: [image],
+      },
+    }),
   };
 }
 
