@@ -29,7 +29,7 @@ export function FortPhotos({ images }: { images: FortPhotoId[] }) {
       : undefined;
   const columns = ratios.map((r) => `${shared ? 1 : r}fr`).join(" ");
   return (
-    <div className="fort-photos" style={{ "--photo-columns": columns } as CSSProperties}>
+    <div className={`fort-photos${images.length === 1 && images[0] !== "historicalMap" ? " fort-photos-single" : ""}`} style={{ "--photo-columns": columns } as CSSProperties}>
       {images.map(id => {
         const [file, caption] = photos[id];
         const src = `/assets/writing/bhimber-forts/${file}`;
