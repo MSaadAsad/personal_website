@@ -68,6 +68,9 @@ function renderPanels() {
   document.body.dataset.turn = side;
   $('#roundNo').textContent = S.round;
   $('#roundMax').textContent = ROUND_LIMIT;
+  $('#roundWhen').textContent = SCN.clock ? `${roundName().replace(', ', ' · ')}${isNight() ? ' ☾' : ''}` : 'Round';
+  const esc0 = escapeGoal();
+  if (esc0) $('#goalText').title = `${men(escaped(esc0.side))} of ${men(esc0.need)} across`;
   for (const s of ['azure', 'red']) {
     $(`#name-${s}`).textContent = SIDES[s].name;
     $(`#vp-${s}`).textContent = S.vp[s];
@@ -124,7 +127,7 @@ function statBlock(u) {
   const v = VARIANTS[u.variant];
   return `<div class="stats"><div><small>March</small><b>${u.side === S.turn ? `${u.mp}<span>/${fullMp(u)}</span>` : fullMp(u)}</b></div><div><small>Attack</small><b>${v.atk}</b></div><div><small>Defence</small><b>${v.def}</b></div><div><small>Range</small><b>${v.range}</b></div></div>`;
 }
-function pipsHtml(hp) { return `<span class="hp-pips${hp < MAX_HP * WAVER_BELOW ? ' low' : ''}" title="${men(hp)} of ${MEN_PER_FORMATION.toLocaleString('en')}">${Array.from({ length: MAX_HP }, (_, i) => `<i class="${i < hp ? 'on' : ''}"></i>`).join('')}</span>`; }
+function pipsHtml(hp, max = MAX_HP) { return `<span class="hp-pips${hp < max * WAVER_BELOW ? ' low' : ''}" title="${men(hp)} of ${men(max)}">${Array.from({ length: max }, (_, i) => `<i class="${i < hp ? 'on' : ''}"></i>`).join('')}</span>`; }
 
 function renderInspector() {
   const box = $('#inspector'), sel = S.selected && unitById(S.selected);
@@ -132,7 +135,7 @@ function renderInspector() {
   let html = '';
   if (sel) {
     const v = VARIANTS[sel.variant], status = wavering(sel) ? 'Wavering — cannot attack until it rallies' : sel.side !== S.turn ? 'Awaiting its command' : sel.attacked ? (sel.mp > 0 ? 'Has fought — may still march' : 'Has fought this round') : sel.mp <= 0 ? 'March spent' : sel.moved ? 'On the march' : 'Ready for orders';
-    html += `<div class="unit-card ${sel.side}"><div class="unit-badge ${sel.side}">${unitPortrait(sel, 'portrait')}</div><div><small>${SIDES[sel.side].name} · ${TYPE_NAME[v.type]}</small><h2>${esc(sel.name)}</h2><p>${pipsHtml(sel.hp)} ${men(sel.hp)}</p><p class="${wavering(sel) ? 'warn' : ''}">${status}</p></div></div>${statBlock(sel)}<p class="trait">${v.trait}</p>`;
+    html += `<div class="unit-card ${sel.side}"><div class="unit-badge ${sel.side}">${unitPortrait(sel, 'portrait')}</div><div><small>${SIDES[sel.side].name} · ${TYPE_NAME[v.type]}</small><h2>${esc(sel.name)}</h2><p>${pipsHtml(sel.hp, maxHp(sel))} ${men(sel.hp)}</p><p class="${wavering(sel) ? 'warn' : ''}">${status}</p></div></div>${statBlock(sel)}<p class="trait">${v.trait}</p>`;
     const st = stockOf(sel), days = wagonDays(sel.side, sel.hex), got = deliveryFor(days), net = got - STOCK_USE;
     const level = st < STOCK_DESERT ? 'cut' : st < STOCK_HUNGRY ? 'warn' : 'ok';
     const effect = st < STOCK_DESERT ? 'starving: −2 attack, −1 defence, losing ${men(1)} every command' : st < STOCK_HUNGRY ? 'hungry: −1 attack, −1 defence, cannot rally' : st < STOCK_SHORT ? 'short: −1 attack' : 'well supplied';
@@ -140,6 +143,8 @@ function renderInspector() {
       + `<small>${Number.isFinite(days) ? `Wagons need ${days < 0.05 ? 'no time — at the depot' : `${days.toFixed(1)} day${days >= 1.05 ? 's' : ''}`} to reach it: +${got}% a day against −${STOCK_USE}% eaten (${net >= 0 ? '+' : ''}${net}%).` : 'No wagons can reach it: the road is cut or there is no friendly depot. −20% a day.'}</small></div>`;
     if (ledBy(sel)) html += `<p class="led-note">★ Led by ${GENERALS[sel.side].name}: +1 attack, +1 defence, never falls back.</p>`;
     if (humanTurn() && canFortify(sel)) html += `<button class="ferry-btn" id="fortifyBtn"><b>Dig a kacha fort here (K)</b><small>Takes this formation's whole day · mud wall and ditch, +${KACHA_DEF} defence · guns wear it down</small></button>`;
+    if (humanTurn() && canCountermine(sel)) { const [, m] = enemyGallery(sel); html += `<button class="ferry-btn" id="mineBtn"><b>Countermine (M)</b><small>The enemy has dug ${m.days} of ${MINE_DAYS} days towards these works · this formation's whole day · breaks into the gallery on a 4 or better</small></button>`; }
+    else if (humanTurn() && canMine(sel)) { const g = galleryAt(sel.side, sel.hex), t = mineTarget(sel), done = g && +g[0] === t ? g[1].days : 0; html += `<button class="ferry-btn" id="mineBtn"><b>${done ? 'Carry on the mine' : 'Dig a mine'} under ${esc(worksTitle(t))} (M)</b><small>${done + 1 === MINE_DAYS ? `Day ${MINE_DAYS} of ${MINE_DAYS}: springs it today, bringing down ${MINE_LEVELS} levels of the works` : `Day ${done + 1} of ${MINE_DAYS} · this formation's whole day · keep someone at the mouth or the gallery is lost`}</small></button>`; }
     if (humanTurn() && sel.side === S.turn && ferrySites(sel).length) html += `<button class="ferry-btn" id="ferryBtn"><b>${V.ferryPick ? 'Choose the far bank…' : `Build a ferry across the ${nearestMajorRiver(sel.hex)}`}</b><small>Once per campaign · costs this command and ${FERRY_COST} soldier · either army may then cross</small></button>`;
     if (sel.side === S.turn && humanTurn()) {
       const hint = sel.attacked ? (sel.mp > 0 ? 'It has struck; horse can ride on with its remaining march points.' : 'This formation has fought and is done for the round.')
@@ -178,7 +183,7 @@ function groundReport(hex, compact) {
   if (S.walls?.[h.place] !== undefined) rows.push(['Walls', S.walls[h.place] > 0 ? `+${Math.ceil(S.walls[h.place])} defence${S.walls[h.place] % 1 ? ' · battered' : ''}` : 'battered down']);
   if (works || S.walls?.[h.place] !== undefined) rows.push(['Under fire', 'every bombardment wears the works down; a hit brings down a level']);
   const enemies = unitsAt(hex).filter(playerSees);
-  return `<div class="ground ${compact ? 'compact' : ''}"><small>Ground report${place ? ` · ${place.kind}` : ''}</small><h3>${esc(title)}</h3><dl>${rows.map(([k, v]) => `<dt>${k}</dt><dd>${esc(v)}</dd>`).join('')}</dl>${enemies.length ? `<p class="occupants">${enemies.map(u => `<span class="${u.side}">${esc(u.name)} ${pipsHtml(u.hp)}</span>`).join('')}</p>` : ''}</div>`;
+  return `<div class="ground ${compact ? 'compact' : ''}"><small>Ground report${place ? ` · ${place.kind}` : ''}</small><h3>${esc(title)}</h3><dl>${rows.map(([k, v]) => `<dt>${k}</dt><dd>${esc(v)}</dd>`).join('')}</dl>${enemies.length ? `<p class="occupants">${enemies.map(u => `<span class="${u.side}">${esc(u.name)} ${pipsHtml(u.hp, maxHp(u))}</span>`).join('')}</p>` : ''}</div>`;
 }
 
 function renderRoster() {
@@ -186,7 +191,7 @@ function renderRoster() {
   $('#rosterSide').textContent = SIDES[side].short;
   $('#roster').innerHTML = S.units.filter(u => u.side === side).map(u => {
     const able = side === S.turn && canActCached(u), place = placeName(u.hex) || TERRAIN[HEXES[u.hex].terrain].name;
-    return `<button class="roster-row ${u.side} ${u.id === S.selected ? 'active' : ''} ${able ? 'able' : 'done'}" data-unit="${u.id}"><span class="mini-badge ${u.side}">${unitPortrait(u, 'portrait')}</span><span class="r-main"><b>${ledBy(u) ? '★ ' : ''}${esc(u.name)}</b><small>${esc(place)}${wavering(u) ? ' · <span class="warn">wavering</span>' : ''}</small></span><span class="r-side">${pipsHtml(u.hp)}<em class="${stockOf(u) < STOCK_HUNGRY ? 'low' : ''}">${stockOf(u)}% supplies</em><em>${side !== S.turn || S.replay ? '' : able ? (u.moved ? `${u.mp} mp` : 'ready') : 'done'}</em></span></button>`;
+    return `<button class="roster-row ${u.side} ${u.id === S.selected ? 'active' : ''} ${able ? 'able' : 'done'}" data-unit="${u.id}"><span class="mini-badge ${u.side}">${unitPortrait(u, 'portrait')}</span><span class="r-main"><b>${ledBy(u) ? '★ ' : ''}${esc(u.name)}</b><small>${esc(place)}${wavering(u) ? ' · <span class="warn">wavering</span>' : ''}</small></span><span class="r-side">${pipsHtml(u.hp, maxHp(u))}<em class="${stockOf(u) < STOCK_HUNGRY ? 'low' : ''}">${stockOf(u)}% supplies</em><em>${side !== S.turn || S.replay ? '' : able ? (u.moved ? `${u.mp} mp` : 'ready') : 'done'}</em></span></button>`;
   }).join('');
 }
 function renderObjectives() {
@@ -227,7 +232,7 @@ function updateTooltip(clientX, clientY) {
       sel.hex = saved;
       const line = parts => parts.map(([k, v]) => `<span>${esc(k)} <b>${v > 0 ? '+' : ''}${v}</b></span>`).join('');
       const seg = (k, label) => f[k] > 0.005 ? `<span class="k ${k}">${label} ${pct(f[k])}</span>` : '';
-      html = `<div class="tip-head attack"><b>${direct ? 'Attack' : 'March & attack'}</b> ${esc(f.def.name)} ${pipsHtml(f.def.hp)}</div>
+      html = `<div class="tip-head attack"><b>${direct ? 'Attack' : 'March & attack'}</b> ${esc(f.def.name)} ${pipsHtml(f.def.hp, maxHp(f.def))}</div>
         <div class="odds"><div>${['rout', 'hit', 'standoff', 'miss', 'repulse'].map(k => `<i class="${k}" style="width:${pct(f[k])}"></i>`).join('')}</div>
         <p>${seg('rout', 'Smash')}${seg('hit', 'Strike')}${seg('standoff', 'Standoff')}${seg('miss', 'Fall short')}${seg('repulse', 'Repulsed')}</p></div>
         <div class="losses"><div><small>They lose</small><b>~${men(f.expDef)}</b><em>${pct(f.pBreak)} breaks them${f.pKill > 0.005 ? ` · ${pct(f.pKill)} destroys` : ''}</em></div><div><small>You lose</small><b>~${men(f.expAtt)}</b><em>${f.melee ? (f.pAttBreak > 0.005 ? `${pct(f.pAttBreak)} breaks you` : 'you hold') : 'fire from range: no risk'}</em></div></div>
@@ -257,8 +262,15 @@ function updateTooltip(clientX, clientY) {
 function doFortify() {
   const sel = S.selected && unitById(S.selected);
   if (!humanTurn() || !sel) return;
-  if (!canFortify(sel)) { toast('A kacha fort takes a formation’s whole day, out of the enemy’s reach, on ground without walls'); return; }
+  if (!canFortify(sel)) { toast('A kacha fort takes a foot formation’s whole day, out of the enemy’s reach, on ground without walls'); return; }
   fortify(sel);
+}
+function doMine() {
+  const sel = S.selected && unitById(S.selected);
+  if (!humanTurn() || !sel) return;
+  if (canCountermine(sel)) { countermine(sel); return; }
+  if (!canMine(sel)) { toast('A mine is dug by foot, next to enemy-held works, with a whole day to spare'); return; }
+  digMine(sel);
 }
 function startFerry() {
   const sel = S.selected && unitById(S.selected), sites = ferrySites(sel);
@@ -366,7 +378,7 @@ UI.flash = (text, side) => toast(text, side);
 UI.banner = () => {
   const b = $('#turnBanner');
   b.querySelector('strong').textContent = SIDES[S.turn].name;
-  b.querySelector('span').textContent = `Round ${S.round} of ${ROUND_LIMIT}`;
+  b.querySelector('span').textContent = `Round ${S.round} of ${ROUND_LIMIT}${SCN.clock ? ` · ${roundName()}` : ""}`;
   b.dataset.side = S.turn;
   b.classList.add('show');
   setTimeout(() => b.classList.remove('show'), 1100);
@@ -527,8 +539,11 @@ async function replayEvent(e) {
       if (e.place && e.walls !== undefined) S.walls[e.place] = e.walls; else if (e.place && e.left !== undefined && S.walls[e.place] !== undefined) S.walls[e.place] = e.left;
       if (e.place && e.battered !== undefined) (S.battered ||= {})[e.place] = e.battered;
       if (e.kacha !== undefined) { S.kacha ||= {}; if (e.kacha) S.kacha[e.hex] = e.kacha; else delete S.kacha[e.hex]; }
+      if (e.mine) delete S.mines?.[e.hex];
       drawMarkers();
-      return replayFx(e.hex, 'breach', e.left ? 'WALLS BATTERED' : 'WALLS DOWN', '');
+      return replayFx(e.hex, 'breach', e.mine ? 'MINE SPRUNG' : e.left ? 'WALLS BATTERED' : 'WALLS DOWN', '');
+    case 'mine': (S.mines ||= {})[e.hex] = { side: e.side, from: e.from, days: e.days }; drawMarkers(); return replayFx(e.from, 'capture', 'MINE DUG', '');
+    case 'countermine': if (e.broke) delete S.mines?.[e.hex]; drawMarkers(); return replayFx(e.hex, 'capture', e.broke ? 'GALLERY BROKEN' : 'COUNTERMINE FAILED', '');
     case 'fortify': (S.kacha ||= {})[e.hex] = KACHA_DEF; drawMarkers(); return replayFx(e.hex, 'capture', 'KACHA FORT DUG', '');
     case 'capture':
       if (STRONG_HEX.get(e.hex) === e.place) S.owners[e.place] = e.side; else S.forts[e.place] = e.side;
@@ -562,7 +577,7 @@ function renderReplayBar() {
   if (!RP.active) return;
   const f = RP.frames[Math.min(RP.frame, RP.frames.length - 1)].board;
   $('#rpTitle').textContent = RP.title;
-  $('#rpDay').textContent = RP.done ? 'The end' : `Day ${f.round} · ${SIDES[f.turn].name} moves`;
+  $('#rpDay').textContent = RP.done ? 'The end' : `${roundName(f.round)} · ${SIDES[f.turn].name} moves`;
   $('#rpDay').dataset.side = RP.done ? '' : f.turn;
   $('#rpPlay').textContent = RP.done ? 'Play again' : RP.paused ? 'Play' : 'Pause';
   $('#rpSpeed').textContent = `${RP.speed}×`;
@@ -896,6 +911,7 @@ function bindInput() {
     else if (k === 'f') doForce();
     else if (k === 'g') doRide();
     else if (k === 'k') doFortify();
+    else if (k === 'm') doMine();
     else if (k === 'escape') { if (RP.active) exitReplay(); else { V.ferryPick = null; select(null); } }
     else if (k === ' ' && RP.active && !e.target.closest('button')) { e.preventDefault(); $('#rpPlay').click(); }
     else if (k === '?' || k === 'h') $('#helpDialog').showModal();
@@ -909,7 +925,7 @@ function bindControls() {
   $('#undoBtn').onclick = () => { if (humanTurn() && undoMove()) toast('March undone'); };
   $('#forceBtn').onclick = doForce;
   $('#rideBtn').onclick = doRide;
-  $('#inspector').addEventListener('click', e => { if (e.target.closest('#ferryBtn')) startFerry(); if (e.target.closest('#fortifyBtn')) doFortify(); });
+  $('#inspector').addEventListener('click', e => { if (e.target.closest('#ferryBtn')) startFerry(); if (e.target.closest('#fortifyBtn')) doFortify(); if (e.target.closest('#mineBtn')) doMine(); });
   $('#zoomIn').onclick = () => zoomAt(R.cam.z * 1.3, R.view.clientWidth / 2, R.view.clientHeight / 2);
   $('#zoomOut').onclick = () => zoomAt(R.cam.z / 1.3, R.view.clientWidth / 2, R.view.clientHeight / 2);
   $('#fitBtn').onclick = fitBoard;
@@ -941,19 +957,39 @@ function bindControls() {
 // The opening screen: a campaign map of the Punjab with a marker for each
 // battle; a battle fought in more than one mode (historic: the armies, numbers
 // and days as recorded; open: an earlier start, evenly matched) offers both.
+// The wars the battles belong to, in order; a scenario names its own `era`
+// or falls in by its year.
+const ERAS = [
+  { id: 'misl', name: 'The misls', years: '1748–1798' },
+  { id: 'ranjit', name: 'Rise of Ranjit Singh', years: '1799–1838' },
+  { id: 'civil', name: 'Sikh civil war', years: '1839–1845' },
+  { id: 'asw1', name: 'First Anglo-Sikh War', years: '1845–46' },
+  { id: 'asw2', name: 'Second Anglo-Sikh War', years: '1848–49' },
+  { id: 'rebellion', name: '1857', years: 'The rebellion' },
+];
+const eraOf = scn => scn.era || (scn.year < 1799 ? 'misl' : scn.year < 1839 ? 'ranjit' : scn.year < 1845 ? 'civil' : scn.year < 1847 ? 'asw1' : scn.year < 1850 ? 'asw2' : 'rebellion');
 function renderStart() {
   const groupOf = id => SCENARIOS[id].group || id, current = groupOf(MAP_ID);
   const groups = [];
-  for (const [id, scn] of Object.entries(SCENARIOS)) if (!groups.some(g => g.group === groupOf(id))) groups.push({ group: groupOf(id), title: scn.title, year: scn.year });
+  for (const [id, scn] of Object.entries(SCENARIOS)) if (!groups.some(g => g.group === groupOf(id))) groups.push({ group: groupOf(id), title: scn.title, year: scn.year, era: eraOf(scn) });
   const go = id => { if (id === MAP_ID) return; const url = new URL(location.href); url.searchParams.set('map', id); location.href = url.toString(); };
   // A battle's seal opens its `primary` version, else its historic one.
   const pickGroup = group => { const ids = Object.keys(SCENARIOS).filter(id => groupOf(id) === group); go(ids.find(id => SCENARIOS[id].primary) || ids.find(id => SCENARIOS[id].mode === 'historic') || ids[0]); };
-  $('#mapPick').innerHTML = CAMPAIGN_MAP.draw(groups, current)
-    + `<div class="cm-list">${groups.map(g => `<button class="cm-chip ${g.group === current ? 'active' : ''}" data-group="${g.group}">${esc(g.title)}</button>`).join('')}</div>`;
-  $('#mapPick').querySelectorAll('[data-group]').forEach(b => {
-    b.onclick = () => pickGroup(b.dataset.group);
-    b.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pickGroup(b.dataset.group); } };
-  });
+  // The era tabs filter the map's seals and the list; the era of the battle
+  // on the board is shown first.
+  V.era ||= eraOf(SCN);
+  const drawPick = () => {
+    const inEra = groups.filter(g => g.era === V.era), era = ERAS.find(e => e.id === V.era);
+    $('#mapPick').innerHTML = `<div class="era-pick" role="tablist">${ERAS.map(e => { const n = groups.filter(g => g.era === e.id).length; return `<button role="tab" class="era ${e.id === V.era ? 'active' : ''}${n ? '' : ' empty'}" data-era="${e.id}" aria-selected="${e.id === V.era}"><b>${e.name}</b><small>${e.years}${n ? ` · ${n}` : ''}</small></button>`; }).join('')}</div>`
+      + CAMPAIGN_MAP.draw(groups, current, V.era)
+      + `<div class="cm-list">${inEra.length ? inEra.map(g => `<button class="cm-chip ${g.group === current ? 'active' : ''}" data-group="${g.group}">${esc(g.title)}</button>`).join('') : `<p class="cm-none">No battles of ${esc(era.name)} have been surveyed yet.</p>`}</div>`;
+    $('#mapPick').querySelectorAll('[data-group]').forEach(b => {
+      b.onclick = () => pickGroup(b.dataset.group);
+      b.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pickGroup(b.dataset.group); } };
+    });
+    $('#mapPick').querySelectorAll('[data-era]').forEach(b => b.onclick = () => { V.era = b.dataset.era; drawPick(); });
+  };
+  drawPick();
   const modes = Object.keys(SCENARIOS).filter(id => groupOf(id) === current).sort((a, b) => !!SCENARIOS[b].primary - !!SCENARIOS[a].primary || (SCENARIOS[a].mode === 'open') - (SCENARIOS[b].mode === 'open'));
   $('#modePick').innerHTML = modes.length < 2 ? '' : modes.map(id => {
     const m = SCENARIOS[id].mode || 'historic';
@@ -984,7 +1020,7 @@ function startCampaign(player, ai) {
   R.unitEls.clear();
   newCampaign({ player, ai, fog: $('#fogPick').value === 'on' });
   V.started = true;
-  log(FIRST, SCN.goal ? `${SCN.title}, ${SCN.year}: the campaign opens. ${SIDES[SCN.goal.attacker].name} must ${SCN.goal.short.toLowerCase()} before day ${ROUND_LIMIT} is out.` : 'The banners are raised. Hold the strongpoints to earn war points; win the local chiefs to raise their levies.');
+  log(FIRST, SCN.goal ? `${SCN.title}, ${SCN.year}: the campaign opens. ${SIDES[SCN.goal.attacker].name} must ${SCN.goal.short[0].toLowerCase() + SCN.goal.short.slice(1)} before ${SCN.clock ? roundName(ROUND_LIMIT) + ' is out' : `day ${ROUND_LIMIT} is out`}.` : 'The banners are raised. Hold the strongpoints to earn war points; win the local chiefs to raise their levies.');
   save();
   $('#startDialog').close();
   refresh();
@@ -1010,7 +1046,7 @@ function loadScript(src) {
 async function boot() {
   const id = chosenMap();
   try { localStorage.setItem('jhelum-marches-map', id); } catch { /* storage blocked */ }
-  await loadScript(`maps/${SCENARIOS[id].map || id}.js?v=38`);
+  await loadScript(`maps/${SCENARIOS[id].map || id}.js?v=39`);
   applyScenario(id);
   // The field manual quotes distances and march points for this map's hex size.
   const km = k => k >= 1 ? `${+k.toFixed(1)} km` : `${Math.round(k * 1000)} m`, mpOf = v => Math.round(VARIANTS[v].mp * MARCH_SCALE * PACE);

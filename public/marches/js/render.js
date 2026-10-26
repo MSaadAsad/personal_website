@@ -363,6 +363,7 @@ function drawStaticMap() {
     const x = kmToPx(m.x), y = kmToPx(m.y), seed = 7000 + k.length * 31;
     if (m.poly) { traced(m, m.poly.map(([a, b]) => [kmToPx(a), kmToPx(b)]), seed); continue; }
     if (m.art === 'gate') art.gate += `M${f1(x - 2.6)} ${f1(y + 2)}v-3.2a2.6 2.6 0 0 1 5.2 0v3.2z`;
+    else if (m.art === 'church') { art.fortGround += `M${f1(x - 2.4)} ${f1(y - 1.6)}h4.8v4.4h-4.8z`; art.gate += `M${f1(x - 0.5)} ${f1(y - 5.6)}h1v1.4h1.4v1h-1.4v1.8h-1v-1.8h-1.4v-1h1.4z`; }
     else if (m.art === 'tomb') { art.fortGround += `M${f1(x - 3.2)} ${f1(y - 3.2)}h6.4v6.4h-6.4z`; art.dome += dome(x, y + 0.8, 1.9); for (const [dx, dy] of [[-1, -1], [1, -1], [1, 1], [-1, 1]]) art.minaret += disc(x + dx * 3.2, y + dy * 3.2, 0.9); }
     else { art.yard += `M${f1(x - 2.2)} ${f1(y - 2.2)}h4.4v4.4h-4.4z`; art.dome += dome(x, y + 0.6, 1.8); }
   }
@@ -509,6 +510,13 @@ function drawMarkers() {
     m.style.setProperty('--left', (0.35 + 0.65 * left / KACHA_DEF).toFixed(2));
     m.innerHTML = '<svg viewBox="-16 -16 32 32" aria-hidden="true"><path class="ditch" d="M-13 -13H13V13H-13Z"/><path class="rampart" d="M-10 -10H10V10H-10Z"/><path class="bast" d="M-10 -13l3 3-3 3-3-3zM10 -13l3 3-3 3-3-3zM10 7l3 3-3 3-3-3zM-10 7l3 3-3 3-3-3z"/></svg>';
     m.title = `Kacha fort: +${Math.ceil(left)} defence${left < KACHA_DEF ? ' (battered)' : ''}`;
+  }
+  // Mines under way: a gallery from the diggers' hex towards the works, with its days.
+  for (const [hex, mn] of Object.entries(S.mines || {})) {
+    const a = HEXES[mn.from], b = HEXES[hex], m = el('div', `marker mine side-${mn.side}`, R.markers);
+    m.style.left = `${f1((a.x * 2 + b.x) / 3)}px`; m.style.top = `${f1((a.y * 2 + b.y) / 3)}px`;
+    m.innerHTML = `<svg viewBox="-10 -10 20 20" aria-hidden="true"><path class="shaft" d="M-6 6L6 -6"/><path class="pick" d="M2 -9c3 1 6 4 7 7M5.5 -5.5l-9 9"/></svg><b>${mn.days}/${MINE_DAYS}</b>`;
+    m.title = `Mine under ${worksTitle(+hex)}: ${mn.days} of ${MINE_DAYS} days dug`;
   }
   // Rubble where gunfire has battered a place's works or walls.
   for (const key of Object.keys(MAP.places)) {
@@ -695,7 +703,7 @@ function syncUnits(animating = null) {
     node._hp = u.hp;
     const pile = stacks.get(u.hex), idx = pile.indexOf(u), mine = S.turn === u.side && !S.ai[u.side];
     node.className = `unit ${u.side} type-${VARIANTS[u.variant].type}${playerSees(u) ? '' : ' fogged'}${u.id === S.selected ? ' selected' : ''}${mine && !canActCached(u) ? ' spent' : ''}${mine && canActCached(u) ? ' ready' : ''}${wavering(u) ? ' wavering' : ''}${ledBy(u) ? ' led' : ''}${stockOf(u) < STOCK_HUNGRY ? ' oos' : ''}`;
-    node.title = `${u.name} · ${SIDES[u.side].name} · ${men(u.hp)} of ${MEN_PER_FORMATION.toLocaleString('en')}${wavering(u) ? ' · wavering' : ''}${ledBy(u) ? ` · led by ${GENERALS[u.side].name}` : ''}} · supplies ${stockOf(u)}%`;
+    node.title = `${u.name} · ${SIDES[u.side].name} · ${men(u.hp)} of ${men(maxHp(u))}${wavering(u) ? ' · wavering' : ''}${ledBy(u) ? ` · led by ${GENERALS[u.side].name}` : ''}} · supplies ${stockOf(u)}%`;
     if (animating === u.id) continue;
     const h = HEXES[u.hex], spread = 8 * unitScale(R.cam.z), off = pile.length > 1 ? (idx - (pile.length - 1) / 2) * spread * 2 : 0;
     node.style.setProperty('--x', `${f1(h.x + off)}px`);

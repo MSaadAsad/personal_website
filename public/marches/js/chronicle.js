@@ -56,7 +56,9 @@ const CHRONICLE = (() => {
         const verb = e.outcome === 'miss' ? missed(e.melee) : OUTCOME[e.outcome];
         return `${r} · ${sideName(e.att.side)}: ${unitText(e.att)} ${verb} ${unitText(e.def)} ${ground(e.hex)}, ${how.join(', ')}. ${loss.join('; ')}.`;
       }
-      case 'breach': return `${r} · The guns of the ${e.unit.name} battered down the works of ${worksName(e)} (${e.left ? `${e.left} levels of defence still standing` : 'nothing left standing'}).`;
+      case 'breach': return `${r} · ${e.mine ? `A mine sprung by the ${e.unit.name} brought down` : `The guns of the ${e.unit.name} battered down`} the works of ${worksName(e)} (${e.left ? `${e.left} levels of defence still standing` : 'nothing left standing'}).`;
+      case 'countermine': return `${r} · ${unitText(e.unit)} of the ${sideName(e.side)} countermined ${ground(e.hex)}${e.broke ? ' and broke into the enemy’s gallery' : ', without finding the gallery'}.`;
+      case 'mine': return `${r} · ${unitText(e.unit)} of the ${sideName(e.side)} drove a mine ${ground(e.from)} towards the works of ${worksName({ place: HEXES[e.hex].place && settlementDef(e.hex) > 0 ? HEXES[e.hex].place : null, hex: e.hex })}.`;
       case 'fortify': return `${r} · ${unitText(e.unit)} of the ${sideName(e.side)} dug a kacha fort ${ground(e.hex)}.`;
       case 'destroyed': return `${r} · ${unitText(e.unit)} of the ${sideName(e.side)} was destroyed.`;
       case 'surrender': return `${r} · ${unitText(e.unit)} of the ${sideName(e.side)} was ${e.why === 'surrounded' ? 'surrounded and laid down its arms' : 'cut off and surrendered'}.`;
@@ -73,7 +75,7 @@ const CHRONICLE = (() => {
   function plainLine(e) {
     switch (e.t) {
       case 'combat': return e.outcome === 'rout' ? `The ${e.att.name} smashed the ${e.def.name}${e.def.hp <= 0 ? '' : `, leaving it ${men(e.def.hp)} strong`}.` : null;
-      case 'breach': return `The guns of the ${e.unit.name} ${e.left ? 'battered down the works' : 'brought the last of the works down'} at ${worksName(e)}.`;
+      case 'breach': return `${e.mine ? `A mine sprung by the ${e.unit.name}` : `The guns of the ${e.unit.name}`} ${e.left ? 'brought down the works' : 'brought the last of the works down'} at ${worksName(e)}.`;
       case 'destroyed': return `The ${e.unit.name} was destroyed.`;
       case 'surrender': return `The ${e.unit.name} was ${e.why === 'surrounded' ? 'surrounded and laid down its arms' : 'cut off and surrendered'}.`;
       case 'capture': return `The ${e.unit.name} took ${placeOf(e.place)}.`;
@@ -88,7 +90,7 @@ const CHRONICLE = (() => {
       `CAMPAIGN: ${SCN.title}, ${SCN.year}. ${SCN.region}.`,
       `BACKGROUND: ${SCN.blurb}`,
       `SIDES: ${['azure', 'red'].map(s => `${sideName(s)}, commanded by ${g(s).name} (${g(s).title})`).join('; ')}.`,
-      `ENGAGEMENT: provisional name "${b.name}" (${b.kind}). Centred ${ground(b.focus)}. Rounds ${b.first}–${b.last} (each round is about a day). The ${sideName(b.attacker)} struck first.`,
+      `ENGAGEMENT: provisional name "${b.name}" (${b.kind}). Centred ${ground(b.focus)}. Rounds ${b.first}–${b.last} (${SCN.clock ? `each round is about ${SCN.clock.hours} hours, from ${roundName(b.first)}` : 'each round is about a day'}). The ${sideName(b.attacker)} struck first.`,
       `RESULT BY THE RULES: ${result}. Men lost (round figures; a full formation is about ${MEN_PER_FORMATION.toLocaleString('en')} men): ${sideName('azure')} ${men(b.lost.azure)}, ${sideName('red')} ${men(b.lost.red)}. Formations destroyed or surrendered: ${sideName('azure')} ${b.broken.azure}, ${sideName('red')} ${b.broken.red}.${S.winner ? ' The campaign ended with this engagement.' : ''}`,
       'EVENTS IN ORDER:',
       ...evs.map(eventLine).filter(Boolean),
@@ -101,7 +103,7 @@ const CHRONICLE = (() => {
 
 Write it as a historian telling the story of the fight: clear, vivid, period-appropriate English prose, past tense. The reader has just played the battle, so make it feel like their battle: who struck first, how the fight turned, what decided it and what it cost.
 
-Stay strictly within the facts. Do not invent people, named officers, dates, weather, or events that are not in the brief. You may describe the ground from the terrain given, and draw on the campaign background for context. Strength is given in round figures of men (a full formation is about 1,000). Use them as the approximations they are ("some 400 men", "nearly a thousand"), and never give a more precise count. The dice and modifiers are the game's abstraction: never mention dice, rounds as game turns, or rules. Call a round "a day" or "the next morning".
+Stay strictly within the facts. Do not invent people, named officers, dates, weather, or events that are not in the brief. You may describe the ground from the terrain given, and draw on the campaign background for context. Strength is given in round figures of men. Use them as the approximations they are ("some 400 men", "nearly a thousand"), and never give a more precise count. The dice and modifiers are the game's abstraction: never mention dice, rounds as game turns, or rules. Call a round "a day" or "the next morning" (or, where the brief gives hours, by its time of day).
 
 Name the engagement. Keep the provisional name unless it misdescribes the fight; it must contain the same place name. You may change only the form, for example "Siege of", "Storming of", "Assault on", "Battle of", "Action at", "Rout at", "Skirmish at", and keep any ordinal ("Second ...").`;
 

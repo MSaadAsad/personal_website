@@ -43,10 +43,12 @@ let MARCH_SCALE = 1;
 const PACE = 0.75;
 let ATTACK_MP = 2;             // march points an attack takes; a formation needs them left to attack
 const MAX_HP = 5;              // soldiers on the counter; each one is a fifth of the formation
-const MEN_PER_FORMATION = 1000; // a full formation is about a thousand men, so each figure is 200
-const MEN_PER_FIGURE = MEN_PER_FORMATION / MAX_HP;
-// Strength in men, as a round figure (to the nearest hundred).
-const menCount = figures => Math.round(figures * MEN_PER_FIGURE / 100) * 100;
+let MEN_PER_FORMATION = 1000; // a full formation is about a thousand men, so each figure is 200
+let MEN_PER_FIGURE = MEN_PER_FORMATION / MAX_HP;  // (a scenario of small detachments sets its own `menPerFormation`)
+// Strength in men, as a round figure (to the nearest hundred, or ten for small detachments).
+const menCount = figures => { const r = MEN_PER_FIGURE < 100 ? 10 : 100; return Math.round(figures * MEN_PER_FIGURE / r) * r; };
+// A formation raised under strength (a company, a troop) never rallies past it.
+const maxHp = u => u.max || MAX_HP;
 const men = figures => `${menCount(figures).toLocaleString('en')} men`;
 const WAVER_BELOW = 0.4;       // below this share a formation falls back and cannot attack
 const SAVE_VERSION = 12;
@@ -61,6 +63,7 @@ let VP_TARGET, ROUND_LIMIT, FIRST, GENERALS, STRONGPOINTS, START_OWNERS, START_U
 function applyScenario(id) {
   MAP_ID = id; SCN = SCENARIOS[id]; MAP = window.MAPS[SCN.map || id];  // several scenarios can share a map
   MARCH_SCALE = 2 / (MAP.hexKm || 2);
+  MEN_PER_FORMATION = SCN.menPerFormation || 1000; MEN_PER_FIGURE = MEN_PER_FORMATION / MAX_HP;
   [GENERAL_RIDE, GENERAL_REACH, WAGON_MP, BATTLE_REACH] = [12, 4, 8, 3].map(n => Math.round(n * MARCH_SCALE));
   ATTACK_MP = Math.round(2 * MARCH_SCALE * PACE);
   SAVE_KEY = `jhelum-marches-${id}-v${SAVE_VERSION}`;
@@ -88,7 +91,9 @@ function indexPlaces() {
 
 function newCampaign({ player = 'azure', ai = true, fog = true } = {}) {
   let seq = 0;
-  const units = START_UNITS.map(([side, variant, at, name]) => makeUnit(side, variant, hexOfStop(at), `${side[0]}${++seq}`, name));
+  // A starting formation may carry options: `post` keeps it where it stands
+  // under the computer (a bridge guard, a frontier post).
+  const units = START_UNITS.map(([side, variant, at, name, figures, opts]) => Object.assign(makeUnit(side, variant, hexOfStop(at), `${side[0]}${++seq}`, name, figures), opts));
   S = {
     version: SAVE_VERSION, map: MAP_ID, round: 1, turn: FIRST, player, ai: { azure: ai && player !== 'azure', red: ai && player !== 'red' }, fog, lastSeen: {},
     units, seq,
@@ -99,7 +104,7 @@ function newCampaign({ player = 'azure', ai = true, fog = true } = {}) {
     levied: {}, vp: { azure: 0, red: 0 }, winner: null, log: [], undo: null, selected: null,
     ferries: [], ferryBuilt: { azure: false, red: false },
     walls: { ...(SCN.walls || {}) },  // great fortifications that must be breached
-    battered: {}, kacha: {},             // levels shelled off places' works; kacha forts dug, by hex
+    battered: {}, kacha: {}, mines: {},  // levels shelled off places' works; kacha forts dug, by hex; galleries under way, by target hex
     turnNo: 0, events: [], battles: [],  // the chronicle: what happened, gathered into battles
     frames: [],                          // the board at the start of every command, for replays
     arrived: {},                         // reinforcements that have marched in
@@ -112,9 +117,24 @@ function newCampaign({ player = 'azure', ai = true, fog = true } = {}) {
 }
 // A formation's full day's march, in this map's hexes.
 const fullMp = u => Math.round(VARIANTS[u.variant].mp * MARCH_SCALE * PACE);
-function makeUnit(side, variant, hex, id, name = null) {
-  return { id, side, variant, name: name || variant, hex, hp: MAX_HP, mp: Math.round(VARIANTS[variant].mp * MARCH_SCALE * PACE), attacked: false, moved: false, stock: 100 };
+function makeUnit(side, variant, hex, id, name = null, figures = MAX_HP) {
+  const u = { id, side, variant, name: name || variant, hex, hp: figures, mp: Math.round(VARIANTS[variant].mp * MARCH_SCALE * PACE), attacked: false, moved: false, stock: 100 };
+  if (figures < MAX_HP) u.max = figures;
+  return u;
 }
+
+// A scenario with a `clock` is fought in watches of `hours` from `from`
+// o'clock on its first `day`, rather than a day to a round; between eight in
+// the evening and five in the morning it is night.
+function clockAt(r) { const c = SCN.clock, h = c.from + (r - 1) * c.hours; return { day: c.day + Math.floor(h / 24), hour: h % 24 }; }
+function roundName(r = S.round) {
+  if (!SCN.clock) return `Day ${r}`;
+  const { day, hour } = clockAt(r), time = hour === 0 ? 'midnight' : hour === 12 ? 'noon' : `${hour % 12} ${hour < 12 ? 'am' : 'pm'}`;
+  return `${day} ${SCN.clock.month}, ${time}`;
+}
+const isNight = (r = S?.round) => !!SCN.clock && r !== undefined && (({ hour }) => hour >= 20 || hour < 5)(clockAt(r));
+// The share of a day's rations eaten (and brought up) in a round.
+const dayShare = () => SCN.clock ? SCN.clock.hours / 24 : 1;
 
 function save() {
   if (S.replay) return;  // a replay borrows the board; it is never saved
@@ -191,7 +211,7 @@ function pathTo(reach, from, to) {
 
 // A formation below 40% strength has lost its nerve: it falls back when hit
 // and cannot attack until it rallies.
-const wavering = u => u.hp < MAX_HP * WAVER_BELOW;
+const wavering = u => u.hp < maxHp(u) * WAVER_BELOW;
 
 // Melee across a great river is impossible; fire can reach over it.
 // `mpLeft`: the march points the formation would have left at `fromHex`.
@@ -316,13 +336,15 @@ function supplyField(side) {
 }
 
 // ---------------------------------------------------------------------------
-// Ferries: once per campaign each side may lash boats together across the
-// Jhelum or Chenab. It costs the builders their whole command and one
+// Ferries: once per campaign each side's foot may lash boats together across
+// the Jhelum or Chenab. It costs the builders their whole command and one
 // soldier, and once it stands anyone may use it.
 
 const FERRY_COST = 1;
+// Only foot do the spadework: ferries and kacha forts are infantry jobs.
+const isFoot = u => VARIANTS[u.variant].type === 'foot';
 function ferrySites(u) {
-  if (!u || S.ferryBuilt[u.side] || u.side !== S.turn || u.attacked || u.hp <= FERRY_COST + 1) return [];
+  if (!u || !isFoot(u) || S.ferryBuilt[u.side] || u.side !== S.turn || u.attacked || u.hp <= FERRY_COST + 1) return [];
   const h = HEXES[u.hex];
   return h.nbr.filter((n, dir) => n >= 0 && h.river[dir] === 'major');
 }
@@ -363,26 +385,98 @@ function worksOf(hex) {
 // Defence still standing: a level counts whole while any part of it stands.
 const fortLevels = hex => Math.ceil(worksOf(hex)?.left || 0) + Math.ceil(S.walls?.[HEXES[hex].place] || 0);
 
+// Wear `dmg` levels off the works at a hex: a great fortress's walls go
+// first, then the place's own works, then a kacha fort.
+function wearWorks(hex, dmg) {
+  const key = HEXES[hex].place;
+  if (S.walls?.[key] > 0) { const t = Math.min(S.walls[key], dmg); S.walls[key] = r2(S.walls[key] - t); dmg = r2(dmg - t); }
+  if (dmg > 0 && settlementDef(hex) > 0) { S.battered ||= {}; S.battered[key] = r2(Math.min(settlementDef(hex), (S.battered[key] || 0) + dmg)); }
+  else if (dmg > 0 && S.kacha?.[hex] > 0) { S.kacha[hex] = r2(Math.max(0, S.kacha[hex] - dmg)); if (!S.kacha[hex]) delete S.kacha[hex]; }
+}
+const worksTitle = hex => settlementDef(hex) > 0 ? MAP.places[HEXES[hex].place].name : 'the kacha fort';
+function noteBreach(att, hex, after, mine = false) {
+  const key = HEXES[hex].place;
+  note({ t: 'breach', side: att.side, unit: muster(att), place: settlementDef(hex) > 0 ? key : null, hex, left: after, walls: S.walls?.[key], battered: S.battered?.[key], kacha: S.kacha?.[hex] || 0, mine });
+}
+
 // Every bombardment wears the works down: a hit brings down a level, any
 // other shot part of one (more from the heavier pieces).
 function shell(att, hex, hit) {
   const before = fortLevels(hex);
   if (!before) return;
-  const key = HEXES[hex].place, name = settlementDef(hex) > 0 ? MAP.places[key].name : 'the kacha fort';
-  let dmg = hit ? 1 : 0.1 + 0.05 * (VARIANTS[att.variant].breach ?? 1);
-  if (S.walls?.[key] > 0) { const t = Math.min(S.walls[key], dmg); S.walls[key] = r2(S.walls[key] - t); dmg = r2(dmg - t); }
-  if (dmg > 0 && settlementDef(hex) > 0) { S.battered ||= {}; S.battered[key] = r2(Math.min(settlementDef(hex), (S.battered[key] || 0) + dmg)); }
-  else if (dmg > 0 && S.kacha?.[hex] > 0) { S.kacha[hex] = r2(Math.max(0, S.kacha[hex] - dmg)); if (!S.kacha[hex]) delete S.kacha[hex]; }
+  wearWorks(hex, hit ? 1 : 0.1 + 0.05 * (VARIANTS[att.variant].breach ?? 1));
   const after = fortLevels(hex);
   if (after >= before) return;
-  note({ t: 'breach', side: att.side, unit: muster(att), place: settlementDef(hex) > 0 ? key : null, hex, left: after, walls: S.walls?.[key], battered: S.battered?.[key], kacha: S.kacha?.[hex] || 0 });
-  log(att.side, `<b>The guns battered down the works of ${name}</b> (${after ? `${after} defence left standing` : 'nothing left standing'}).`);
+  noteBreach(att, hex, after);
+  log(att.side, `<b>The guns battered down the works of ${worksTitle(hex)}</b> (${after ? `${after} defence left standing` : 'nothing left standing'}).`);
   UI.flash(after ? 'WALLS BATTERED' : 'THE WALLS ARE DOWN', att.side);
 }
 
-// A formation that spends its whole day digging throws up a kacha fort round
+// Mines: foot next to enemy works dig a gallery under them, a whole day at a
+// time; on the last day it is sprung and brings MINE_LEVELS down at once.
+// The gallery is lost if no one of the side is left at its mouth.
+const MINE_DAYS = 3, MINE_LEVELS = 2;
+const enemyHeld = (hex, side) => S.units.some(e => e.hex === hex && e.side !== side)
+  || STRONG_HEX.has(hex) && S.owners[STRONG_HEX.get(hex)] === other(side) || FORT_HEX.has(hex) && S.forts[FORT_HEX.get(hex)] === other(side);
+const mineTargets = u => HEXES[u.hex].nbr.filter(n => n >= 0 && fortLevels(n) > 0 && enemyHeld(n, u.side));
+const galleryAt = (side, from) => Object.entries(S.mines || {}).find(([, m]) => m.side === side && m.from === from);
+const canMine = u => !!u && isFoot(u) && !S.winner && u.side === S.turn && !u.moved && !u.attacked && u.mp >= fullMp(u) && mineTargets(u).length > 0;
+// Carry on the gallery begun from this hex, else start under the strongest works.
+function mineTarget(u) {
+  const g = galleryAt(u.side, u.hex), targets = mineTargets(u);
+  if (g && targets.includes(+g[0])) return +g[0];
+  return targets.sort((a, b) => fortLevels(b) - fortLevels(a))[0];
+}
+function digMine(u) {
+  if (!canMine(u)) return false;
+  const target = mineTarget(u), name = worksTitle(target);
+  S.mines ||= {};
+  for (const [k, m] of Object.entries(S.mines)) if (m.side === u.side && m.from === u.hex && +k !== target) delete S.mines[k];
+  const m = S.mines[target]?.side === u.side && S.mines[target].from === u.hex ? S.mines[target] : (S.mines[target] = { side: u.side, from: u.hex, days: 0 });
+  m.days++;
+  u.mp = 0; u.attacked = true; S.undo = null;
+  if (m.days < MINE_DAYS) {
+    note({ t: 'mine', side: u.side, unit: muster(u), hex: target, from: u.hex, days: m.days });
+    log(u.side, `<b>${u.name}</b> drove a mine towards the works of ${name} (${m.days} of ${MINE_DAYS} days). Keep a formation at its mouth.`);
+    UI.flash('MINE DUG', u.side);
+  } else {
+    delete S.mines[target];
+    wearWorks(target, MINE_LEVELS);
+    const after = fortLevels(target);
+    noteBreach(u, target, after, true);
+    log(u.side, `<b>${u.name} sprang a mine under ${name}</b>: the works came down (${after ? `${after} defence left standing` : 'nothing left standing'}).`);
+    UI.flash('MINE SPRUNG', u.side);
+  }
+  save(); UI.refresh();
+  return true;
+}
+// The garrison can countermine: foot in the works spend their day digging to
+// meet the gallery, and break into it on a roll of 4 or better.
+const enemyGallery = u => Object.entries(S.mines || {}).find(([k, m]) => +k === u.hex && m.side !== u.side);
+const canCountermine = u => !!u && isFoot(u) && !S.winner && u.side === S.turn && !u.moved && !u.attacked && u.mp >= fullMp(u) && !!enemyGallery(u);
+function countermine(u) {
+  if (!canCountermine(u)) return false;
+  const [k, m] = enemyGallery(u), roll = 1 + Math.floor(Math.random() * 6), name = worksTitle(u.hex);
+  u.mp = 0; u.attacked = true; S.undo = null;
+  if (roll >= 4) delete S.mines[k];
+  note({ t: 'countermine', side: u.side, unit: muster(u), hex: u.hex, from: m.from, broke: roll >= 4 });
+  log(u.side, roll >= 4 ? `<b>${u.name}</b> countermined under ${name} and broke into the enemy’s gallery: the mine is lost.` : `${u.name} countermined under ${name} but could not find the enemy’s gallery (rolled ${roll}).`);
+  UI.flash(roll >= 4 ? 'GALLERY BROKEN' : 'COUNTERMINE FAILED', u.side);
+  save(); UI.refresh();
+  return true;
+}
+// At the start of a side's command its galleries with no one at the mouth are lost.
+function checkMines() {
+  for (const [k, m] of Object.entries(S.mines || {})) {
+    if (m.side !== S.turn || S.units.some(u => u.side === m.side && u.hex === m.from) && fortLevels(+k) > 0) continue;
+    delete S.mines[k];
+    if (fortLevels(+k) > 0) log(m.side, `The mine under ${worksTitle(+k)} was abandoned.`);
+  }
+}
+
+// A foot formation that spends its whole day digging throws up a kacha fort round
 // its hex, out of reach of the enemy.
-const canFortify = u => !!u && !S.winner && u.side === S.turn && !u.moved && !u.attacked && u.mp >= fullMp(u)
+const canFortify = u => !!u && isFoot(u) && !S.winner && u.side === S.turn && !u.moved && !u.attacked && u.mp >= fullMp(u)
   && !settlementDef(u.hex) && !(S.kacha?.[u.hex] > 0)
   && !HEXES[u.hex].nbr.some(n => n >= 0 && S.units.some(e => e.side !== u.side && e.hex === n));
 function fortify(u) {
@@ -490,7 +584,7 @@ function resolve(m, att, def, melee) {
   return { outcome: 'repulse', dDef: 0, dAtt: bites ? damageOut(def, 2) : 1 };
 }
 // Breaks = destroyed, or pushed below 40% and forced back (a led formation holds).
-const breaks = (u, loss) => u.hp - loss <= 0 || (!ledBy(u) && settlementDef(u.hex) < SETTLEMENT_DEF.fort && u.hp - loss < MAX_HP * WAVER_BELOW && loss > 0);
+const breaks = (u, loss) => u.hp - loss <= 0 || (!ledBy(u) && settlementDef(u.hex) < SETTLEMENT_DEF.fort && u.hp - loss < maxHp(u) * WAVER_BELOW && loss > 0);
 
 function forecast(att, fromHex, target, mpLeft = att.mp) {
   const def = defenderIn(target.hex, att, fromHex) || target, A = attackOf(att, fromHex, def, mpLeft), D = defenceOf(def, att, fromHex);
@@ -791,9 +885,9 @@ function arrive() {
     if (r.side !== S.turn || r.round !== S.round || S.arrived?.[i]) return;
     (S.arrived ||= {})[i] = true;
     const at = hexOfStop(r.at);
-    for (const [variant, name] of r.units) {
+    for (const [variant, name, figures] of r.units) {
       const hex = roomNear(at, r.side);
-      if (hex >= 0) S.units.push(makeUnit(r.side, variant, hex, nextUnitId(r.side), name));
+      if (hex >= 0) S.units.push(makeUnit(r.side, variant, hex, nextUnitId(r.side), name, figures));
     }
     log(r.side, `<b>${r.name}</b> ${r.note || 'joined the army'}.`);
     UI.flash(`${r.name.toUpperCase()} ARRIVES`, r.side);
@@ -831,6 +925,7 @@ function happen() {
 function startTurn() {
   happen();
   arrive();
+  checkMines();
   for (const u of S.units) if (u.side === S.turn) { u.mp = fullMp(u); u.attacked = false; u.moved = false; }
   Object.assign(S.generals[S.turn], { rode: false, forced: false });
   S.undo = null; S.selected = null;
@@ -840,7 +935,7 @@ function startTurn() {
 }
 const boardSnapshot = () => JSON.parse(JSON.stringify({
   round: S.round, turn: S.turn, units: S.units, owners: S.owners, forts: S.forts, allies: S.allies,
-  levied: S.levied, vp: S.vp, generals: S.generals, walls: S.walls, battered: S.battered || {}, kacha: S.kacha || {},
+  levied: S.levied, vp: S.vp, generals: S.generals, walls: S.walls, battered: S.battered || {}, kacha: S.kacha || {}, mines: S.mines || {},
 }));
 
 async function endTurn() {
@@ -848,8 +943,8 @@ async function endTurn() {
   const side = S.turn, zoc = enemyZoc(side);
   // Formations that held still away from the enemy recover soldiers; the
   // general's presence brings stragglers back faster.
-  for (const u of S.units) if (u.side === side && !u.moved && !u.attacked && u.hp < MAX_HP && !zoc[u.hex] && stockOf(u) >= STOCK_HUNGRY) {
-    const gain = Math.min(MAX_HP - u.hp, nearGeneral(u) ? 2 : 1);
+  for (const u of S.units) if (u.side === side && !u.moved && !u.attacked && u.hp < maxHp(u) && !zoc[u.hex] && stockOf(u) >= STOCK_HUNGRY) {
+    const gain = Math.min(maxHp(u) - u.hp, nearGeneral(u) ? 2 : 1);
     u.hp += gain;
     log(side, `${u.name} rested and rallied +${men(gain)} (${men(u.hp)}).`);
   }
@@ -859,7 +954,7 @@ async function endTurn() {
     // A garrison shut up in a besieged fort or walled town lives on its
     // magazines: half rations, so it starves over a week or two, not days.
     const before = stockOf(u), got = delivery(u), shut = settlementDef(u.hex) >= SETTLEMENT_DEF.town && besieged(u.hex, side);
-    u.stock = Math.max(0, Math.min(100, before - STOCK_USE / (shut ? 2 : 1) + got));
+    u.stock = Math.max(0, Math.min(100, Math.round(before + (got - STOCK_USE / (shut ? 2 : 1)) * dayShare())));
     if (before >= STOCK_HUNGRY && u.stock < STOCK_HUNGRY) log(side, `${u.name} is going hungry: its wagons cannot keep up (${u.stock}% supplies).`);
     if (u.stock >= STOCK_DESERT) continue;
     u.hp--;
@@ -889,7 +984,7 @@ async function endTurn() {
   S.roundEnded = other(side) === FIRST;
   if (other(side) === FIRST) for (const s of [FIRST, other(FIRST)]) {
     const held = STRONGPOINTS.filter(k => S.owners[k] === s).length;
-    if (held) { S.vp[s] += held; log(s, `${held} strongpoint${held === 1 ? '' : 's'} held at the end of round ${S.round}: <b>+${held} war points</b> (${S.vp[s]}/${VP_TARGET}).`); }
+    if (held) { S.vp[s] += held; if (Number.isFinite(VP_TARGET)) log(s, `${held} strongpoint${held === 1 ? '' : 's'} held at the end of round ${S.round}: <b>+${held} war points</b> (${S.vp[s]}/${VP_TARGET}).`); }
   }
   if (checkVictory()) { save(); UI.refresh(); return; }
   S.turnNo++;
@@ -911,7 +1006,7 @@ async function endTurn() {
     save(); UI.refresh(); return;
   }
   startTurn();
-  log(S.turn, `Round ${S.round}: the ${SIDES[S.turn].name} takes the initiative.`);
+  log(S.turn, `${SCN.clock ? roundName() : `Round ${S.round}`}: the ${SIDES[S.turn].name} takes the initiative.${SCN.clock && isNight() && !isNight(S.round - (S.turn === FIRST ? 1 : 0)) ? ' Night has fallen.' : ''}`);
   save();
   UI.refresh();
   UI.banner();
@@ -927,7 +1022,11 @@ function declareWinner(side, reason) {
 // attacker must hold at the end of a round; with `general`, taking the
 // defending general wins as well.
 const goalForts = () => SCN.goal ? SCN.goal.forts || [SCN.goal.fort] : [];
-const goalMet = side => goalForts().filter(k => S.owners[k] === side).length >= (SCN.goal.need || goalForts().length);
+const goalMet = side => goalForts().length > 0 && goalForts().filter(k => S.owners[k] === side).length >= (SCN.goal.need || goalForts().length);
+// An escape goal: the side wins once `need` of its soldiers (figures) stand
+// on the ground of `power` at the end of its command, out of the enemy's reach.
+const escapeGoal = () => SCN.goal?.escape || null;
+const escaped = side => escapeGoal()?.side === side ? S.units.filter(u => u.side === side && HEXES[u.hex].territory === escapeGoal().power).reduce((n, u) => n + u.hp, 0) : 0;
 
 function checkVictory() {
   if (S.winner) return true;
@@ -935,6 +1034,7 @@ function checkVictory() {
   if (g && goalMet(g.attacker) && S.roundEnded) { declareWinner(g.attacker, g.attackerWins); return true; }
   // Some goals also fall to the attacker if the defending general is taken.
   if (g && g.general && S.generals[other(g.attacker)].captured) { declareWinner(g.attacker, g.generalWins); return true; }
+  if (g?.escape && S.turn === g.escape.side && escaped(g.escape.side) >= g.escape.need) { declareWinner(g.escape.side, g.escapeWins); return true; }
   const lead = S.vp.azure === S.vp.red ? null : S.vp.azure > S.vp.red ? 'azure' : 'red';
   if (lead && S.vp[lead] >= VP_TARGET) { declareWinner(lead, `${S.vp[lead]} war points to ${S.vp[other(lead)]}: the forts and ghats of the Jhelum answer to the ${SIDES[lead].name}.`); return true; }
   for (const side of ['azure', 'red']) {
@@ -953,7 +1053,10 @@ function checkVictory() {
 // could make from there (expected soldiers struck down minus those risked).
 
 function aiGoalField(side) {
-  const sources = [];
+  const sources = [], esc = escapeGoal();
+  // A side making its escape heads for the ground it must reach; the other hunts it.
+  if (esc?.side === side) { HEXES.forEach((h, i) => { if (h.territory === esc.power) sources.push([i, 0]); }); return costField(sources).dist; }
+  if (esc) for (const u of believedEnemies(side)) sources.push([u.hex, 0]);
   // Nearest objectives first: each one taken becomes a depot for the next.
   // Where only some of several goals must be held, walls count as distance:
   // the easier ones are worth taking first.
@@ -1039,8 +1142,10 @@ function aiPlan(u, goal, threat, garrisoned, looming, supply) {
   const vital = SCN.goal && goalForts().includes(key) && u.side !== SCN.goal.attacker;
   const holders = unitsAt(here).filter(f => f.side === u.side && VARIANTS[f.variant].type !== 'horse').length;
   const vitalDuty = vital && (VARIANTS[u.variant].type !== 'horse' || !holders) && (garrisoned.get(here) || 0) < STACK_LIMIT;
-  const garrison = key && S.owners[key] === u.side && !wavering(u) && (vitalDuty || (looming[here] > 0 && !garrisoned.has(here)));
-  const options = garrison || u.mp <= 0 ? [here] : [here, ...reach.cost.keys()];
+  // A side making its escape holds nothing: it only wants to be gone.
+  const fleeing = escapeGoal()?.side === u.side;
+  const garrison = !fleeing && key && S.owners[key] === u.side && !wavering(u) && (vitalDuty || (looming[here] > 0 && !garrisoned.has(here)));
+  const options = garrison || u.post || u.mp <= 0 ? [here] : [here, ...reach.cost.keys()];
   const foes = knownEnemies(u.side), walledEnemy = [...new Set(foes.map(e => e.hex))].filter(h => fortLevels(h) >= 2);
   const works = v.type === 'guns' && v.range > 1 ? enemyWorks(u.side) : [];
   const precious = preciousGeneral(u);
@@ -1054,7 +1159,7 @@ function aiPlan(u, goal, threat, garrisoned, looming, supply) {
     const h = HEXES[hex], cover = TERRAIN[h.terrain].def + (h.cover ? 1 : 0) + fortLevels(hex);
     let score = -goal[hex] * (wavering(u) ? 0.2 : 0.9 * pull);
     if (!Number.isFinite(score)) score = -999;
-    const sk = STRONG_HEX.get(hex);
+    const sk = fleeing ? undefined : STRONG_HEX.get(hex);
     if (sk && S.owners[sk] !== u.side) score += 14;
     else if (sk && threat[hex] > 0 && !garrisoned.has(hex)) score += hex === here ? 5 : 9;
     // Foot and guns are drawn back into an under-garrisoned objective.
@@ -1084,7 +1189,7 @@ function aiPlan(u, goal, threat, garrisoned, looming, supply) {
     if (precious && foes.some(e => hexDistance(e.hex, hex) === 1)) score -= 12;
     score -= friendsAt(hex) * 0.6;
     // Standing still out of contact rallies a worn formation.
-    if (hex === here && !u.moved && u.hp < MAX_HP && !zoc[hex]) score += 1.6 * Math.min(2, MAX_HP - u.hp) * (nearGeneral(u) ? 1.5 : 1);
+    if (hex === here && !u.moved && u.hp < maxHp(u) && !zoc[hex]) score += 1.6 * Math.min(2, maxHp(u) - u.hp) * (nearGeneral(u) ? 1.5 : 1);
     // Strikes it can make today, and ones it is setting up for tomorrow: a
     // formation that closes in with too little march left to attack can hit
     // next day from where it stands, steadier for having held its ground.
@@ -1125,10 +1230,11 @@ async function aiGeneral(side) {
 // A formation may march to the bank first and build there the same day.
 async function aiFerry(side) {
   if (S.ferryBuilt[side] || S.round < 2) return;
+  if (escapeGoal() && escapeGoal().side !== side) return;  // the hunters do not open a way across for the hunted
   const goal = aiGoalField(side);
   let best = null;
   for (const u of S.units) {
-    if (u.side !== side || u.attacked || u.hp <= FERRY_COST + 2 || VARIANTS[u.variant].type === 'guns') continue;
+    if (u.side !== side || u.attacked || u.hp <= FERRY_COST + 2 || !isFoot(u)) continue;
     const reach = reachable(u);
     for (const hex of [u.hex, ...reach.cost.keys()]) {
       if (S.units.some(v => v.hex === hex && v !== u)) continue;
@@ -1178,6 +1284,10 @@ async function runAI(side) {
       // days off: on an unwalled strongpoint, or covering its own siege guns.
       const worthDigging = STRONG_HEX.has(u.hex) || VARIANTS[u.variant].type === 'guns' && knownEnemies(side).some(e => hexDistance(e.hex, u.hex) <= 2 && fortLevels(e.hex) > 0);
       if (pass === 0 && plan.hex === u.hex && !plan.strike && !dug && worthDigging && looming[u.hex] > 0 && canFortify(u)) { await UI.focus(u.hex); fortify(u); dug++; continue; }
+      // A garrison with a mine under it countermines unless it has a good blow to strike.
+      if (pass === 0 && canCountermine(u) && (!plan.strike || plan.strike.value < 3)) { await UI.focus(u.hex); countermine(u); continue; }
+      // Foot already at the walls with nothing better to strike mines them.
+      if (pass === 0 && plan.hex === u.hex && (!plan.strike || plan.strike.value < 1.5) && canMine(u) && (galleryAt(side, u.hex) || fortLevels(mineTarget(u)) >= MINE_LEVELS)) { await UI.focus(u.hex); digMine(u); continue; }
       if (plan.hex !== u.hex) {
         await UI.focus(u.hex);
         await moveUnit(u, plan.hex, plan.reach);

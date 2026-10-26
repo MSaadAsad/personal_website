@@ -69,6 +69,7 @@ const CAMPAIGN_MAP = (() => {
     lahore: { at: [31.58, 74.33], off: [0, 0], side: 'l', name: 'Lahore' },
     multan1818: { at: [30.20, 71.47], off: [-24, -20], side: 'l', name: 'Multan' },
     multan1849: { at: [30.20, 71.47], off: [24, 14], side: 'r', name: 'Multan', year: '1848–49' },
+    jhelum1857: { at: [32.925, 73.725], off: [20, 16], side: 'r', name: 'Jhelum' },
   };
 
   const line = pts => 'M' + pts.map(p => px(p).map(f).join(' ')).join('L');
@@ -140,7 +141,7 @@ const CAMPAIGN_MAP = (() => {
   function cartouche() {
     const [x0] = px([0, 74.05]), [, y0] = px([30.18, 0]), w = W - M - 12 - x0, km = K / 111.32; // px per km
     let s = `<g class="cm-cartouche" transform="translate(${f(x0)} ${f(y0)})"><rect width="${f(w)}" height="96" rx="3" class="cm-cart-box"/><rect x="4" y="4" width="${f(w - 8)}" height="88" rx="2" class="cm-cart-in"/>`;
-    s += `<text x="${f(w / 2)}" y="30" class="cm-cart-title">THE PANJAB</text><text x="${f(w / 2)}" y="47" class="cm-cart-sub">and its marches, 1764–1849</text>`;
+    s += `<text x="${f(w / 2)}" y="30" class="cm-cart-title">THE PANJAB</text><text x="${f(w / 2)}" y="47" class="cm-cart-sub">and its marches, 1764–1857</text>`;
     const bar = 100 * km, bx = (w - bar) / 2;
     for (let i = 0; i < 4; i++) s += `<rect x="${f(bx + i * bar / 4)}" y="62" width="${f(bar / 4)}" height="4" class="${i % 2 ? 'cm-scale-b' : 'cm-scale-a'}"/>`;
     s += `<text x="${f(bx)}" y="78" class="cm-cart-km">0</text><text x="${f(bx + bar / 2)}" y="78" class="cm-cart-km">50</text><text x="${f(bx + bar)}" y="78" class="cm-cart-km">100 km</text></g>`;
@@ -154,8 +155,10 @@ const CAMPAIGN_MAP = (() => {
       + `<text y="-30" class="cm-rose-n">N</text></g>`;
   }
 
-  function seal(g, current) {
+  function seal(g, current, era) {
     const s = SPOTS[g.group]; if (!s) return '';
+    // Battles of other eras stay on the map, faint, as landmarks.
+    if (era && g.era !== era) { const [x, y] = px(s.at); return `<circle cx="${f(x)}" cy="${f(y)}" r="3.2" class="cm-past"><title>${g.title}, ${g.year}</title></circle>`; }
     const [x, y] = px(s.at), [dx, dy] = s.off, on = g.group === current;
     const year = s.year || g.year, name = s.name;
     const tx = s.side === 'l' ? -17 : 17, anchor = s.side === 'l' ? 'end' : 'start';
@@ -167,8 +170,8 @@ const CAMPAIGN_MAP = (() => {
       + `<text x="${tx}" y="-1" text-anchor="${anchor}" class="cm-bname">${name}</text><text x="${tx}" y="11" text-anchor="${anchor}" class="cm-byear">${year}</text></g>`;
   }
 
-  function draw(groups, current) {
-    const r = rand(1849), battleTowns = new Set(['Gujrat', 'Lahore', 'Multan']);
+  function draw(groups, current, era) {
+    const r = rand(1849), battleTowns = new Set(groups.filter(g => !era || g.era === era).map(g => SPOTS[g.group]?.name));  // a battle's seal names its town
     let svg = `<svg viewBox="0 0 ${W} ${H}" class="campaign-map" role="img" aria-label="Map of the Punjab with the campaigns">`
       + `<defs><filter id="cmGrain" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" seed="7"/><feColorMatrix values="0 0 0 0 .35  0 0 0 0 .25  0 0 0 0 .12  0 0 0 .5 0"/><feComposite in2="SourceGraphic" operator="in"/></filter>`
       + `<filter id="cmBlot" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency=".012" numOctaves="3" seed="3"/><feColorMatrix values="0 0 0 0 .55  0 0 0 0 .40  0 0 0 0 .20  0 0 0 .55 -.18"/><feComposite in2="SourceGraphic" operator="in"/></filter>`
@@ -197,7 +200,7 @@ const CAMPAIGN_MAP = (() => {
     svg += `<rect x="${M}" y="${M}" width="${IW}" height="${IH}" fill="url(#cmVignette)" pointer-events="none"/>`;
     svg += frame() + compass() + cartouche();
     // The chosen campaign's seal goes last so it sits on top.
-    for (const g of [...groups].sort((a, b) => (a.group === current) - (b.group === current))) svg += seal(g, current);
+    for (const g of [...groups].sort((a, b) => (a.group === current) - (b.group === current))) svg += seal(g, current, era);
     return svg + '</svg>';
   }
   return { draw };

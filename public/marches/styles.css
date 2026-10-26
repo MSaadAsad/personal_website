@@ -37,7 +37,7 @@ kbd { display: inline-block; min-width: 18px; padding: 0 5px; border: 1px solid 
 .score.azure .vp-track i { background: var(--azure); }
 .score.red .vp-track { direction: rtl; } .score.red .vp-track i { background: var(--red); }
 .round { height: 100%; display: grid; place-content: center; text-align: center; border-inline: 1px solid var(--line); background: #17160f; line-height: 1.15; }
-.round small { font-size: 10px; color: var(--dim); letter-spacing: .06em; text-transform: uppercase; }
+.round small { font-size: 10px; color: var(--dim); letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; }
 .round b { font: 700 22px/1 var(--serif); color: var(--gold-2); }
 .round em { font-style: normal; font-size: 13px; color: var(--dim); }
 
@@ -620,6 +620,13 @@ em.writing::before { content: ""; display: inline-block; width: 8px; height: 8px
 .cm-halo { fill: none; stroke: #b5432f; stroke-width: 2; opacity: .8; animation: cmPulse 1.8s ease-out infinite; transform-box: fill-box; transform-origin: center; }
 @keyframes cmPulse { from { transform: scale(.75); opacity: .9; } to { transform: scale(1.45); opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .cm-halo { animation: none; } }
+.era-pick { display: flex; flex-wrap: wrap; gap: 4px; margin: 6px 0 0; }
+.era { display: grid; gap: 1px; padding: 5px 10px 6px; border-radius: 6px; border: 1px solid var(--line-2); background: var(--panel-2); text-align: left; }
+.era b { font: 700 12.5px var(--serif); } .era small { font-size: 10.5px; color: var(--muted); }
+.era.active { border-color: var(--gold); background: #2b2616; } .era.active b { color: var(--gold-2); }
+.era.empty:not(.active) { opacity: .55; }
+.cm-past { fill: #7a2418; opacity: .45; stroke: #ead9ae; stroke-width: 1; }
+.cm-none { margin: 0; font-size: 12.5px; color: var(--muted); font-style: italic; }
 .cm-list { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 12px; }
 .cm-chip { padding: 5px 10px; border-radius: 999px; border: 1px solid var(--line-2); background: var(--panel-2); font-size: 12.5px; }
 .cm-chip.active { border-color: var(--gold); color: var(--gold-2); }
@@ -634,6 +641,10 @@ em.writing::before { content: ""; display: inline-block; width: 8px; height: 8px
 .marker.kacha .ditch { fill: none; stroke: #5b4128; stroke-width: 1; stroke-dasharray: 2 1.5; }
 .marker.kacha .rampart { fill: #a07a4c22; stroke: #7a5634; stroke-width: 2.6; stroke-linejoin: round; }
 .marker.kacha .bast { fill: #a07a4c; stroke: #5b4128; stroke-width: .7; }
+.marker.mine svg { position: absolute; left: -9px; top: -9px; width: 18px; height: 18px; pointer-events: auto; }
+.marker.mine .shaft { stroke: #3f2c1a; stroke-width: 3; stroke-dasharray: 2 1.6; fill: none; }
+.marker.mine .pick { stroke: #2a1d10; stroke-width: 1.6; fill: none; stroke-linecap: round; }
+.marker.mine b { position: absolute; left: 8px; top: -14px; font: 700 10px var(--sans); color: #fff3d6; background: #3f2c1acc; padding: 0 3px; border-radius: 3px; }
 .marker.rubble svg { position: absolute; left: 2px; top: -4px; width: 24px; height: 24px; opacity: calc(.45 + .55 * var(--n)); pointer-events: auto; }
 .marker.rubble .smoke { fill: none; stroke: #6d655a; stroke-width: 1.4; stroke-linecap: round; opacity: .7; }
 .marker.rubble .stones { fill: #8c7457; stroke: #3f2c1a; stroke-width: .6; }

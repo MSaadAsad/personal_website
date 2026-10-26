@@ -782,4 +782,143 @@ const SCENARIOS = {
       { text: 'Kabul River', lat: 34.12, lon: 71.66, cls: 'water', tier: 1, angle: 10 },
     ],
   },
+
+  // Jhelum, 7 July 1857, after Cave-Browne, The Punjab and Delhi in 1857
+  // (1861), vol. II, pp. 48-58, with his sketch of the cantonment. To stop
+  // the 14th Native Infantry carrying the mutiny into the Punjab, Sir John
+  // Lawrence had it disarmed at Jhelum on the same morning the 58th were
+  // disarmed at Rawalpindi. Lt-Col. Ellice marched from Pindi with three
+  // companies of HM 24th (260), three horse-artillery guns under Captain
+  // Cookes and 150 of Miller's Police Battalion, and Lind's Mooltanee levies
+  // (some 460 horse and 250 foot, raw recruits with matchlocks) joined him;
+  // at Dina half the Mooltanee horse were sent across the river to hold the
+  // far bank. At dawn the guns and the rest of the horse took post between the
+  // lines and the town, the 24th came down off the high ground, and the 14th
+  // (some 500, once its hundred Sikhs had stepped out) loaded and fell back on
+  // its loopholed lines and quarter-guard. The Mooltanee charge was shot to
+  // pieces; about eleven the 24th carried the quarter-guard, Ellice falling
+  // badly wounded; a shell blew up the 39th's magazine; and some 300 got away
+  // to the village of Samlee, which held all afternoon against the guns. In
+  // the night they slipped away. The bridge of boats was held by Punjab
+  // police, the ferry-boats had long been taken up, and of those who reached
+  // the Mangla ford and Kashmir most were given up by the Maharaja's people.
+  // The rounds are three-hour watches from five in the morning on the 7th;
+  // a formation here is 250 men, so a figure is 50.
+  jhelum1857: {
+    map: 'jhelum1857', group: 'jhelum1857', mode: 'historic',
+    title: 'The Rising at Jhelum',
+    year: 1857,
+    region: 'Jhelum · Mangla',
+    blurb: 'July 1857. Delhi has fallen to the mutineers, and in the Punjab the Company is disarming every Hindustani regiment it does not trust. At dawn on the 7th a column from Rawalpindi, HM 24th, three horse-artillery guns, police and raw Mooltanee levies, closes on the cantonment at Jhelum to take the arms of the 14th Native Infantry. The 14th will not give them up. Their only way out is across the river into the Maharaja of Kashmir’s country, and the bridge of boats is already in the hands of the police.',
+    first: 'red',
+    vpTarget: Infinity,
+    roundLimit: 14,
+    menPerFormation: 250,
+    clock: { day: 7, month: 'July', from: 5, hours: 3 },
+    goal: {
+      escape: { side: 'azure', power: 'kashmir', need: 4 }, attacker: 'azure', forts: [], short: 'Get 200 men into Kashmir',
+      escapeWins: 'Two hundred of the regiment are over the river and into the Maharaja’s hills, arms in hand. The news runs down the Grand Trunk Road ahead of the dak, and Sialkot rises within the day.',
+      attackerWins: '', defenderWins: 'The 14th Native Infantry is destroyed as a regiment. The handful who got away are taken by the villagers or given up by the Kashmir authorities, and the rising does not spread beyond the Jhelum.',
+    },
+    sides: {
+      azure: { name: '14th Native Infantry', short: '14th N.I.', adj: 'sepoy', pitch: 'Some five hundred of the 14th, armed, in their own lines with the quarter-guard and loopholed huts round you. The bridge of boats is held against you and the boats are taken up. Get 200 men across into Kashmir by the Mangla ford, or by boats you seize, before the evening of the 8th.', tag: 'Moves second · reach Kashmir with 200 men' },
+      red: { name: 'Rawalpindi Column', short: 'Column', adj: 'Company', pitch: 'HM 24th, Cookes’s guns, Miller’s police and Lind’s Mooltanee horse and foot are round the cantonment at first light, with half the Mooltanee horse across the river. The 14th must not get away: keep them from the Mangla ford and the far bank until they are destroyed.', tag: 'Moves first · let fewer than 200 escape' },
+    },
+    generals: {
+      azure: { name: 'Mirza Dildar Baig', title: 'Leader of the mutineers of the 14th', leads: '14th N.I., Right Wing' },
+      red: { name: 'Lt-Col. Charles Ellice', title: 'Commanding the column, HM 24th Foot', leads: 'HM 24th Foot' },
+    },
+    // The column's road back to Rawalpindi; the 14th has nowhere to fall back on.
+    homeBase: { red: [33.095, 73.535], azure: null },
+    walls: { lines14: 1, samlee: 1 },  // the battlemented quarter-guard and loopholed huts; Samlee's mud walls and houses
+    strongpoints: ['jhelum', 'lines14', 'lines39', 'samlee', 'dina'],
+    startOwners: { jhelum: 'red', lines14: 'azure', dina: 'red' },
+    startUnits: [
+      // The 14th in its lines, its Sikhs gone over.
+      ['azure', 'Line Infantry', 'lines14', '14th N.I., Right Wing'], ['azure', 'Line Infantry', 'lines14', '14th N.I., Left Wing'],
+      // The 24th and the police coming down off the high ground by the fakir's takia.
+      ['red', 'Line Infantry', [32.936, 73.703], 'HM 24th Foot'], ['red', 'Matchlockmen', [32.936, 73.703], 'Miller’s Police Battalion', 3],
+      ['red', 'Matchlockmen', [32.939, 73.713], 'Mooltanee Foot'], ['red', 'Sepoy Infantry', [32.939, 73.713], 'Sikh Company of the 14th', 2],
+      // The guns and half the Mooltanee horse on the right of the cantonment, between the lines and the town.
+      ['red', 'Horse Artillery', [32.925, 73.726], 'Cookes’s Horse Artillery', 4], ['red', 'Irregular Sowars', [32.925, 73.726], 'Lind’s Mooltanee Horse'],
+      // The bridge held by police since first light; the other half of the horse across the river.
+      ['red', 'Matchlockmen', 'jhelum', 'Punjab Police', 2, { post: true }], ['red', 'Irregular Sowars', 'jhelum', 'Mounted Police', 1],
+      ['red', 'Irregular Sowars', [32.937, 73.751], 'Mooltanee Horse, far bank', 4, { post: true }],
+      ['red', 'Matchlockmen', 'dina', 'Dina Thana', 1, { post: true }],
+      // The Maharaja's post at the Kashmir end of the Mangla ford, which gave up those who came through.
+      ['red', 'Matchlockmen', [33.101, 73.673], 'Gulab Singh’s Post at the Ford', 2, { post: true }],
+    ],
+    events: [
+      { round: 3, side: 'red', text: 'A shell blows up the regimental magazine in the lines of the 39th', flash: 'THE MAGAZINE BLOWS UP', hurt: { at: 'lines39', hp: 1 } },
+    ],
+    powers: [
+      { id: 'jhelum', name: 'Jhelum District', chief: 'Major Clement Browne, Deputy Commissioner', seat: 'jhelum', npc: false, side: 'red', color: '#94493a', note: 'The Company’s district on the right bank', extraSeats: ['dina', 'rohtas', 'mangla', 'kalagujran'] },
+      { id: 'gujrat', name: 'Gujrat District', chief: 'The Company', seat: 'sarai', npc: false, side: 'red', color: '#8a5a44', note: 'The left bank below the Kashmir frontier', extraSeats: [[32.975, 73.805]] },
+      { id: 'kashmir', name: 'Kashmir', chief: 'Maharaja Gulab Singh', seat: 'manglafort', npc: false, side: null, color: '#3f7b4c', note: 'The Maharaja’s country above the Mangla ford: the 14th’s refuge', extraSeats: ['khari', 'kotkandhari'] },
+    ],
+    labels: [
+      { text: 'CANTONMENT', lat: 32.913, lon: 73.718, cls: 'region', tier: 2 },
+      { text: 'KASHMIR', lat: 33.07, lon: 73.75, cls: 'region', tier: 1 },
+      { text: 'Jhelum', lat: 32.905, lon: 73.722, cls: 'water', tier: 1, angle: 50 },
+    ],
+  },
+
+  // The same rising from the evening before: Ellice's column has halted at
+  // Dina and opened its sealed orders, Lind's horse are riding through the
+  // cantonment for the river, and the 14th, still armed, has heard enough to
+  // be wary. Round 1 is 5 p.m. on 6 July.
+  jhelum1857o: {
+    map: 'jhelum1857', group: 'jhelum1857', mode: 'open',
+    title: 'The Rising at Jhelum',
+    year: 1857,
+    region: 'Jhelum · Mangla',
+    blurb: 'Evening, 6 July 1857. Colonel Ellice’s column has halted at Dina, a march short of Jhelum, and opened its sealed orders: the 14th Native Infantry is to be disarmed in the morning. Half the Mooltanee horse are riding on through the cantonment to cross the river. The 14th, still armed in its lines, has heard enough to be wary. Strike first, or slip away before the column comes up.',
+    first: 'red',
+    vpTarget: Infinity,
+    roundLimit: 16,
+    menPerFormation: 250,
+    clock: { day: 6, month: 'July', from: 17, hours: 3 },
+    goal: {
+      escape: { side: 'azure', power: 'kashmir', need: 5 }, attacker: 'azure', forts: [], short: 'Get 250 men into Kashmir',
+      escapeWins: 'Half the regiment is over the river and into the Maharaja’s hills, arms in hand. The news runs down the Grand Trunk Road ahead of the dak, and Sialkot rises within the day.',
+      attackerWins: '', defenderWins: 'The 14th Native Infantry is destroyed as a regiment. The handful who got away are taken by the villagers or given up by the Kashmir authorities, and the rising does not spread beyond the Jhelum.',
+    },
+    sides: {
+      azure: { name: '14th Native Infantry', short: '14th N.I.', adj: 'sepoy', pitch: 'The whole regiment, some 600, is armed in its lines, and the column is a march away at Dina. Take the bridge of boats, seize boats, or march for the Mangla ford: get 250 men into Kashmir by the afternoon of the 8th.', tag: 'Moves second · reach Kashmir with 250 men' },
+      red: { name: 'Rawalpindi Column', short: 'Column', adj: 'Company', pitch: 'The column lies at Dina with its sealed orders open; half the Mooltanee horse are already on the road through the cantonment for the river. Close the crossings and the Mangla ford, then bring the 14th to bay.', tag: 'Moves first · let fewer than 250 escape' },
+    },
+    generals: {
+      azure: { name: 'Mirza Dildar Baig', title: 'Leader of the mutineers of the 14th', leads: '14th N.I., Right Wing' },
+      red: { name: 'Lt-Col. Charles Ellice', title: 'Commanding the column, HM 24th Foot', leads: 'HM 24th Foot' },
+    },
+    homeBase: { red: [33.095, 73.535], azure: null },
+    walls: { lines14: 1, samlee: 1 },
+    strongpoints: ['jhelum', 'lines14', 'lines39', 'samlee', 'dina'],
+    startOwners: { jhelum: 'red', lines14: 'azure', lines39: 'azure', dina: 'red' },
+    startUnits: [
+      ['azure', 'Line Infantry', 'lines14', '14th N.I., Right Wing'], ['azure', 'Line Infantry', 'lines14', '14th N.I., Left Wing'],
+      ['azure', 'Sepoy Infantry', 'lines39', '14th N.I., Sikh Company', 2],
+      // The column at Dina.
+      ['red', 'Line Infantry', 'dina', 'HM 24th Foot'], ['red', 'Horse Artillery', 'dina', 'Cookes’s Horse Artillery', 4],
+      ['red', 'Matchlockmen', [33.022, 73.612], 'Miller’s Police Battalion', 3], ['red', 'Matchlockmen', [33.022, 73.612], 'Mooltanee Foot'],
+      ['red', 'Irregular Sowars', [33.015, 73.625], 'Lind’s Mooltanee Horse'],
+      // Half the horse on the road through the cantonment for the river.
+      ['red', 'Irregular Sowars', [32.940, 73.700], 'Mooltanee Horse, advance', 4],
+      ['red', 'Matchlockmen', 'jhelum', 'Punjab Police', 2, { post: true }], ['red', 'Irregular Sowars', 'jhelum', 'Mounted Police', 1],
+      ['red', 'Matchlockmen', [33.101, 73.673], 'Gulab Singh’s Post at the Ford', 2, { post: true }],
+    ],
+    reinforcements: [
+      { round: 11, side: 'red', at: [33.095, 73.535], name: 'Colonel Browne with the 24th', note: 'came down the road from Rawalpindi by forced marches', units: [['Line Infantry', 'HM 24th, second detachment', 4]] },
+    ],
+    powers: [
+      { id: 'jhelum', name: 'Jhelum District', chief: 'Major Clement Browne, Deputy Commissioner', seat: 'jhelum', npc: false, side: 'red', color: '#94493a', note: 'The Company’s district on the right bank', extraSeats: ['dina', 'rohtas', 'mangla', 'kalagujran'] },
+      { id: 'gujrat', name: 'Gujrat District', chief: 'The Company', seat: 'sarai', npc: false, side: 'red', color: '#8a5a44', note: 'The left bank below the Kashmir frontier', extraSeats: [[32.975, 73.805]] },
+      { id: 'kashmir', name: 'Kashmir', chief: 'Maharaja Gulab Singh', seat: 'manglafort', npc: false, side: null, color: '#3f7b4c', note: 'The Maharaja’s country above the Mangla ford: the 14th’s refuge', extraSeats: ['khari', 'kotkandhari'] },
+    ],
+    labels: [
+      { text: 'CANTONMENT', lat: 32.913, lon: 73.718, cls: 'region', tier: 2 },
+      { text: 'KASHMIR', lat: 33.07, lon: 73.75, cls: 'region', tier: 1 },
+      { text: 'Jhelum', lat: 32.905, lon: 73.722, cls: 'water', tier: 1, angle: 50 },
+    ],
+  },
 };

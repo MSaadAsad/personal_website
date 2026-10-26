@@ -20,6 +20,8 @@ const HIGH_ACUITY_KM = 16;                                // from walls, towers 
 const DUST_KM = 4, DUST_M = 25;                           // a marching column's dust: seen further, standing high
 const POST_SIGHT_KM = 3;                                  // a held strongpoint or fort keeps a watch from its walls
 const CLOSE_KM = 1.5;                                     // troops under cover are seen only this close
+const NIGHT_KM = 1.5, NIGHT_HIGH_KM = 2;                  // by night a formation is made out only close by, and raises no dust to see
+const acuity = (type, high) => isNight() ? (high ? NIGHT_HIGH_KM : NIGHT_KM) : high ? HIGH_ACUITY_KM : ACUITY_KM[type];
 const EYE_M = { foot: 1.7, guns: 1.7, horse: 2.7 };       // the watcher's eye above the ground
 const WALL_EYE_M = { village: 5, sarai: 8, town: 8, city: 12, fort: 15 };   // from roofs, walls and towers
 const COVER_M = { woods: 8, forest: 15, scrub: 1.5 };     // what vegetation rises above the ground
@@ -72,10 +74,10 @@ function computeSight(side) {
   };
   for (const u of S.units) if (u.side === side) {
     const type = VARIANTS[u.variant].type, eye = eyeAt(u.hex, type);
-    watch(u.hex, raised(u.hex, eye) ? HIGH_ACUITY_KM : ACUITY_KM[type], eye);
+    watch(u.hex, acuity(type, raised(u.hex, eye)), eye);
   }
   const posts = [...STRONGPOINTS.filter(k => S.owners[k] === side), ...FORTS.filter(k => S.forts?.[k] === side)];
-  for (const k of posts) if (HEX_OF[k] >= 0 && !S.units.some(u => u.side === side && u.hex === HEX_OF[k])) watch(HEX_OF[k], POST_SIGHT_KM, eyeAt(HEX_OF[k], 'foot'));
+  for (const k of posts) if (HEX_OF[k] >= 0 && !S.units.some(u => u.side === side && u.hex === HEX_OF[k])) watch(HEX_OF[k], isNight() ? NIGHT_KM : POST_SIGHT_KM, eyeAt(HEX_OF[k], 'foot'));
   // Tidy the specks: fill holes, drop lone hexes that are no true viewpoint.
   const tidy = Uint8Array.from(ground);
   for (const h of HEXES) {
@@ -91,6 +93,7 @@ function computeSight(side) {
 // this side's formations can see, though the column itself is out of sight.
 function computeDust(side, vis) {
   const dust = new Set(), perKm = 1 / HEX_KM;
+  if (isNight()) return dust;
   const watchers = S.units.filter(u => u.side === side).map(u => { const type = VARIANTS[u.variant].type, eye = eyeAt(u.hex, type); return { hex: u.hex, eye, km: (raised(u.hex, eye) ? HIGH_ACUITY_KM : ACUITY_KM[type]) + DUST_KM }; });
   for (const e of S.units) if (e.side !== side && e.moved && !vis[e.hex] && !S.kacha?.[e.hex])
     if (watchers.some(w => hexDistance(w.hex, e.hex) <= Math.round(w.km * perKm) && lineOfSight(w.hex, e.hex, w.eye, DUST_M, true))) dust.add(e.id);
@@ -101,7 +104,7 @@ function computeDust(side, vis) {
 // dust and the record of where each enemy formation was last seen are kept
 // up to date whenever anything moves.
 const SIGHT = { key: '', vis: {}, ground: {}, own: {}, dust: {} };
-const sideKey = side => `${S.units.filter(u => u.side === side).map(u => `${u.hex}${VARIANTS[u.variant].type[0]}`).join(',')}|${Object.keys(S.kacha || {}).join(',')}|${Object.entries(S.owners).filter(([, o]) => o === side).map(([k]) => k).join(',')}`;
+const sideKey = side => `${isNight() ? 'n' : 'd'}|${S.units.filter(u => u.side === side).map(u => `${u.hex}${VARIANTS[u.variant].type[0]}`).join(',')}|${Object.keys(S.kacha || {}).join(',')}|${Object.entries(S.owners).filter(([, o]) => o === side).map(([k]) => k).join(',')}`;
 function sightOf(side) {
   const key = `${S.turnNo}|${S.units.map(u => `${u.id}${u.side[0]}${u.hex}${u.moved ? 'm' : ''}`).join(',')}|${Object.keys(S.kacha || {}).join(',')}|${Object.values(S.owners).join(',')}`;
   if (key !== SIGHT.key) {
