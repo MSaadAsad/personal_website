@@ -56,7 +56,8 @@ const CHRONICLE = (() => {
         const verb = e.outcome === 'miss' ? missed(e.melee) : OUTCOME[e.outcome];
         return `${r} · ${sideName(e.att.side)}: ${unitText(e.att)} ${verb} ${unitText(e.def)} ${ground(e.hex)}, ${how.join(', ')}. ${loss.join('; ')}.`;
       }
-      case 'breach': return `${r} · The guns of the ${e.unit.name} breached the walls of ${placeOf(e.place)} (${e.left ? `${e.left} levels of wall still standing` : 'the walls are down'}).`;
+      case 'breach': return `${r} · The guns of the ${e.unit.name} battered down the works of ${worksName(e)} (${e.left ? `${e.left} levels of defence still standing` : 'nothing left standing'}).`;
+      case 'fortify': return `${r} · ${unitText(e.unit)} of the ${sideName(e.side)} dug a kacha fort ${ground(e.hex)}.`;
       case 'destroyed': return `${r} · ${unitText(e.unit)} of the ${sideName(e.side)} was destroyed.`;
       case 'surrender': return `${r} · ${unitText(e.unit)} of the ${sideName(e.side)} was ${e.why === 'surrounded' ? 'surrounded and laid down its arms' : 'cut off and surrendered'}.`;
       case 'fallback': return `${r} · ${unitText(e.unit)} fell back in disorder ${ground(e.hex)} (${strength(e.unit)}).`;
@@ -66,11 +67,13 @@ const CHRONICLE = (() => {
       default: return null;
     }
   }
+  // Battered works belong to a place, or to a kacha fort dug in open country.
+  const worksName = e => e.place ? placeOf(e.place) : `the kacha fort ${ground(e.hex)}`;
   // The same events as short sentences for the field notes.
   function plainLine(e) {
     switch (e.t) {
       case 'combat': return e.outcome === 'rout' ? `The ${e.att.name} smashed the ${e.def.name}${e.def.hp <= 0 ? '' : `, leaving it ${men(e.def.hp)} strong`}.` : null;
-      case 'breach': return `The guns of the ${e.unit.name} ${e.left ? 'breached the walls' : 'brought the last of the walls down'} at ${placeOf(e.place)}.`;
+      case 'breach': return `The guns of the ${e.unit.name} ${e.left ? 'battered down the works' : 'brought the last of the works down'} at ${worksName(e)}.`;
       case 'destroyed': return `The ${e.unit.name} was destroyed.`;
       case 'surrender': return `The ${e.unit.name} was ${e.why === 'surrounded' ? 'surrounded and laid down its arms' : 'cut off and surrendered'}.`;
       case 'capture': return `The ${e.unit.name} took ${placeOf(e.place)}.`;

@@ -139,6 +139,7 @@ function renderInspector() {
     html += `<div class="supply-card ${level}"><div class="supply-top"><b>Supplies ${st}%</b><span>${effect}</span></div><div class="supply-bar"><i style="width:${st}%"></i><em style="left:${STOCK_DESERT}%"></em><em style="left:${STOCK_HUNGRY}%"></em></div>`
       + `<small>${Number.isFinite(days) ? `Wagons need ${days < 0.05 ? 'no time — at the depot' : `${days.toFixed(1)} day${days >= 1.05 ? 's' : ''}`} to reach it: +${got}% a day against −${STOCK_USE}% eaten (${net >= 0 ? '+' : ''}${net}%).` : 'No wagons can reach it: the road is cut or there is no friendly depot. −20% a day.'}</small></div>`;
     if (ledBy(sel)) html += `<p class="led-note">★ Led by ${GENERALS[sel.side].name}: +1 attack, +1 defence, never falls back.</p>`;
+    if (humanTurn() && canFortify(sel)) html += `<button class="ferry-btn" id="fortifyBtn"><b>Dig a kacha fort here (K)</b><small>Takes this formation's whole day · mud wall and ditch, +${KACHA_DEF} defence · guns wear it down</small></button>`;
     if (humanTurn() && sel.side === S.turn && ferrySites(sel).length) html += `<button class="ferry-btn" id="ferryBtn"><b>${V.ferryPick ? 'Choose the far bank…' : `Build a ferry across the ${nearestMajorRiver(sel.hex)}`}</b><small>Once per campaign · costs this command and ${FERRY_COST} soldier · either army may then cross</small></button>`;
     if (sel.side === S.turn && humanTurn()) {
       const hint = sel.attacked ? (sel.mp > 0 ? 'It has struck; horse can ride on with its remaining march points.' : 'This formation has fought and is done for the round.')
@@ -172,8 +173,11 @@ function groundReport(hex, compact) {
   const sk = STRONG_HEX.get(hex), fk = FORT_HEX.get(hex);
   if (sk) rows.push(['Strongpoint', S.owners[sk] ? `held by ${SIDES[S.owners[sk]].name}` : 'unclaimed']);
   if (fk) rows.push(['Fort', S.forts[fk] ? `held by ${SIDES[S.forts[fk]].name} · supply source` : 'ungarrisoned']);
-  if (S.walls?.[h.place] !== undefined) rows.push(['Walls', S.walls[h.place] ? `+${S.walls[h.place]} defence · guns breach one level per hit` : 'breached']);
-  const enemies = unitsAt(hex);
+  const works = worksOf(hex);
+  if (works) rows.push([works.name === 'Kacha fort' ? 'Kacha fort' : 'Works', works.left ? `+${Math.ceil(works.left)} defence${works.left < works.max ? ` · battered (${Math.round(works.left / works.max * 100)}% standing)` : ''}` : 'battered down']);
+  if (S.walls?.[h.place] !== undefined) rows.push(['Walls', S.walls[h.place] > 0 ? `+${Math.ceil(S.walls[h.place])} defence${S.walls[h.place] % 1 ? ' · battered' : ''}` : 'battered down']);
+  if (works || S.walls?.[h.place] !== undefined) rows.push(['Under fire', 'every bombardment wears the works down; a hit brings down a level']);
+  const enemies = unitsAt(hex).filter(playerSees);
   return `<div class="ground ${compact ? 'compact' : ''}"><small>Ground report${place ? ` · ${place.kind}` : ''}</small><h3>${esc(title)}</h3><dl>${rows.map(([k, v]) => `<dt>${k}</dt><dd>${esc(v)}</dd>`).join('')}</dl>${enemies.length ? `<p class="occupants">${enemies.map(u => `<span class="${u.side}">${esc(u.name)} ${pipsHtml(u.hp)}</span>`).join('')}</p>` : ''}</div>`;
 }
 
@@ -250,6 +254,12 @@ function updateTooltip(clientX, clientY) {
 // ---------------------------------------------------------------------------
 // Orders
 
+function doFortify() {
+  const sel = S.selected && unitById(S.selected);
+  if (!humanTurn() || !sel) return;
+  if (!canFortify(sel)) { toast('A kacha fort takes a formation’s whole day, out of the enemy’s reach, on ground without walls'); return; }
+  fortify(sel);
+}
 function startFerry() {
   const sel = S.selected && unitById(S.selected), sites = ferrySites(sel);
   if (!humanTurn() || !sites.length) return;
@@ -363,11 +373,14 @@ UI.banner = () => {
 };
 UI.focus = async hex => {
   if (!V.followAI || !S.ai[S.turn]) return;
+  if (fogOn() && !sightOf(viewSide())[hex]) return;  // the camera does not follow what cannot be seen
   if (!hexOnScreen(hex)) await flyTo(HEXES[hex].x, HEXES[hex].y, Math.max(R.cam.z, 0.6), 300 / V.speed);
 };
 UI.animateMove = async (u, path) => {
   const node = R.unitEls.get(u.id);
   if (!node || !path || path.length < 2) return;
+  // An enemy march wholly out of sight is not shown.
+  if (fogOn() && u.side !== viewSide() && !path.some(h => sightOf(viewSide())[h])) return;
   V.animating = u.id;
   node.classList.add('moving');
   // Long marches on the 2 km lattice animate quickly: about half a second each.
@@ -510,7 +523,13 @@ async function replayEvent(e) {
     case 'destroyed': case 'surrender': drop(e.unit.id); if (nearFocus(e.hex)) await sleep(300 / RP.speed); return;
     case 'ride': S.generals[e.side].unitId = e.id; syncUnits(); return;
     case 'general': S.generals[e.side].captured = true; syncUnits(); return;
-    case 'breach': S.walls[e.place] = e.left; return replayFx(e.hex, 'breach', e.left ? 'WALLS BREACHED' : 'WALLS DOWN', '');
+    case 'breach':
+      if (e.place && e.walls !== undefined) S.walls[e.place] = e.walls; else if (e.place && e.left !== undefined && S.walls[e.place] !== undefined) S.walls[e.place] = e.left;
+      if (e.place && e.battered !== undefined) (S.battered ||= {})[e.place] = e.battered;
+      if (e.kacha !== undefined) { S.kacha ||= {}; if (e.kacha) S.kacha[e.hex] = e.kacha; else delete S.kacha[e.hex]; }
+      drawMarkers();
+      return replayFx(e.hex, 'breach', e.left ? 'WALLS BATTERED' : 'WALLS DOWN', '');
+    case 'fortify': (S.kacha ||= {})[e.hex] = KACHA_DEF; drawMarkers(); return replayFx(e.hex, 'capture', 'KACHA FORT DUG', '');
     case 'capture':
       if (STRONG_HEX.get(e.hex) === e.place) S.owners[e.place] = e.side; else S.forts[e.place] = e.side;
       drawMarkers(); renderPanels();
@@ -775,6 +794,7 @@ function drawMinimap() {
     ctx.fillRect(-5, -5, 10, 10); ctx.strokeRect(-5, -5, 10, 10); ctx.restore();
   }
   for (const u of S.units) {
+    if (!playerSees(u)) continue;
     const h = HEXES[u.hex];
     ctx.beginPath(); ctx.arc(h.x * s, h.y * s, 5, 0, Math.PI * 2);
     ctx.fillStyle = SIDES[u.side].color; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#111'; ctx.stroke();
@@ -875,6 +895,7 @@ function bindInput() {
     else if (k === 'u' || (k === 'z' && e.ctrlKey)) { if (humanTurn() && undoMove()) toast('March undone'); }
     else if (k === 'f') doForce();
     else if (k === 'g') doRide();
+    else if (k === 'k') doFortify();
     else if (k === 'escape') { if (RP.active) exitReplay(); else { V.ferryPick = null; select(null); } }
     else if (k === ' ' && RP.active && !e.target.closest('button')) { e.preventDefault(); $('#rpPlay').click(); }
     else if (k === '?' || k === 'h') $('#helpDialog').showModal();
@@ -888,7 +909,7 @@ function bindControls() {
   $('#undoBtn').onclick = () => { if (humanTurn() && undoMove()) toast('March undone'); };
   $('#forceBtn').onclick = doForce;
   $('#rideBtn').onclick = doRide;
-  $('#inspector').addEventListener('click', e => { if (e.target.closest('#ferryBtn')) startFerry(); });
+  $('#inspector').addEventListener('click', e => { if (e.target.closest('#ferryBtn')) startFerry(); if (e.target.closest('#fortifyBtn')) doFortify(); });
   $('#zoomIn').onclick = () => zoomAt(R.cam.z * 1.3, R.view.clientWidth / 2, R.view.clientHeight / 2);
   $('#zoomOut').onclick = () => zoomAt(R.cam.z / 1.3, R.view.clientWidth / 2, R.view.clientHeight / 2);
   $('#fitBtn').onclick = fitBoard;
@@ -925,17 +946,19 @@ function renderStart() {
   const groups = [];
   for (const [id, scn] of Object.entries(SCENARIOS)) if (!groups.some(g => g.group === groupOf(id))) groups.push({ group: groupOf(id), title: scn.title, year: scn.year });
   const go = id => { if (id === MAP_ID) return; const url = new URL(location.href); url.searchParams.set('map', id); location.href = url.toString(); };
-  const pickGroup = group => { const ids = Object.keys(SCENARIOS).filter(id => groupOf(id) === group); go(ids.find(id => SCENARIOS[id].mode === 'historic') || ids[0]); };
+  // A battle's seal opens its `primary` version, else its historic one.
+  const pickGroup = group => { const ids = Object.keys(SCENARIOS).filter(id => groupOf(id) === group); go(ids.find(id => SCENARIOS[id].primary) || ids.find(id => SCENARIOS[id].mode === 'historic') || ids[0]); };
   $('#mapPick').innerHTML = CAMPAIGN_MAP.draw(groups, current)
     + `<div class="cm-list">${groups.map(g => `<button class="cm-chip ${g.group === current ? 'active' : ''}" data-group="${g.group}">${esc(g.title)}</button>`).join('')}</div>`;
   $('#mapPick').querySelectorAll('[data-group]').forEach(b => {
     b.onclick = () => pickGroup(b.dataset.group);
     b.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pickGroup(b.dataset.group); } };
   });
-  const modes = Object.keys(SCENARIOS).filter(id => groupOf(id) === current).sort((a, b) => (SCENARIOS[a].mode === 'open') - (SCENARIOS[b].mode === 'open'));
+  const modes = Object.keys(SCENARIOS).filter(id => groupOf(id) === current).sort((a, b) => !!SCENARIOS[b].primary - !!SCENARIOS[a].primary || (SCENARIOS[a].mode === 'open') - (SCENARIOS[b].mode === 'open'));
   $('#modePick').innerHTML = modes.length < 2 ? '' : modes.map(id => {
     const m = SCENARIOS[id].mode || 'historic';
-    return `<button class="mode ${id === MAP_ID ? 'active' : ''}" data-mode="${id}"><b>${m === 'historic' ? 'Historic' : 'Open campaign'}</b><small>${m === 'historic' ? 'the armies, numbers and days as recorded' : 'from an earlier start, evenly matched'}</small></button>`;
+    const sc = SCENARIOS[id], label = sc.modeLabel || (m === 'historic' ? 'Historic' : 'Open campaign'), note = sc.modeNote || (m === 'historic' ? 'the armies, numbers and days as recorded' : 'from an earlier start, evenly matched');
+    return `<button class="mode ${id === MAP_ID ? 'active' : ''}" data-mode="${id}"><b>${label}</b><small>${note}</small></button>`;
   }).join('');
   $('#modePick').querySelectorAll('[data-mode]').forEach(b => b.onclick = () => go(b.dataset.mode));
   $('#startTitle').textContent = SCN.title;
@@ -959,7 +982,7 @@ function startCampaign(player, ai) {
   clearSave();
   for (const node of R.unitEls.values()) node.remove();
   R.unitEls.clear();
-  newCampaign({ player, ai });
+  newCampaign({ player, ai, fog: $('#fogPick').value === 'on' });
   V.started = true;
   log(FIRST, SCN.goal ? `${SCN.title}, ${SCN.year}: the campaign opens. ${SIDES[SCN.goal.attacker].name} must ${SCN.goal.short.toLowerCase()} before day ${ROUND_LIMIT} is out.` : 'The banners are raised. Hold the strongpoints to earn war points; win the local chiefs to raise their levies.');
   save();
@@ -987,7 +1010,7 @@ function loadScript(src) {
 async function boot() {
   const id = chosenMap();
   try { localStorage.setItem('jhelum-marches-map', id); } catch { /* storage blocked */ }
-  await loadScript(`maps/${SCENARIOS[id].map || id}.js?v=31`);
+  await loadScript(`maps/${SCENARIOS[id].map || id}.js?v=37`);
   applyScenario(id);
   // The field manual quotes distances and march points for this map's hex size.
   const km = k => k >= 1 ? `${+k.toFixed(1)} km` : `${Math.round(k * 1000)} m`, mpOf = v => Math.round(VARIANTS[v].mp * MARCH_SCALE * PACE);

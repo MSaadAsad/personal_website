@@ -501,6 +501,32 @@ function drawMarkers() {
     m.innerHTML = '<i></i><b></b>';
     m.title = `${power.name} — seat of a local power (${ally ? `allied to the ${SIDES[ally].name}` : 'uncommitted'})`;
   }
+  // Kacha forts dug in the campaign: a mud wall with corner bastions, fading
+  // as the guns wear it down.
+  for (const [hex, left] of Object.entries(S.kacha || {})) {
+    const h = HEXES[hex], m = el('div', 'marker kacha', R.markers);
+    m.style.left = `${f1(h.x)}px`; m.style.top = `${f1(h.y)}px`;
+    m.style.setProperty('--left', (0.35 + 0.65 * left / KACHA_DEF).toFixed(2));
+    m.innerHTML = '<svg viewBox="-16 -16 32 32" aria-hidden="true"><path class="ditch" d="M-13 -13H13V13H-13Z"/><path class="rampart" d="M-10 -10H10V10H-10Z"/><path class="bast" d="M-10 -13l3 3-3 3-3-3zM10 -13l3 3-3 3-3-3zM10 7l3 3-3 3-3-3zM-10 7l3 3-3 3-3-3z"/></svg>';
+    m.title = `Kacha fort: +${Math.ceil(left)} defence${left < KACHA_DEF ? ' (battered)' : ''}`;
+  }
+  // Rubble where gunfire has battered a place's works or walls.
+  for (const key of Object.keys(MAP.places)) {
+    const lost = (S.battered?.[key] || 0) + Math.max(0, (SCN.walls?.[key] || 0) - (S.walls?.[key] ?? SCN.walls?.[key] ?? 0));
+    if (lost < 0.3 || HEX_OF[key] === undefined) continue;
+    const [x, y] = placePx(key), m = el('div', 'marker rubble', R.markers);
+    m.style.left = `${f1(x)}px`; m.style.top = `${f1(y)}px`;
+    m.style.setProperty('--n', Math.min(1, lost / 4).toFixed(2));
+    m.innerHTML = '<svg viewBox="-14 -14 28 28" aria-hidden="true"><path class="smoke" d="M-4 -4c-3-3 1-6 3-4c1-4 6-3 5 1c4 0 4 5 0 5"/><path class="stones" d="M-9 6l3-2 3 2-1 3h-4zM2 7l3-3 4 2-1 3h-5zM-3 10l2-2 3 1-1 2z"/></svg>';
+    m.title = `${MAP.places[key].name}: works battered by gunfire`;
+  }
+  // Where enemy formations were last seen, faded, with the day.
+  for (const g of ghostsFor(viewSide())) {
+    const h = HEXES[g.hex], m = el('div', `marker ghost ${g.side}`, R.markers);
+    m.style.left = `${f1(h.x)}px`; m.style.top = `${f1(h.y)}px`;
+    m.innerHTML = `<i></i><b>${g.round ? `day ${g.round}` : 'reported'}</b>`;
+    m.title = g.round ? `${g.name} (${g.variant}): last seen here on day ${g.round}` : `${g.name} (${g.variant}): reported here at the outset`;
+  }
   // Crossed swords where a battle or siege was fought, in the victor's colour.
   for (const b of S.battles) if (!b.open && b.major) {
     const h = HEXES[b.focus], m = el('div', `marker battle won-${b.victor || 'none'}`, R.markers);
@@ -667,7 +693,7 @@ function syncUnits(animating = null) {
     });
     node._hp = u.hp;
     const pile = stacks.get(u.hex), idx = pile.indexOf(u), mine = S.turn === u.side && !S.ai[u.side];
-    node.className = `unit ${u.side} type-${VARIANTS[u.variant].type}${u.id === S.selected ? ' selected' : ''}${mine && !canActCached(u) ? ' spent' : ''}${mine && canActCached(u) ? ' ready' : ''}${wavering(u) ? ' wavering' : ''}${ledBy(u) ? ' led' : ''}${stockOf(u) < STOCK_HUNGRY ? ' oos' : ''}`;
+    node.className = `unit ${u.side} type-${VARIANTS[u.variant].type}${playerSees(u) ? '' : ' fogged'}${u.id === S.selected ? ' selected' : ''}${mine && !canActCached(u) ? ' spent' : ''}${mine && canActCached(u) ? ' ready' : ''}${wavering(u) ? ' wavering' : ''}${ledBy(u) ? ' led' : ''}${stockOf(u) < STOCK_HUNGRY ? ' oos' : ''}`;
     node.title = `${u.name} · ${SIDES[u.side].name} · ${men(u.hp)} of ${MEN_PER_FORMATION.toLocaleString('en')}${wavering(u) ? ' · wavering' : ''}${ledBy(u) ? ` · led by ${GENERALS[u.side].name}` : ''}} · supplies ${stockOf(u)}%`;
     if (animating === u.id) continue;
     const h = HEXES[u.hex], spread = 8 * unitScale(R.cam.z), off = pile.length > 1 ? (idx - (pile.length - 1) / 2) * spread * 2 : 0;
@@ -697,9 +723,17 @@ function ferryGlyph(o, a, b, cls) {
   svgEl('path', { d: `M${pt(-3.2, -7)}L${pt(3.2, -7)}L${pt(2.2, 7)}L${pt(-2.2, 7)}Z`, class: `${cls}-boat` }, o);
 }
 
+// The fog: ground the player's formations cannot see now is washed over.
+const FOG = { key: '', d: '' };
+function fogPath() {
+  const side = viewSide(), vis = sightOf(side), key = `${SIGHT.key}|${side}`;
+  if (key !== FOG.key) { FOG.key = key; FOG.d = HEXES.filter(h => !vis[h.id]).map(h => linePath(hexCorners(h.x, h.y)) + 'Z').join(''); }
+  return FOG.d;
+}
 function drawOverlay(sel, reach, targets, pathHexes, pathCost, ferryPick = null, supplySide = null) {
   const o = R.overlay;
   o.innerHTML = '';
+  if (fogOn()) svgEl('path', { d: fogPath(), class: 'fog' }, o);
   if (supplySide) {
     const field = supplyField(supplySide);
     let d = '';

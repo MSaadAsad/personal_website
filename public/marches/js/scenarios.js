@@ -16,14 +16,14 @@ const SCENARIOS = {
     blurb: 'After the siege of Lahore, Chand Kaur’s estates in Khari Khariyali, the strip of floodplain between the Mirpur ridge and the Jhelum, pass to Raja Gulab Singh. The Sikh troops holding them under Surat Singh will not give them up. Diwan Hari Chand marches the Dogra army in: Aurangabad, Sukhchainpur, Kot Kandhari, and then Mangla Fort on its hill in the meander of the Jhelum, which even Ranjit Singh could not take.',
     first: 'red',
     vpTarget: Infinity,
-    roundLimit: 19,
+    roundLimit: 16,
     goal: {
       fort: 'manglafort', attacker: 'red', short: 'Take Mangla',
       attackerWins: 'The walls of Mangla are breached and the Sikh garrison marches out. Khari Khariyali passes to the Dogras, who will hold it for 107 years.',
       defenderWins: 'The campaigning season ends with the Khalsa banner still flying over Mangla Fort.',
     },
     sides: {
-      azure: { name: 'Khalsa Garrison', short: 'Khalsa', adj: 'Khalsa', pitch: 'Surat Singh’s Sikh troops hold the Khari jagirs east of the Jhelum: Aurangabad, Sukhchainpur, Kot Kandhari, Khari and Mangla Fort. No help will come from across the river. Hold Mangla until the season ends.', tag: 'Moves second · hold Mangla for 19 days' },
+      azure: { name: 'Khalsa Garrison', short: 'Khalsa', adj: 'Khalsa', pitch: 'Surat Singh’s Sikh troops hold the Khari jagirs east of the Jhelum: Aurangabad, Sukhchainpur, Kot Kandhari, Khari and Mangla Fort. No help will come from across the river. Hold Mangla until the season ends.', tag: 'Moves second · hold Mangla for 16 days' },
       red: { name: 'Dogra Army', short: 'Dogra', adj: 'Dogra', pitch: 'Diwan Hari Chand marches for Raja Gulab Singh with field guns and Dogra swordsmen. You have no supply until you take a town or fort: strike Aurangabad, storm Sukhchainpur, then besiege Mangla.', tag: 'Moves first · no supply until you take a fort' },
     },
     generals: {
@@ -34,7 +34,7 @@ const SCENARIOS = {
     // it holds. The Khalsa holds only the jagirs east of the Jhelum.
     homeBase: { red: null, azure: null },
     // Mangla's walls had defeated every earlier siege; guns must bring them down.
-    walls: { manglafort: 2 },
+    walls: { manglafort: 3 },
     // Camp markers are not places a battle would be named after.
     strongpoints: ['sarai', 'sukhchainpur', 'kotkandhari', 'khari', 'manglafort'],
     startOwners: { sarai: 'azure', sukhchainpur: 'azure', kotkandhari: 'azure', khari: 'azure', manglafort: 'azure' },
@@ -84,15 +84,15 @@ const SCENARIOS = {
     blurb: 'January 1849. Sher Singh has drawn the Khalsa army up on the Jhelum: its left on the low ridges at Rasul, its centre hidden in thick jungle, its right on the villages towards Lakhnawala, with an outpost in Chillianwala. Lord Gough marches up from the Chenab by Helan and Dinga to bring him to battle before Chattar Singh’s army arrives from Attock. Multan still holds out, so no help will come from Whish.',
     first: 'red',
     vpTarget: Infinity,
-    roundLimit: 10,
+    roundLimit: 12,
     goal: {
-      forts: ['rasul', 'lakhnawala', 'mong'], need: 2, attacker: 'red', short: 'Break the Sikh line',
+      forts: ['rasul', 'lakhnawala', 'mong'], need: 1, attacker: 'red', short: 'Break the Sikh line',
       attackerWins: 'The Sikh line is broken: Sher Singh’s army is driven back over the Jhelum before Chattar Singh can join it.',
       defenderWins: 'As in January 1849, the Khalsa line still stands from Rasul to the villages: Gough has bled his army in the jungle, and Chattar Singh’s army is coming down to join Sher Singh.',
     },
     sides: {
-      azure: { name: 'Khalsa Army', short: 'Khalsa', adj: 'Khalsa', pitch: 'Sher Singh’s battalions hold the Rasul ridges and the jungle south of them, with the Jhelum at their backs and Chattar Singh’s army coming on day 8. Keep Rasul, Lakhnawala and Mong until the campaign closes: lose two of them at the end of a day and the line is broken.', tag: 'Moves second · hold the line for 10 days' },
-      red: { name: 'Army of the Punjab', short: 'British', adj: 'British', pitch: 'Gough’s army marches up from Helan and Dinga. Drive in the Chillianwala outpost, find a way through the jungle, and break the Sikh line: hold two of Rasul, Lakhnawala and Mong at the end of a day.', tag: 'Moves first · break the line' },
+      azure: { name: 'Khalsa Army', short: 'Khalsa', adj: 'Khalsa', pitch: 'Sher Singh’s battalions hold the Rasul ridges and the jungle south of them, with the Jhelum at their backs and Chattar Singh’s army coming on day 8. Keep Rasul, Lakhnawala and Mong until the campaign closes: lose any one at the end of a day and the line is broken.', tag: 'Moves second · hold the line for 12 days' },
+      red: { name: 'Army of the Punjab', short: 'British', adj: 'British', pitch: 'Gough’s army marches up from Helan and Dinga. Drive in the Chillianwala outpost, find a way through the jungle, and break the Sikh line: hold Rasul, Lakhnawala or Mong at the end of a day.', tag: 'Moves first · break the line' },
     },
     generals: {
       azure: { name: 'Raja Sher Singh Attariwala', title: 'Commander of the Khalsa army', leads: 'Sher Singh’s Battalions' },
@@ -158,14 +158,14 @@ const SCENARIOS = {
     blurb: 'February 1849. After Chillianwala, short of food, Raja Sher Singh and his father Chattar Singh have taken the Khalsa army and Akram Khan’s Afghan horse from Rasul to Gujrat, meaning to cross the Chenab and march on Lahore. Their camp nearly encircles the town behind the dry bed of the Dwara and the fortified Kalra villages. Lord Gough has come down to the Chenab south-west of the town; Whish’s division, Dundas’s Bombay column and Markham’s brigade are coming up to join him. Byrne’s sepoys watch the fords at Wazirabad.',
     first: 'azure',
     vpTarget: Infinity,
-    roundLimit: 7,
+    roundLimit: 6,
     goal: {
       fort: 'gujrat', attacker: 'red', short: 'Take Gujrat',
       attackerWins: 'The Sikh line breaks under the guns and Gujrat falls. Within three weeks Sher Singh and Chattar Singh lay down their arms near Rawalpindi, and the Punjab is annexed.',
       defenderWins: 'The Khalsa army still holds Gujrat as the campaign closes: Gough has not broken it, and the war goes on.',
     },
     sides: {
-      azure: { name: 'Khalsa Army', short: 'Khalsa', adj: 'Khalsa', pitch: 'Sher Singh’s battalions and guns hold Gujrat behind the Dwara and the Kalra villages, with Afghan horse on the right and Ghorcharas on the left. Hold Gujrat until the campaign closes, or break Gough before his reinforcements arrive.', tag: 'Moves first · hold Gujrat for 7 days' },
+      azure: { name: 'Khalsa Army', short: 'Khalsa', adj: 'Khalsa', pitch: 'Sher Singh’s battalions and guns hold Gujrat behind the Dwara and the Kalra villages, with Afghan horse on the right and Ghorcharas on the left. Hold Gujrat until the campaign closes, or break Gough before his reinforcements arrive.', tag: 'Moves first · hold Gujrat for 6 days' },
       red: { name: 'Army of the Punjab', short: 'British', adj: 'British', pitch: 'Gough’s army lies on the Chenab south-west of Gujrat. Gather Whish (day 3), Dundas (day 4) and Markham (day 5), move up by Trikha and Shadiwal, and break the Sikh line from the south with the heavy guns.', tag: 'Moves second · take Gujrat' },
     },
     generals: {
@@ -175,6 +175,7 @@ const SCENARIOS = {
     // Each army's road home: the Sikhs' back through the Pabbi hills towards
     // Jhelum, the British across the Chenab towards Lahore.
     homeBase: { azure: [32.92, 73.80], red: [32.25, 73.95] },
+    walls: { gujrat: 1 },  // the town's mud wall and the Sikh earthworks round it
     strongpoints: ['gujrat', 'kunjah', 'jalalpur', 'kharian', 'wazirabad', 'ramnagar', 'dinga'],
     startOwners: { gujrat: 'azure', kunjah: 'azure', jalalpur: 'azure', kharian: 'azure', wazirabad: 'red', ramnagar: 'red', dinga: 'red' },
     startUnits: [
@@ -253,7 +254,7 @@ const SCENARIOS = {
       azure: { name: 'Nawab Muzaffar Khan Sadozai', title: 'Nawab of Multan', leads: 'Nawab’s Guard' },
       red: { name: 'Misr Diwan Chand', title: 'Commanding for Prince Kharak Singh', leads: 'Diwan Chand’s Battalions' },
     },
-    homeBase: { azure: null, red: [30.32, 71.64] },
+    homeBase: { azure: null, red: [30.395, 71.665] },
     walls: { multan: 2, multanfort: 6 },  // the city walls, then the citadel on its mound
     strongpoints: ['multanfort', 'multan', 'shujabad', 'muzaffargarh', 'khangarh'],
     startOwners: { multanfort: 'azure', multan: 'azure', shujabad: 'azure', muzaffargarh: 'azure', khangarh: 'azure' },
@@ -265,17 +266,17 @@ const SCENARIOS = {
       ['azure', 'Matchlockmen', 'shujabad', 'Shujabad Garrison'], ['azure', 'Jingal', 'shujabad', 'Shujabad Guns'],
       ['azure', 'Matchlockmen', 'muzaffargarh', 'Muzaffargarh Garrison'],
       ['azure', 'Matchlockmen', 'khangarh', 'Khangarh Garrison'],
-      ['red', 'Khalsa Infantry', [30.29, 71.61], 'Diwan Chand’s Battalions'], ['red', 'Khalsa Infantry', [30.29, 71.61], 'Khalsa Battalions'],
-      ['red', 'Khalsa Infantry', [30.30, 71.585], 'Khalsa Battalions'], ['red', 'Khalsa Infantry', [30.30, 71.585], 'Khalsa Battalions'],
-      ['red', 'Dhal & Talwar', [30.28, 71.635], 'Akali Nihangs'], ['red', 'Dhal & Talwar', [30.28, 71.635], 'Dogra Rajputs'],
-      ['red', 'Matchlockmen', [30.31, 71.61], 'Ramgarhia Sikhs'], ['red', 'Zamburak', [30.31, 71.61], 'Camel Guns'],
-      ['red', 'Light Field Gun', [30.295, 71.635], 'Ilahi Bakhsh’s Topkhana'], ['red', 'Light Field Gun', [30.295, 71.635], 'Ilahi Bakhsh’s Topkhana'],
-      ['red', 'Light Field Gun', [30.31, 71.635], 'Ilahi Bakhsh’s Topkhana'],
-      ['red', 'Irregular Sowars', [30.27, 71.60], 'Ghorcharas'], ['red', 'Irregular Sowars', [30.27, 71.60], 'Ghorcharas'],
-      ['red', 'Irregular Sowars', [30.285, 71.56], 'Hari Singh Nalwa’s Horse'], ['red', 'Irregular Sowars', [30.285, 71.56], 'Ghorcharas'],
+      ['red', 'Khalsa Infantry', [30.375, 71.625], 'Diwan Chand’s Battalions'], ['red', 'Khalsa Infantry', [30.375, 71.625], 'Khalsa Battalions'],
+      ['red', 'Khalsa Infantry', [30.385, 71.60], 'Khalsa Battalions'], ['red', 'Khalsa Infantry', [30.385, 71.60], 'Khalsa Battalions'],
+      ['red', 'Dhal & Talwar', [30.365, 71.65], 'Akali Nihangs'], ['red', 'Dhal & Talwar', [30.365, 71.65], 'Dogra Rajputs'],
+      ['red', 'Matchlockmen', [30.392, 71.635], 'Ramgarhia Sikhs'], ['red', 'Zamburak', [30.392, 71.635], 'Camel Guns'],
+      ['red', 'Light Field Gun', [30.37, 71.665], 'Ilahi Bakhsh’s Topkhana'], ['red', 'Light Field Gun', [30.37, 71.665], 'Ilahi Bakhsh’s Topkhana'],
+      ['red', 'Light Field Gun', [30.393, 71.66], 'Ilahi Bakhsh’s Topkhana'],
+      ['red', 'Irregular Sowars', [30.355, 71.615], 'Ghorcharas'], ['red', 'Irregular Sowars', [30.355, 71.615], 'Ghorcharas'],
+      ['red', 'Irregular Sowars', [30.38, 71.575], 'Hari Singh Nalwa’s Horse'], ['red', 'Irregular Sowars', [30.38, 71.575], 'Ghorcharas'],
     ],
     reinforcements: [
-      { round: 8, side: 'red', at: [30.31, 71.63], name: 'The Zamzama', note: 'was dragged down from Lahore', units: [['Great Gun', 'Zamzama'], ['Khalsa Infantry', 'Beldars and Escort']] },
+      { round: 8, side: 'red', at: [30.39, 71.66], name: 'The Zamzama', note: 'was dragged down from Lahore', units: [['Great Gun', 'Zamzama'], ['Khalsa Infantry', 'Beldars and Escort']] },
     ],
     powers: [
       { id: 'sadozai', name: 'Sadozai Multan', chief: 'Nawab Muzaffar Khan', seat: 'multan', npc: false, side: 'azure', color: '#3f6f8f', note: 'The Nawab’s province', extraSeats: ['shujabad', 'muzaffargarh', 'khangarh'] },
@@ -285,78 +286,92 @@ const SCENARIOS = {
     ],
   },
 
-  // Multan, 1848-49. Mulraj, governor of Multan, rose after Vans Agnew and
-  // Anderson were killed there in April 1848. Herbert Edwardes raised Pathan
-  // levies beyond the Indus and, with Van Cortlandt's regiments and the Nawab
-  // of Bahawalpur's army, beat Mulraj's field army at Kineyri (18 June) and
-  // Saddusam (early July), took Shujabad and Sikandarabad, and shut him up in
-  // Multan. Whish's division came with the Bengal siege train in August; after
-  // Sher Singh changed sides in September the siege was raised, and resumed
-  // with the Bombay column in December: the magazine blew up on 30 December,
-  // the city was stormed on 2 January 1849, and Mulraj surrendered the citadel
-  // on the 22nd. The months are compressed: the campaign opens in June and a
+  // Multan, 1848-49, from Herbert Edwardes, A Year on the Punjab Frontier
+  // (1851), vol. II. Mulraj rose after Vans Agnew and Anderson were killed at
+  // Multan in April 1848. On 17 June his army, eight to ten thousand horse and
+  // foot with ten guns under his brother-in-law Rung Ram, lay across the Multan
+  // road three miles south of Shujabad; the Nawab of Bahawalpur's Daudpotras,
+  // about 8,500 with eleven guns and thirty zamburaks under Futteh Muhammad Khan
+  // Ghori, were at Goweyn fifteen miles south; and Edwardes, with Cortlandt's
+  // 1,500 Sikh regulars and ten guns and some 5,000 Pathan irregulars, was across
+  // the Chenab at the Gaggianwalluh ferry with a handful of boats. Rung Ram
+  // marched for the Kineyree ferry to beat the Daudpotras before Edwardes
+  // could cross; the battle of Kineyree opened on the 18th as Edwardes was on
+  // the river. Shujabad and Sikandarabad fell; the allies advanced to
+  // Surajkund behind Wali Muhammad's canal, and on 1 July Mulraj, leading in
+  // person, was beaten at Saddusam and driven into Multan. Whish came with the
+  // Bengal siege train in August; Raja Sher Singh's Darbar troops went over to
+  // Mulraj on 14 September and the siege was raised; the Bombay column came in
+  // December, the magazine blew up on the 30th, and Mulraj gave up the citadel
+  // on 22 January 1849. The months are compressed: round 1 is 17 June, and a
   // round is a day's march, not a day of the calendar.
   multan1849: {
-    map: 'multan', group: 'multan1849', mode: 'open',
+    map: 'shujabad', group: 'multan1849', mode: 'open',
+    modeNote: 'the same opening at Kineyree, with no script: evenly matched',
     title: 'The Multan Campaign, 1848–49',
     year: 1848,
-    region: 'Multan',
-    blurb: 'Summer 1848. Diwan Mulraj, governor of Multan, has risen against the Lahore Darbar and its British residents. His field army holds the Chenab at Kineyri and the forts around the city. Herbert Edwardes comes in from beyond the Indus with Pathan levies and Van Cortlandt’s regiments; the Nawab of Bahawalpur’s army marches up from the south. Behind them, Whish’s division and the siege trains from Bengal and Bombay are on the road.',
+    region: 'Shujabad · Multan',
+    blurb: '17 June 1848. Diwan Mulraj’s army under Rung Ram lies across the Multan road below Shujabad. The Nawab of Bahawalpur’s Daudpotras are at Goweyn fifteen miles south, and Herbert Edwardes, with his Pathan levies and Cortlandt’s Sikh regulars, is across the Chenab at the Gaggianwalluh ferry with a handful of boats. Whoever reaches the Kineyree ferry first decides the opening; behind it all stand the walls of Multan.',
     first: 'red',
     vpTarget: Infinity,
-    roundLimit: 30,
+    roundLimit: 24,
     goal: {
       fort: 'multanfort', attacker: 'red', short: 'Take the citadel',
       attackerWins: 'The breaches are stormed and the citadel, its magazine blown and its walls mined, gives in: Mulraj walks out with his last 550 men.',
       defenderWins: 'Multan still holds as the campaign closes, and the rising spreads across the Punjab.',
     },
     sides: {
-      azure: { name: 'Mulraj’s Multan', short: 'Mulraj', adj: 'Multani', pitch: 'Mulraj’s field army holds the Kineyri ferry and the forts round Multan. Beat Edwardes and the Bahawalpur army in the field before the British siege trains arrive, then hold the citadel until the campaign closes.', tag: 'Moves second · hold the citadel for 30 days' },
-      red: { name: 'Edwardes and the British', short: 'British', adj: 'British', pitch: 'Edwardes’s Pathans come over the Chenab from the west, the Bahawalpur army from the south. Beat Mulraj in the field, take the outlying forts, and shut him up in Multan; Whish’s siege train arrives on day 8 and the Bombay column on day 15.', tag: 'Moves first · take the citadel' },
+      azure: { name: 'Mulraj’s Multan', short: 'Mulraj', adj: 'Multani', pitch: 'Rung Ram’s army lies below Shujabad, between the Daudpotras to the south and Edwardes across the river. Beat one before the other can join it, hold Shujabad and the canal line, and keep the citadel until the campaign closes.', tag: 'Moves second · hold the citadel for 24 days' },
+      red: { name: 'Edwardes and the British', short: 'British', adj: 'British', pitch: 'Get Edwardes over the Chenab at Kineyree before Rung Ram falls on the Daudpotras, join hands, take Shujabad and Sikandarabad, and drive Mulraj into Multan. Sheikh Imamuddin joins on day 6, Whish with the Bengal siege train on day 11 and the Bombay column on day 21.', tag: 'Moves first · take the citadel' },
     },
     generals: {
       azure: { name: 'Diwan Mulraj', title: 'Governor of Multan', leads: 'Mulraj’s Guard' },
       red: { name: 'Lieutenant Herbert Edwardes', title: 'Political officer, raising levies beyond the Indus', leads: 'Edwardes’s Pathans' },
     },
-    // Edwardes's road from Dera Ghazi Khan in the west; Bahawalpur's from the south.
-    homeBase: { azure: null, red: [[30.07, 71.04], [29.85, 71.62]] },
-    walls: { multan: 3, multanfort: 6 },  // the city walls, then the citadel on its mound
-    events: [
-      { round: 26, side: 'red', text: 'The great magazine in Multan’s citadel blew up', flash: 'THE MAGAZINE EXPLODES', walls: { multanfort: -1 }, hurt: { at: 'multanfort', hp: 2 } },
-    ],
-    strongpoints: ['multanfort', 'multan', 'shujabad', 'muzaffargarh', 'khangarh'],
-    startOwners: { multanfort: 'azure', multan: 'azure', shujabad: 'azure', muzaffargarh: 'azure', khangarh: 'azure' },
+    // Edwardes's road back to Dera Ghazi Khan, the Daudpotras' to Bahawalpur,
+    // and the Lahore road for the British columns.
+    homeBase: { azure: null, red: [[30.07, 70.94], [29.63, 71.15], [30.34, 71.69]] },
+    walls: { multan: 5, multanfort: 9 },
+    strongpoints: ['multanfort', 'multan', 'shujabad', 'sikandarabad', 'khangarh', 'muzaffargarh'],
+    startOwners: { multanfort: 'azure', multan: 'azure', shujabad: 'azure', sikandarabad: 'azure', khangarh: 'red', muzaffargarh: null },
     startUnits: [
-      // Mulraj: the citadel, the city, the field army at the Kineyri ferry, the forts.
+      // Rung Ram's army across the Multan road, three miles south of Shujabad.
+      ['azure', 'Khalsa Infantry', [29.840, 71.295], 'Rung Ram’s Battalions'], ['azure', 'Light Field Gun', [29.840, 71.295], 'Mulraj’s Topkhana'],
+      ['azure', 'Khalsa Infantry', [29.833, 71.310], 'Rung Ram’s Battalions'], ['azure', 'Khalsa Infantry', [29.833, 71.310], 'Multani Battalions'],
+      ['azure', 'Irregular Sowars', [29.846, 71.280], 'Multani Horse'], ['azure', 'Irregular Sowars', [29.846, 71.280], 'Multani Horse'],
+      ['azure', 'Matchlockmen', [29.828, 71.288], 'Multani Levies'], ['azure', 'Light Field Gun', [29.828, 71.288], 'Mulraj’s Topkhana'],
+      // The forts and the city.
+      ['azure', 'Matchlockmen', 'shujabad', 'Shujabad Garrison'], ['azure', 'Matchlockmen', 'sikandarabad', 'Sikandarabad Garrison'],
+      ['azure', 'Khalsa Infantry', 'multan', 'City Battalions'],
       ['azure', 'Khalsa Infantry', 'multanfort', 'Mulraj’s Guard'], ['azure', 'Light Field Gun', 'multanfort', 'Citadel Guns'],
-      ['azure', 'Khalsa Infantry', 'multan', 'City Battalions'], ['azure', 'Matchlockmen', 'multan', 'Multani Levies'],
-      ['azure', 'Khalsa Infantry', [29.885, 71.255], 'Mulraj’s Field Army'], ['azure', 'Light Field Gun', [29.885, 71.255], 'Field Guns'],
-      ['azure', 'Khalsa Infantry', [29.90, 71.27], 'Mulraj’s Field Army'], ['azure', 'Irregular Sowars', [29.90, 71.27], 'Multani Horse'],
-      ['azure', 'Matchlockmen', 'shujabad', 'Shujabad Garrison'],
-      ['azure', 'Matchlockmen', 'sikandarabad', 'Sikandarabad Garrison'],
-      ['azure', 'Matchlockmen', 'muzaffargarh', 'Muzaffargarh Garrison'],
-      ['azure', 'Matchlockmen', 'khangarh', 'Khangarh Garrison'],
-      ['azure', 'Irregular Sowars', [30.15, 71.40], 'Multani Horse'],
-      // Edwardes from the west, the Bahawalpur army from the south.
-      ['red', 'Matchlockmen', [30.02, 71.06], 'Edwardes’s Pathans'], ['red', 'Matchlockmen', [30.02, 71.06], 'Edwardes’s Pathans'],
-      ['red', 'Matchlockmen', [29.97, 71.07], 'Edwardes’s Pathans'], ['red', 'Irregular Sowars', [29.97, 71.07], 'Pathan Horse'],
-      ['red', 'Sepoy Infantry', [30.06, 71.06], 'Van Cortlandt’s Regiments'], ['red', 'Light Field Gun', [30.06, 71.06], 'Van Cortlandt’s Guns'],
-      ['red', 'Matchlockmen', [29.86, 71.42], 'Bahawalpur Daudputras'], ['red', 'Matchlockmen', [29.86, 71.42], 'Bahawalpur Daudputras'],
-      ['red', 'Irregular Sowars', [29.86, 71.46], 'Bahawalpur Horse'], ['red', 'Light Field Gun', [29.86, 71.46], 'Bahawalpur Guns'],
-      ['red', 'Matchlockmen', [29.875, 71.44], 'Bahawalpur Daudputras'], ['red', 'Irregular Sowars', [29.99, 71.08], 'Pathan Horse'],
+      // Edwardes across the Chenab at the Gaggianwalluh ferry.
+      ['red', 'Matchlockmen', [29.742, 71.170], 'Edwardes’s Pathans'], ['red', 'Matchlockmen', [29.742, 71.170], 'Edwardes’s Pathans'],
+      ['red', 'Matchlockmen', [29.752, 71.165], 'Edwardes’s Pathans'], ['red', 'Zamburak', [29.752, 71.165], 'Pathan Zamburaks'],
+      ['red', 'Khalsa Infantry', [29.732, 71.165], 'Cortlandt’s Regulars'], ['red', 'Light Field Gun', [29.732, 71.165], 'Cortlandt’s Guns'],
+      ['red', 'Irregular Sowars', [29.762, 71.158], 'Pathan Horse'], ['red', 'Irregular Sowars', [29.762, 71.158], 'Pathan Horse'],
+      // The Daudpotras at Goweyn.
+      ['red', 'Matchlockmen', [29.635, 71.205], 'Daudpotra Infantry'], ['red', 'Matchlockmen', [29.635, 71.205], 'Daudpotra Infantry'],
+      ['red', 'Matchlockmen', [29.642, 71.222], 'Daudpotra Infantry'], ['red', 'Zamburak', [29.642, 71.222], 'Daudpotra Zamburaks'],
+      ['red', 'Irregular Sowars', [29.628, 71.190], 'Daudpotra Horse'], ['red', 'Irregular Sowars', [29.628, 71.190], 'Daudpotra Horse'],
+      ['red', 'Light Field Gun', [29.648, 71.210], 'Bahawalpur Guns'], ['red', 'Matchlockmen', [29.648, 71.210], 'Daudpotra Infantry'],
+      ['red', 'Matchlockmen', 'khangarh', 'Khangarh Levies'],
     ],
     reinforcements: [
-      { round: 8, side: 'red', at: [30.38, 71.64], name: 'Whish’s division', note: 'came down from Lahore with the Bengal siege train', units: [['Line Infantry', 'HM 10th Foot'], ['Line Infantry', 'HM 32nd Foot'], ['Sepoy Infantry', '49th Bengal NI'], ['Sepoy Infantry', '72nd Bengal NI'], ['Heavy Battery', 'Bengal Siege Train'], ['Horse Artillery', 'Bengal Horse Artillery']] },
-      { round: 15, side: 'red', at: [30.15, 71.46], name: 'The Bombay column', note: 'came up from Sindh and joined the siege camp with its own siege train', units: [['Line Infantry', 'HM 60th Rifles'], ['Line Infantry', '1st Bombay Fusiliers'], ['Sepoy Infantry', '3rd Bombay NI'], ['Heavy Battery', 'Bombay Siege Train'], ['Irregular Sowars', 'Scinde Horse']] },
+      { round: 6, side: 'red', at: [29.95, 71.75], name: 'Sheikh Imamuddin’s division', note: 'came in from the east', units: [['Khalsa Infantry', 'Sheikh Imamuddin’s Division'], ['Light Field Gun', 'Imamuddin’s Guns']] },
+      { round: 11, side: 'red', at: [30.335, 71.69], name: 'Whish’s division', note: 'came down from Lahore with the Bengal siege train', units: [['Line Infantry', 'HM 10th Foot'], ['Line Infantry', 'HM 32nd Foot'], ['Sepoy Infantry', '49th Bengal NI'], ['Sepoy Infantry', '72nd Bengal NI'], ['Heavy Battery', 'Bengal Siege Train'], ['Horse Artillery', 'Bengal Horse Artillery']] },
+      { round: 12, side: 'azure', at: 'multan', name: 'Mulraj’s new levies', note: 'were raised in the city', units: [['Matchlockmen', 'Multani Levies'], ['Matchlockmen', 'Multani Levies']] },
+      { round: 21, side: 'red', at: [29.635, 71.67], name: 'The Bombay column', note: 'came up from Sindh with its own siege train', units: [['Line Infantry', 'HM 60th Rifles'], ['Line Infantry', '1st Bombay Fusiliers'], ['Sepoy Infantry', '3rd Bombay NI'], ['Heavy Battery', 'Bombay Siege Train'], ['Irregular Sowars', 'Scinde Horse']] },
     ],
     powers: [
-      { id: 'mulraj', name: 'Mulraj’s Multan', chief: 'Diwan Mulraj', seat: 'multanfort', npc: false, side: 'azure', color: '#3f6f8f', note: 'The rebel province', extraSeats: ['multan', 'shujabad', 'sikandarabad', 'muzaffargarh', 'khangarh'] },
-      { id: 'beyond', name: 'Beyond the Indus', chief: 'Lieutenant Edwardes', seat: [30.10, 71.04], npc: false, side: 'red', color: '#94493a', note: 'Where Edwardes raised his levies', extraSeats: [[29.85, 71.62]] },
+      { id: 'mulraj', name: 'Mulraj’s Multan', chief: 'Diwan Mulraj', seat: 'multanfort', npc: false, side: 'azure', color: '#3f6f8f', note: 'The rebel province', extraSeats: ['multan', 'shujabad', 'sikandarabad'] },
+      { id: 'beyond', name: 'Beyond the Chenab', chief: 'Lieutenant Edwardes', seat: 'khangarh', npc: false, side: 'red', color: '#94493a', note: 'The right bank, where Edwardes raised his levies', extraSeats: [[30.07, 71.00]] },
+      { id: 'bahawalpur', name: 'Bahawalpur', chief: 'Nawab Bahawal Khan', seat: 'goweyn', npc: false, side: 'red', color: '#94493a', note: 'The Daudpotra country to the south' },
     ],
     labels: [
-      { text: 'Chenab', lat: 30.02, lon: 71.25, cls: 'water', tier: 1, angle: 70 },
+      { text: 'Chenab', lat: 29.90, lon: 71.18, cls: 'water', tier: 1, angle: 60 },
     ],
   },
+
 
   // Lahore, January 1841. Maharaja Kharak Singh and his son Nau Nihal Singh
   // were both dead within a day of each other; Kharak Singh's widow, Maharani
@@ -392,7 +407,7 @@ const SCENARIOS = {
       red: { name: 'Kanwar Sher Singh', title: 'Son of Ranjit Singh, claimant to the throne', leads: 'Sher Singh’s Battalions' },
     },
     homeBase: { azure: null, red: [31.59, 74.47] },
-    walls: { lahorefort: 5, lahore: 2 },
+    walls: { lahorefort: 7, lahore: 2 },
     strongpoints: ['lahorefort', 'lahore', 'shalimar', 'shahdara', 'anarkali', 'mianmir'],
     startOwners: { lahorefort: 'azure', lahore: 'azure', shalimar: 'azure', shahdara: 'azure', anarkali: null, mianmir: 'red' },
     startUnits: [
@@ -424,66 +439,79 @@ const SCENARIOS = {
       { text: 'Grand Trunk Road', lat: 31.596, lon: 74.43, cls: 'route', tier: 2, angle: -8 },
     ],
   },
-  // Historic mode: the second siege of Multan as it stood on 27 December
-  // 1848, with Whish's Bengal division and the Bombay column round the city.
+
+  // Historic mode: the same opening, with the campaign's events as they fell
+  // out: Sher Singh's defection, the raising of the first siege, the magazine.
   multan1849h: {
-    map: 'multan', group: 'multan1849', mode: 'historic',
+    map: 'shujabad', group: 'multan1849', mode: 'historic',
+    modeNote: 'Edwardes’s numbers, and the campaign as it fell out',
     title: 'The Multan Campaign, 1848–49',
     year: 1848,
-    region: 'Multan',
-    blurb: 'December 1848: the siege as it stood. Diwan Mulraj holds the walled city and its citadel with some 12,000 men and over fifty guns. Major-General Whish, rejoined by the Bombay column, closes in with siege trains from Bengal and Bombay, Edwardes’s Pathan irregulars and the Nawab of Bahawalpur’s troops: about 32,000 men and 150 guns. Round 1 is 27 December.',
+    region: 'Shujabad · Multan',
+    blurb: '17 June 1848. Diwan Mulraj’s army under Rung Ram lies across the Multan road below Shujabad. The Nawab of Bahawalpur’s Daudpotras are at Goweyn fifteen miles south, and Herbert Edwardes, with his Pathan levies and Cortlandt’s Sikh regulars, is across the Chenab at the Gaggianwalluh ferry with a handful of boats. Whoever reaches the Kineyree ferry first decides the opening; behind it all stand the walls of Multan.',
     first: 'red',
     vpTarget: Infinity,
-    roundLimit: 26,
+    roundLimit: 24,
     goal: {
       fort: 'multanfort', attacker: 'red', short: 'Take the citadel',
       attackerWins: 'The breaches are stormed and the citadel, its magazine blown and its walls mined, gives in: Mulraj walks out with his last 550 men.',
-      defenderWins: 'Multan still holds as the campaign closes, and Whish’s army is needed on the Chenab.',
+      defenderWins: 'Multan still holds as the campaign closes, and the rising spreads across the Punjab.',
     },
     sides: {
-      azure: { name: 'Multan Garrison', short: 'Mulraj', adj: 'Multani', pitch: 'Mulraj’s battalions hold the suburbs, the walled city and the citadel. Make every breach cost the British, and hold the citadel until the campaign closes.', tag: 'Moves second · hold the citadel for 26 days' },
-      red: { name: 'Multan Field Force', short: 'British', adj: 'British', pitch: 'Whish’s Bengal division, Dundas’s Bombay column, Edwardes’s irregulars and the Bahawalpur troops surround Multan. Clear the suburbs, bring up the siege trains, breach the walls and storm the citadel.', tag: 'Moves first · take the citadel' },
+      azure: { name: 'Mulraj’s Multan', short: 'Mulraj', adj: 'Multani', pitch: 'Rung Ram’s army lies below Shujabad, between the Daudpotras to the south and Edwardes across the river. Beat one before the other can join it, hold Shujabad and the canal line, and keep the citadel until the campaign closes. Raja Sher Singh’s Sikhs, sent against you, may yet come over.', tag: 'Moves second · hold the citadel for 24 days' },
+      red: { name: 'Edwardes and the British', short: 'British', adj: 'British', pitch: 'Get Edwardes over the Chenab at Kineyree before Rung Ram falls on the Daudpotras, join hands, take Shujabad and Sikandarabad, and drive Mulraj into Multan. Sheikh Imamuddin joins on day 6, Sher Singh’s Darbar troops on day 9, Whish with the Bengal siege train on day 11 and the Bombay column on day 21.', tag: 'Moves first · take the citadel' },
     },
     generals: {
       azure: { name: 'Diwan Mulraj', title: 'Governor of Multan', leads: 'Mulraj’s Guard' },
-      red: { name: 'Major-General William Whish', title: 'Commanding the Multan Field Force', leads: 'HM 10th Foot' },
+      red: { name: 'Lieutenant Herbert Edwardes', title: 'Political officer, raising levies beyond the Indus', leads: 'Edwardes’s Pathans' },
     },
-    homeBase: { azure: null, red: [29.85, 71.62] },
-    walls: { multan: 4, multanfort: 8 },
+    // Edwardes's road back to Dera Ghazi Khan, the Daudpotras' to Bahawalpur,
+    // and the Lahore road for the British columns.
+    homeBase: { azure: null, red: [[30.07, 70.94], [29.63, 71.15], [30.34, 71.69]] },
+    walls: { multan: 5, multanfort: 9 },
     events: [
-      { round: 4, side: 'red', text: 'The great magazine in Multan’s citadel blew up', flash: 'THE MAGAZINE EXPLODES', walls: { multanfort: -1 }, hurt: { at: 'multanfort', hp: 2 } },
+      { round: 15, side: 'azure', text: 'Raja Sher Singh and the Darbar troops went over to Mulraj, and Whish raised the siege', flash: 'SHER SINGH GOES OVER', defect: { names: ['Sher Singh’s Sikhs', 'Sher Singh’s Ghorcharas'], to: 'azure' } },
+      { round: 18, side: 'azure', text: 'Sher Singh marched north from Multan to join his father’s rising', flash: 'SHER SINGH MARCHES NORTH', depart: ['Sher Singh’s Sikhs', 'Sher Singh’s Ghorcharas'] },
+      { round: 23, side: 'red', text: 'The great magazine in Multan’s citadel blew up', flash: 'THE MAGAZINE EXPLODES', walls: { multanfort: -1 }, hurt: { at: 'multanfort', hp: 2 } },
     ],
-    strongpoints: ['multanfort', 'multan', 'shujabad', 'muzaffargarh', 'khangarh'],
-    startOwners: { multanfort: 'azure', multan: 'azure', shujabad: 'red', muzaffargarh: 'red', khangarh: 'red' },
+    strongpoints: ['multanfort', 'multan', 'shujabad', 'sikandarabad', 'khangarh', 'muzaffargarh'],
+    startOwners: { multanfort: 'azure', multan: 'azure', shujabad: 'azure', sikandarabad: 'azure', khangarh: 'red', muzaffargarh: null },
     startUnits: [
-      ['azure', 'Khalsa Infantry', 'multanfort', 'Mulraj’s Guard'], ['azure', 'Light Field Gun', 'multanfort', 'Citadel Guns'],
+      // Rung Ram's army across the Multan road, three miles south of Shujabad.
+      ['azure', 'Khalsa Infantry', [29.840, 71.295], 'Rung Ram’s Battalions'], ['azure', 'Light Field Gun', [29.840, 71.295], 'Mulraj’s Topkhana'],
+      ['azure', 'Khalsa Infantry', [29.833, 71.310], 'Rung Ram’s Battalions'], ['azure', 'Khalsa Infantry', [29.833, 71.310], 'Multani Battalions'],
+      ['azure', 'Irregular Sowars', [29.846, 71.280], 'Multani Horse'], ['azure', 'Irregular Sowars', [29.846, 71.280], 'Multani Horse'],
+      ['azure', 'Matchlockmen', [29.828, 71.288], 'Multani Levies'], ['azure', 'Light Field Gun', [29.828, 71.288], 'Mulraj’s Topkhana'],
+      // The forts and the city.
+      ['azure', 'Matchlockmen', 'shujabad', 'Shujabad Garrison'], ['azure', 'Matchlockmen', 'sikandarabad', 'Sikandarabad Garrison'],
       ['azure', 'Khalsa Infantry', 'multan', 'City Battalions'],
-      ['azure', 'Khalsa Infantry', [30.207, 71.487], 'Multan Battalions'], ['azure', 'Light Field Gun', [30.207, 71.487], 'Multan Topkhana'],
-      ['azure', 'Khalsa Infantry', [30.188, 71.462], 'Multan Battalions'], ['azure', 'Jingal', [30.188, 71.462], 'Wall Guns'],
-      ['azure', 'Khalsa Infantry', [30.212, 71.458], 'Multan Battalions'], ['azure', 'Matchlockmen', [30.212, 71.458], 'Multani Levies'],
-      ['azure', 'Matchlockmen', [30.185, 71.49], 'Multani Levies'], ['azure', 'Light Field Gun', [30.185, 71.49], 'Mortar Battery'],
-      ['azure', 'Irregular Sowars', [30.225, 71.50], 'Multani Horse'],
-      ['red', 'Line Infantry', [30.165, 71.50], 'HM 10th Foot'], ['red', 'Line Infantry', [30.165, 71.50], 'HM 32nd Foot'],
-      ['red', 'Sepoy Infantry', [30.17, 71.525], '49th Bengal NI'], ['red', 'Sepoy Infantry', [30.17, 71.525], '51st Bengal NI'],
-      ['red', 'Sepoy Infantry', [30.155, 71.48], '52nd Bengal NI'], ['red', 'Sepoy Infantry', [30.155, 71.48], '72nd Bengal NI'],
-      ['red', 'Heavy Battery', [30.15, 71.505], 'Bengal Siege Train'], ['red', 'Heavy Battery', [30.15, 71.505], 'Bengal Siege Train'],
-      ['red', 'Horse Artillery', [30.16, 71.535], 'Bengal Horse Artillery'],
-      ['red', 'Line Infantry', [30.16, 71.455], 'HM 60th Rifles'], ['red', 'Line Infantry', [30.16, 71.455], '1st Bombay Fusiliers'],
-      ['red', 'Sepoy Infantry', [30.15, 71.44], '3rd Bombay NI'], ['red', 'Sepoy Infantry', [30.15, 71.44], '19th Bombay NI'],
-      ['red', 'Heavy Battery', [30.145, 71.465], 'Bombay Siege Train'], ['red', 'Horse Artillery', [30.145, 71.465], 'Bombay Horse Artillery'],
-      ['red', 'Irregular Sowars', [30.17, 71.42], 'Scinde Horse'],
-      ['red', 'Matchlockmen', [30.20, 71.42], 'Edwardes’s Pathans'], ['red', 'Matchlockmen', [30.20, 71.42], 'Edwardes’s Pathans'],
-      ['red', 'Sepoy Infantry', [30.215, 71.43], 'Van Cortlandt’s Regiments'],
-      ['red', 'Matchlockmen', [30.18, 71.545], 'Bahawalpur Daudputras'], ['red', 'Irregular Sowars', [30.18, 71.545], 'Bahawalpur Horse'],
-      ['red', 'Matchlockmen', [30.215, 71.405], 'Edwardes’s Pathans'], ['red', 'Irregular Sowars', [30.215, 71.405], 'Pathan Horse'],
-      ['red', 'Matchlockmen', [30.19, 71.565], 'Bahawalpur Daudputras'], ['red', 'Matchlockmen', [30.19, 71.565], 'Bahawalpur Daudputras'],
+      ['azure', 'Khalsa Infantry', 'multanfort', 'Mulraj’s Guard'], ['azure', 'Light Field Gun', 'multanfort', 'Citadel Guns'],
+      // Edwardes across the Chenab at the Gaggianwalluh ferry.
+      ['red', 'Matchlockmen', [29.742, 71.170], 'Edwardes’s Pathans'], ['red', 'Matchlockmen', [29.742, 71.170], 'Edwardes’s Pathans'],
+      ['red', 'Matchlockmen', [29.752, 71.165], 'Edwardes’s Pathans'], ['red', 'Zamburak', [29.752, 71.165], 'Pathan Zamburaks'],
+      ['red', 'Khalsa Infantry', [29.732, 71.165], 'Cortlandt’s Regulars'], ['red', 'Light Field Gun', [29.732, 71.165], 'Cortlandt’s Guns'],
+      ['red', 'Irregular Sowars', [29.762, 71.158], 'Pathan Horse'], ['red', 'Irregular Sowars', [29.762, 71.158], 'Pathan Horse'],
+      // The Daudpotras at Goweyn.
+      ['red', 'Matchlockmen', [29.635, 71.205], 'Daudpotra Infantry'], ['red', 'Matchlockmen', [29.635, 71.205], 'Daudpotra Infantry'],
+      ['red', 'Matchlockmen', [29.642, 71.222], 'Daudpotra Infantry'], ['red', 'Zamburak', [29.642, 71.222], 'Daudpotra Zamburaks'],
+      ['red', 'Irregular Sowars', [29.628, 71.190], 'Daudpotra Horse'], ['red', 'Irregular Sowars', [29.628, 71.190], 'Daudpotra Horse'],
+      ['red', 'Light Field Gun', [29.648, 71.210], 'Bahawalpur Guns'], ['red', 'Matchlockmen', [29.648, 71.210], 'Daudpotra Infantry'],
+      ['red', 'Matchlockmen', 'khangarh', 'Khangarh Levies'],
+    ],
+    reinforcements: [
+      { round: 6, side: 'red', at: [29.95, 71.75], name: 'Sheikh Imamuddin’s division', note: 'came in from the east', units: [['Khalsa Infantry', 'Sheikh Imamuddin’s Division'], ['Light Field Gun', 'Imamuddin’s Guns']] },
+      { round: 9, side: 'red', at: [30.335, 71.69], name: 'Raja Sher Singh’s Darbar troops', note: 'came down the Lahore road', units: [['Khalsa Infantry', 'Sher Singh’s Sikhs'], ['Khalsa Infantry', 'Sher Singh’s Sikhs'], ['Khalsa Infantry', 'Sher Singh’s Sikhs'], ['Irregular Sowars', 'Sher Singh’s Ghorcharas']] },
+      { round: 11, side: 'red', at: [30.335, 71.69], name: 'Whish’s division', note: 'came down from Lahore with the Bengal siege train', units: [['Line Infantry', 'HM 10th Foot'], ['Line Infantry', 'HM 32nd Foot'], ['Sepoy Infantry', '49th Bengal NI'], ['Sepoy Infantry', '72nd Bengal NI'], ['Heavy Battery', 'Bengal Siege Train'], ['Horse Artillery', 'Bengal Horse Artillery']] },
+      { round: 12, side: 'azure', at: 'multan', name: 'Mulraj’s new levies', note: 'were raised in the city', units: [['Matchlockmen', 'Multani Levies'], ['Matchlockmen', 'Multani Levies']] },
+      { round: 21, side: 'red', at: [29.635, 71.67], name: 'The Bombay column', note: 'came up from Sindh with its own siege train', units: [['Line Infantry', 'HM 60th Rifles'], ['Line Infantry', '1st Bombay Fusiliers'], ['Sepoy Infantry', '3rd Bombay NI'], ['Heavy Battery', 'Bombay Siege Train'], ['Irregular Sowars', 'Scinde Horse']] },
     ],
     powers: [
-      { id: 'mulraj', name: 'Multan', chief: 'Diwan Mulraj', seat: 'multanfort', npc: false, side: 'azure', color: '#3f6f8f', note: 'The rebel city', extraSeats: ['multan'] },
-      { id: 'company', name: 'British and allied ground', chief: 'Major-General Whish', seat: 'shujabad', npc: false, side: 'red', color: '#94493a', note: 'Held by the besiegers and their allies', extraSeats: ['muzaffargarh', 'khangarh', 'sikandarabad'] },
+      { id: 'mulraj', name: 'Mulraj’s Multan', chief: 'Diwan Mulraj', seat: 'multanfort', npc: false, side: 'azure', color: '#3f6f8f', note: 'The rebel province', extraSeats: ['multan', 'shujabad', 'sikandarabad'] },
+      { id: 'beyond', name: 'Beyond the Chenab', chief: 'Lieutenant Edwardes', seat: 'khangarh', npc: false, side: 'red', color: '#94493a', note: 'The right bank, where Edwardes raised his levies', extraSeats: [[30.07, 71.00]] },
+      { id: 'bahawalpur', name: 'Bahawalpur', chief: 'Nawab Bahawal Khan', seat: 'goweyn', npc: false, side: 'red', color: '#94493a', note: 'The Daudpotra country to the south' },
     ],
     labels: [
-      { text: 'Chenab', lat: 30.02, lon: 71.25, cls: 'water', tier: 1, angle: 70 },
+      { text: 'Chenab', lat: 29.90, lon: 71.18, cls: 'water', tier: 1, angle: 60 },
     ],
   },
 
@@ -494,17 +522,17 @@ const SCENARIOS = {
     title: 'The Siege of Lahore, 1841',
     year: 1841,
     region: 'Lahore',
-    blurb: 'January 1841: the siege as it stood. Sher Singh’s Khalsa army, some 26,000 foot, 8,000 horse and 45 guns, is round the city; Raja Gulab Singh’s 5,000 Dogras and guards hold Lahore Fort and the walled city for Maharani Chand Kaur. Round 1 is 13 January; on the evening of the 17th Dhian Singh arranged a ceasefire.',
+    blurb: 'January 1841. Sher Singh’s Khalsa army, some 26,000 foot, 8,000 horse and 45 guns, has come down the Amritsar road and camped at Budhu ka Awa, and the regiments at Mian Mir and the Fauj-i-Khas at Anarkali have declared for him. Raja Gulab Singh’s 5,000 Dogras and guards hold Lahore Fort and the walled city for Maharani Chand Kaur. Round 1 is 14 January; on the evening of the 17th Dhian Singh arranged a ceasefire.',
     first: 'red',
     vpTarget: Infinity,
-    roundLimit: 5,
+    roundLimit: 6,
     goal: {
       fort: 'lahorefort', attacker: 'red', short: 'Take Lahore Fort',
       attackerWins: 'The fort falls to Sher Singh. Chand Kaur gives up her claim for a jagir, Gulab Singh marches out at midnight with the treasury, and Sher Singh is proclaimed Maharaja of the Punjab.',
       defenderWins: 'Lahore Fort still holds for Chand Kaur when the ceasefire comes. Sher Singh must treat with the regent’s party.',
     },
     sides: {
-      azure: { name: 'Chand Kaur’s Garrison', short: 'Regency', adj: 'Regency', pitch: 'Gulab Singh’s Dogras hold Lahore Fort and the walled city for Maharani Chand Kaur. You are outnumbered six to one: hold the fort for five days, until terms can be made.', tag: 'Moves second · hold the fort for 5 days' },
+      azure: { name: 'Chand Kaur’s Garrison', short: 'Regency', adj: 'Regency', pitch: 'Gulab Singh’s Dogras hold Lahore Fort and the walled city for Maharani Chand Kaur. You are outnumbered six to one: hold the fort for six days, until terms can be made.', tag: 'Moves second · hold the fort for 6 days' },
       red: { name: 'Sher Singh’s Army', short: 'Sher Singh', adj: 'Khalsa', pitch: 'The Khalsa army has come over to Sher Singh. Force the city gates, bring the guns up to the Badshahi Mosque and the walls, and take Lahore Fort.', tag: 'Moves first · take the fort' },
     },
     generals: {
@@ -512,7 +540,7 @@ const SCENARIOS = {
       red: { name: 'Kanwar Sher Singh', title: 'Son of Ranjit Singh, claimant to the throne', leads: 'Sher Singh’s Battalions' },
     },
     homeBase: { azure: null, red: [31.59, 74.47] },
-    walls: { lahorefort: 5, lahore: 2 },
+    walls: { lahorefort: 6, lahore: 2 },
     strongpoints: ['lahorefort', 'lahore', 'shalimar', 'shahdara', 'anarkali', 'mianmir'],
     startOwners: { lahorefort: 'azure', lahore: 'azure', shalimar: 'red', shahdara: null, anarkali: null, mianmir: 'red' },
     startUnits: [
@@ -521,7 +549,7 @@ const SCENARIOS = {
       ['azure', 'Irregular Sowars', [31.592, 74.322], 'Dogra Horse'], ['azure', 'Matchlockmen', [31.578, 74.328], 'Dogra Musketeers'],
       ['red', 'Khalsa Infantry', [31.605, 74.36], 'Khalsa Battalions'], ['red', 'Khalsa Infantry', [31.605, 74.36], 'Khalsa Battalions'],
       ['red', 'Khalsa Infantry', [31.555, 74.345], 'Khalsa Battalions'], ['red', 'Khalsa Infantry', [31.555, 74.345], 'Khalsa Battalions'],
-      ['red', 'Khalsa Infantry', [31.56, 74.315], 'Khalsa Battalions'], ['red', 'Khalsa Infantry', [31.56, 74.315], 'Khalsa Battalions'],
+      ['red', 'Khalsa Infantry', [31.552, 74.372], 'Khalsa Battalions'], ['red', 'Khalsa Infantry', [31.552, 74.372], 'Khalsa Battalions'],
       ['red', 'Irregular Sowars', [31.62, 74.36], 'Ghorcharas'], ['red', 'Irregular Sowars', [31.62, 74.36], 'Ghorcharas'],
       ['red', 'Khalsa Infantry', [31.585, 74.39], 'Sher Singh’s Battalions'], ['red', 'Khalsa Infantry', [31.585, 74.39], 'Khalsa Battalions'],
       ['red', 'Khalsa Infantry', [31.578, 74.375], 'Khalsa Battalions'], ['red', 'Khalsa Infantry', [31.578, 74.375], 'Khalsa Battalions'],
@@ -531,11 +559,12 @@ const SCENARIOS = {
       ['red', 'Khalsa Infantry', [31.565, 74.30], 'Fauj-i-Khas'], ['red', 'Khalsa Infantry', [31.565, 74.30], 'Fauj-i-Khas'],
       ['red', 'Khalsa Infantry', [31.598, 74.355], 'Khalsa Battalions'], ['red', 'Khalsa Infantry', [31.598, 74.355], 'Khalsa Battalions'],
       ['red', 'Light Field Gun', [31.582, 74.385], 'Khalsa Topkhana'], ['red', 'Light Field Gun', [31.582, 74.385], 'Khalsa Topkhana'],
-      ['red', 'Light Field Gun', [31.575, 74.35], 'Khalsa Topkhana'], ['red', 'Heavy Battery', [31.575, 74.35], 'Sher Singh’s Siege Guns'],
-      ['red', 'Heavy Battery', [31.56, 74.34], 'Sher Singh’s Siege Guns'],
+      ['red', 'Light Field Gun', [31.578, 74.362], 'Khalsa Topkhana'], ['red', 'Heavy Battery', [31.578, 74.362], 'Sher Singh’s Siege Guns'],
+      ['red', 'Heavy Battery', [31.568, 74.372], 'Sher Singh’s Siege Guns'],
       ['red', 'Irregular Sowars', [31.60, 74.40], 'Ghorcharas'], ['red', 'Irregular Sowars', [31.60, 74.40], 'Ghorcharas'],
-      ['red', 'Irregular Sowars', [31.545, 74.33], 'Ghorcharas'], ['red', 'Light Dragoons', [31.545, 74.33], 'Ghorchara Khas'],
-      ['red', 'Irregular Sowars', [31.61, 74.33], 'Ghorcharas'],
+      ['red', 'Irregular Sowars', [31.545, 74.352], 'Ghorcharas'], ['red', 'Light Dragoons', [31.545, 74.352], 'Ghorchara Khas'],
+      ['red', 'Irregular Sowars', [31.603, 74.378], 'Ghorcharas'],
+      ['red', 'Khalsa Infantry', 'shalimar', 'Shalimar Camp Guard'], ['red', 'Khalsa Infantry', 'mianmir', 'Mian Mir Battalions'],
     ],
     powers: [
       { id: 'regency', name: 'The regent’s Lahore', chief: 'Maharani Chand Kaur', seat: 'lahorefort', npc: false, side: 'azure', color: '#3f6f8f', note: 'The fort and the walled city', extraSeats: ['lahore'] },
@@ -567,7 +596,7 @@ const SCENARIOS = {
     blurb: '1764. After the sack of Sirhind, Charat Singh of the Sukerchakia misl and Gujjar Singh of the Bhangis ride north-west over the Chenab to the Jhelum. Sarbuland Khan, Ahmad Shah Abdali’s uncle and his faujdar at Rohtas, comes down to the river with some 12,000 Afghans to stop them. Behind him stands Sher Shah’s fortress, four kilometres of wall round a broken hilltop that no army has stormed.',
     first: 'red',
     vpTarget: Infinity,
-    roundLimit: 8,
+    roundLimit: 11,
     goal: {
       forts: ['rohtas', 'jhelum', 'dina'], need: 2, attacker: 'red', short: 'Win the faujdari', general: true,
       attackerWins: 'The faujdari of Rohtas is lost to the Afghans: the Sukerchakias and the Bhangis hold the country from the Jhelum to the Salt Range, and the road to Kabul is cut.',
@@ -575,7 +604,7 @@ const SCENARIOS = {
       defenderWins: 'Sarbuland Khan still holds the faujdari of Rohtas as the season closes, and the road from Kabul stays open to Ahmad Shah.',
     },
     sides: {
-      azure: { name: 'Durrani Army', short: 'Durrani', adj: 'Durrani', pitch: 'Sarbuland Khan’s Afghans hold the Jhelum crossing, with Rohtas behind them. Stop the Sikhs at the river, keep at least two of Rohtas, Jhelum and Dina, and do not let the faujdar be taken.', tag: 'Moves second · hold the faujdari for 8 days' },
+      azure: { name: 'Durrani Army', short: 'Durrani', adj: 'Durrani', pitch: 'Sarbuland Khan’s Afghans hold the Jhelum crossing, with Rohtas behind them. Stop the Sikhs at the river, keep at least two of Rohtas, Jhelum and Dina, and do not let the faujdar be taken.', tag: 'Moves second · hold the faujdari for 11 days' },
       red: { name: 'Sikh Misls', short: 'Misls', adj: 'Sikh', pitch: 'Charat Singh’s and Gujjar Singh’s horse come up from Gujrat. Cross the Jhelum and beat Sarbuland Khan in the field. Hold two of Rohtas, Jhelum and Dina at the end of a day, or draw the faujdar out and take him.', tag: 'Moves first · take the faujdari or its faujdar' },
     },
     generals: {
@@ -585,8 +614,8 @@ const SCENARIOS = {
     // The Afghans' road home over the Bakrala pass; the Sikhs' back to Gujrat.
     homeBase: { azure: [33.10, 73.445], red: [32.81, 73.86] },
     walls: { rohtas: 2 },
-    strongpoints: ['rohtas', 'jhelum', 'dina', 'sarai', 'mangla'],
-    startOwners: { rohtas: 'azure', jhelum: 'azure', dina: 'azure', sarai: 'red', mangla: null },
+    strongpoints: ['rohtas', 'jhelum', 'dina', 'sarai'],
+    startOwners: { rohtas: 'azure', jhelum: 'azure', dina: 'azure', sarai: 'red' },
     startUnits: [
       // Sarbuland Khan's army at the Jhelum crossing, Rohtas behind it.
       ['azure', 'Irregular Sowars', [32.952, 73.68], 'Sarbuland Khan’s Guard'], ['azure', 'Irregular Sowars', [32.952, 73.68], 'Durrani Horse'],
@@ -603,6 +632,7 @@ const SCENARIOS = {
       ['red', 'Irregular Sowars', [32.86, 73.80], 'Bhangi Sowars'], ['red', 'Zamburak', [32.86, 73.80], 'Bhangi Zamburaks'],
       ['red', 'Matchlockmen', 'sarai', 'Bhangi Musketeers'], ['red', 'Zamburak', 'sarai', 'Bhangi Zamburaks'],
       ['red', 'Dhal & Talwar', [32.895, 73.765], 'Akali Nihangs'], ['red', 'Dhal & Talwar', [32.895, 73.765], 'Akali Nihangs'],
+      ['red', 'Irregular Sowars', [32.84, 73.79], 'Sukerchakia Sowars'], ['red', 'Irregular Sowars', [32.84, 73.79], 'Bhangi Sowars'],
       ['red', 'Irregular Sowars', [33.0, 73.835], 'Akali Sowars'], ['red', 'Zamburak', [33.0, 73.835], 'Sukerchakia Zamburaks'],
     ],
     powers: [
@@ -616,16 +646,16 @@ const SCENARIOS = {
   },
 
   // Open campaign: the season before, the Afghans spread across their posts
-  // and the two misls coming separately, Gujjar Singh by the Mangla ferry.
+  // and the two misls coming separately, Gujjar Singh by Jatlan.
   rohtaso: {
     map: 'rohtas', group: 'rohtas', mode: 'open',
     title: 'The Battle of Rohtas',
     year: 1764,
     region: 'Jhelum · Rohtas',
-    blurb: '1764, before the armies meet. Sarbuland Khan’s Afghans are spread across the faujdari of Rohtas, at the fort, at Jhelum and Dina and on the Mangla ferry. Charat Singh rides up the Gujrat road for the Jhelum crossing; Gujjar Singh’s Bhangis are coming round by Jatlan for the Mangla ferry.',
+    blurb: '1764, before the armies meet. Sarbuland Khan’s Afghans are spread across the faujdari of Rohtas, at the fort, at Jhelum and Dina. Charat Singh rides up the Gujrat road for the Jhelum crossing; Gujjar Singh’s Bhangis are coming round by Jatlan.',
     first: 'red',
     vpTarget: Infinity,
-    roundLimit: 14,
+    roundLimit: 18,
     goal: {
       forts: ['rohtas', 'jhelum', 'dina'], need: 2, attacker: 'red', short: 'Win the faujdari', general: true,
       attackerWins: 'The faujdari of Rohtas is lost to the Afghans: the Sukerchakias and the Bhangis hold the country from the Jhelum to the Salt Range, and the road to Kabul is cut.',
@@ -633,7 +663,7 @@ const SCENARIOS = {
       defenderWins: 'Sarbuland Khan still holds the faujdari of Rohtas as the season closes, and the road from Kabul stays open to Ahmad Shah.',
     },
     sides: {
-      azure: { name: 'Durrani Army', short: 'Durrani', adj: 'Durrani', pitch: 'Sarbuland Khan’s Afghans hold Rohtas, Jhelum, Dina and the Mangla ferry. Gather before the two misls join, beat one of them at the river, keep two of Rohtas, Jhelum and Dina, and keep the faujdar out of their hands.', tag: 'Moves second · hold the faujdari for 14 days' },
+      azure: { name: 'Durrani Army', short: 'Durrani', adj: 'Durrani', pitch: 'Sarbuland Khan’s Afghans hold Rohtas, Jhelum and Dina. Gather before the two misls join, beat one of them at the river, keep two of Rohtas, Jhelum and Dina, and keep the faujdar out of their hands.', tag: 'Moves second · hold the faujdari for 18 days' },
       red: { name: 'Sikh Misls', short: 'Misls', adj: 'Sikh', pitch: 'Charat Singh comes up the Gujrat road; Gujjar Singh’s Bhangis reach Jatlan on day 3. Cross the Jhelum, join hands, and hold two of Rohtas, Jhelum and Dina at the end of a day, or take the faujdar.', tag: 'Moves first · take the faujdari or its faujdar' },
     },
     generals: {
@@ -642,29 +672,114 @@ const SCENARIOS = {
     },
     homeBase: { azure: [33.10, 73.445], red: [32.81, 73.86] },
     walls: { rohtas: 2 },
-    strongpoints: ['rohtas', 'jhelum', 'dina', 'sarai', 'mangla'],
-    startOwners: { rohtas: 'azure', jhelum: 'azure', dina: 'azure', sarai: null, mangla: 'azure' },
+    strongpoints: ['rohtas', 'jhelum', 'dina', 'sarai'],
+    startOwners: { rohtas: 'azure', jhelum: 'azure', dina: 'azure', sarai: null },
     startUnits: [
       ['azure', 'Irregular Sowars', [32.975, 73.60], 'Sarbuland Khan’s Guard'], ['azure', 'Irregular Sowars', [32.975, 73.60], 'Durrani Horse'],
       ['azure', 'Dhal & Talwar', [32.985, 73.585], 'Afghan Swordsmen'], ['azure', 'Zamburak', [32.985, 73.585], 'Durrani Zamburaks'],
       ['azure', 'Matchlockmen', 'rohtas', 'Rohtas Garrison'], ['azure', 'Jingal', 'rohtas', 'Rohtas Wall Guns'],
       ['azure', 'Matchlockmen', 'jhelum', 'Afghan Jezailchis'], ['azure', 'Zamburak', 'jhelum', 'Durrani Zamburaks'],
-      ['azure', 'Matchlockmen', 'dina', 'Dina Post'], ['azure', 'Irregular Sowars', 'mangla', 'Mangla Post'],
+      ['azure', 'Matchlockmen', 'dina', 'Dina Post'],
       ['azure', 'Dhal & Talwar', [32.95, 73.64], 'Afghan Swordsmen'], ['azure', 'Irregular Sowars', 'bakrala', 'Qizilbash Horse'],
       ['red', 'Irregular Sowars', [32.83, 73.845], 'Charat Singh’s Sowars'], ['red', 'Mounted Matchlocks', [32.83, 73.845], 'Sukerchakia Sowars'],
       ['red', 'Irregular Sowars', [32.815, 73.83], 'Sukerchakia Sowars'], ['red', 'Mounted Matchlocks', [32.815, 73.83], 'Sukerchakia Sowars'],
       ['red', 'Matchlockmen', [32.845, 73.855], 'Sukerchakia Musketeers'], ['red', 'Zamburak', [32.845, 73.855], 'Sukerchakia Zamburaks'],
+      ['red', 'Dhal & Talwar', [32.83, 73.86], 'Akali Nihangs'], ['red', 'Irregular Sowars', [32.83, 73.86], 'Sukerchakia Sowars'],
     ],
     reinforcements: [
       { round: 3, side: 'red', at: [33.04, 73.84], name: 'Gujjar Singh’s Bhangis', note: 'came round by Jatlan', units: [['Irregular Sowars', 'Gujjar Singh’s Sowars'], ['Mounted Matchlocks', 'Bhangi Sowars'], ['Irregular Sowars', 'Bhangi Sowars'], ['Zamburak', 'Bhangi Zamburaks'], ['Matchlockmen', 'Bhangi Musketeers'], ['Dhal & Talwar', 'Akali Nihangs']] },
     ],
     powers: [
-      { id: 'durrani', name: 'Durrani Rohtas', chief: 'Sarbuland Khan', seat: 'rohtas', npc: false, side: 'azure', color: '#3f6f8f', note: 'The faujdari of Rohtas', extraSeats: ['jhelum', 'dina', 'bakrala', 'mangla'] },
+      { id: 'durrani', name: 'Durrani Rohtas', chief: 'Sarbuland Khan', seat: 'rohtas', npc: false, side: 'azure', color: '#3f6f8f', note: 'The faujdari of Rohtas', extraSeats: ['jhelum', 'dina', 'bakrala'] },
       { id: 'misls', name: 'The misls', chief: 'Sardar Charat Singh', seat: [32.85, 73.84], npc: false, side: 'red', color: '#94493a', note: 'Gujjar Singh’s country towards Gujrat', extraSeats: ['jatlan'] },
     ],
     labels: [
       { text: 'Jhelum', lat: 32.86, lon: 73.66, cls: 'water', tier: 1, angle: 50 },
       { text: 'Grand Trunk Road', lat: 33.03, lon: 73.50, cls: 'route', tier: 2, angle: -50 },
+    ],
+  },
+
+  // Jamrud, April 1837, after the Gazetteer of the Peshawar District (1897-98),
+  // ch. II, with the numbers of the Afghan army from Gupta, History of the
+  // Sikhs V, and Nalwa, Hari Singh Nalwa (2009). Hari Singh built the fort of
+  // Jamrud (Fatehgarh) at the mouth of the Khyber between December 1836 and
+  // February 1837. In the spring the best of the Sikh troops were called to
+  // Lahore for Kanwar Nau Nihal Singh's wedding, and Dost Muhammad sent his son
+  // Muhammad Akbar Khan, with the minister Mirza Sami Khan, Afzal Khan and
+  // Shamsuddin Khan, down the Khyber with some 7,000 horse, 2,000 matchlockmen,
+  // 9,000 ghazis, eighteen guns and a host of Khyberi tribesmen, while Haji
+  // Khan brought levies from Bajaur, Kunar and the Mohmand country into the
+  // Doaba against Lehna Singh at Shabqadar. Jamrud, held by Mahan Singh with
+  // 600-800 men, was invested on 23 April; on the 29th the Afghan guns laid its
+  // walls in ruins, and on the 30th Hari Singh came out from Peshawar, broke the
+  // assault and took fourteen guns, until Shamsuddin and Akbar Khan rallied the
+  // Afghans and Hari Singh fell charging their right. The Sikhs held the fort,
+  // his death was kept secret, and when the reinforcements from Lahore came up
+  // the Afghans withdrew by night. Round 1 is 20 April, as the Afghans come down
+  // the pass; the relief from Lahore is compressed to arrive in early May.
+  jamrud: {
+    map: 'jamrud', group: 'jamrud', mode: 'historic',
+    title: 'The Battle of Jamrud',
+    year: 1837,
+    region: 'Peshawar · Khyber',
+    blurb: 'April 1837. Hari Singh Nalwa has built a fort at Jamrud, at the very mouth of the Khyber, and the best of the Sikh army has gone to Lahore for Nau Nihal Singh’s wedding. Now Dost Muhammad’s son Akbar Khan is coming down the pass with the Afghan army and its guns, the Afridis rising in the hills on either side, and Haji Khan’s Mohmand levies are descending on Shabqadar. Mahan Singh holds Jamrud with a few hundred men; Hari Singh is at Peshawar with what the wedding left him; the Lahore army is days away.',
+    first: 'red',
+    vpTarget: Infinity,
+    roundLimit: 14,
+    goal: {
+      forts: ['jamrud', 'balahisar'], need: 1, attacker: 'red', short: 'Take Jamrud or Peshawar',
+      attackerWins: 'The Sikh post at the mouth of the Khyber is gone, and Dost Muhammad can treat for Peshawar from strength.',
+      defenderWins: 'Jamrud and Peshawar still hold for the Khalsa. As the army from Lahore comes up, the Afghans withdraw by night through the Khyber, and the frontier stays at the mouth of the pass.',
+    },
+    sides: {
+      azure: { name: 'Khalsa Army', short: 'Khalsa', adj: 'Sikh', pitch: 'The Lahore army is away. Mahan Singh holds the new fort at Jamrud with a few hundred men, Lehna Singh holds Shabqadar, and Hari Singh has what is left at Peshawar. Keep Jamrud and the Bala Hisar until the army from Lahore comes up on day 11.', tag: 'Moves second · hold for 14 days' },
+      red: { name: 'Afghan Army', short: 'Afghan', adj: 'Afghan', pitch: 'Akbar Khan’s horse, guns and ghazis come down the Khyber, the Afridis rise in the hills, and Haji Khan’s levies descend on the Doaba. Take Jamrud before the Lahore army can come up, or Peshawar itself.', tag: 'Moves first · take Jamrud or Peshawar' },
+    },
+    generals: {
+      azure: { name: 'Sardar Hari Singh Nalwa', title: 'Governor of Peshawar, commander-in-chief on the frontier', leads: 'Hari Singh’s Battalions' },
+      red: { name: 'Sardar Muhammad Akbar Khan', title: 'Son of Amir Dost Muhammad Khan', leads: 'Akbar Khan’s Horse' },
+    },
+    // The Afghans' road back up the Khyber and over the Mohmand hills; the Sikhs' to Attock.
+    homeBase: { azure: [34.005, 71.83], red: [[34.035, 71.235], [34.31, 71.45]] },
+    walls: { jamrud: 5, balahisar: 3 },  // Jamrud's walls ten feet thick round a citadel mound; the Sikh fort on the Bala Hisar
+    strongpoints: ['jamrud', 'balahisar', 'peshawar', 'shabqadar'],
+    startOwners: { jamrud: 'azure', balahisar: 'azure', peshawar: 'azure', shabqadar: 'azure' },
+    startUnits: [
+      // Mahan Singh's garrison in the new fort.
+      ['azure', 'Khalsa Infantry', 'jamrud', 'Mahan Singh’s Garrison'], ['azure', 'Jingal', 'jamrud', 'Jamrud Wall Guns'],
+      // Hari Singh at Peshawar with what the wedding left him.
+      ['azure', 'Khalsa Infantry', 'balahisar', 'Hari Singh’s Battalions'], ['azure', 'Light Field Gun', 'balahisar', 'Bala Hisar Guns'],
+      ['azure', 'Matchlockmen', 'peshawar', 'Peshawar Guard'], ['azure', 'Khalsa Infantry', 'peshawar', 'City Battalion'],
+      ['azure', 'Khalsa Infantry', [34.000, 71.548], 'Khalsa Battalions'], ['azure', 'Khalsa Infantry', [34.000, 71.548], 'Khalsa Battalions'],
+      ['azure', 'Irregular Sowars', [34.018, 71.540], 'Ghorcharas'], ['azure', 'Light Dragoons', [34.018, 71.540], 'Ghorchara Khas'],
+      ['azure', 'Light Field Gun', [33.995, 71.565], 'Khalsa Topkhana'], ['azure', 'Zamburak', [33.995, 71.565], 'Zamburkhana'],
+      // Lehna Singh at Shabqadar.
+      ['azure', 'Khalsa Infantry', 'shabqadar', 'Lehna Singh’s Garrison'], ['azure', 'Jingal', 'shabqadar', 'Shabqadar Wall Guns'],
+      // Akbar Khan's army coming down the Khyber past Ali Masjid.
+      ['red', 'Irregular Sowars', [34.022, 71.300], 'Akbar Khan’s Horse'], ['red', 'Irregular Sowars', [34.022, 71.300], 'Durrani Horse'],
+      ['red', 'Irregular Sowars', [34.025, 71.285], 'Qizilbash Horse'], ['red', 'Irregular Sowars', [34.025, 71.285], 'Durrani Horse'],
+      ['red', 'Irregular Sowars', [34.028, 71.255], 'Shamsuddin Khan’s Horse'], ['red', 'Light Field Gun', [34.028, 71.255], 'Afghan Topkhana'],
+      ['red', 'Light Field Gun', [34.020, 71.268], 'Afghan Topkhana'], ['red', 'Light Field Gun', [34.020, 71.268], 'Afghan Topkhana'],
+      ['red', 'Matchlockmen', [34.015, 71.315], 'Afzal Khan’s Jezailchis'], ['red', 'Matchlockmen', [34.015, 71.315], 'Jezailchis'],
+      ['red', 'Dhal & Talwar', [34.032, 71.310], 'Ghazis'], ['red', 'Dhal & Talwar', [34.032, 71.310], 'Ghazis'],
+      ['red', 'Dhal & Talwar', [34.035, 71.275], 'Ghazis'], ['red', 'Zamburak', [34.035, 71.275], 'Afghan Zamburaks'],
+      // The Afridis rising in the hills on either side of the mouth of the pass.
+      ['red', 'Matchlockmen', [33.975, 71.335], 'Afridi Lashkar'], ['red', 'Matchlockmen', [34.060, 71.330], 'Afridi Lashkar'],
+      // Haji Khan's levies coming down from the Mohmand hills.
+      ['red', 'Matchlockmen', [34.300, 71.460], 'Bajauri Levies'], ['red', 'Matchlockmen', [34.295, 71.430], 'Mohmand Levies'],
+      ['red', 'Irregular Sowars', [34.305, 71.445], 'Haji Khan’s Horse'],
+    ],
+    reinforcements: [
+      { round: 11, side: 'azure', at: [34.005, 71.82], name: 'The army from Lahore', note: 'came up the Attock road by forced marches', units: [['Khalsa Infantry', 'Fauj-i-Khas'], ['Khalsa Infantry', 'Fauj-i-Khas'], ['Khalsa Infantry', 'Khalsa Battalions'], ['Light Dragoons', 'Ghorchara Khas'], ['Irregular Sowars', 'Ghorcharas'], ['Light Field Gun', 'Topkhana-i-Khas']] },
+    ],
+    powers: [
+      { id: 'khalsa', name: 'Sikh Peshawar', chief: 'Sardar Hari Singh Nalwa', seat: 'balahisar', npc: false, side: 'azure', color: '#3f6f8f', note: 'The Peshawar valley under Sikh rule', extraSeats: ['peshawar', 'jamrud', 'shabqadar'] },
+      { id: 'kabul', name: 'Kabul', chief: 'Amir Dost Muhammad Khan', seat: [34.030, 71.240], npc: false, side: 'red', color: '#94493a', note: 'The Khyber and the hills beyond', extraSeats: [[34.30, 71.45]] },
+    ],
+    labels: [
+      { text: 'KHYBER', lat: 33.99, lon: 71.27, cls: 'region', tier: 1 },
+      { text: 'DOABA', lat: 34.17, lon: 71.62, cls: 'region', tier: 1 },
+      { text: 'Kabul River', lat: 34.12, lon: 71.66, cls: 'water', tier: 1, angle: 10 },
     ],
   },
 };

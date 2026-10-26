@@ -62,6 +62,7 @@ main { height: calc(100% - 66px); display: grid; grid-template-columns: minmax(0
               radial-gradient(ellipse at center, transparent 62%, #6b532f55 100%); }
 #relief { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 #mapSvg, #overlay { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+#mapSvg { overflow: hidden; }  /* rivers and cover stop at the neat line */
 #mapSvg { z-index: 2; } #overlay { z-index: 3; }
 #markers { position: absolute; inset: 0; z-index: 7; pointer-events: none; }
 #units { position: absolute; inset: 0; z-index: 6; pointer-events: none; }
@@ -571,7 +572,7 @@ em.writing::before { content: ""; display: inline-block; width: 8px; height: 8px
 .start > .map-pick { grid-column: 1; grid-row: 2 / span 7; }
 .start > :not(.kicker):not(.map-pick) { grid-column: 2; }
 .start > #startTitle { grid-row: 2; margin-top: 8px; } .start > #startLede { grid-row: 3; } .start > #modePick { grid-row: 4; margin-top: 0; }
-.start > #continueBtn { grid-row: 5; } .start > #sidePick { grid-row: 6; } .start > .opponent { grid-row: 7; margin-top: 14px; }
+.start > #continueBtn { grid-row: 5; } .start > #sidePick { grid-row: 6; } .start > .opponent-row { grid-row: 7; margin-top: 14px; }
 @media (max-width: 980px) { .start[open] { display: block; } }
 .campaign-map { display: block; width: 100%; height: auto; margin: 8px 0 8px; border-radius: 4px; box-shadow: 0 0 0 1px #6e5d3a, 0 12px 40px #000a; font-family: var(--serif); }
 .cm-paper { fill: #ead9ae; }
@@ -627,3 +628,21 @@ em.writing::before { content: ""; display: inline-block; width: 8px; height: 8px
 .mode { flex: 1; display: grid; gap: 2px; text-align: left; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--line-2); background: var(--panel-2); }
 .mode b { font: 700 15px var(--serif); } .mode small { font-size: 12px; color: var(--muted); }
 .mode.active { border-color: var(--gold); background: #2b2616; }
+
+/* Kacha forts and battered works */
+.marker.kacha svg { position: absolute; left: -15px; top: -15px; width: 30px; height: 30px; opacity: var(--left); pointer-events: auto; }
+.marker.kacha .ditch { fill: none; stroke: #5b4128; stroke-width: 1; stroke-dasharray: 2 1.5; }
+.marker.kacha .rampart { fill: #a07a4c22; stroke: #7a5634; stroke-width: 2.6; stroke-linejoin: round; }
+.marker.kacha .bast { fill: #a07a4c; stroke: #5b4128; stroke-width: .7; }
+.marker.rubble svg { position: absolute; left: 2px; top: -4px; width: 24px; height: 24px; opacity: calc(.45 + .55 * var(--n)); pointer-events: auto; }
+.marker.rubble .smoke { fill: none; stroke: #6d655a; stroke-width: 1.4; stroke-linecap: round; opacity: .7; }
+.marker.rubble .stones { fill: #8c7457; stroke: #3f2c1a; stroke-width: .6; }
+
+/* Fog of war */
+.opponent-row { display: flex; flex-wrap: wrap; gap: 10px 22px; }
+.opponent-row .opponent { margin: 0; }
+#overlay .fog { fill: #1d1a12; fill-opacity: .34; stroke: none; pointer-events: none; }
+.unit.fogged { display: none; }
+.marker.ghost i { position: absolute; left: -7px; top: -18px; width: 14px; height: 14px; border-radius: 3px; border: 1.5px dashed currentColor; opacity: .7; transform: scale(var(--mk, 1)); }
+.marker.ghost.azure { color: #4f8db3; } .marker.ghost.red { color: #b4513f; }
+.marker.ghost b { position: absolute; left: -16px; top: -3px; width: 32px; text-align: center; font: 600 9px var(--sans); color: #2b1d11; opacity: .75; pointer-events: none; }

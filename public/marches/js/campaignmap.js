@@ -6,7 +6,7 @@
 // real coordinates (lat, lon) in an equirectangular projection true at 31.5°N.
 
 const CAMPAIGN_MAP = (() => {
-  const LON0 = 70.25, LON1 = 75.85, LAT0 = 33.95, LAT1 = 29.45, COS = Math.cos(31.5 * Math.PI / 180);
+  const LON0 = 70.25, LON1 = 75.85, LAT0 = 34.40, LAT1 = 29.45, COS = Math.cos(31.5 * Math.PI / 180);
   const M = 22, W = 700, IW = W - 2 * M, K = IW / ((LON1 - LON0) * COS), IH = Math.round(K * (LAT0 - LAT1)), H = IH + 2 * M;
   const px = ([lat, lon]) => [M + (lon - LON0) * COS * K, M + (LAT0 - lat) * K];
   const f = v => v.toFixed(1);
@@ -14,8 +14,9 @@ const CAMPAIGN_MAP = (() => {
 
   const RIVERS = [
     // name, width, points (north to south), [label segment, side]
-    ['Indus', 3, [[34.0, 72.3], [33.89, 72.24], [33.48, 71.93], [32.96, 71.55], [32.58, 71.53], [31.83, 70.97], [31.2, 70.85], [30.70, 70.68], [30.05, 70.78], [29.40, 70.52]], 4],
-    ['Jhelum', 2.2, [[34.0, 73.52], [33.73, 73.60], [33.30, 73.67], [33.13, 73.64], [32.93, 73.73], [32.69, 73.53], [32.58, 73.05], [32.29, 72.35], [31.70, 72.30], [31.15, 72.15]], 7],
+    ['Indus', 3, [[34.40, 72.92], [34.09, 72.70], [33.95, 72.38], [33.89, 72.24], [33.48, 71.93], [32.96, 71.55], [32.58, 71.53], [31.83, 70.97], [31.2, 70.85], [30.70, 70.68], [30.05, 70.78], [29.40, 70.52]], 4],
+    ['Jhelum', 2.2, [[34.40, 73.47], [34.0, 73.52], [33.73, 73.60], [33.30, 73.67], [33.13, 73.64], [32.93, 73.73], [32.69, 73.53], [32.58, 73.05], [32.29, 72.35], [31.70, 72.30], [31.15, 72.15]], 7],
+    ['Kabul', 2.2, [[34.30, 70.95], [34.25, 71.15], [34.16, 71.36], [34.10, 71.66], [34.02, 71.98], [33.92, 72.20], [33.89, 72.24]], 2],
     ['Chenab', 2.4, [[32.89, 74.74], [32.67, 74.47], [32.45, 74.10], [32.33, 73.78], [31.72, 72.98], [31.27, 72.32], [31.15, 72.15], [30.65, 71.85], [30.20, 71.33], [29.60, 71.08], [29.35, 71.0]], 3],
     ['Ravi', 2, [[32.37, 75.60], [32.05, 75.05], [31.80, 74.62], [31.62, 74.30], [31.30, 73.60], [30.95, 73.00], [30.73, 72.40], [30.68, 71.85]], 4],
     ['Beas', 1.8, [[32.05, 75.85], [31.60, 75.40], [31.17, 74.95]], 1],
@@ -23,6 +24,9 @@ const CAMPAIGN_MAP = (() => {
   ];
   // Hill ranges as ridge lines, hachured on both flanks.
   const RIDGES = [
+    [[34.40, 71.00], [34.15, 71.18], [33.97, 71.15], [33.75, 70.95]],                                      // the Khyber hills
+    [[34.40, 71.45], [34.33, 71.75], [34.36, 72.10], [34.30, 72.45]],                                      // the Mohmand and Swat hills
+    [[34.40, 72.95], [34.12, 73.12], [33.95, 73.38]],                                                      // Hazara
     [[32.95, 71.62], [32.72, 71.95], [32.63, 72.35], [32.68, 72.85], [32.78, 73.15], [32.93, 73.45]],      // the Salt Range
     [[32.73, 73.86], [32.80, 73.98], [32.86, 74.08]],                                                      // the Pabbi hills
     [[33.70, 72.35], [33.63, 72.80], [33.74, 73.10]],                                                      // Kala Chitta and the Margallas
@@ -42,7 +46,7 @@ const CAMPAIGN_MAP = (() => {
   ];
   // name, lat, lon, label side (r/l/a/b), city?
   const TOWNS = [
-    ['Attock', 33.89, 72.24, 'r'], ['Rawalpindi', 33.60, 73.05, 'r'], ['Jhelum', 32.93, 73.72, 'r'],
+    ['Attock', 33.89, 72.24, 'r'], ['Peshawar', 34.01, 71.58, 'r', 1], ['Rawalpindi', 33.60, 73.05, 'r'], ['Jhelum', 32.93, 73.72, 'r'],
     ['Jammu', 32.73, 74.86, 'r', 1], ['Sialkot', 32.49, 74.53, 'r'], ['Wazirabad', 32.44, 74.12, 'b'], ['Ramnagar', 32.33, 73.78, 'l'],
     ['Gujranwala', 32.16, 74.19, 'r'], ['Amritsar', 31.63, 74.87, 'r', 1], ['Kasur', 31.12, 74.45, 'r'], ['Ferozepur', 30.95, 74.62, 'r'],
     ['Dera Ghazi Khan', 30.05, 70.64, 'r'], ['Dera Ismail Khan', 31.83, 70.90, 'r'],
@@ -58,6 +62,7 @@ const CAMPAIGN_MAP = (() => {
   // and which side of the seal its name goes.
   const SPOTS = {
     khari: { at: [33.07, 73.70], off: [26, -18], side: 'r', name: 'Khari' },
+    jamrud: { at: [34.0033, 71.3784], off: [-18, 26], side: 'l', name: 'Jamrud' },
     rohtas: { at: [32.97, 73.58], off: [-26, -12], side: 'l', name: 'Rohtas' },
     chillianwala: { at: [32.66, 73.60], off: [-22, 18], side: 'l', name: 'Chillianwala' },
     gujrat: { at: [32.57, 74.08], off: [12, -20], side: 'r', name: 'Gujrat' },
@@ -180,7 +185,7 @@ const CAMPAIGN_MAP = (() => {
     for (const [, w, pts] of RIVERS) svg += `<path d="${smooth(pts)}" class="cm-river-halo" style="stroke-width:${w + 4}"/>`;
     for (const [, w, pts] of RIVERS) svg += `<path d="${smooth(pts)}" class="cm-river" style="stroke-width:${w}"/>`;
     for (const [name, , pts, seg] of RIVERS) svg += riverLabel(name, pts, seg);
-    { const [x, y] = px([33.745, 72.645]); svg += `<text transform="translate(${f(x)} ${f(y)}) rotate(19) translate(0 -5)" class="cm-route" text-anchor="middle">Grand Trunk Road</text>`; }
+    
     for (const [name, lat, lon, side, city] of TOWNS) {
       if (battleTowns.has(name)) continue;
       const [x, y] = px([lat, lon]);
