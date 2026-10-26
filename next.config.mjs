@@ -24,6 +24,12 @@ const nextConfig = {
       },
     ];
   },
+  async rewrites() {
+    return [
+      // The Jhelum Marches: a static game in public/marches, not linked from the site yet.
+      { source: '/marches', destination: '/marches/index.html' },
+    ];
+  },
   async headers() {
     return [
       {

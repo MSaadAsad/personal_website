@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <base href="/marches/" />
+  <meta name="robots" content="noindex" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#14130f" />
+  <title>The Jhelum Marches</title>
+  <meta name="description" content="Hex-and-counter campaigns on surveyed maps of the Jhelum and Chenab: the Battle for Khari (1841), Chillianwala and Gujrat (1849)." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Newsreader:opsz,wght@6..72,500;6..72,600;6..72,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css?v=26" />
+</head>
+<body class="loading" data-turn="azure">
+  <header class="topbar">
+    <div class="brand">
+      <div class="crest" aria-hidden="true"><span>JM</span></div>
+      <div><h1 id="brandTitle">The Jhelum Marches</h1><p id="brandSub">Mirpur · Poonch · Gujrat — 1765</p></div>
+    </div>
+
+    <div class="scoreboard" aria-label="Campaign score">
+      <div class="score azure">
+        <div class="score-top"><span id="name-azure">Hill Confederacy</span><strong id="vp-azure">0</strong></div>
+        <div class="vp-track"><i id="vpbar-azure"></i></div>
+        <small id="held-azure">+0/round</small>
+      </div>
+      <div class="round"><small>Round</small><b><span id="roundNo">1</span><em>/<span id="roundMax">20</span></em></b><small id="goalText">First to 40</small></div>
+      <div class="score red">
+        <div class="score-top"><strong id="vp-red">0</strong><span id="name-red">Durrani Lashkar</span></div>
+        <div class="vp-track"><i id="vpbar-red"></i></div>
+        <small id="held-red">+0/round</small>
+      </div>
+    </div>
+
+    <div class="top-actions">
+      <button class="ghost" id="chronicleBtn" title="Battles and sieges of the campaign (C)">Chronicle</button>
+      <button class="ghost" id="newBtn">New campaign</button>
+      <button class="ghost icon" id="helpBtn" aria-label="Rules and controls">?</button>
+      <button class="ghost icon panel-toggle" id="panelToggle" aria-label="Show intelligence panel">☰</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="map-stage">
+      <div id="viewport" tabindex="0" aria-label="Campaign map. Drag to pan, scroll to zoom. Click a formation to select it, then click ground to march or an enemy to attack.">
+        <div id="board">
+          <canvas id="relief" aria-hidden="true"></canvas>
+          <svg id="mapSvg" aria-hidden="true"></svg>
+          <svg id="overlay" aria-hidden="true"></svg>
+          <div id="markers"></div>
+          <div id="units"></div>
+          <div id="labels"></div>
+        </div>
+        <div id="tooltip" hidden></div>
+      </div>
+
+      <div class="hud turn-hud">
+        <div class="turn-id"><i></i><div><small>Command</small><strong id="turnName">Hill Confederacy</strong><span id="turnSub">6 of 6 formations can act</span></div></div>
+        <div class="turn-buttons">
+          <button id="nextBtn" title="Select the next formation with orders (N)">Next unit <kbd>N</kbd></button>
+          <button id="undoBtn" title="Undo the last march (U)">Undo <kbd>U</kbd></button>
+          <button id="endTurnBtn" class="primary" title="End your command (E)">End command <kbd>E</kbd></button>
+        </div>
+      </div>
+
+
+      <div class="hud map-tools">
+        <button id="zoomIn" aria-label="Zoom in">+</button>
+        <button id="zoomOut" aria-label="Zoom out">−</button>
+        <button id="fitBtn" aria-label="Show whole theatre" title="Whole theatre (0)">⤢</button>
+      </div>
+
+      <div class="hud minimap-hud">
+        <canvas id="minimap" aria-label="Overview map. Click to move the view."></canvas>
+        <div class="layers">
+          <label><input type="checkbox" id="layerRealms" checked> Realms</label>
+          <label><input type="checkbox" id="layerGrid" checked> Hexes</label>
+          <label><input type="checkbox" id="layerLabels" checked> Names</label>
+          <label><input type="checkbox" id="layerSupply"> Supply</label>
+          <label><input type="checkbox" id="followAI" checked> Follow AI</label>
+        </div>
+      </div>
+
+      <div class="hud legend">
+        <div id="scaleBar"><i></i><b>10 km</b></div>
+        <div class="compass" aria-hidden="true">N</div>
+      </div>
+
+      <div class="hud replay-bar" id="replayBar" hidden>
+        <div class="rp-head"><small>Replay</small><b id="rpTitle"></b><span id="rpDay"></span></div>
+        <div class="rp-track" id="rpTrack" aria-label="Commands: click one to jump there"></div>
+        <div class="rp-controls"><button id="rpPlay">Pause</button><button id="rpSpeed" title="Playback speed">2×</button><button class="ghost" id="rpExit" title="Back to the campaign (Esc)">Exit replay</button></div>
+      </div>
+
+      <div id="loadError" class="load-error" hidden></div>
+      <div class="loader" aria-hidden="true"><span>Surveying the theatre…</span></div>
+    </section>
+
+    <aside class="panel" aria-label="Intelligence">
+      <section class="card general-card" id="generalCard">
+        <div class="gen-portrait" id="genPortrait"></div>
+        <div class="gen-body">
+          <small id="genTitle">Commander</small>
+          <strong id="genName">General</strong>
+          <span id="genLeads"></span>
+          <div class="gen-actions">
+            <button id="rideBtn"><span>Take command</span></button>
+            <button id="forceBtn"><span>Forced march</span></button>
+          </div>
+          <p class="gen-rules">Leads: +1 attack &amp; defence, never falls back · rally ×2 nearby · captured if his formation falls</p>
+        </div>
+      </section>
+      <section class="card inspector-card"><div id="inspector"></div></section>
+      <section class="card">
+        <header><h4>Your formations</h4><span id="rosterSide">Hills</span></header>
+        <div id="roster"></div>
+      </section>
+      <section class="card">
+        <header><h4>Strongpoints</h4><span id="objCount">0 · 0</span></header>
+        <p class="card-note">At the end of every round each strongpoint scores a war point for whoever holds it.</p>
+        <div id="objectives"></div>
+      </section>
+      <section class="card">
+        <header><h4>Local powers</h4><span>end a command in their seat</span></header>
+        <div id="powers"></div>
+      </section>
+      <section class="card">
+        <header><h4>Battles &amp; sieges</h4><span id="battleCount">none yet</span></header>
+        <div id="battles"></div>
+      </section>
+      <section class="card">
+        <header><h4>Dispatches</h4></header>
+        <div id="log"></div>
+      </section>
+      <p class="credits">Relief: SRTM via AWS Terrain Tiles. Vegetation: ESA WorldCover 2021. Rivers &amp; places: © OpenStreetMap contributors (ODbL). Spheres of influence are approximate, grown from each seat and bounded by rivers. 1 hex = 2 km; one round is about a day's march.</p>
+    </aside>
+  </main>
+
+  <div class="turn-banner" id="turnBanner" aria-live="polite"><small>The initiative passes to</small><strong>Hill Confederacy</strong><span>Round 1</span></div>
+  <div class="toast" id="toast" aria-live="polite"></div>
+  <div class="battle-notice" id="battleNotice" role="status" hidden></div>
+
+  <dialog id="startDialog" class="dialog start">
+    <small class="kicker">Choose a campaign</small>
+    <div class="map-pick" id="mapPick"></div>
+    <h2 id="startTitle">The Jhelum Marches</h2>
+    <p class="lede" id="startLede"></p>
+    <button class="continue" id="continueBtn" hidden><b>Continue campaign</b><small></small></button>
+    <div class="side-pick" id="sidePick"></div>
+    <label class="opponent">Opponent <select id="opponent"><option value="ai" selected>Computer</option><option value="human">Second player (hot-seat)</option></select></label>
+  </dialog>
+
+  <dialog id="helpDialog" class="dialog help">
+    <button class="close" data-close aria-label="Close">×</button>
+    <small class="kicker">Field manual</small>
+    <h2>How to command</h2>
+    <div class="help-grid">
+      <div><h3>Win</h3><p>At the end of every round each strongpoint (◆) scores a war point for its holder. First to 40 with the lead wins. So does holding all eight, or scattering the enemy. After 20 rounds the higher score wins.</p></div>
+      <div><h3>March</h3><p>Select a formation and click blue ground. You can split a march across several clicks. Roads cost 1 per hex, open plain 2, broken ground 3, hills 4 and mountains 6. Scrub and forest add 1, horse pays extra in rough ground, and guns pay extra in hills.</p></div>
+      <div><h3>Rivers</h3><p>Great rivers (the Jhelum and Chenab) can only be crossed at a ghat (ferry bar on the map). Once per campaign a formation on the bank can <b>build a ferry</b>: it costs that formation its command and 200 men, and afterwards either army may cross there. Fordable rivers such as the Poonch cost +3, and nalas +1. Defenders behind water gain defence.</p></div>
+      <div><h3>Contact</h3><p>Stepping next to an enemy ends your march. Formations may share a hex two at a time; Shift-click a friendly hex to join it.</p></div>
+      <div><h3>Fight</h3><p>Every formation is about 1,000 men, shown as five figures of 200 on its stand; losses take figures off. Click a red ring to attack, or a dashed ring to march and attack in one order. Hover first to see the odds and expected losses. Each side rolls a d6 and adds modifiers. Win by 3+ to smash (600 men lost); tie or win by less to strike (400), with 200 lost back in melee. Every 800 enemy men standing next to the defender cost it 1 defence (up to 3), and a formation encircled (enemies on three sides, or on opposite sides) loses 1 more and surrenders rather than falling back. Lose by 1–2 in melee and both lose 200; lose by 3+ and you are repulsed. A formation deals damage in proportion to the soldiers it has left. Forts give +3 and great fortresses have walls on top that only guns can knock down, one level per hit; all guns get a bonus against walls. A defender 60 m above its attacker gets +1 (+2 at 180 m), and attacking downhill gives the attacker +1. Cavalry is poor wherever the ground rises more than 100 m within a hex: +2 to march there, −1 attacking into it and −1 defending in it. Only Light Field Guns fire two hexes; camel swivels and jingals must close to the next hex like everyone else. Guns firing at range and skirmishers risk nothing.</p></div>
+      <div><h3>Fatigue</h3><p>An attack takes 2 march points, and a formation needs 2 left to make one; afterwards it may march on with whatever remains. A formation that has not marched in its latest command fights at +1 (holding its ground). One that used more than a third of its march fights at −1, more than two thirds at −2, both attacking and when attacked before its next command.</p></div>
+      <div><h3>Retreat &amp; rally</h3><p>A formation pushed below 40% (200 men left) falls back up to two hexes and cannot attack until it rallies. If it is cut off it surrenders. A formation that neither marches nor fights, away from the enemy, rallies 200 men, or 400 near the general.</p></div>
+      <div><h3>The general</h3><p>Your general rides with one formation: +1 attack, +1 defence, and it never falls back. Once per command he can <b>take command</b> of another formation within 12 hexes (G) and order a <b>forced march</b> for one within 4 hexes (F). If his formation is destroyed he is captured and the enemy gains 5 war points.</p></div>
+      <div><h3>Supply &amp; forts</h3><p>Every formation carries a supply stock. Each command it eats 20%, and wagons from your supply zone (the strongpoints, forts and allied seats you hold, and any home base) bring in more: 40% at a depot, about 20% two wagon-days away, nothing beyond three and a half days or if enemies cut the road. Below 60% a formation attacks at −1; below 40% it is hungry (−1 defence too, no rallying); below 20% its men desert each command until it marches back. Forts belong to whoever last garrisoned them. Tick <b>Supply</b> under the minimap to see where your wagons reach.</p></div>
+      <div><h3>Chronicle</h3><p>Fights close together in place and time make one engagement, named after the nearest place: a battle, an assault, or a siege if a fort is invested for days. When one ends, Claude writes its account (the turning points, what it cost) from what happened on the map. Add your own Anthropic API key under <b>Chronicle</b> (C); without one you get field notes. Crossed swords mark where each was fought. <b>Replay the battle</b> (or the whole campaign) plays the troop movements back on the map: pause, change speed, or click the bar to jump to any command; Esc returns to the game.</p></div>
+      <div><h3>Allies &amp; ground</h3><p>End a command in a local chief's seat to win them over: they send one levy formation and add +1 defence in their sphere. Vegetation is from satellite land cover: thorn scrub and pine slow a march and give cover, and scrub forest (phulai and kao thicket) gives +2.</p></div>
+    </div>
+    <p class="keys"><kbd>N</kbd> next unit <kbd>E</kbd> end command <kbd>U</kbd> undo <kbd>G</kbd> general takes command <kbd>F</kbd> forced march <kbd>C</kbd> chronicle <kbd>Esc</kbd> deselect <kbd>+</kbd><kbd>−</kbd> zoom <kbd>0</kbd> whole map · drag to pan, scroll to zoom, right-click to deselect</p>
+  </dialog>
+
+  <dialog id="victoryDialog" class="dialog victory">
+    <small class="kicker">The marches are decided</small>
+    <h2 id="victoryTitle">Victory</h2>
+    <p id="victoryCopy"></p>
+    <div class="victory-battles" id="victoryBattles"></div>
+    <div class="actions"><button class="primary" id="victoryNew" autofocus>New campaign</button><button class="ghost" id="victoryReplay">▶ Replay the campaign</button><button class="ghost" data-close>Review the map</button></div>
+  </dialog>
+
+  <dialog id="chronicleDialog" class="dialog chronicle">
+    <button class="close" data-close aria-label="Close">×</button>
+    <small class="kicker">Chronicle of the campaign</small>
+    <button class="replay-btn chron-replay" id="replayCampaign">▶ Replay the campaign</button>
+    <div class="chron-grid">
+      <nav id="chronList" aria-label="Battles"></nav>
+      <article id="chronBody"></article>
+    </div>
+    <details class="chron-settings" id="chronSettings">
+      <summary>Chronicler · <span id="chronStatus"></span></summary>
+      <p>When a battle or siege ends, Claude (<code id="chronModel"></code>) names it and writes the account from what happened on the map. This uses your own Anthropic API key, kept only in this browser and sent only to api.anthropic.com. Each account costs a few cents. Without a key the chronicle keeps field notes instead.</p>
+      <div class="key-row"><input type="password" id="apiKey" placeholder="sk-ant-…" autocomplete="off" spellcheck="false" aria-label="Anthropic API key"><button id="saveKey">Save key</button><button class="ghost" id="forgetKey">Forget</button></div>
+      <label class="auto"><input type="checkbox" id="autoChron"> Write each account as soon as a battle ends</label>
+    </details>
+  </dialog>
+
+  <script src="js/scenarios.js?v=26"></script>
+  <script src="js/geo.js?v=26"></script>
+  <script src="js/game.js?v=26"></script>
+  <script src="js/chronicle.js?v=26"></script>
+  <script src="js/render.js?v=26"></script>
+  <script src="js/ui.js?v=26"></script>
+</body>
+</html>
