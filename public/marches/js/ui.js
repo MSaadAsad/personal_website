@@ -1010,7 +1010,7 @@ function loadScript(src) {
 async function boot() {
   const id = chosenMap();
   try { localStorage.setItem('jhelum-marches-map', id); } catch { /* storage blocked */ }
-  await loadScript(`maps/${SCENARIOS[id].map || id}.js?v=37`);
+  await loadScript(`maps/${SCENARIOS[id].map || id}.js?v=38`);
   applyScenario(id);
   // The field manual quotes distances and march points for this map's hex size.
   const km = k => k >= 1 ? `${+k.toFixed(1)} km` : `${Math.round(k * 1000)} m`, mpOf = v => Math.round(VARIANTS[v].mp * MARCH_SCALE * PACE);
