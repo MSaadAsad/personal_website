@@ -524,8 +524,9 @@ function drawMarkers() {
   for (const g of ghostsFor(viewSide())) {
     const h = HEXES[g.hex], m = el('div', `marker ghost ${g.side}`, R.markers);
     m.style.left = `${f1(h.x)}px`; m.style.top = `${f1(h.y)}px`;
-    m.innerHTML = `<i></i><b>${g.round ? `day ${g.round}` : 'reported'}</b>`;
-    m.title = g.round ? `${g.name} (${g.variant}): last seen here on day ${g.round}` : `${g.name} (${g.variant}): reported here at the outset`;
+    m.className += g.report ? ' army' : '';
+    m.innerHTML = `<i></i><b>${g.report ? `army · ~${g.strength}` : g.round ? `day ${g.round}` : 'reported'}</b>`;
+    m.title = g.report ? `Reports at the outset put ${g.strength > 1 ? `the ${g.name.toLowerCase()}, about ${g.strength} formations,` : `an ${g.name.toLowerCase()}`} about here` : g.round ? `${g.name} (${g.variant}): last seen here on day ${g.round}` : `${g.name} (${g.variant}): holding this place at the outset`;
   }
   // Crossed swords where a battle or siege was fought, in the victor's colour.
   for (const b of S.battles) if (!b.open && b.major) {
@@ -726,7 +727,7 @@ function ferryGlyph(o, a, b, cls) {
 // The fog: ground the player's formations cannot see now is washed over.
 const FOG = { key: '', d: '' };
 function fogPath() {
-  const side = viewSide(), vis = sightOf(side), key = `${SIGHT.key}|${side}`;
+  const side = viewSide(), vis = groundSeen(side), key = `${SIGHT.key}|${side}`;
   if (key !== FOG.key) { FOG.key = key; FOG.d = HEXES.filter(h => !vis[h.id]).map(h => linePath(hexCorners(h.x, h.y)) + 'Z').join(''); }
   return FOG.d;
 }

@@ -646,3 +646,5 @@ em.writing::before { content: ""; display: inline-block; width: 8px; height: 8px
 .marker.ghost i { position: absolute; left: -7px; top: -18px; width: 14px; height: 14px; border-radius: 3px; border: 1.5px dashed currentColor; opacity: .7; transform: scale(var(--mk, 1)); }
 .marker.ghost.azure { color: #4f8db3; } .marker.ghost.red { color: #b4513f; }
 .marker.ghost b { position: absolute; left: -16px; top: -3px; width: 32px; text-align: center; font: 600 9px var(--sans); color: #2b1d11; opacity: .75; pointer-events: none; }
+.marker.ghost.army i { width: 22px; height: 22px; left: -11px; top: -24px; border-radius: 50%; border-width: 2px; }
+.marker.ghost.army b { width: 60px; left: -30px; top: 1px; }

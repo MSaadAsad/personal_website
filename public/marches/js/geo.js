@@ -290,7 +290,7 @@ function buildRoads() {
 // ---------------------------------------------------------------------------
 // Places and polities
 
-const SETTLEMENT_DEF = { village: 0, sarai: 1, town: 1, city: 2, fort: 3 };
+const SETTLEMENT_DEF = { village: 1, sarai: 1, town: 1, city: 2, fort: 3 };  // a village's mud walls and lanes count too
 
 function buildPlaces() {
   const claim = (h, key, p) => {

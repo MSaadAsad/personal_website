@@ -1010,6 +1010,23 @@ function aiStrikeValue(u, f) {
   return value;
 }
 
+// Every hex of a walled place the enemy holds (all of a great city's
+// footprint), or where enemy troops behind works were seen or last seen.
+const WORKS = { key: '', hexes: [] };
+function enemyWorks(side) {
+  const key = `${side}|${S.turnNo}|${JSON.stringify(S.owners)}|${JSON.stringify(S.forts)}|${Object.keys(S.kacha || {}).join(',')}`;
+  if (WORKS.key !== key) {
+    const held = new Set(believedEnemies(side).map(e => e.hex)), out = [];
+    for (const h of HEXES) {
+      if (fortLevels(h.id) < 2) continue;
+      const k = h.place, owner = k && (STRONGPOINTS.includes(k) ? S.owners[k] : FORTS.includes(k) ? S.forts[k] : null);
+      if (held.has(h.id) || owner && owner !== side) out.push(h.id);
+    }
+    WORKS.key = key; WORKS.hexes = out;
+  }
+  return WORKS.hexes;
+}
+
 function aiPlan(u, goal, threat, garrisoned, looming, supply) {
   const v = VARIANTS[u.variant], reach = reachable(u), here = u.hex, zoc = enemyZoc(u.side);
   const friendsAt = hex => unitsAt(hex).filter(f => f.side === u.side && f !== u).length;
@@ -1025,6 +1042,7 @@ function aiPlan(u, goal, threat, garrisoned, looming, supply) {
   const garrison = key && S.owners[key] === u.side && !wavering(u) && (vitalDuty || (looming[here] > 0 && !garrisoned.has(here)));
   const options = garrison || u.mp <= 0 ? [here] : [here, ...reach.cost.keys()];
   const foes = knownEnemies(u.side), walledEnemy = [...new Set(foes.map(e => e.hex))].filter(h => fortLevels(h) >= 2);
+  const works = v.type === 'guns' && v.range > 1 ? enemyWorks(u.side) : [];
   const precious = preciousGeneral(u);
   const fragile = (u.hp <= 2 ? 1.8 : 1) * (precious ? 6 : ledBy(u) ? 2.5 : 1);
   let best = null;
@@ -1042,11 +1060,18 @@ function aiPlan(u, goal, threat, garrisoned, looming, supply) {
     // Foot and guns are drawn back into an under-garrisoned objective.
     if (sk && SCN.goal && goalForts().includes(sk) && u.side !== SCN.goal.attacker && S.owners[sk] === u.side && v.type !== 'horse'
         && unitsAt(hex).filter(f => f.side === u.side && f !== u && VARIANTS[f.variant].type !== 'horse').length < STACK_LIMIT) score += 12;
-    // Siege lines: the ring two hexes from enemy walls belongs to the field
-    // guns (it is where they can batter the walls from); foot keep out of it.
-    // Swivels and wall pieces must close to the next hex to fire.
-    const ring = v.type === 'guns' ? v.range : 2, battering = walledEnemy.some(w => hexDistance(hex, w) === ring);
-    if (battering) score += v.type === 'guns' ? 5 : -4;
+    // Siege lines. Guns that fire at range batter the walls from as far off as
+    // they reach, measured from every hex the enemy's works cover, and never
+    // stand against them (the walls' fire and a sally would wreck them).
+    // Swivels and wall pieces must close to the next hex to fire. Foot keep
+    // out of the batteries' ring.
+    if (v.type === 'guns' && v.range > 1 && works.length) {
+      const d = Math.min(...works.map(w => hexDistance(hex, w)));
+      if (d <= 1) score -= 14; else if (d === v.range) score += 9;
+    } else {
+      const ring = v.type === 'guns' ? v.range : 2, battering = walledEnemy.some(w => hexDistance(hex, w) === ring);
+      if (battering) score += v.type === 'guns' ? 5 : -4;
+    }
     const seat = SEAT_HEX.get(hex);
     if (seat && S.allies[seat] !== u.side) score += 9;
     score += cover * 0.8;
