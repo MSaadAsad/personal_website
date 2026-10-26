@@ -4,17 +4,20 @@
 //
 // Coordinates: the survey data is in kilometres from the north-west corner
 // (equirectangular, corrected for latitude so a kilometre is the same length
-// in both directions). The board draws 16 px per km; each hex is 2 km across,
-// so a day's march is a realistic number of hexes rather than slower units.
+// in both directions). Each map sets its hex size (2 km by default, 1 km for
+// close-fought maps); a hex is always drawn the same size on screen, so a
+// 1 km map is drawn at twice the scale. Marching scales with the hex size
+// (see marchScale in game.js), so a day's march covers the same ground.
 
 let MAP = null;  // the loaded map's data (dist/maps/<id>.js)
-const PX_PER_KM = 16;
-const HEX_KM = 2;
-const HEX_D = HEX_KM * PX_PER_KM;              // centre-to-centre distance, px
+let HEX_KM = 2, PX_PER_KM = 16;                // set per map in initGeometry
+const HEX_D = 32;                              // centre-to-centre distance, px
 const HEX_R = HEX_D / Math.sqrt(3);            // circumradius, px
 const COL_W = HEX_R * 1.5;
 let BOARD_W, BOARD_H, COLS, ROWS, ORIGIN_X, ORIGIN_Y;
 function initGeometry() {
+  HEX_KM = MAP.hexKm || 2;
+  PX_PER_KM = HEX_D / HEX_KM;
   BOARD_W = Math.round(MAP.widthKm * PX_PER_KM);
   BOARD_H = Math.round(MAP.heightKm * PX_PER_KM);
   COLS = Math.floor((BOARD_W - HEX_R * 1.5) / COL_W) + 1;
@@ -151,17 +154,19 @@ function buildHexes() {
     const xKm = x / PX_PER_KM, yKm = y / PX_PER_KM;
     // Sample the relief across the hex: centre plus two rings.
     let sum = 0, lo = Infinity, hi = -Infinity, n = 0;
-    for (const radius of [0, 0.45, 0.95]) for (let k = 0; k < (radius ? 6 : 1); k++) {
+    for (const radius of [0, 0.225 * HEX_KM, 0.475 * HEX_KM]) for (let k = 0; k < (radius ? 6 : 1); k++) {
       const a = Math.PI / 3 * k + (radius > 0.5 ? Math.PI / 6 : 0);
       const e = elevationKm(xKm + radius * Math.cos(a), yKm + radius * Math.sin(a));
       sum += e; lo = Math.min(lo, e); hi = Math.max(hi, e); n++;
     }
     const elev = sum / n, relief = hi - lo;
-    const terrain = relief < 36 ? 'plain' : relief < 96 ? 'broken' : relief < 264 ? 'hills' : 'mountain';
+    // Relief thresholds are for a 2 km hex; a smaller hex spans less of a slope.
+    const rs = relief * 2 / HEX_KM;
+    const terrain = rs < 36 ? 'plain' : rs < 96 ? 'broken' : rs < 264 ? 'hills' : 'mountain';
     // Vegetation: average the land-cover shares over the same footprint.
     let tree = 0, shrub = 0, crop = 0, m = 0;
     for (const dy of [-0.7, -0.35, 0, 0.35, 0.7]) for (const dx of [-0.8, -0.4, 0, 0.4, 0.8]) {
-      const [t, sh, cr] = vegetationKm(xKm + dx, yKm + dy);
+      const [t, sh, cr] = vegetationKm(xKm + dx * HEX_KM / 2, yKm + dy * HEX_KM / 2);
       tree += t; shrub += sh; crop += cr; m++;
     }
     tree /= m; shrub /= m; crop /= m;
@@ -238,7 +243,7 @@ function buildRiverCrossings() {
       const cls = MAP.rivers.find(r => r.id === riverId).cls;
       if (!best || rank[cls] > rank[best]) best = cls;
     }
-    if (best === 'major' && crossPoint && ghats.some(g => Math.hypot(g.x - crossPoint[0], g.y - crossPoint[1]) < 1.3)) best = 'ghat';
+    if (best === 'major' && crossPoint && ghats.some(g => Math.hypot(g.x - crossPoint[0], g.y - crossPoint[1]) < 0.65 * HEX_KM)) best = 'ghat';
     h.river[dir] = best;
     o.river[(dir + 3) % 6] = best;
   }
@@ -288,15 +293,33 @@ function buildRoads() {
 const SETTLEMENT_DEF = { village: 0, sarai: 1, town: 1, city: 2, fort: 3 };
 
 function buildPlaces() {
-  for (const [key, p] of Object.entries(MAP.places)) {
-    const id = hexAtKm(p.x, p.y);
-    if (id < 0) continue;
-    const h = HEXES[id];
+  const claim = (h, key, p) => {
     // Keep the most defensible place when two share a hex.
     if (!h.place || SETTLEMENT_DEF[p.kind] > SETTLEMENT_DEF[MAP.places[h.place].kind]) h.place = key;
     // Towns and forts stand in cleared ground.
     if (p.kind !== 'village') h.cover = null;
+  };
+  for (const [key, p] of Object.entries(MAP.places)) {
+    const id = hexAtKm(p.x, p.y);
+    if (id < 0) continue;
+    claim(HEXES[id], key, p);
+    // A large fort or walled city spans every hex whose centre lies inside it:
+    // its walls and defence hold in all of them; the hex at its heart is the
+    // one that must be taken.
+    // One traced from its walls (p.poly, in km) spans the hexes inside them.
+    if (p.poly) { for (const h of HEXES) if (h.id !== id && insidePoly(p.poly, h.x / PX_PER_KM, h.y / PX_PER_KM)) claim(h, key, p); }
+    else if (p.sizeKm) for (const h of HEXES) if (h.id !== id && Math.hypot(h.x / PX_PER_KM - p.x, h.y / PX_PER_KM - p.y) <= p.sizeKm) claim(h, key, p);
   }
+}
+
+// Even-odd point-in-polygon test on [x, y] points.
+function insidePoly(poly, x, y) {
+  let c = false;
+  for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+    const [xi, yi] = poly[i], [xj, yj] = poly[j];
+    if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) c = !c;
+  }
+  return c;
 }
 
 // Political spheres come from the scenario (see scenarios.js).
@@ -354,7 +377,9 @@ function costField(sources, unit = null, edgeExtra = null) {
 }
 
 function buildTerritories() {
-  const seats = POWERS.flatMap(power => [power.seat, ...(power.extraSeats || [])].map(seat => [placeHex(seat), 0, power.id]));
+  // A seat is a place key, or [lat, lon] for a camp or district with no town of its own.
+  const seatHex = seat => Array.isArray(seat) ? hexAtKm(...geoToKm(...seat)) : placeHex(seat);
+  const seats = POWERS.flatMap(power => [power.seat, ...(power.extraSeats || [])].map(seat => [seatHex(seat), 0, power.id]));
   const ownerOfSeat = new Map(seats.map(([id, , power]) => [id, power]));
   // Rivers are frontiers: a realm only spreads across water when nothing nearer
   // on the far bank claims the ground. Great rivers count most, nalas least.

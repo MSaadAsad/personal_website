@@ -122,7 +122,7 @@ function generalPortrait(side) {
 
 function statBlock(u) {
   const v = VARIANTS[u.variant];
-  return `<div class="stats"><div><small>March</small><b>${u.side === S.turn ? `${u.mp}<span>/${v.mp}</span>` : v.mp}</b></div><div><small>Attack</small><b>${v.atk}</b></div><div><small>Defence</small><b>${v.def}</b></div><div><small>Range</small><b>${v.range}</b></div></div>`;
+  return `<div class="stats"><div><small>March</small><b>${u.side === S.turn ? `${u.mp}<span>/${fullMp(u)}</span>` : fullMp(u)}</b></div><div><small>Attack</small><b>${v.atk}</b></div><div><small>Defence</small><b>${v.def}</b></div><div><small>Range</small><b>${v.range}</b></div></div>`;
 }
 function pipsHtml(hp) { return `<span class="hp-pips${hp < MAX_HP * WAVER_BELOW ? ' low' : ''}" title="${men(hp)} of ${MEN_PER_FORMATION.toLocaleString('en')}">${Array.from({ length: MAX_HP }, (_, i) => `<i class="${i < hp ? 'on' : ''}"></i>`).join('')}</span>`; }
 
@@ -141,7 +141,7 @@ function renderInspector() {
     if (ledBy(sel)) html += `<p class="led-note">★ Led by ${GENERALS[sel.side].name}: +1 attack, +1 defence, never falls back.</p>`;
     if (humanTurn() && sel.side === S.turn && ferrySites(sel).length) html += `<button class="ferry-btn" id="ferryBtn"><b>${V.ferryPick ? 'Choose the far bank…' : `Build a ferry across the ${nearestMajorRiver(sel.hex)}`}</b><small>Once per campaign · costs this command and ${FERRY_COST} soldier · either army may then cross</small></button>`;
     if (sel.side === S.turn && humanTurn()) {
-      const hint = sel.attacked ? (sel.mp > 0 ? 'It has fought; it can still march with its remaining march points.' : 'This formation has fought and is done for the round.')
+      const hint = sel.attacked ? (sel.mp > 0 ? 'It has struck; horse can ride on with its remaining march points.' : 'This formation has fought and is done for the round.')
         : V.targets.length ? 'Red rings are in range. Click one to attack, or click blue ground to march.'
         : V.farTargets.length ? 'Dashed rings can be reached and attacked in one order.'
         : wavering(sel) ? 'Pull it back out of contact and let it rest to rally.'
@@ -233,7 +233,7 @@ function updateTooltip(clientX, clientY) {
     const place = h.place && MAP.places[h.place];
     html = `<div class="tip-head">${esc(place ? place.name : TERRAIN[h.terrain].name)}</div><p class="muted">${TERRAIN[h.terrain].name}${h.cover ? `, ${COVER[h.cover].name.toLowerCase()}` : ''} · ${h.elev} m</p>`;
     if (sel && V.reach) {
-      if (V.reach.cost.has(hex)) html += `<p>March cost <b>${V.reach.cost.get(hex)}</b> of ${sel.mp}${enemyZoc(sel.side)[hex] ? ' · <span class="warn">enemy contact ends the march</span>' : ''}${here.some(u => u.side === sel.side) ? '<br><span class="muted">Shift-click to join this stack</span>' : ''}</p>`;
+      if (V.reach.cost.has(hex)) html += `<p>March cost <b>${V.reach.cost.get(hex)}</b> of ${sel.mp}${enemyZoc(sel.side)[hex] ? ' · <span class="warn">enemy contact ends the march</span>' : ''}${here.some(u => u.side === sel.side) ? '<br><span class="muted">Click to join this stack · Shift-click to select it</span>' : ''}</p>`;
       else if (hex !== sel.hex) html += '<p class="muted">Beyond this march.</p>';
     }
     if (here.length) html += `<p>${here.map(u => `<span class="${u.side}-text">${esc(u.name)}</span>`).join(', ')}</p>`;
@@ -259,7 +259,7 @@ function startFerry() {
   refresh();
 }
 
-async function onHexClick(hex, joinStack = false) {
+async function onHexClick(hex, selectOnly = false) {
   if (!humanTurn() || hex < 0) return;
   if (V.ferryPick) {
     const pick = V.ferryPick, u = unitById(pick.unit);
@@ -275,8 +275,9 @@ async function onHexClick(hex, joinStack = false) {
     const from = strikeHexFor(sel, enemy);
     if (from !== null) return order(async () => { await moveUnit(sel, from, reach); await attack(sel, enemy); });
   }
-  // Clicking friends selects them; Shift-click marches the selection into their stack.
-  if (mine && reach?.cost.has(hex) && (!own.length || joinStack)) return order(() => moveUnit(sel, hex, reach));
+  // A friendly hex the selection can reach (with room) is a march into that
+  // stack; Shift-click, or a friend out of reach, selects them instead.
+  if (mine && reach?.cost.has(hex) && !selectOnly) return order(() => moveUnit(sel, hex, reach));
   if (own.length) {
     const i = own.findIndex(u => u.id === S.selected);
     select(own[(i + 1) % own.length].id);
@@ -291,7 +292,7 @@ function isOrderHex(hex) {
   if (!humanTurn() || !sel || sel.side !== S.turn || hex < 0) return false;
   const enemy = unitsAt(hex).find(u => u.side !== sel.side);
   if (enemy) return !sel.attacked && (V.targets.includes(enemy) || unitsAt(hex).some(u => V.targets.includes(u)) || strikeHexFor(sel, enemy) !== null);
-  return !!V.reach?.cost.has(hex) && !unitsAt(hex).some(u => u.side === sel.side);
+  return !!V.reach?.cost.has(hex);
 }
 async function order(fn) {
   V.busy = true;
@@ -916,15 +917,27 @@ function bindControls() {
 // Start, continue, and boot
 
 // The opening screen: pick a map (each its own scenario), then a side.
+// The opening screen: a campaign map of the Punjab with a marker for each
+// battle; a battle fought in more than one mode (historic: the armies, numbers
+// and days as recorded; open: an earlier start, evenly matched) offers both.
 function renderStart() {
-  $('#mapPick').innerHTML = Object.entries(SCENARIOS).map(([id, scn]) =>
-    `<button class="map-card ${id === MAP_ID ? 'active' : ''}" data-map="${id}"><b>${esc(scn.title)}</b><small>${esc(scn.region)} · ${scn.year}</small></button>`).join('');
-  $('#mapPick').querySelectorAll('[data-map]').forEach(b => b.onclick = () => {
-    if (b.dataset.map === MAP_ID) return;
-    const url = new URL(location.href);
-    url.searchParams.set('map', b.dataset.map);
-    location.href = url.toString();
+  const groupOf = id => SCENARIOS[id].group || id, current = groupOf(MAP_ID);
+  const groups = [];
+  for (const [id, scn] of Object.entries(SCENARIOS)) if (!groups.some(g => g.group === groupOf(id))) groups.push({ group: groupOf(id), title: scn.title, year: scn.year });
+  const go = id => { if (id === MAP_ID) return; const url = new URL(location.href); url.searchParams.set('map', id); location.href = url.toString(); };
+  const pickGroup = group => { const ids = Object.keys(SCENARIOS).filter(id => groupOf(id) === group); go(ids.find(id => SCENARIOS[id].mode === 'historic') || ids[0]); };
+  $('#mapPick').innerHTML = CAMPAIGN_MAP.draw(groups, current)
+    + `<div class="cm-list">${groups.map(g => `<button class="cm-chip ${g.group === current ? 'active' : ''}" data-group="${g.group}">${esc(g.title)}</button>`).join('')}</div>`;
+  $('#mapPick').querySelectorAll('[data-group]').forEach(b => {
+    b.onclick = () => pickGroup(b.dataset.group);
+    b.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pickGroup(b.dataset.group); } };
   });
+  const modes = Object.keys(SCENARIOS).filter(id => groupOf(id) === current).sort((a, b) => (SCENARIOS[a].mode === 'open') - (SCENARIOS[b].mode === 'open'));
+  $('#modePick').innerHTML = modes.length < 2 ? '' : modes.map(id => {
+    const m = SCENARIOS[id].mode || 'historic';
+    return `<button class="mode ${id === MAP_ID ? 'active' : ''}" data-mode="${id}"><b>${m === 'historic' ? 'Historic' : 'Open campaign'}</b><small>${m === 'historic' ? 'the armies, numbers and days as recorded' : 'from an earlier start, evenly matched'}</small></button>`;
+  }).join('');
+  $('#modePick').querySelectorAll('[data-mode]').forEach(b => b.onclick = () => go(b.dataset.mode));
   $('#startTitle').textContent = SCN.title;
   $('#startLede').textContent = SCN.blurb;
   $('#sidePick').innerHTML = ['azure', 'red'].map(side => {
@@ -974,8 +987,12 @@ function loadScript(src) {
 async function boot() {
   const id = chosenMap();
   try { localStorage.setItem('jhelum-marches-map', id); } catch { /* storage blocked */ }
-  await loadScript(`maps/${SCENARIOS[id].map || id}.js?v=20`);
+  await loadScript(`maps/${SCENARIOS[id].map || id}.js?v=31`);
   applyScenario(id);
+  // The field manual quotes distances and march points for this map's hex size.
+  const km = k => k >= 1 ? `${+k.toFixed(1)} km` : `${Math.round(k * 1000)} m`, mpOf = v => Math.round(VARIANTS[v].mp * MARCH_SCALE * PACE);
+  const hexKm = MAP.hexKm || 1, scale = { hex: km(hexKm), foot: mpOf('Matchlockmen'), horse: `${mpOf('Lancers')}–${mpOf('Irregular Sowars')}`, attack: ATTACK_MP, range: km(2 * hexKm) };
+  document.querySelectorAll('[data-scale]').forEach(e => { e.textContent = scale[e.dataset.scale]; });
   document.title = `${SCN.title} — ${SCN.year}`;
   $('#brandTitle').textContent = SCN.title;
   $('#brandSub').textContent = `${SCN.region} — ${SCN.year}`;

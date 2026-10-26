@@ -29,11 +29,19 @@ const VARIANTS = {
   'Light Dragoons':     { type: 'horse', mp: 12, range: 1, atk: 4, def: 2, look: 'Irregular Sowars', trait: 'Regular cavalry — the sabre charge' },
   'Horse Artillery':    { type: 'guns',  mp: 10, range: 2, atk: 4, def: 1, breach: 1, look: 'Light Field Gun', trait: 'Galloper guns — keep pace with the cavalry; fire two hexes' },
   'Heavy Battery':      { type: 'guns',  mp: 4,  range: 2, atk: 6, def: 1, breach: 2, look: 'Light Field Gun', trait: '18-pounders — the heaviest guns in the field; fire two hexes; +2 against walls' },
+  'Great Gun':          { type: 'guns',  mp: 3,  range: 2, atk: 7, def: 0, breach: 3, look: 'Light Field Gun', trait: 'A monster siege gun — barely moves; fires two hexes; +3 against walls' },
 };
 const TYPE_NAME = { foot: 'Foot', guns: 'Guns', horse: 'Horse' };
 
 const STACK_LIMIT = 2;
-const ATTACK_MP = 2;           // march points an attack takes; a formation needs them left to attack
+// Distances below are for a 2 km hex; applyScenario scales them to the map's
+// hex size so a day's march, a wagon's day and a general's ride cover the
+// same ground on a 1 km map (in twice as many hexes).
+let MARCH_SCALE = 1;
+// Armies with baggage and guns march slower than the variants' nominal rate:
+// a foot formation covers about 12 km a day by road, 6 km across open plain.
+const PACE = 0.75;
+let ATTACK_MP = 2;             // march points an attack takes; a formation needs them left to attack
 const MAX_HP = 5;              // soldiers on the counter; each one is a fifth of the formation
 const MEN_PER_FORMATION = 1000; // a full formation is about a thousand men, so each figure is 200
 const MEN_PER_FIGURE = MEN_PER_FORMATION / MAX_HP;
@@ -42,8 +50,8 @@ const menCount = figures => Math.round(figures * MEN_PER_FIGURE / 100) * 100;
 const men = figures => `${menCount(figures).toLocaleString('en')} men`;
 const WAVER_BELOW = 0.4;       // below this share a formation falls back and cannot attack
 const SAVE_VERSION = 12;
-const GENERAL_RIDE = 12;   // hexes (24 km) he can ride to take command of another formation
-const GENERAL_REACH = 4;   // hexes within which he can order a forced march
+let GENERAL_RIDE = 12;     // hexes (24 km) he can ride to take command of another formation
+let GENERAL_REACH = 4;     // hexes (8 km) within which he can order a forced march
 const GENERAL_RANSOM = 5;  // war points to whoever captures him
 
 // Set from the chosen scenario by applyScenario().
@@ -52,6 +60,9 @@ let VP_TARGET, ROUND_LIMIT, FIRST, GENERALS, STRONGPOINTS, START_OWNERS, START_U
 
 function applyScenario(id) {
   MAP_ID = id; SCN = SCENARIOS[id]; MAP = window.MAPS[SCN.map || id];  // several scenarios can share a map
+  MARCH_SCALE = 2 / (MAP.hexKm || 2);
+  [GENERAL_RIDE, GENERAL_REACH, WAGON_MP, BATTLE_REACH] = [12, 4, 8, 3].map(n => Math.round(n * MARCH_SCALE));
+  ATTACK_MP = Math.round(2 * MARCH_SCALE * PACE);
   SAVE_KEY = `jhelum-marches-${id}-v${SAVE_VERSION}`;
   ({ vpTarget: VP_TARGET, roundLimit: ROUND_LIMIT, first: FIRST, generals: GENERALS, strongpoints: STRONGPOINTS, startOwners: START_OWNERS, startUnits: START_UNITS } = SCN);
   for (const side of ['azure', 'red']) Object.assign(SIDES[side], SCN.sides[side]);
@@ -97,8 +108,10 @@ function newCampaign({ player = 'azure', ai = true } = {}) {
   startTurn();
   return S;
 }
+// A formation's full day's march, in this map's hexes.
+const fullMp = u => Math.round(VARIANTS[u.variant].mp * MARCH_SCALE * PACE);
 function makeUnit(side, variant, hex, id, name = null) {
-  return { id, side, variant, name: name || variant, hex, hp: MAX_HP, mp: VARIANTS[variant].mp, attacked: false, moved: false, stock: 100 };
+  return { id, side, variant, name: name || variant, hex, hp: MAX_HP, mp: Math.round(VARIANTS[variant].mp * MARCH_SCALE * PACE), attacked: false, moved: false, stock: 100 };
 }
 
 function save() {
@@ -220,7 +233,7 @@ function canForce(u) {
 }
 function forcedMarch(u) {
   if (!canForce(u)) return false;
-  S.generals[u.side].forced = true; u.mp = VARIANTS[u.variant].mp; S.undo = null;
+  S.generals[u.side].forced = true; u.mp = fullMp(u); S.undo = null;
   log(u.side, `Forced march: <b>${GENERALS[u.side].name}</b> drove the ${u.name} on through the night.`);
   save(); UI.refresh();
   return true;
@@ -243,7 +256,7 @@ function captureGeneral(side) {
 // 20%, and the wagons bring in an amount that falls off with travel time.
 // Low stock weakens it; below 20% its soldiers start to desert.
 
-const WAGON_MP = 8;            // march points a wagon train covers in a day (a foot day)
+let WAGON_MP = 8;              // march points a wagon train covers in a day (a foot day)
 const STOCK_USE = 20;          // % eaten every command
 const STOCK_HUNGRY = 40, STOCK_SHORT = 60, STOCK_DESERT = 20;
 const wagonDays = (side, hex) => supplyField(side)[hex] / WAGON_MP;
@@ -256,17 +269,28 @@ const stockOf = u => u.stock ?? 100;
 // Kept for the panels and the AI: a formation is "in supply" if wagons can keep it fed.
 const inSupply = u => delivery(u) >= STOCK_USE;
 // A side may have no base on the map at all (an invading army living off what it takes).
-const homeBase = side => { const b = SCN.homeBase?.[side]; return !b ? null : Array.isArray(b) ? hexAtKm(...geoToKm(...b)) : HEX_OF[b]; };
+// A side's bases off the map: a place key, a [lat, lon], or a list of these
+// (Edwardes from Dera Ghazi Khan and Bahawalpur from the south, say).
+const homeBases = side => {
+  const b = SCN.homeBase?.[side];
+  if (!b) return [];
+  const list = Array.isArray(b) && (Array.isArray(b[0]) || typeof b[0] === 'string') ? b : [b];
+  return list.map(x => Array.isArray(x) ? hexAtKm(...geoToKm(...x)) : HEX_OF[x]);
+};
+const homeBase = side => homeBases(side)[0] ?? null;
 let SUPPLY = {};
 
+// A town or fort the enemy has closed on from two or more sides is besieged:
+// its wagons stop, and it feeds no one, not even its own garrison.
+const besieged = (hex, side) => new Set(S.units.filter(u => u.side !== side && HEXES[hex].nbr.includes(u.hex)).map(u => u.hex)).size >= 2;
 function supplySources(side) {
   const out = [];
   for (const k of STRONGPOINTS) if (S.owners[k] === side) out.push(HEX_OF[k]);
   for (const p of POWERS) if (p.npc && S.allies[p.id] === side) out.push(HEX_OF[p.seat]);
   for (const k of FORTS) if (S.forts[k] === side) out.push(HEX_OF[k]);
-  const base = homeBase(side);
-  if (base !== null) out.push(base);
-  return out.filter(hex => !S.units.some(u => u.side !== side && u.hex === hex));
+  const held = out.filter(hex => !S.units.some(u => u.side !== side && u.hex === hex) && !besieged(hex, side));
+  held.push(...homeBases(side));
+  return held;
 }
 function supplyField(side) {
   if (SUPPLY[side]) return SUPPLY[side];
@@ -334,7 +358,7 @@ function pressureOn(u, except = null) {
 // ground fights steadier; one that spent most of its day's march fights tired.
 function marchState(u, moved = u.moved, mpLeft = u.mp) {
   if (!moved) return ['Holding its ground', 1];
-  const spent = 1 - mpLeft / VARIANTS[u.variant].mp;
+  const spent = 1 - mpLeft / fullMp(u);
   return spent > 2 / 3 ? ['Spent by the march', -2] : spent > 1 / 3 ? ['Tired from the march', -1] : ['', 0];
 }
 
@@ -362,7 +386,9 @@ function defenceOf(def, attacker, attackFrom) {
     if (rise >= 60) parts.push(['Higher ground', rise >= 180 ? 2 : 1]);
   }
   // Outnumbered and surrounded: every 4 enemy soldiers alongside cost 1.
-  if (attacker) {
+  // Standing walls cover a garrison's flanks: numbers outside count only
+  // once the walls are down.
+  if (attacker && !wall) {
     const press = pressureOn(def, attacker);
     if (press.soldiers >= 4) parts.push([`Pressed by ${men(press.soldiers)}`, -Math.min(3, Math.floor(press.soldiers / 4))]);
     if (press.encircled) parts.push(['Encircled', -1]);
@@ -479,7 +505,8 @@ async function attack(att, target) {
   const fromHex = att.hex, f = forecast(att, fromHex, target), def = f.def, defHex = def.hex;
   const ar = 1 + Math.floor(Math.random() * 6), dr = 1 + Math.floor(Math.random() * 6);
   const { outcome, dDef, dAtt } = resolve(ar + f.A.total - (dr + f.D.total), att, def, f.melee);
-  att.attacked = true; att.mp = Math.max(0, att.mp - ATTACK_MP); S.undo = null;
+  // Only horse can strike and ride on (a raid); foot and guns are done for the day.
+  att.attacked = true; att.mp = VARIANTS[att.variant].type === 'horse' ? Math.max(0, att.mp - ATTACK_MP) : 0; S.undo = null;
   const lostDef = Math.min(def.hp, dDef), lostAtt = Math.min(att.hp, dAtt);
   def.hp -= lostDef; att.hp -= lostAtt;
   ENGAGEMENT = engagementAt(defHex);
@@ -543,7 +570,7 @@ async function attack(att, target) {
 // the nearest place; it closes once both sides have had a command without
 // striking a blow there. ui.js then has it written up (see chronicle.js).
 
-const BATTLE_REACH = 3;   // hexes from where an engagement began that still count as part of it
+let BATTLE_REACH = 3;     // hexes (6 km) from where an engagement began that still count as part of it
 const BATTLE_LULL = 2, BATTLE_LULL_IN_CONTACT = 4;  // quiet commands before an engagement is over
 let ENGAGEMENT = null;    // the engagement the attack being resolved belongs to
 
@@ -703,9 +730,24 @@ function roomNear(start, side) {
   return -1;
 }
 
+// Scripted happenings at the start of a round (Multan's magazine, say):
+// walls change by `walls`, and formations at `hurt.at` lose `hurt.hp` each.
+function happen() {
+  if (S.turn !== FIRST) return;
+  (SCN.events || []).forEach((ev, i) => {
+    if (ev.round !== S.round || S.happened?.[i]) return;
+    (S.happened ||= {})[i] = true;
+    for (const [k, d] of Object.entries(ev.walls || {})) S.walls[k] = Math.max(0, (S.walls[k] || 0) + d);
+    if (ev.hurt) for (const u of [...unitsAt(HEX_OF[ev.hurt.at])]) u.hp = Math.max(1, u.hp - ev.hurt.hp);
+    log(ev.side || FIRST, `<b>${ev.text}</b>`);
+    UI.flash(ev.flash || ev.text.toUpperCase(), ev.side || FIRST);
+  });
+}
+
 function startTurn() {
+  happen();
   arrive();
-  for (const u of S.units) if (u.side === S.turn) { u.mp = VARIANTS[u.variant].mp; u.attacked = false; u.moved = false; }
+  for (const u of S.units) if (u.side === S.turn) { u.mp = fullMp(u); u.attacked = false; u.moved = false; }
   Object.assign(S.generals[S.turn], { rode: false, forced: false });
   S.undo = null; S.selected = null;
   // Keyframe for replays: the board as this command begins. The events noted
@@ -730,8 +772,10 @@ async function endTurn() {
   // The day's rations are eaten and the wagons that can reach each formation
   // refill it. Below 20% men start to desert.
   for (const u of [...S.units]) if (u.side === side) {
-    const before = stockOf(u), got = delivery(u);
-    u.stock = Math.max(0, Math.min(100, before - STOCK_USE + got));
+    // A garrison shut up in a besieged fort or walled town lives on its
+    // magazines: half rations, so it starves over a week or two, not days.
+    const before = stockOf(u), got = delivery(u), shut = settlementDef(u.hex) >= SETTLEMENT_DEF.town && besieged(u.hex, side);
+    u.stock = Math.max(0, Math.min(100, before - STOCK_USE / (shut ? 2 : 1) + got));
     if (before >= STOCK_HUNGRY && u.stock < STOCK_HUNGRY) log(side, `${u.name} is going hungry: its wagons cannot keep up (${u.stock}% supplies).`);
     if (u.stock >= STOCK_DESERT) continue;
     u.hp--;
@@ -796,7 +840,8 @@ function declareWinner(side, reason) {
   UI.victory(side, reason);
 }
 // A scenario's goal is one fort, or `need` of several `forts`, that the
-// attacker must hold at the end of a round.
+// attacker must hold at the end of a round; with `general`, taking the
+// defending general wins as well.
 const goalForts = () => SCN.goal ? SCN.goal.forts || [SCN.goal.fort] : [];
 const goalMet = side => goalForts().filter(k => S.owners[k] === side).length >= (SCN.goal.need || goalForts().length);
 
@@ -804,6 +849,8 @@ function checkVictory() {
   if (S.winner) return true;
   const g = SCN.goal;
   if (g && goalMet(g.attacker) && S.roundEnded) { declareWinner(g.attacker, g.attackerWins); return true; }
+  // Some goals also fall to the attacker if the defending general is taken.
+  if (g && g.general && S.generals[other(g.attacker)].captured) { declareWinner(g.attacker, g.generalWins); return true; }
   const lead = S.vp.azure === S.vp.red ? null : S.vp.azure > S.vp.red ? 'azure' : 'red';
   if (lead && S.vp[lead] >= VP_TARGET) { declareWinner(lead, `${S.vp[lead]} war points to ${S.vp[other(lead)]}: the forts and ghats of the Jhelum answer to the ${SIDES[lead].name}.`); return true; }
   for (const side of ['azure', 'red']) {
@@ -824,7 +871,10 @@ function checkVictory() {
 function aiGoalField(side) {
   const sources = [];
   // Nearest objectives first: each one taken becomes a depot for the next.
-  for (const k of STRONGPOINTS) if (S.owners[k] !== side) sources.push([HEX_OF[k], 0]);
+  // Where only some of several goals must be held, walls count as distance:
+  // the easier ones are worth taking first.
+  const g = SCN.goal, pick = g && g.attacker === side && g.need && g.need < goalForts().length;
+  for (const k of STRONGPOINTS) if (S.owners[k] !== side) sources.push([HEX_OF[k], pick && goalForts().includes(k) ? (S.walls?.[k] || 0) * 4 : 0]);
   for (const [hex, id] of SEAT_HEX) if (S.allies[id] !== side) sources.push([hex, 2]);
   for (const k of FORTS) if (S.forts[k] !== side) sources.push([HEX_OF[k], 6]);
   for (const u of S.units) if (u.side !== side) sources.push([u.hex, 7]);
@@ -837,7 +887,7 @@ function aiThreat(side, turns = 1) {
   const threat = new Float32Array(HEXES.length);
   for (const e of S.units) if (e.side !== side && !wavering(e)) {
     const v = VARIANTS[e.variant], saved = e.mp;
-    e.mp = v.mp * turns;
+    e.mp = fullMp(e) * turns;
     const reach = reachable(e);
     e.mp = saved;
     const hit = new Uint8Array(HEXES.length), w = v.atk / 4 * (0.4 + 0.6 * e.hp / MAX_HP);
@@ -855,12 +905,16 @@ function rangeHexes(center, radius) {
   return out;
 }
 
+// Where taking the defending general decides the campaign, the defender's
+// AI treats his formation as the one thing it cannot lose.
+const preciousGeneral = u => !!SCN.goal?.general && u.side !== SCN.goal.attacker && ledBy(u);
+
 function aiStrikeValue(u, f) {
   const weak = u.hp <= 2;
   let value = f.expDef * 2.2 + f.pBreak * 3 + f.pKill * 5 - f.expAtt * (weak ? 4 : 2.5) - f.pAttBreak * 2;
   if (STRONG_HEX.has(f.def.hex)) value += f.expDef * 0.8;
   if (ledBy(f.def)) value += f.pKill * 8;          // a chance to take the enemy general
-  if (ledBy(u)) value -= f.pAttKill * 15;          // never gamble our own
+  if (ledBy(u)) value -= f.pAttKill * (preciousGeneral(u) ? 40 : 15);   // never gamble our own
   // Sieges: guns that can bring a wall down are worth firing even at long odds,
   // and an attacker racing the season presses harder on the fort that decides it.
   const place = HEXES[f.def.hex].place;
@@ -886,7 +940,9 @@ function aiPlan(u, goal, threat, garrisoned, looming, supply) {
   const vitalDuty = vital && (VARIANTS[u.variant].type !== 'horse' || !holders) && (garrisoned.get(here) || 0) < STACK_LIMIT;
   const garrison = key && S.owners[key] === u.side && !wavering(u) && (vitalDuty || (looming[here] > 0 && !garrisoned.has(here)));
   const options = garrison || u.mp <= 0 ? [here] : [here, ...reach.cost.keys()];
-  const fragile = (u.hp <= 2 ? 1.8 : 1) * (ledBy(u) ? 2.5 : 1);
+  const walledEnemy = Object.entries(S.walls || {}).filter(([k, w]) => w > 0 && HEX_OF[k] !== undefined && unitsAt(HEX_OF[k]).some(e => e.side !== u.side)).map(([k]) => HEX_OF[k]);
+  const precious = preciousGeneral(u);
+  const fragile = (u.hp <= 2 ? 1.8 : 1) * (precious ? 6 : ledBy(u) ? 2.5 : 1);
   let best = null;
   // An attacker racing the clock presses harder as the days run out: its
   // objectives pull more and the danger of the enemy's reach counts for less.
@@ -902,6 +958,11 @@ function aiPlan(u, goal, threat, garrisoned, looming, supply) {
     // Foot and guns are drawn back into an under-garrisoned objective.
     if (sk && SCN.goal && goalForts().includes(sk) && u.side !== SCN.goal.attacker && S.owners[sk] === u.side && v.type !== 'horse'
         && unitsAt(hex).filter(f => f.side === u.side && f !== u && VARIANTS[f.variant].type !== 'horse').length < STACK_LIMIT) score += 12;
+    // Siege lines: the ring two hexes from enemy walls belongs to the field
+    // guns (it is where they can batter the walls from); foot keep out of it.
+    // Swivels and wall pieces must close to the next hex to fire.
+    const ring = v.type === 'guns' ? v.range : 2, battering = walledEnemy.some(w => hexDistance(hex, w) === ring);
+    if (battering) score += v.type === 'guns' ? 5 : -4;
     const seat = SEAT_HEX.get(hex);
     if (seat && S.allies[seat] !== u.side) score += 9;
     score += cover * 0.8;
@@ -910,7 +971,8 @@ function aiPlan(u, goal, threat, garrisoned, looming, supply) {
     score += (Math.min(fed, 30) - STOCK_USE) * 0.22 * need;
     // Only so many formations can strike one hex in a day: danger saturates.
     score -= Math.min(threat[hex], 4) * Math.max(0.3, 1 - cover * 0.12) * (v.type === 'guns' ? 2.2 : 1.1) * fragile * nerve;
-    if (v.type === 'guns' && S.units.some(e => e.side !== u.side && hexDistance(e.hex, hex) === 1)) score -= 6;
+    if (v.type === 'guns' && v.range > 1 && S.units.some(e => e.side !== u.side && hexDistance(e.hex, hex) === 1)) score -= 6;
+    if (precious && S.units.some(e => e.side !== u.side && hexDistance(e.hex, hex) === 1)) score -= 12;
     score -= friendsAt(hex) * 0.6;
     // Standing still out of contact rallies a worn formation.
     if (hex === here && !u.moved && u.hp < MAX_HP && !zoc[hex]) score += 1.6 * Math.min(2, MAX_HP - u.hp) * (nearGeneral(u) ? 1.5 : 1);
@@ -920,7 +982,7 @@ function aiPlan(u, goal, threat, garrisoned, looming, supply) {
     let strike = null, setup = 0;
     if (!u.attacked) for (const t of S.units) {
       if (t.side === u.side) continue;
-      const left = u.mp - (hex === here ? 0 : reach.cost.get(hex)), full = VARIANTS[u.variant].mp;
+      const left = u.mp - (hex === here ? 0 : reach.cost.get(hex)), full = fullMp(u);
       const now = canStrike(u, hex, t, left);
       if (!now && !canStrike(u, hex, t, full)) continue;
       const savedHex = u.hex, savedMoved = u.moved; u.hex = hex;
@@ -940,8 +1002,12 @@ function aiPlan(u, goal, threat, garrisoned, looming, supply) {
 async function aiGeneral(side) {
   const lead = generalUnit(side);
   if (!lead || S.generals[side].rode) return;
-  const worth = u => VARIANTS[u.variant].atk + u.hp * 0.6 + (S.units.some(e => e.side !== side && hexDistance(e.hex, u.hex) <= 3) ? 2.5 : 0)
-    - (VARIANTS[u.variant].type === 'guns' ? 3 : 0) - (wavering(u) ? 6 : 0) - (u.hp <= 2 ? 3 : 0);
+  // A general whose capture loses the campaign rides to the fort instead.
+  const safe = preciousGeneral(lead), near = (u, d) => S.units.some(e => e.side !== side && hexDistance(e.hex, u.hex) <= d);
+  const worth = safe
+    ? u => (goalForts().includes(STRONG_HEX.get(u.hex)) ? 8 : 0) + u.hp * 0.6 - (near(u, 2) ? 6 : 0) - (VARIANTS[u.variant].type === 'guns' ? 2 : 0)
+    : u => VARIANTS[u.variant].atk + u.hp * 0.6 + (near(u, 3) ? 2.5 : 0)
+      - (VARIANTS[u.variant].type === 'guns' ? 3 : 0) - (wavering(u) ? 6 : 0) - (u.hp <= 2 ? 3 : 0);
   const best = S.units.filter(u => u.side === side && hexDistance(u.hex, lead.hex) <= GENERAL_RIDE).sort((a, b) => worth(b) - worth(a))[0];
   if (best && best !== lead && worth(best) > worth(lead) + 1.5) { await UI.focus(best.hex); rideTo(best); }
 }
@@ -979,7 +1045,9 @@ async function runAI(side) {
     const goal = aiGoalField(side), threat = aiThreat(side), looming = aiThreat(side, 2), garrisoned = new Map(), supply = supplyField(side);
     const order = S.units.filter(u => u.side === side)
       .map(u => ({ u, d: Math.min(...S.units.filter(e => e.side !== side).map(e => hexDistance(u.hex, e.hex)), 99) }))
-      .sort((a, b) => a.d - b.d).map(x => x.u);
+      // Guns go first, so they take the firing positions before the foot
+      // crowd them (and soften the enemy for the assault); then nearest first.
+      .sort((a, b) => (VARIANTS[b.u.variant].type === 'guns') - (VARIANTS[a.u.variant].type === 'guns') || a.d - b.d).map(x => x.u);
     for (const u of order) {
       if (S.winner || !S.units.includes(u) || u.attacked) continue;
       let plan = null;
@@ -987,7 +1055,7 @@ async function runAI(side) {
         // A spent formation near the general may be driven on by a forced march.
         if (!canForce(u)) { if (!targetsFrom(u).length) continue; }
         else {
-          u.mp = VARIANTS[u.variant].mp;
+          u.mp = fullMp(u);
           const pushed = aiPlan(u, goal, threat, garrisoned, looming, supply);
           u.mp = 0;
           if (pushed.strike && pushed.strike.value > 3 || STRONG_HEX.has(pushed.hex) && S.owners[STRONG_HEX.get(pushed.hex)] !== side) { forcedMarch(u); plan = aiPlan(u, goal, threat, garrisoned, looming, supply); }

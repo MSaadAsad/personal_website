@@ -126,6 +126,9 @@ function drawStaticMap() {
   // Vegetation and fields are scattered on a jittered grid that ignores the
   // hexes, sampled straight from the land-cover data, so the pattern reads
   // as countryside rather than repeating tile by tile.
+  // Drawn in a fixed 16 px-per-km space and scaled to the board, so the
+  // countryside has the same real-world grain whatever the map's hex size.
+  const KM = 16, G = PX_PER_KM / KM, W = BOARD_W / G, H = BOARD_H / G;
   const STEP = 19, glyph = { pine: '', canopy: '', shade: '', scrub: '' };
   let plots = '', plots2 = '', furrows = '';
   // Field systems share an orientation across a district, as real ones do.
@@ -134,15 +137,15 @@ function drawStaticMap() {
     const fx = x / 260, fy = y / 260, i = Math.floor(fx), j = Math.floor(fy), u = smooth(fx - i), v = smooth(fy - j);
     return (lattice(i, j) * (1 - u) + lattice(i + 1, j) * u) * (1 - v) + (lattice(i, j + 1) * (1 - u) + lattice(i + 1, j + 1) * u) * v;
   };
-  const settled = Object.values(MAP.places).filter(p => p.kind !== 'village').map(p => [kmToPx(p.x), kmToPx(p.y)]);
-  for (let gy = 0; gy * STEP < BOARD_H; gy++) for (let gx = 0; gx * STEP < BOARD_W; gx++) {
+  const settled = Object.values(MAP.places).filter(p => p.kind !== 'village').map(p => [p.x * KM, p.y * KM]);
+  for (let gy = 0; gy * STEP < H; gy++) for (let gx = 0; gx * STEP < W; gx++) {
     const r1 = hash2(gx, gy), r2 = hash2(gy + 101, gx + 37), r3 = hash2(gx + 517, gy + 211);
     const x = (gx + 0.15 + r1 * 0.7) * STEP, y = (gy + 0.15 + r2 * 0.7) * STEP;
     if (settled.some(([sx, sy]) => Math.abs(sx - x) < 9 && Math.abs(sy - y) < 9)) continue;
-    const [tree, shrub, crop] = vegetationKm(x / PX_PER_KM, y / PX_PER_KM);
+    const [tree, shrub, crop] = vegetationKm(x / KM, y / KM);
     if (tree > 0.3 && r3 < tree * 0.95) {
       const sz = 0.75 + hash2(gx + 3, gy + 5) * 0.55;
-      if (elevationKm(x / PX_PER_KM, y / PX_PER_KM) > 1100) glyph.pine += `M${f1(x)} ${f1(y - 6.5 * sz)}l${f1(3.2 * sz)} ${f1(7.5 * sz)}h${f1(-6.4 * sz)}z`;
+      if (elevationKm(x / KM, y / KM) > 1100) glyph.pine += `M${f1(x)} ${f1(y - 6.5 * sz)}l${f1(3.2 * sz)} ${f1(7.5 * sz)}h${f1(-6.4 * sz)}z`;
       else {
         const rr = 2.6 * sz, ox = (hash2(gx, gy + 9) - 0.5) * 4;
         glyph.shade += `M${f1(x + 0.9 - rr)} ${f1(y + 1)}a${f1(rr)} ${f1(rr * 0.85)} 0 1 0 ${f1(rr * 2)} 0a${f1(rr)} ${f1(rr * 0.85)} 0 1 0 ${f1(-rr * 2)} 0`;
@@ -160,10 +163,12 @@ function drawStaticMap() {
     }
   }
   const farm = g('farmland');
+  if (G !== 1) farm.setAttribute('transform', `scale(${G})`);
   if (plots) svgEl('path', { d: plots, class: 'field ochre' }, farm);
   if (plots2) svgEl('path', { d: plots2, class: 'field green' }, farm);
   if (furrows) svgEl('path', { d: furrows, class: 'furrow' }, farm);
   const veg = g('vegetation');
+  if (G !== 1) veg.setAttribute('transform', `scale(${G})`);
   for (const [kind, d] of Object.entries(glyph)) if (d) svgEl('path', { d, class: `veg ${kind}` }, veg);
 
   // Streams that really do die out on the plain taper over their last stretch
@@ -211,16 +216,157 @@ function drawStaticMap() {
   for (const h of HEXES) { const c = hexCorners(h.x, h.y); grid += linePath([c[0], c[1], c[2], c[3]]); }
   svgEl('path', { d: grid, class: 'hexgrid' }, svg);
 
-  // Settlement symbols.
-  const towns = g('settlements');
-  for (const [key, p] of Object.entries(MAP.places)) {
-    const x = kmToPx(p.x), y = kmToPx(p.y);
-    if (p.kind === 'fort') svgEl('path', { d: fortGlyph(x, y, 7), class: 'sym fort' }, towns);
-    else if (p.kind === 'city') svgEl('rect', { x: f1(x - 5.5), y: f1(y - 5.5), width: 11, height: 11, class: 'sym city' }, towns);
-    else if (p.kind === 'sarai') svgEl('rect', { x: f1(x - 4), y: f1(y - 4), width: 8, height: 8, class: 'sym sarai' }, towns);
-    else svgEl('circle', { cx: f1(x), cy: f1(y), r: p.kind === 'town' ? 4.2 : p.tier >= 4 ? 1.8 : 2.6, class: `sym ${p.kind}${p.tier >= 4 ? ' minor' : ''}` }, towns);
-    if (key === 'mirpur') svgEl('circle', { cx: f1(x), cy: f1(y), r: 9, class: 'sym ring' }, towns);
+  // Settlements, drawn as they would look from a survey of the time: villages
+  // as a handful of flat-roofed mud houses and a tree, towns as a cluster
+  // round a mosque, cities packed inside a bastioned wall, forts as a
+  // bastioned trace with a keep, a sarai as a walled square.
+  const towns = g('settlements'), art = { fortGround: '', garden: '', house: '', tree: '', wall: '', rampart: '', fortWall: '', channel: '', bastion: '', dome: '', yard: '', minaret: '', gate: '' };
+  // Houses packed in rows along a lane, one orientation per settlement, the
+  // rows shortening towards the edges so the block reads as a compact village.
+  const houses = (x, y, n, r, seed, big = 1) => {
+    const ang = hash2(seed, 404) * Math.PI, ca = Math.cos(ang), sa = Math.sin(ang);
+    const cell = 3.4 * big, cols = Math.max(2, Math.round(Math.sqrt(n * 1.6))), rows = Math.ceil(n / cols);
+    let k = 0;
+    for (let row = 0; row < rows && k < n; row++) for (let col = 0; col < cols && k < n; col++, k++) {
+      const u = (col - (cols - 1) / 2) * cell + (row % 2 ? cell * 0.35 : 0), v = (row - (rows - 1) / 2) * cell * 0.95 + (row >= rows / 2 ? 1.2 * big : 0);
+      if (Math.hypot(u, v) > r + cell * 0.6) continue;
+      const w = (2.4 + hash2(seed + 3, k) * 0.7) * big, h = (2 + hash2(seed + 5, k) * 0.5) * big;
+      const cx = x + u * ca - v * sa, cy = y + u * sa + v * ca;
+      const pt = (du, dv) => `${f1(cx + du * ca - dv * sa)} ${f1(cy + du * sa + dv * ca)}`;
+      art.house += `M${pt(-w / 2, -h / 2)}L${pt(w / 2, -h / 2)}L${pt(w / 2, h / 2)}L${pt(-w / 2, h / 2)}Z`;
+    }
+  };
+  const ring = (x, y, r, n, seed, jitter) => Array.from({ length: n }, (_, i) => { const a = i / n * Math.PI * 2 + 0.3, rr = r * (1 - jitter / 2 + hash2(seed, i) * jitter); return [x + Math.cos(a) * rr, y + Math.sin(a) * rr * 0.85]; });
+  const polygon = pts => 'M' + pts.map(p => `${f1(p[0])} ${f1(p[1])}`).join('L') + 'Z';
+  const bastions = pts => { for (const [bx, by] of pts) art.bastion += `M${f1(bx - 1.6)} ${f1(by)}a1.6 1.6 0 1 0 3.2 0a1.6 1.6 0 1 0 -3.2 0`; };
+  // Places traced from their walls (p.poly) are drawn to that trace.
+  const insidePx = (pts, x, y) => { let c = false; for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) { const [xi, yi] = pts[i], [xj, yj] = pts[j]; if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) c = !c; } return c; };
+  const centroid = pts => [pts.reduce((a, p) => a + p[0], 0) / pts.length, pts.reduce((a, p) => a + p[1], 0) / pts.length];
+  // The direction of a trace's longest side: streets, terraces and channels run along it.
+  const axis = pts => { let best = 0, ang = 0; pts.forEach((p, i) => { const q = pts[(i + 1) % pts.length], l = Math.hypot(q[0] - p[0], q[1] - p[1]); if (l > best) { best = l; ang = Math.atan2(q[1] - p[1], q[0] - p[0]); } }); return ang; };
+  const housesIn = (pts, cell, seed, fill = 0.72) => {
+    const ang = axis(pts), ca = Math.cos(ang), sa = Math.sin(ang), [cx, cy] = centroid(pts);
+    const r = Math.max(...pts.map(p => Math.hypot(p[0] - cx, p[1] - cy)));
+    for (let v = -r, row = 0; v <= r; v += cell, row++) for (let u = -r, col = 0; u <= r; u += cell, col++) {
+      const hx = cx + u * ca - v * sa, hy = cy + u * sa + v * ca;
+      // Lanes: every fifth row and column stays open, and some plots are empty.
+      if (row % 5 === 2 || col % 6 === 3 || hash2(seed + row, col) > fill || !insidePx(pts, hx, hy)) continue;
+      const w = cell * (0.62 + hash2(seed, row * 97 + col) * 0.2), h = cell * 0.55;
+      const pt = (du, dv) => `${f1(hx + du * ca - dv * sa)} ${f1(hy + du * sa + dv * ca)}`;
+      art.house += `M${pt(-w / 2, -h / 2)}L${pt(w / 2, -h / 2)}L${pt(w / 2, h / 2)}L${pt(-w / 2, h / 2)}Z`;
+    }
+  };
+  // Towers along a wall: at its sharp corners, and every so far along the
+  // straight runs, never crowding closer than half that spacing.
+  const towersOn = (pts, every) => {
+    const out = [], n = pts.length, far = q => out.every(o => Math.hypot(o[0] - q[0], o[1] - q[1]) >= every * 0.5);
+    pts.forEach((p, i) => {
+      const a = pts[(i + n - 1) % n], b = pts[(i + 1) % n];
+      const turn = Math.abs(Math.atan2(Math.sin(Math.atan2(b[1] - p[1], b[0] - p[0]) - Math.atan2(p[1] - a[1], p[0] - a[0])), Math.cos(Math.atan2(b[1] - p[1], b[0] - p[0]) - Math.atan2(p[1] - a[1], p[0] - a[0]))));
+      if (turn > 0.6 && far(p)) out.push(p);
+    });
+    pts.forEach((p, i) => { const q = pts[(i + 1) % n], l = Math.hypot(q[0] - p[0], q[1] - p[1]); for (let t = every; t < l; t += every) { const m = [p[0] + (q[0] - p[0]) * t / l, p[1] + (q[1] - p[1]) * t / l]; if (far(m)) out.push(m); } });
+    return out;
+  };
+  const dome = (x, y, r) => `M${f1(x - r)} ${f1(y)}a${f1(r)} ${f1(r)} 0 1 1 ${f1(2 * r)} 0z`;
+  const disc = (x, y, r) => `M${f1(x - r)} ${f1(y)}a${f1(r)} ${f1(r)} 0 1 0 ${f1(2 * r)} 0a${f1(r)} ${f1(r)} 0 1 0 ${f1(-2 * r)} 0`;
+  // A rectangle of half-sides a, b turned to angle ang.
+  const box = (x, y, a, b, ang) => { const ca = Math.cos(ang), sa = Math.sin(ang); return polygon([[-a, -b], [a, -b], [a, b], [-a, b]].map(([u, v]) => [x + u * ca - v * sa, y + u * sa + v * ca])); };
+  const traced = (p, pts, seed) => {
+    const [cx, cy] = centroid(pts), ang = axis(pts), ca = Math.cos(ang), sa = Math.sin(ang);
+    const span = Math.max(...pts.map(q => Math.abs((q[0] - cx) * ca + (q[1] - cy) * sa))), depth = Math.max(...pts.map(q => Math.abs(-(q[0] - cx) * sa + (q[1] - cy) * ca)));
+    if (p.art === 'garden') {
+      // A Mughal garden: walled terraces, a channel down the middle and across
+      // each terrace, and rows of trees.
+      art.garden += polygon(pts); art.rampart += polygon(pts);
+      art.channel += `M${f1(cx - span * ca * 0.92)} ${f1(cy - span * sa * 0.92)}L${f1(cx + span * ca * 0.92)} ${f1(cy + span * sa * 0.92)}`;
+      for (const t of [-0.66, 0, 0.66]) { const tx = cx + span * t * ca, ty = cy + span * t * sa; art.channel += `M${f1(tx + depth * sa * 0.85)} ${f1(ty - depth * ca * 0.85)}L${f1(tx - depth * sa * 0.85)} ${f1(ty + depth * ca * 0.85)}`; }
+      for (const t of [-0.33, 0.33]) { const tx = cx + span * t * ca, ty = cy + span * t * sa; art.wall += `M${f1(tx + depth * sa)} ${f1(ty - depth * ca)}L${f1(tx - depth * sa)} ${f1(ty + depth * ca)}`; }
+      const step = Math.max(2.6, span / 9);
+      for (let u = -span + step; u < span; u += step) for (let v = -depth + step * 0.8; v < depth; v += step * 0.8) {
+        if (Math.abs(v) < step * 0.4) continue;
+        const tx = cx + u * ca - v * sa, ty = cy + u * sa + v * ca;
+        if (insidePx(pts, tx, ty)) art.tree += disc(tx, ty, Math.min(1.5, step * 0.3));
+      }
+      for (const q of pts) art.bastion += disc(q[0], q[1], 1.6);
+      return;
+    }
+    if (p.art === 'mosque') {
+      // A great congregational mosque: the courtyard, the prayer hall on the
+      // west side under three domes, and a minaret at each corner.
+      art.fortGround += polygon(pts);
+      const west = ca < 0 ? 1 : -1, hx = cx + west * span * 0.72 * Math.abs(ca), hy = cy;
+      art.yard += box(hx, hy, span * 0.2, depth * 0.62, ang);
+      for (const d of [-0.36, 0, 0.36]) art.dome += dome(hx - d * depth * sa, hy + d * depth * ca, d ? depth * 0.13 : depth * 0.19);
+      for (const q of pts) art.minaret += disc(q[0], q[1], 1.5);
+      return;
+    }
+    if (p.kind === 'city') {
+      art.fortGround += polygon(pts);
+      housesIn(pts, 3.6, seed);
+      art.wall += polygon(pts);
+      bastions(towersOn(pts, 22));
+      return;
+    }
+    // A fort or walled enclosure: its trace with bastions, the palaces and
+    // barracks inside packed along the long axis.
+    art.fortGround += polygon(pts);
+    housesIn(pts, 3.2, seed, p.kind === 'fort' ? 0.55 : 0.35);
+    art.rampart += polygon(pts);
+    bastions(towersOn(pts, 18));
+    if (p.kind === 'fort') art.yard += box(cx, cy, Math.min(span * 0.3, 7), Math.min(depth * 0.3, 4), ang);
+  };
+  Object.entries(MAP.places).forEach(([key, p], k) => {
+    const x = kmToPx(p.x), y = kmToPx(p.y), seed = 1000 + k * 13;
+    if (p.poly) { traced(p, p.poly.map(([a, b]) => [kmToPx(a), kmToPx(b)]), seed); return; }
+    if (p.art === 'tomb' || p.art === 'mosque') {
+      // A tomb on its platform with corner minarets; a mosque with its domes.
+      const s2 = p.art === 'tomb' ? 4.5 : 5.5;
+      art.fortGround += `M${f1(x - s2)} ${f1(y - s2)}h${f1(2 * s2)}v${f1(2 * s2)}h${f1(-2 * s2)}z`;
+      art.dome += dome(x, y + 1, s2 * 0.45);
+      for (const [dx, dy] of [[-1, -1], [1, -1], [1, 1], [-1, 1]]) art.minaret += disc(x + dx * s2, y + dy * s2, 1.2);
+      if (p.kind !== 'village') houses(x + s2 * 2.2, y + s2 * 1.4, 8, 5, seed);
+      return;
+    }
+    if (p.kind === 'fort') {
+      // A great walled city with its citadel (Multan) is filled with streets;
+      // a fort shows its bastioned trace and keep.
+      // Most forts of the period were square with corner bastions; a great
+      // fortress with a footprint follows its irregular trace.
+      const R = Math.max(8, (p.sizeKm || 0) * PX_PER_KM * 0.9);
+      const tilt = (hash2(seed, 31) - 0.5) * 0.5;
+      const pts = p.sizeKm ? ring(x, y, R, 9, seed, 0.22)
+        : Array.from({ length: 4 }, (_, i) => { const a = Math.PI / 4 + i * Math.PI / 2 + tilt, rr = R * (0.95 + hash2(seed, i) * 0.1); return [x + Math.cos(a) * rr, y + Math.sin(a) * rr]; });
+      art.fortWall += polygon(pts); bastions(pts);
+      if (p.sizeKm) { houses(x - R * 0.15, y + R * 0.1, 40, R * 0.72, seed, 0.95); art.yard += polygon(ring(x + R * 0.35, y - R * 0.3, R * 0.28, 6, seed + 1, 0.1)); }
+      else { art.yard += `M${f1(x - 2.8)} ${f1(y - 3.2)}h5.6v5.6h-5.6z`; houses(x, y, 3, R * 0.45, seed, 0.7); }
+    } else if (p.kind === 'city') {
+      // A walled city drawn at its footprint when it has one (Lahore, 2 km).
+      const R = Math.max(17, (p.sizeKm || 0) * PX_PER_KM * 0.95);
+      houses(x, y, Math.round(34 * (R / 17) ** 2), R * 0.78, seed);
+      const pts = ring(x, y, R, 12, seed, 0.15);
+      art.wall += polygon(pts); bastions(pts);
+      art.dome += `M${f1(x + 2)} ${f1(y - 1)}a2 2 0 1 0 4 0z`;
+    } else if (p.kind === 'sarai') {
+      art.fortWall += `M${f1(x - 5)} ${f1(y - 5)}h10v10h-10z`; art.yard += `M${f1(x - 3)} ${f1(y - 3)}h6v6h-6z`;
+    } else if (p.kind === 'town') {
+      houses(x, y, 16, 9.5, seed);
+      art.dome += `M${f1(x - 1.6)} ${f1(y + 0.4)}a1.6 1.6 0 1 1 3.2 0z`;
+      art.tree += `M${f1(x + 6)} ${f1(y + 4)}a2.2 1.9 0 1 0 4.4 0a2.2 1.9 0 1 0 -4.4 0`;
+    } else {
+      houses(x, y, p.tier >= 4 ? 4 : 6, p.tier >= 4 ? 4.5 : 5.5, seed, p.tier >= 4 ? 0.85 : 1);
+      art.tree += `M${f1(x + 3.5)} ${f1(y + 2.5)}a1.9 1.6 0 1 0 3.8 0a1.9 1.6 0 1 0 -3.8 0`;
+    }
+  });
+  // Landmarks: gates, tombs and shrines that take no part in the game.
+  for (const [k, m] of Object.entries(MAP.landmarks || {})) {
+    const x = kmToPx(m.x), y = kmToPx(m.y), seed = 7000 + k.length * 31;
+    if (m.poly) { traced(m, m.poly.map(([a, b]) => [kmToPx(a), kmToPx(b)]), seed); continue; }
+    if (m.art === 'gate') art.gate += `M${f1(x - 2.6)} ${f1(y + 2)}v-3.2a2.6 2.6 0 0 1 5.2 0v3.2z`;
+    else if (m.art === 'tomb') { art.fortGround += `M${f1(x - 3.2)} ${f1(y - 3.2)}h6.4v6.4h-6.4z`; art.dome += dome(x, y + 0.8, 1.9); for (const [dx, dy] of [[-1, -1], [1, -1], [1, 1], [-1, 1]]) art.minaret += disc(x + dx * 3.2, y + dy * 3.2, 0.9); }
+    else { art.yard += `M${f1(x - 2.2)} ${f1(y - 2.2)}h4.4v4.4h-4.4z`; art.dome += dome(x, y + 0.6, 1.8); }
   }
+  for (const [cls, d] of Object.entries(art)) if (d) svgEl('path', { d, class: `set ${cls}` }, towns);
 
   // Graticule ticks on the neat line every 0.1°.
   const frame = g('graticule');
@@ -272,6 +418,7 @@ function buildLabels() {
     const strong = STRONGPOINTS.includes(key) || POWERS.some(pw => pw.npc && pw.seat === key);
     add(kmToPx(p.x), kmToPx(p.y), p.name, `place ${p.kind} tier-${p.tier}${strong ? ' strong' : ''}`, strong ? 1 : p.tier, (strong ? 0 : 10) + p.tier * 3 + (p.kind === 'village' ? 2 : 0));
   }
+  for (const m of Object.values(MAP.landmarks || {})) if (m.tier) add(kmToPx(m.x), kmToPx(m.y), m.name, `place landmark ${m.art} tier-${m.tier}`, m.tier, 18 + m.tier * 3);
   for (const x of SCN.labels) {
     const [kx, ky] = geoToKm(x.lat, x.lon);
     add(kmToPx(kx), kmToPx(ky), x.text, x.cls, x.tier, x.cls === 'region' ? 30 : 20, x.angle || 0, false);
@@ -298,7 +445,8 @@ function layoutLabels() {
   for (const key of STRONGPOINTS) { const [x, y] = placePx(key); placed.push([x * z + 3, y * z - 23, 16, 16]); }
   for (const p of POWERS) if (p.npc) { const [x, y] = placePx(p.seat); placed.push([x * z - 17, y * z - 28, 16, 24]); }
   for (const key of FORTS) { const [x, y] = placePx(key); placed.push([x * z + 3, y * z - 17, 12, 12]); }
-  const visibleTier = z < 0.42 ? 1 : z < 0.8 ? 2 : z < 1.35 ? 3 : 4;
+  // Thresholds are in screen pixels per km (16 px/km at zoom 1 on a 2 km map).
+  const zk = z * PX_PER_KM / 16, visibleTier = zk < 0.42 ? 1 : zk < 0.8 ? 2 : zk < 1.35 ? 3 : 4;
   // Only names on (or near) the screen take part in the layout.
   const vw = R.view.clientWidth, vh = R.view.clientHeight, cx = -R.cam.x, cy = -R.cam.y;
   const items = [...R.labelItems].sort((a, b) => a.prio - b.prio);
@@ -414,30 +562,57 @@ function riderFigure(variant, p, coat) {
     'Mounted Matchlocks': `<path d="M-3.6 -15.8L10.4 -21.6" stroke="${WOOD}" stroke-width=".95" stroke-linecap="round"/><path d="M8.6 -20.8L10.4 -21.6" stroke="${STEEL}" stroke-width=".7"/>`,
     'Irregular Sowars': `<path d="M1.6 -19.4Q5.2 -23.2 3.6 -28.4" stroke="${STEEL}" stroke-width=".85" fill="none" stroke-linecap="round"/>`,
   }[variant] || '';
-  return `<path d="M-8.2 -10.4Q-10.6 -9 -10 -4.2Q-9.6 -6.6 -8.8 -8.2" fill="${dark}" stroke="${dark}" stroke-width=".6"/>`
-    // Legs with knees and hocks.
-    + `<path d="M-6.3 -8.2L-7.4 -4.4L-6.6 0M-4.6 -7.6L-5.1 -4L-4.3 0M3.6 -7.6L3.2 -3.8L3.8 0M5.1 -7.8L5.8 -4.1L5.2 0" stroke="${coat}" stroke-width="1.05" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`
-    + `<path d="M-7 -.1H-6M-4.7 -.1H-3.8M3.4 -.1H4.3M4.8 -.1H5.7" stroke="${dark}" stroke-width=".8"/>`
-    // Barrel, chest and an arched neck to a tapered head.
-    + `<path d="M-8.6 -9.6C-9 -12.2 -6 -12.8 -3 -12.2L3.4 -12.4C5.2 -12.6 6.2 -13.4 7.2 -15.6L8.5 -18C9.1 -18.8 10.3 -18.6 11.2 -17.6L12.6 -15.8C12.9 -15.2 12.4 -14.7 11.8 -14.9L10.4 -15.4C9.6 -13.8 8.8 -11.8 7.6 -10.4C7 -8.8 6.2 -7.8 4.8 -7.6L-4.6 -7.4C-6.6 -7.4 -8.2 -8 -8.6 -9.6Z" fill="${coat}" ${LINE}/>`
-    + `<path d="M7 -15.4Q8.2 -17.8 9.2 -18.6" stroke="${dark}" stroke-width=".9" fill="none"/>`
-    // Saddle cloth, rider seated with leg down the flank.
-    + `<path d="M-3.4 -12.4H2.8L2.2 -9.6H-2.8Z" fill="${p.sash}" ${LINE}/>`
-    + `<path d="M.2 -12.6L1 -9.2L.4 -7.6" stroke="${p.legs}" stroke-width="1.05" fill="none" stroke-linecap="round"/>`
-    + `<path d="M-1.6 -12.6Q-.2 -13.2 1.4 -12.6L1.2 -18.6Q0 -19.2 -1.2 -18.6Z" fill="${p.coat}" ${LINE}/>`
-    + `<ellipse cx=".1" cy="-20.4" rx="1.05" ry="1.25" fill="${SKIN}" ${LINE}/><path d="M-1.3 -20.8Q-1.3 -22.8 .1 -23Q1.5 -22.9 1.35 -20.9Q.1 -20.5 -1.3 -20.8Z" fill="${p.turban}" ${LINE}/>`
-    + weapon;
+  // A horse in profile, facing right: barrel and croup, deep chest, arched
+  // neck to a wedge-shaped head; jointed legs (knee and fetlock in front, the
+  // hock bending back behind), the far pair shaded. Hooves at y = 0.
+  const leg = (pts, near) => {
+    const [[x0, y0], [x1, y1], [x2, y2], [x3, y3]] = pts, c = coat;
+    return `<path d="M${x0} ${y0}L${x1} ${y1}" stroke="${c}" stroke-width="1.7" stroke-linecap="round"/>`
+      + `<path d="M${x1} ${y1}L${x2} ${y2}L${x3} ${y3}" stroke="${c}" stroke-width="1" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`
+      + (near ? '' : `<path d="M${x0} ${y0}L${x1} ${y1}L${x2} ${y2}L${x3} ${y3}" stroke="#000" stroke-opacity=".28" stroke-width="1.1" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`)
+      + `<path d="M${x3 - 0.55} ${y3 + 0.1}H${x3 + 0.75}" stroke="${dark}" stroke-width="1.15" stroke-linecap="round"/>`;
+  };
+  const far = leg([[3.6, -8.6], [3.1, -4.6], [2.5, -1.1], [2.7, -0.2]], false) + leg([[-6.2, -9.2], [-6.9, -4.9], [-5.9, -1.1], [-5.6, -0.2]], false);
+  const near = leg([[5.4, -8.8], [5.6, -4.7], [5.9, -1.1], [6.2, -0.2]], true) + leg([[-8, -9.6], [-9, -5], [-8.3, -1.1], [-8, -0.2]], true);
+  const body = `<path d="M-8.8 -12.2C-6 -13.2 -2 -12.4 1.5 -12.6C3.5 -12.8 4.8 -13.6 6 -15.6C7.2 -17.6 8.6 -19.2 10 -19.6L10.5 -20.9L11 -19.5C12 -18.7 13.2 -16.5 13.9 -15.2C14.2 -14.6 13.8 -14 13.1 -14.1C12.2 -14.3 11.2 -15 10.4 -15.6C9.4 -14.6 8.6 -12.6 8 -11C7.6 -9.4 6.8 -8.4 5.6 -8.2L-3.8 -8C-6.6 -8.2 -8.4 -8.8 -9.4 -10C-9.9 -10.8 -9.6 -11.8 -8.8 -12.2Z" fill="${coat}" ${LINE}/>`
+    + `<path d="M-6.4 -9.1Q-1 -8 4.6 -8.6" stroke="#000" stroke-opacity=".18" stroke-width="1.2" fill="none"/>`;
+  const mane = `<path d="M10 -19.4C8.4 -19 7 -17.4 6 -15.4C5.3 -14.2 4.6 -13.6 3.4 -13.1" stroke="${dark}" stroke-width="1.15" fill="none" stroke-linecap="round"/>`;
+  const tail = `<path d="M-9.1 -11.8C-10.9 -11.2 -11.7 -8.8 -11.3 -5.4C-10.9 -7.6 -10.3 -9.6 -9.3 -10.6Z" fill="${dark}" stroke="${dark}" stroke-width=".7" stroke-linejoin="round"/>`;
+  const face = `<circle cx="11.5" cy="-17.5" r=".38" fill="${dark}"/><path d="M13.2 -14.6L3.2 -14.9" stroke="${dark}" stroke-width=".35" fill="none"/>`;
+  // The rider: saddle cloth, seat on the back, leg down the flank, hand on the reins.
+  const rider = `<path d="M-2.8 -12.9H2.8L2.4 -9.6H-2.4Z" fill="${p.sash}" ${LINE}/>`
+    + `<path d="M.1 -13L2.1 -10.8L1.5 -8.2" stroke="${p.legs}" stroke-width="1.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M1 -8.1H2.3" stroke="${IRON}" stroke-width=".6"/>`
+    + `<path d="M-1.5 -12.9Q0 -13.5 1.6 -12.9L1.3 -18.4Q0 -19 -1.2 -18.4Z" fill="${p.coat}" ${LINE}/>`
+    + `<path d="M.9 -17.4L3.3 -15" stroke="${p.flat}" stroke-width="1.1" stroke-linecap="round"/>`
+    + `<ellipse cx=".2" cy="-20.2" rx="1.05" ry="1.25" fill="${SKIN}" ${LINE}/><path d="M-1.2 -20.6Q-1.2 -22.6 .2 -22.8Q1.6 -22.7 1.45 -20.7Q.2 -20.3 -1.2 -20.6Z" fill="${p.turban}" ${LINE}/>`;
+  return `<g transform="scale(.94)">${far}${tail}${body}${mane}${face}${near}${rider}${weapon}</g>`;
 }
 
 function gunPiece(variant) {
   if (variant === 'Light Field Gun') return `<path d="M-1.5 -4.8L-14 -.2" stroke="${WOOD}" stroke-width="1.6" stroke-linecap="round"/><path d="M-6 -8.2L13.5 -11.6" stroke="url(#bronze)" stroke-width="2.6" stroke-linecap="round"/><path d="M-6 -8.2L13.5 -11.6" stroke="${INK}" stroke-width="2.6" stroke-opacity=".25" stroke-linecap="round" fill="none"/><circle cx="-6.4" cy="-8.1" r="1.1" fill="url(#bronze)" ${LINE}/>`
     + `<circle cx="-1" cy="-4.8" r="4.6" fill="none" stroke="${WOOD}" stroke-width="1.1"/><circle cx="-1" cy="-4.8" r="4.6" fill="none" stroke="${INK}" stroke-width=".3"/><path d="M-5.6 -4.8H3.6M-1 -9.4V-.2M-4.2 -8L2.2 -1.6M-4.2 -1.6L2.2 -8" stroke="${WOOD}" stroke-width=".45"/><circle cx="-1" cy="-4.8" r=".9" fill="${IRON}"/>`;
   if (variant === 'Jingal') return `<path d="M2 -9.6L-2.6 0M2 -9.6L6.4 0M2 -9.6L2.2 0" stroke="${WOOD}" stroke-width=".75"/><path d="M-13 -8.4L17 -11.6" stroke="${IRON}" stroke-width="1.25" stroke-linecap="round"/><path d="M-13 -8.4L-6 -9.2" stroke="${WOOD}" stroke-width="1.9" stroke-linecap="round"/>`;
-  // Zamburak: a kneeling camel carrying a swivel gun.
-  const camel = '#a9895f';
-  return `<path d="M-6.4 -6L-7.4 -2.6L-6.6 0M-3.4 -6L-3.6 0M3.4 -6L3.6 -2.8L4.4 0M6.2 -6.2L7.6 0" stroke="${camel}" stroke-width="1" fill="none" stroke-linecap="round"/>`
-    + `<path d="M-8 -8.4C-8.6 -11 -6.2 -11.6 -4 -11.8Q-1.8 -15.6 1.4 -12.2Q4 -12.4 5.6 -11L7.6 -14.6Q8.6 -17.8 10.6 -17.6L12.2 -17C12.6 -16.6 12.2 -16 11.6 -16.2L10.6 -16Q9.6 -12 7.8 -8.8Q7 -7 5 -6.6H-5.6C-7 -6.6 -7.8 -7.4 -8 -8.4Z" fill="${camel}" ${LINE}/>`
-    + `<path d="M-2.4 -15.4L9.4 -18.2" stroke="url(#bronze)" stroke-width="1.5" stroke-linecap="round"/><path d="M1 -14L1.6 -16.2" stroke="${WOOD}" stroke-width=".7"/>`;
+  // Zamburak: a standing dromedary with a swivel gun on a pivot over the
+  // saddle and its gunner riding behind. Facing right, feet at y = 0.
+  const camel = '#b8976a', shade = '#000', dark = '#3a2a1c';
+  const leg = (hip, knee, foot, far) => `<path d="M${hip}L${knee}L${foot}" stroke="${camel}" stroke-width="1.15" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`
+    + (far ? `<path d="M${hip}L${knee}L${foot}" stroke="${shade}" stroke-opacity=".25" stroke-width="1.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>` : '')
+    + `<circle cx="${knee.split(' ')[0]}" cy="${knee.split(' ')[1]}" r=".75" fill="${camel}"/>`
+    + `<path d="M${(+foot.split(' ')[0] - 0.7).toFixed(2)} ${foot.split(' ')[1]}H${(+foot.split(' ')[0] + 1).toFixed(2)}" stroke="${dark}" stroke-width="1.1" stroke-linecap="round"/>`;
+  const farLegs = leg('2.6 -11.2', '2.9 -5.6', '2.4 -0.3', true) + leg('-4.2 -11.6', '-4.9 -5.4', '-4.3 -0.3', true);
+  const nearLegs = leg('4.4 -11.2', '4.9 -5.6', '4.6 -0.3', false) + leg('-6 -12', '-6.8 -5.4', '-6.1 -0.3', false);
+  const body = `<path d="M-8 -14.6C-7 -16.8 -4.4 -19.6 -1 -19.8C2 -20 3.6 -17.4 5.4 -15.6C7 -14.6 8.6 -15.6 9.6 -17.6C10.4 -19.4 10.8 -21 11.8 -21.6C13 -22.2 14.6 -21.4 15.6 -20.6C16.2 -20 15.8 -19.2 15 -19.2C14 -19.2 13.2 -19 12.6 -18.4C11.8 -16.6 11 -13.6 9 -12.4C7.8 -11.6 6.4 -11.2 5.2 -11L-5.6 -11C-7.2 -11.2 -8.4 -12.4 -8 -14.6Z" fill="${camel}" ${LINE}/>`
+    + `<path d="M-6 -12.2Q0 -11.4 5.4 -12" stroke="${shade}" stroke-opacity=".15" stroke-width="1.2" fill="none"/>`
+    + `<path d="M-8 -14.2Q-9.2 -12.6 -8.8 -10.2" stroke="${dark}" stroke-width=".8" fill="none" stroke-linecap="round"/>`
+    + `<path d="M11.6 -21.5L11.9 -22.6L12.5 -21.7" fill="${camel}" ${LINE}/><circle cx="13.7" cy="-20.6" r=".35" fill="${dark}"/>`;
+  // Saddle-cloth over the hump, the swivel gun on its crutch, the gunner behind.
+  const gun = `<path d="M-4 -19.4Q-1 -21.6 2.6 -19.2L2.2 -17.6Q-1 -19.4 -3.6 -17.8Z" fill="#8c2f24" ${LINE}/>`
+    + `<path d="M.6 -20.4V-22.2" stroke="${IRON}" stroke-width=".8"/>`
+    + `<path d="M-2.4 -22.1L9.6 -24.3" stroke="url(#bronze)" stroke-width="1.6" stroke-linecap="round"/><circle cx="-2.4" cy="-22.1" r=".7" fill="url(#bronze)" ${LINE}/>`
+    + `<path d="M-4.2 -20.2Q-3.4 -20.8 -2.4 -20.2L-2.6 -24.6Q-3.4 -25.1 -4 -24.6Z" fill="#c9b48a" ${LINE}/>`
+    + `<ellipse cx="-3.3" cy="-26" rx=".95" ry="1.1" fill="${SKIN}" ${LINE}/><path d="M-4.6 -26.3Q-4.6 -28 -3.3 -28.1Q-2 -28 -2.1 -26.4Q-3.3 -26 -4.6 -26.3Z" fill="#ece4cf" ${LINE}/>`
+    + `<path d="M-2.8 -24L-1.6 -22.6" stroke="#c9b48a" stroke-width=".9" stroke-linecap="round"/>`;
+  return `<g transform="scale(.9)">${farLegs}${body}${nearLegs}${gun}</g>`;
 }
 // Figure slots in the order they fall: flanks first, standard-bearer last.
 const SLOTS = {
@@ -590,7 +765,7 @@ function applyCamera() {
   R.board.style.setProperty('--inv', String(1 / z));
   R.board.style.setProperty('--mk', String(1 / z));
   R.board.style.setProperty('--unit-scale', String(unitScale(z)));
-  R.view.classList.toggle('far', z < 0.42);
+  R.view.classList.toggle('far', z * PX_PER_KM / 16 < 0.42);
   R.view.classList.toggle('near', z >= 0.8);
   scheduleLabelLayout();
   UI.cameraChanged?.();
@@ -660,7 +835,7 @@ function initRenderer() {
   R.board.style.width = `${BOARD_W}px`;
   R.board.style.height = `${BOARD_H}px`;
   R.overlay.setAttribute('viewBox', `0 0 ${BOARD_W} ${BOARD_H}`);
-  drawRelief(R.relief, 0.1);
+  drawRelief(R.relief, 0.05 * HEX_KM);  // 10 px per km at 2 km hexes, 20 at 1 km
   drawStaticMap();
   buildLabels();
 }
