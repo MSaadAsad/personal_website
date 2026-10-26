@@ -525,7 +525,7 @@ function drawMarkers() {
     const h = HEXES[g.hex], m = el('div', `marker ghost ${g.side}`, R.markers);
     m.style.left = `${f1(h.x)}px`; m.style.top = `${f1(h.y)}px`;
     m.className += g.report ? ' army' : '';
-    m.innerHTML = `<i></i><b>${g.report ? `army · ~${g.strength}` : g.round ? `day ${g.round}` : 'reported'}</b>`;
+    m.innerHTML = `<i></i>${g.report ? `<b>army · ~${g.strength}</b>` : g.round ? `<b>day ${g.round}</b>` : ''}`;
     m.title = g.report ? `Reports at the outset put ${g.strength > 1 ? `the ${g.name.toLowerCase()}, about ${g.strength} formations,` : `an ${g.name.toLowerCase()}`} about here` : g.round ? `${g.name} (${g.variant}): last seen here on day ${g.round}` : `${g.name} (${g.variant}): holding this place at the outset`;
   }
   // Crossed swords where a battle or siege was fought, in the victor's colour.

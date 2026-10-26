@@ -643,8 +643,8 @@ em.writing::before { content: ""; display: inline-block; width: 8px; height: 8px
 .opponent-row .opponent { margin: 0; }
 #overlay .fog { fill: #1d1a12; fill-opacity: .34; stroke: none; pointer-events: none; }
 .unit.fogged { display: none; }
-.marker.ghost i { position: absolute; left: -7px; top: -18px; width: 14px; height: 14px; border-radius: 3px; border: 1.5px dashed currentColor; opacity: .7; transform: scale(var(--mk, 1)); }
+.marker.ghost i { position: absolute; left: -7px; top: -18px; width: 14px; height: 14px; border-radius: 3px; border: 1.5px dashed currentColor; opacity: .7; transform-origin: 7px 18px; transform: scale(var(--mk, 1)); pointer-events: none; }
 .marker.ghost.azure { color: #4f8db3; } .marker.ghost.red { color: #b4513f; }
-.marker.ghost b { position: absolute; left: -16px; top: -3px; width: 32px; text-align: center; font: 600 9px var(--sans); color: #2b1d11; opacity: .75; pointer-events: none; }
-.marker.ghost.army i { width: 22px; height: 22px; left: -11px; top: -24px; border-radius: 50%; border-width: 2px; }
-.marker.ghost.army b { width: 60px; left: -30px; top: 1px; }
+.marker.ghost b { position: absolute; left: -30px; top: -3px; width: 60px; text-align: center; font: 600 9px/1 var(--sans); color: #2b1d11; opacity: .8; white-space: nowrap; pointer-events: none; transform-origin: 30px 3px; transform: scale(var(--mk, 1)); text-shadow: 0 0 2px #efe3bf, 0 0 2px #efe3bf; }
+.marker.ghost.army i { width: 22px; height: 22px; left: -11px; top: -24px; border-radius: 50%; border-width: 2px; transform-origin: 11px 24px; }
+.marker.ghost.army b { top: 1px; transform-origin: 30px -1px; }
