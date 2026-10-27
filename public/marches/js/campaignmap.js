@@ -44,11 +44,11 @@ const CAMPAIGN_MAP = (() => {
     [[33.89, 72.24], [33.60, 73.05], [32.97, 73.58], [32.93, 73.72], [32.78, 73.87], [32.57, 74.08], [32.44, 74.12], [32.16, 74.19], [31.58, 74.33], [31.63, 74.87], [31.17, 74.95], [30.97, 75.30], [30.90, 75.85]],
     [[31.58, 74.33], [31.30, 73.95], [30.63, 72.86], [30.52, 72.24], [30.20, 71.47]],
   ];
-  // name, lat, lon, label side (r/l/a/b), city?
+  // name, lat, lon, label side (r/l/a/b), city? (2: the capital, starred)
   const TOWNS = [
     ['Attock', 33.89, 72.24, 'r'], ['Peshawar', 34.01, 71.58, 'r', 1], ['Rawalpindi', 33.60, 73.05, 'r'], ['Jhelum', 32.93, 73.72, 'r'],
     ['Jammu', 32.73, 74.86, 'r', 1], ['Sialkot', 32.49, 74.53, 'r'], ['Wazirabad', 32.44, 74.12, 'b'], ['Ramnagar', 32.33, 73.78, 'l'],
-    ['Gujranwala', 32.16, 74.19, 'r'], ['Amritsar', 31.63, 74.87, 'r', 1], ['Kasur', 31.12, 74.45, 'r'], ['Ferozepur', 30.95, 74.62, 'r'],
+    ['Gujranwala', 32.16, 74.19, 'r'], ['Lahore', 31.58, 74.33, 'b', 2], ['Amritsar', 31.63, 74.87, 'r', 1], ['Kasur', 31.12, 74.45, 'r'], ['Ferozepur', 30.95, 74.62, 'r'],
     ['Dera Ghazi Khan', 30.05, 70.64, 'r'], ['Dera Ismail Khan', 31.83, 70.90, 'r'],
     ['Jhang', 31.27, 72.32, 'r'], ['Chiniot', 31.72, 72.98, 'r'], ['Kalabagh', 32.96, 71.55, 'r'],
     ['Pakpattan', 30.34, 73.39, 'r'], ['Shujabad', 29.88, 71.30, 'r'], ['Harappa', 30.63, 72.86, 'b'],
@@ -70,6 +70,7 @@ const CAMPAIGN_MAP = (() => {
     multan1818: { at: [30.20, 71.47], off: [-24, -20], side: 'l', name: 'Multan' },
     multan1849: { at: [30.20, 71.47], off: [24, 14], side: 'r', name: 'Multan', year: '1848–49' },
     jhelum1857: { at: [32.925, 73.725], off: [20, 16], side: 'r', name: 'Jhelum' },
+    aliwal: { at: [30.945, 75.614], off: [-20, -18], side: 'l', name: 'Aliwal' },
   };
 
   const line = pts => 'M' + pts.map(p => px(p).map(f).join(' ')).join('L');
@@ -158,7 +159,8 @@ const CAMPAIGN_MAP = (() => {
   function seal(g, current, era) {
     const s = SPOTS[g.group]; if (!s) return '';
     // Battles of other eras stay on the map, faint, as landmarks.
-    if (era && g.era !== era) { const [x, y] = px(s.at); return `<circle cx="${f(x)}" cy="${f(y)}" r="3.2" class="cm-past"><title>${g.title}, ${g.year}</title></circle>`; }
+    // The capital's star stands in for its faint mark.
+    if (era && g.era !== era) { if (TOWNS.some(t => t[0] === s.name && t[4] === 2)) return ''; const [x, y] = px(s.at); return `<circle cx="${f(x)}" cy="${f(y)}" r="3.2" class="cm-past"><title>${g.title}, ${g.year}</title></circle>`; }
     const [x, y] = px(s.at), [dx, dy] = s.off, on = g.group === current;
     const year = s.year || g.year, name = s.name;
     const tx = s.side === 'l' ? -17 : 17, anchor = s.side === 'l' ? 'end' : 'start';
@@ -193,8 +195,9 @@ const CAMPAIGN_MAP = (() => {
       if (battleTowns.has(name)) continue;
       const [x, y] = px([lat, lon]);
       const [tx, ty, a] = { r: [5, 3.5, 'start'], l: [-5, 3.5, 'end'], a: [0, -6, 'middle'], b: [0, 12, 'middle'] }[side];
-      svg += city ? `<rect x="${f(x - 3)}" y="${f(y - 3)}" width="6" height="6" class="cm-city"/>` : `<circle cx="${f(x)}" cy="${f(y)}" r="2.2" class="cm-town"/>`;
-      svg += `<text x="${f(x + tx * (city ? 1.3 : 1))}" y="${f(y + ty)}" text-anchor="${a}" class="cm-townname${city ? ' big' : ''}">${name}</text>`;
+      const star = Array.from({ length: 10 }, (_, i) => { const a = -Math.PI / 2 + i * Math.PI / 5, rr = i % 2 ? 2.6 : 6.4; return `${f(x + Math.cos(a) * rr)} ${f(y + Math.sin(a) * rr)}`; }).join('L');
+      svg += city === 2 ? `<path d="M${star}Z" class="cm-capital"/>` : city ? `<rect x="${f(x - 3)}" y="${f(y - 3)}" width="6" height="6" class="cm-city"/>` : `<circle cx="${f(x)}" cy="${f(y)}" r="2.2" class="cm-town"/>`;
+      svg += `<text x="${f(x + tx * (city ? 1.3 : 1))}" y="${f(y + ty * (city === 2 ? 1.3 : 1))}" text-anchor="${a}" class="cm-townname${city ? ' big' : ''}${city === 2 ? ' capital' : ''}">${name}</text>`;
     }
     svg += `</g>`;
     svg += `<rect x="${M}" y="${M}" width="${IW}" height="${IH}" fill="url(#cmVignette)" pointer-events="none"/>`;

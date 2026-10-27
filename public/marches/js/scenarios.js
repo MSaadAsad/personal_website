@@ -406,8 +406,9 @@ const SCENARIOS = {
       azure: { name: 'Raja Gulab Singh', title: 'Holding the fort for Maharani Chand Kaur', leads: 'Gulab Singh’s Dogras' },
       red: { name: 'Kanwar Sher Singh', title: 'Son of Ranjit Singh, claimant to the throne', leads: 'Sher Singh’s Battalions' },
     },
-    homeBase: { azure: null, red: [31.59, 74.47] },
-    walls: { lahorefort: 7, lahore: 2 },
+    homeBase: { azure: null, red: [31.596, 74.412] },
+    walls: { lahorefort: 6, lahore: 2 },
+    sealed: ['lahorefort'],  // the fort spans three hexes: storm the one the garrison holds
     strongpoints: ['lahorefort', 'lahore', 'shalimar', 'shahdara', 'anarkali', 'mianmir'],
     startOwners: { lahorefort: 'azure', lahore: 'azure', shalimar: 'azure', shahdara: 'azure', anarkali: null, mianmir: 'red' },
     startUnits: [
@@ -416,14 +417,14 @@ const SCENARIOS = {
       ['azure', 'Matchlockmen', 'lahore', 'Dogra Musketeers'], ['azure', 'Khalsa Infantry', 'lahore', 'Chand Kaur’s Guard'],
       ['azure', 'Matchlockmen', 'shalimar', 'Shalimar Guard'], ['azure', 'Irregular Sowars', 'shahdara', 'Dogra Horse'],
       // Sher Singh's army on the road from Amritsar, and the Mian Mir regiments.
-      ['red', 'Khalsa Infantry', [31.605, 74.465], 'Sher Singh’s Battalions'], ['red', 'Khalsa Infantry', [31.605, 74.465], 'Khalsa Battalions'],
-      ['red', 'Khalsa Infantry', [31.595, 74.455], 'Khalsa Battalions'], ['red', 'Khalsa Infantry', [31.595, 74.455], 'Khalsa Battalions'],
-      ['red', 'Khalsa Infantry', [31.615, 74.455], 'Khalsa Battalions'], ['red', 'Khalsa Infantry', [31.615, 74.455], 'Khalsa Battalions'],
-      ['red', 'Khalsa Infantry', [31.585, 74.465], 'Khalsa Battalions'], ['red', 'Khalsa Infantry', [31.585, 74.465], 'Khalsa Battalions'],
-      ['red', 'Light Field Gun', [31.60, 74.445], 'Khalsa Topkhana'], ['red', 'Light Field Gun', [31.60, 74.445], 'Khalsa Topkhana'],
-      ['red', 'Heavy Battery', [31.61, 74.468], 'Sher Singh’s Siege Guns'], ['red', 'Heavy Battery', [31.59, 74.468], 'Sher Singh’s Siege Guns'],
-      ['red', 'Irregular Sowars', [31.625, 74.44], 'Ghorcharas'], ['red', 'Irregular Sowars', [31.625, 74.44], 'Ghorcharas'],
-      ['red', 'Light Dragoons', [31.575, 74.45], 'Ghorchara Khas'], ['red', 'Irregular Sowars', [31.575, 74.45], 'Ghorcharas'],
+      ['red', 'Khalsa Infantry', [31.601, 74.405], 'Sher Singh’s Battalions'], ['red', 'Khalsa Infantry', [31.601, 74.405], 'Khalsa Battalions'],
+      ['red', 'Khalsa Infantry', [31.594, 74.400], 'Khalsa Battalions'], ['red', 'Khalsa Infantry', [31.594, 74.400], 'Khalsa Battalions'],
+      ['red', 'Khalsa Infantry', [31.608, 74.400], 'Khalsa Battalions'], ['red', 'Khalsa Infantry', [31.608, 74.400], 'Khalsa Battalions'],
+      ['red', 'Khalsa Infantry', [31.587, 74.405], 'Khalsa Battalions'], ['red', 'Khalsa Infantry', [31.587, 74.405], 'Khalsa Battalions'],
+      ['red', 'Light Field Gun', [31.598, 74.395], 'Khalsa Topkhana'], ['red', 'Light Field Gun', [31.598, 74.395], 'Khalsa Topkhana'],
+      ['red', 'Heavy Battery', [31.604, 74.410], 'Sher Singh’s Siege Guns'], ['red', 'Heavy Battery', [31.590, 74.410], 'Sher Singh’s Siege Guns'],
+      ['red', 'Irregular Sowars', [31.616, 74.395], 'Ghorcharas'], ['red', 'Irregular Sowars', [31.616, 74.395], 'Ghorcharas'],
+      ['red', 'Light Dragoons', [31.577, 74.400], 'Ghorchara Khas'], ['red', 'Irregular Sowars', [31.577, 74.400], 'Ghorcharas'],
       ['red', 'Khalsa Infantry', 'mianmir', 'Mian Mir Battalions'], ['red', 'Khalsa Infantry', 'mianmir', 'Mian Mir Battalions'],
       ['red', 'Light Field Gun', [31.54, 74.37], 'Mian Mir Topkhana'], ['red', 'Khalsa Infantry', [31.54, 74.37], 'Mian Mir Battalions'],
     ],
@@ -432,11 +433,11 @@ const SCENARIOS = {
     ],
     powers: [
       { id: 'regency', name: 'The regent’s Lahore', chief: 'Maharani Chand Kaur', seat: 'lahorefort', npc: false, side: 'azure', color: '#3f6f8f', note: 'The fort, the walled city and its outposts', extraSeats: ['lahore', 'shalimar', 'shahdara'] },
-      { id: 'sher', name: 'Sher Singh’s camp', chief: 'Kanwar Sher Singh', seat: [31.60, 74.465], npc: false, side: 'red', color: '#94493a', note: 'The Khalsa army and the cantonments', extraSeats: ['mianmir', 'anarkali'] },
+      { id: 'sher', name: 'Sher Singh’s camp', chief: 'Kanwar Sher Singh', seat: [31.601, 74.405], npc: false, side: 'red', color: '#94493a', note: 'The Khalsa army and the cantonments', extraSeats: ['mianmir', 'anarkali'] },
     ],
     labels: [
-      { text: 'Ravi', lat: 31.635, lon: 74.27, cls: 'water', tier: 1, angle: -35 },
-      { text: 'Grand Trunk Road', lat: 31.596, lon: 74.43, cls: 'route', tier: 2, angle: -8 },
+      { text: 'Ravi', lat: 31.612, lon: 74.350, cls: 'water', tier: 1, angle: -40 },
+      { text: 'Grand Trunk Road', lat: 31.5845, lon: 74.345, cls: 'route', tier: 2, angle: 0 },
     ],
   },
 
@@ -539,8 +540,9 @@ const SCENARIOS = {
       azure: { name: 'Raja Gulab Singh', title: 'Holding the fort for Maharani Chand Kaur', leads: 'Gulab Singh’s Dogras' },
       red: { name: 'Kanwar Sher Singh', title: 'Son of Ranjit Singh, claimant to the throne', leads: 'Sher Singh’s Battalions' },
     },
-    homeBase: { azure: null, red: [31.59, 74.47] },
+    homeBase: { azure: null, red: [31.596, 74.412] },
     walls: { lahorefort: 6, lahore: 2 },
+    sealed: ['lahorefort'],
     strongpoints: ['lahorefort', 'lahore', 'shalimar', 'shahdara', 'anarkali', 'mianmir'],
     startOwners: { lahorefort: 'azure', lahore: 'azure', shalimar: 'red', shahdara: null, anarkali: null, mianmir: 'red' },
     startUnits: [
@@ -571,8 +573,8 @@ const SCENARIOS = {
       { id: 'sher', name: 'Sher Singh’s camp', chief: 'Kanwar Sher Singh', seat: 'shalimar', npc: false, side: 'red', color: '#94493a', note: 'Where the Khalsa army camps', extraSeats: ['mianmir', 'anarkali', 'shahdara', 'baghbanpura'] },
     ],
     labels: [
-      { text: 'Ravi', lat: 31.635, lon: 74.27, cls: 'water', tier: 1, angle: -35 },
-      { text: 'Grand Trunk Road', lat: 31.596, lon: 74.43, cls: 'route', tier: 2, angle: -8 },
+      { text: 'Ravi', lat: 31.612, lon: 74.350, cls: 'water', tier: 1, angle: -40 },
+      { text: 'Grand Trunk Road', lat: 31.5845, lon: 74.345, cls: 'route', tier: 2, angle: 0 },
     ],
   },
 
@@ -919,6 +921,89 @@ const SCENARIOS = {
       { text: 'CANTONMENT', lat: 32.913, lon: 73.718, cls: 'region', tier: 2 },
       { text: 'KASHMIR', lat: 33.07, lon: 73.75, cls: 'region', tier: 1 },
       { text: 'Jhelum', lat: 32.905, lon: 73.722, cls: 'water', tier: 1, angle: 50 },
+    ],
+  },
+
+  // The Aliwal campaign, January 1846, after Gough's despatch of 1 February
+  // and Sir Harry Smith's from the field of Aliwal (London Gazette 20588).
+  // While the main armies faced each other at Sobraon, Sardar Ranjodh Singh
+  // Majithia crossed the Sutlej from Phillaur with a large force and the
+  // Raja of Ladwa's men, threatening Ludhiana, held by Godby's three native
+  // battalions, and the British road at Jagraon, Bassian and Raikot. Smith,
+  // who had just taken the grain fort of Dharamkot, marched by Jagraon for
+  // Ludhiana and lost much of his baggage to the Sikh horse at Budhowal on the
+  // 21st. Ranjodh Singh fell back from Budhowal to the ghat of Talwan, where
+  // 4,000 of Avitabile's regulars, twelve guns and more horse crossed to him;
+  // Wheeler's brigade came up to Smith. On the 28th Smith attacked the Sikh
+  // line on the ridge from Aliwal to Bhundri and drove it into the river.
+  // A round is a day, from the 18th.
+  aliwal: {
+    title: 'The Aliwal Campaign',
+    year: 1846,
+    region: 'Sutlej · Ludhiana',
+    blurb: 'January 1846. While the main armies face each other at Sobraon, Sardar Ranjodh Singh Majithia has crossed the upper Sutlej from Phillaur with a large force and the Raja of Ladwa’s men. He threatens Ludhiana, held by three native battalions, and the British road through Jagraon and Bassian. Sir Harry Smith has just taken the grain fort of Dharamkot, sixty miles to the west, and is ordered to clear the left bank.',
+    first: 'red',
+    vpTarget: Infinity,
+    roundLimit: 16,
+    goal: {
+      forts: ['dharamkot', 'baddowal', 'aliwal'], attacker: 'red', short: 'Clear the Sikh posts on the left bank',
+      attackerWins: 'Dharamkot, Budhowal and the bridgehead at Aliwal are all in British hands and the Sikh army is driven over the Sutlej, leaving its guns behind. The Sikh garrisons evacuate the forts on the British bank, and Gough can turn all his strength on Sobraon.',
+      defenderWins: 'The campaign closes with Ranjodh Singh still holding ground on the British bank. The road by Jagraon stays under threat, and Gough must look over his shoulder at Sobraon.',
+    },
+    sides: {
+      azure: { name: 'Sikh Army', short: 'Sikhs', adj: 'Sikh', pitch: 'Ranjodh Singh’s battalions, guns and Ghorcharas are over the river from Phillaur, with Ladwa’s men and posts at Dharamkot, Budhowal and the Talwan ghat. Raid the British road and Ludhiana, and keep at least one post on the left bank. Avitabile’s battalions cross at Talwan on day 9.', tag: 'Moves second · keep a post on the left bank for 16 days' },
+      red: { name: 'Smith’s Division', short: 'British', adj: 'British', pitch: 'Smith’s brigade and Cureton’s cavalry are before Dharamkot; Godby holds Ludhiana and the 53rd Jagraon, with the Shekhawati brigade at Bassian. The Gurkhas come from Delhi on day 4 and Wheeler on day 9. Take Dharamkot, Budhowal and Aliwal.', tag: 'Moves first · take Dharamkot, Budhowal and Aliwal' },
+    },
+    generals: {
+      azure: { name: 'Sardar Ranjodh Singh Majithia', title: 'Commanding the Sikh army on the upper Sutlej', leads: 'Ranjodh Singh’s Battalions' },
+      red: { name: 'Major-General Sir Harry Smith', title: 'Commanding the 1st Division', leads: 'HM 31st Foot' },
+    },
+    // The Sikhs' road home over the Sutlej into the Jullundur Doab; the British
+    // road back to Gough's headquarters by Dharamkot.
+    homeBase: { azure: [31.196, 75.66], red: [30.95, 75.158] },
+    walls: { dharamkot: 1, baddowal: 1, ludhiana: 2, phillaur: 2 },  // the grain fort; Budhowal's little fort; the forts of Ludhiana and Phillaur
+    strongpoints: ['dharamkot', 'baddowal', 'aliwal', 'ludhiana', 'jagraon', 'bassian'],
+    startOwners: { dharamkot: 'azure', baddowal: 'azure', aliwal: 'azure', ludhiana: 'red', jagraon: 'red', bassian: 'red' },
+    startUnits: [
+      // The garrison of Dharamkot: "Mercenaries, Rohillas, Eusufzies and Affghans".
+      ['azure', 'Matchlockmen', 'dharamkot', 'Dharamkot Garrison', 3],
+      // Ranjodh Singh over the river, between Budhowal and the old bed of the
+      // Sutlej: some 7,000 men and 20 guns.
+      ['azure', 'Khalsa Infantry', 'baddowal', 'Ranjodh Singh’s Battalions'], ['azure', 'Light Field Gun', 'baddowal', 'Khalsa Topkhana', 4],
+      ['azure', 'Khalsa Infantry', [30.955, 75.74], 'Fauj-i-Ain Battalions', 4], ['azure', 'Heavy Battery', [30.955, 75.74], 'Sikh Heavy Guns', 2],
+      ['azure', 'Irregular Sowars', [30.935, 75.73], 'Ghorcharas', 4], ['azure', 'Irregular Sowars', [30.885, 75.70], 'Ghorcharas', 3],
+      ['azure', 'Matchlockmen', [30.96, 75.72], 'Raja of Ladwa’s Levies', 3], ['azure', 'Irregular Sowars', [30.96, 75.72], 'Raja of Ladwa’s Horse', 3],
+      // The guard on the ghat of Talwan, and the fort at Phillaur across the river.
+      ['azure', 'Matchlockmen', 'aliwal', 'Najibs at the Ghat', 2],
+      ['azure', 'Khalsa Infantry', 'phillaur', 'Phillaur Garrison', 3, { post: true }], ['azure', 'Jingal', 'phillaur', 'Phillaur Wall Guns', 3, { post: true }],
+      // Smith before Dharamkot with his first brigade and Cureton's cavalry.
+      ['red', 'Line Infantry', [30.93, 75.255], 'HM 31st Foot', 4], ['red', 'Sepoy Infantry', [30.93, 75.255], '24th Bengal NI', 4],
+      ['red', 'Sepoy Infantry', [30.92, 75.245], '47th Bengal NI', 4], ['red', 'Light Field Gun', [30.92, 75.245], 'Light Field Battery'],
+      ['red', 'Lancers', [30.915, 75.27], 'HM 16th Lancers', 4], ['red', 'Light Dragoons', [30.915, 75.27], '3rd Bengal Light Cavalry', 4],
+      ['red', 'Light Dragoons', [30.905, 75.255], 'Governor-General’s Bodyguard', 2], ['red', 'Irregular Sowars', [30.905, 75.255], '4th Irregular Cavalry', 4],
+      ['red', 'Horse Artillery', [30.91, 75.24], 'Alexander’s Troop'], ['red', 'Horse Artillery', [30.91, 75.24], 'Turton’s Troop'],
+      // Godby at Ludhiana with three native battalions and the fort's howitzers.
+      ['red', 'Sepoy Infantry', 'ludhiana', '30th Bengal NI', 4], ['red', 'Sepoy Infantry', 'ludhiana', 'Ludhiana Fort Guard', 2, { post: true }],
+      ['red', 'Sepoy Infantry', [30.915, 75.835], '36th Bengal NI', 4], ['red', 'Heavy Battery', [30.915, 75.835], 'Two 8-inch Howitzers', 2],
+      // HM 53rd at Jagraon; Forster's Shekhawati brigade at the depot of Bassian.
+      ['red', 'Line Infantry', 'jagraon', 'HM 53rd Foot', 4],
+      ['red', 'Sepoy Infantry', 'bassian', 'Shekhawati Infantry', 4], ['red', 'Light Field Gun', 'bassian', 'Shekhawati Guns', 2],
+      ['red', 'Irregular Sowars', [30.665, 75.53], 'Shekhawati Cavalry', 3],
+    ],
+    reinforcements: [
+      { round: 4, side: 'red', at: [30.90, 75.905], name: 'The brigade from Delhi', note: 'came up the Grand Trunk Road to Ludhiana', units: [['Sepoy Infantry', 'Sirmoor Battalion', 4], ['Sepoy Infantry', 'Nusseree Battalion', 4]] },
+      { round: 9, side: 'red', at: [30.95, 75.165], name: 'Wheeler’s brigade', note: 'came up from headquarters by Dharamkot with more cavalry and guns', units: [['Line Infantry', 'HM 50th Foot', 4], ['Sepoy Infantry', '48th Bengal NI', 4], ['Light Dragoons', '1st and 5th Bengal Light Cavalry', 4], ['Horse Artillery', 'Lane’s Troop'], ['Light Field Gun', 'Mill’s and Boileau’s Batteries']] },
+      { round: 9, side: 'azure', at: [30.99, 75.607], name: 'Avitabile’s battalions', note: 'crossed the Sutlej at the ghat of Talwan with twelve guns and a large force of horse', units: [['Khalsa Infantry', 'Avitabile’s Battalions'], ['Khalsa Infantry', 'Avitabile’s Battalions'], ['Khalsa Infantry', 'Avitabile’s Battalions', 3], ['Light Field Gun', 'Avitabile’s Guns'], ['Irregular Sowars', 'Ghorcharas', 4]] },
+    ],
+    powers: [
+      { id: 'lahore', name: 'Lahore Darbar', chief: 'Maharaja Duleep Singh', seat: 'phillaur', npc: false, side: 'azure', color: '#3f6f8f', note: 'The Jullundur Doab across the Sutlej, with the Sikh posts on the left bank', extraSeats: ['talwan', 'nurmahal', [31.10, 75.40], 'aliwal', 'dharamkot'] },
+      { id: 'company', name: 'Cis-Sutlej States', chief: 'The Company', seat: 'ludhiana', npc: false, side: 'red', color: '#94493a', note: 'The British bank of the Sutlej, from Ludhiana to the road for Ferozepur', extraSeats: ['jagraon', 'bassian', 'raikot', 'mullanpur', 'purain', 'sidhwan', [30.80, 75.30], [30.95, 75.665]] },
+    ],
+    labels: [
+      { text: 'JULLUNDUR DOAB', lat: 31.11, lon: 75.62, cls: 'region', tier: 1 },
+      { text: 'MALWA', lat: 30.70, lon: 75.35, cls: 'region', tier: 1 },
+      { text: 'Sutlej', lat: 31.03, lon: 75.40, cls: 'water', tier: 1, angle: 15 },
+      { text: 'Budha Nala', lat: 30.936, lon: 75.765, cls: 'water', tier: 2, angle: 12 },
     ],
   },
 };

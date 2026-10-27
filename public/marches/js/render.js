@@ -220,7 +220,7 @@ function drawStaticMap() {
   // as a handful of flat-roofed mud houses and a tree, towns as a cluster
   // round a mosque, cities packed inside a bastioned wall, forts as a
   // bastioned trace with a keep, a sarai as a walled square.
-  const towns = g('settlements'), art = { fortGround: '', garden: '', house: '', tree: '', wall: '', rampart: '', fortWall: '', channel: '', bastion: '', dome: '', yard: '', minaret: '', gate: '' };
+  const towns = g('settlements'), art = { fortGround: '', garden: '', house: '', tree: '', wall: '', rampart: '', fortWall: '', channel: '', bastion: '', sandstone: '', court: '', hall: '', dome: '', yard: '', minaret: '', gate: '' };
   // Houses packed in rows along a lane, one orientation per settlement, the
   // rows shortening towards the edges so the block reads as a compact village.
   const houses = (x, y, n, r, seed, big = 1) => {
@@ -292,13 +292,16 @@ function drawStaticMap() {
       return;
     }
     if (p.art === 'mosque') {
-      // A great congregational mosque: the courtyard, the prayer hall on the
-      // west side under three domes, and a minaret at each corner.
-      art.fortGround += polygon(pts);
-      const west = ca < 0 ? 1 : -1, hx = cx + west * span * 0.72 * Math.abs(ca), hy = cy;
-      art.yard += box(hx, hy, span * 0.2, depth * 0.62, ang);
-      for (const d of [-0.36, 0, 0.36]) art.dome += dome(hx - d * depth * sa, hy + d * depth * ca, d ? depth * 0.13 : depth * 0.19);
-      for (const q of pts) art.minaret += disc(q[0], q[1], 1.5);
+      // A great congregational mosque in red sandstone: the paved courtyard,
+      // the prayer hall along the west wall under three marble domes, the
+      // gateway in the east wall and a minaret at each corner.
+      art.sandstone += polygon(pts);
+      art.court += polygon(pts.map(([qx, qy]) => [cx + (qx - cx) * 0.84, cy + (qy - cy) * 0.84]));
+      const w = ca < 0 ? 1 : -1, hx = cx + w * span * 0.66 * ca, hy = cy + w * span * 0.66 * sa;
+      art.hall += box(hx, hy, span * 0.24, depth * 0.84, ang);
+      art.hall += box(cx - w * span * 0.86 * ca, cy - w * span * 0.86 * sa, span * 0.1, depth * 0.17, ang);
+      for (const d of [-0.42, 0, 0.42]) art.dome += dome(hx - d * depth * sa, hy + d * depth * ca + depth * 0.06, d ? depth * 0.18 : depth * 0.26);
+      for (const q of pts) art.minaret += disc(q[0], q[1], 2.1);
       return;
     }
     if (p.kind === 'city') {
@@ -353,6 +356,13 @@ function drawStaticMap() {
       houses(x, y, 16, 9.5, seed);
       art.dome += `M${f1(x - 1.6)} ${f1(y + 0.4)}a1.6 1.6 0 1 1 3.2 0z`;
       art.tree += `M${f1(x + 6)} ${f1(y + 4)}a2.2 1.9 0 1 0 4.4 0a2.2 1.9 0 1 0 -4.4 0`;
+    } else if (p.sizeKm) {
+      // A large village drawn at its footprint (the villages round Lahore):
+      // packed houses, a mosque and trees round the edge.
+      const R = p.sizeKm * PX_PER_KM * 0.9;
+      housesIn(ring(x, y, R, 11, seed, 0.3), 3.2, seed, 0.8);
+      art.dome += `M${f1(x - 1.8)} ${f1(y + 0.4)}a1.8 1.8 0 1 1 3.6 0z`;
+      for (let i = 0; i < 5; i++) { const a = i * 1.3 + hash2(seed, i) * 0.8, tx = x + Math.cos(a) * (R + 3), ty = y + Math.sin(a) * (R + 3) * 0.9; art.tree += `M${f1(tx - 2)} ${f1(ty)}a2 1.7 0 1 0 4 0a2 1.7 0 1 0 -4 0`; }
     } else {
       houses(x, y, p.tier >= 4 ? 4 : 6, p.tier >= 4 ? 4.5 : 5.5, seed, p.tier >= 4 ? 0.85 : 1);
       art.tree += `M${f1(x + 3.5)} ${f1(y + 2.5)}a1.9 1.6 0 1 0 3.8 0a1.9 1.6 0 1 0 -3.8 0`;

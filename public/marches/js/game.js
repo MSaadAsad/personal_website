@@ -178,6 +178,16 @@ function enemyZoc(side, known = false) {
   return zoc;
 }
 
+// A fort the scenario seals (SCN.sealed) spans several hexes, but while its
+// walls stand an enemy cannot walk into the ones round its heart: the heart,
+// on the wall line, must be stormed.
+function sealedAgainst(side, hex) {
+  const k = HEXES[hex].place;
+  if (!k || !SCN.sealed?.includes(k) || hex === HEX_OF[k]) return false;
+  const owner = STRONGPOINTS.includes(k) ? S.owners[k] : S.forts[k];
+  return owner === other(side) && fortLevels(HEX_OF[k]) > 0;
+}
+
 // Dijkstra over remaining march points. Entering an enemy's zone of control
 // ends the march; friendly units can be passed through but stacks are capped.
 // Under the fog a formation plans its march round the enemies it can see;
@@ -193,7 +203,7 @@ function reachable(u) {
     if (a !== u.hex && zoc[a]) continue;
     for (let dir = 0; dir < 6; dir++) {
       const b = HEXES[a].nbr[dir];
-      if (b < 0 || enemyAt.has(b)) continue;
+      if (b < 0 || enemyAt.has(b) || sealedAgainst(u.side, b)) continue;
       const nd = d + terrainCost(a, dir, u);
       if (nd > u.mp || nd >= (cost.get(b) ?? Infinity)) continue;
       cost.set(b, nd); prev.set(b, a); heap.push(nd, b);

@@ -555,6 +555,9 @@ em.writing::before { content: ""; display: inline-block; width: 8px; height: 8px
 .set.fortWall { fill: #d6c193; stroke: #3f2c1a; stroke-width: 1.4; stroke-linejoin: round; }
 .set.bastion { fill: #cdb68a; stroke: #3f2c1a; stroke-width: .9; }
 .set.yard { fill: #8e6a45; stroke: #3f2c1a; stroke-width: .6; }
+.set.sandstone { fill: #b0634a; stroke: #4a2618; stroke-width: .8; stroke-linejoin: round; }
+.set.court { fill: #dcbc96; stroke: #7a4630; stroke-width: .4; }
+.set.hall { fill: #a3553e; stroke: #4a2618; stroke-width: .6; }
 .set.dome { fill: #efe6cf; stroke: #5d4128; stroke-width: .5; }
 .set.fortGround { fill: #d9c69a; stroke: none; }
 .set.garden { fill: #9aa66a; stroke: none; }
@@ -593,6 +596,8 @@ em.writing::before { content: ""; display: inline-block; width: 8px; height: 8px
 .cm-city { fill: #ead9ae; stroke: #3a2a1a; stroke-width: 1.4; }
 .cm-townname { font: 600 10px var(--serif); fill: #3a2a1a; paint-order: stroke; stroke: #ead9aecc; stroke-width: 2.5; }
 .cm-townname.big { font-size: 11.5px; font-weight: 700; }
+.cm-capital { fill: #c99a3e; stroke: #3a2a1a; stroke-width: 1.1; stroke-linejoin: round; }
+.cm-townname.capital { font-size: 13px; letter-spacing: .02em; }
 .cm-rose-disc { fill: #ead9aee6; stroke: #4a3520; stroke-width: .8; }
 .cm-rose-ring { fill: none; stroke: #4a3520; stroke-width: .5; stroke-dasharray: 1.5 2; }
 .cm-rose-a, .cm-rose-b { fill: #ead9ae; stroke: #4a3520; stroke-width: .8; }
