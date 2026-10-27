@@ -493,6 +493,16 @@ function layoutLabels() {
 
 function drawMarkers() {
   R.markers.innerHTML = '';
+  // Kacha forts dug in the campaign: a mud wall with corner bastions, fading
+  // as the guns wear it down. Drawn first, under the other markers; one dug
+  // round a village or town rings the houses where they stand in the hex.
+  for (const [hex, left] of Object.entries(S.kacha || {})) {
+    const h = HEXES[hex], key = h.place, [x, y] = key && HEX_OF[key] === +hex ? placePx(key) : [h.x, h.y], m = el('div', 'marker kacha', R.markers);
+    m.style.left = `${f1(x)}px`; m.style.top = `${f1(y)}px`;
+    m.style.setProperty('--left', (0.35 + 0.65 * left / KACHA_DEF).toFixed(2));
+    m.innerHTML = '<svg viewBox="-16 -16 32 32" aria-hidden="true"><path class="ditch" d="M-13 -13H13V13H-13Z"/><path class="rampart" d="M-10 -10H10V10H-10Z"/><path class="bast" d="M-10 -13l3 3-3 3-3-3zM10 -13l3 3-3 3-3-3zM10 7l3 3-3 3-3-3zM-10 7l3 3-3 3-3-3z"/></svg>';
+    m.title = `Kacha fort: +${Math.ceil(left)} defence${left < KACHA_DEF ? ' (battered)' : ''}`;
+  }
   for (const key of STRONGPOINTS) {
     const [x, y] = placePx(key), m = el('div', `marker strongpoint owner-${S.owners[key] || 'none'}`, R.markers);
     m.style.left = `${f1(x)}px`; m.style.top = `${f1(y)}px`;
@@ -511,15 +521,6 @@ function drawMarkers() {
     m.style.setProperty('--power', power.color);
     m.innerHTML = '<i></i><b></b>';
     m.title = `${power.name} — seat of a local power (${ally ? `allied to the ${SIDES[ally].name}` : 'uncommitted'})`;
-  }
-  // Kacha forts dug in the campaign: a mud wall with corner bastions, fading
-  // as the guns wear it down.
-  for (const [hex, left] of Object.entries(S.kacha || {})) {
-    const h = HEXES[hex], m = el('div', 'marker kacha', R.markers);
-    m.style.left = `${f1(h.x)}px`; m.style.top = `${f1(h.y)}px`;
-    m.style.setProperty('--left', (0.35 + 0.65 * left / KACHA_DEF).toFixed(2));
-    m.innerHTML = '<svg viewBox="-16 -16 32 32" aria-hidden="true"><path class="ditch" d="M-13 -13H13V13H-13Z"/><path class="rampart" d="M-10 -10H10V10H-10Z"/><path class="bast" d="M-10 -13l3 3-3 3-3-3zM10 -13l3 3-3 3-3-3zM10 7l3 3-3 3-3-3zM-10 7l3 3-3 3-3-3z"/></svg>';
-    m.title = `Kacha fort: +${Math.ceil(left)} defence${left < KACHA_DEF ? ' (battered)' : ''}`;
   }
   // Mines under way: a gallery from the diggers' hex towards the works, with its days.
   for (const [hex, mn] of Object.entries(S.mines || {})) {

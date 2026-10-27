@@ -192,7 +192,7 @@ const SCENARIOS = {
       ['azure', 'Khalsa Infantry', [32.48, 74.10], 'Ford Party'], ['azure', 'Irregular Sowars', [32.48, 74.10], 'Ghorcharas'],
       ['azure', 'Irregular Sowars', [32.58, 74.01], 'Afghan Horse'], ['azure', 'Irregular Sowars', [32.565, 73.995], 'Afghan Horse'],
       ['azure', 'Irregular Sowars', [32.57, 74.13], 'Ghorcharas'],
-      ['azure', 'Matchlockmen', 'sarai', 'Sarai Alamgir Post'], ['azure', 'Irregular Sowars', 'rasul', 'Rasul Post'],
+      ['azure', 'Matchlockmen', 'sarai', 'Sarai Alamgir Post', 5, { post: true }], ['azure', 'Irregular Sowars', 'rasul', 'Rasul Post', 5, { post: true }],
       // Gough's army on the Chenab south-west of Gujrat.
       ['red', 'Line Infantry', [32.445, 73.92], 'HM 29th Foot'], ['red', 'Line Infantry', [32.445, 73.92], 'HM 24th Foot'],
       ['red', 'Line Infantry', [32.455, 73.90], 'HM 61st Foot'], ['red', 'Line Infantry', [32.455, 73.90], '2nd Bengal Europeans'],
@@ -921,6 +921,117 @@ const SCENARIOS = {
       { text: 'CANTONMENT', lat: 32.913, lon: 73.718, cls: 'region', tier: 2 },
       { text: 'KASHMIR', lat: 33.07, lon: 73.75, cls: 'region', tier: 1 },
       { text: 'Jhelum', lat: 32.905, lon: 73.722, cls: 'water', tier: 1, angle: 50 },
+    ],
+  },
+
+  // The Gogera rising, 17–30 September 1857, after the reports in the Punjab
+  // Mutiny Reports, vol. VIII, part II: Elphinstone's narrative of the Gugera
+  // district and Hamilton's of the Multan division. On the night of the 16th
+  // the chiefs of the Ravi clans slipped away from the station to rise in
+  // their villages; at dawn Ahmad Khan Kharral, across the river at Jhamra,
+  // told Berkeley he was the King of Delhi's man. The Lahore–Multan road, the
+  // Punjab's only line to Bombay, was cut for eight days. Lahore sent the 1st
+  // Sikh Cavalry and Paton's column (three horse-artillery guns, a company of
+  // HM 81st, one of Subhan Khan's regiment, mounted police); Multan sent
+  // Chamberlain with 180 sowars of the 1st Irregular Cavalry, who was besieged
+  // in the serai at Chichawatni. Ahmad Khan fell at Gishkori on the 21st;
+  // Berkeley was killed by the Fatianas near Kaure Shah the next day; the
+  // rebels fell back on the Jalli jungle. A round is a day; a formation here is
+  // 250 men, so a figure is 50.
+  gogera: {
+    title: 'The Gogera Rising',
+    year: 1857,
+    region: 'Ravi · Gogera',
+    blurb: 'September 1857. The Company’s army is before Delhi and the Punjab has been stripped of troops to feed the siege. On the night of the 16th the chiefs of the Ravi clans slip away from Gogera to rise in their villages, and at dawn Rai Ahmad Khan Kharral, across the river at Jhamra, declares for the King of Delhi. The Lahore–Multan road, the Punjab’s only line to Bombay, runs through the district, held by a few police posts and a levy of raw recruits.',
+    first: 'azure',
+    vpTarget: Infinity,
+    roundLimit: 14,
+    menPerFormation: 250,
+    clock: { day: 17, month: 'September', from: 6, hours: 24 },
+    goal: {
+      // The Company must have every post on the road back when the days run
+      // out; the clans win at once if they hold Gogera at the end of a day.
+      forts: ['gogera', 'kaureshah', 'harappa', 'chichawatni'], attacker: 'red', atEnd: true,
+      prize: 'gogera', prizeSide: 'azure', short: 'Hold the four posts on the Multan road',
+      prizeWins: 'Gogera has fallen: the treasury, the jail and the district records are in the hands of the clans. With the station gone the whole country from Lahore to Tulumba is up, and the Company must reconquer the Ravi from outside.',
+      attackerWins: 'The posts on the Multan road are all in the Company’s hands again and the dak runs. The clans have fallen back into the jungle at Jalli; there will be weeks more of burning villages before the Ravi is quiet.',
+      defenderWins: 'At the end of September the clans still hold the Multan road. Lahore has no word from Bombay but by camel round through Bahawalpur, and the rising has outlasted the fall of Delhi.',
+    },
+    sides: {
+      azure: { name: 'The Ravi Clans', short: 'Clans', adj: 'Kharral', pitch: 'Ahmad Khan Kharral’s horsemen and matchlocks at Jhamra across the river, and Mohmand Kathia’s men out on the Multan road. Raise the Wattus at Gishkori, the Fatianas at Jalli and the Mardanas at Mohammadpur by riding to them. Take Gogera before the columns come from Lahore, or hold a post on the road until the end of the month.', tag: 'Moves first · take Gogera, or hold a road post on 30 September' },
+      red: { name: 'Gugera District', short: 'Company', adj: 'Company', pitch: 'Lieutenant Elphinstone has a levy of raw recruits, a few police and Berkeley’s handful of horse to hold the station. The 1st Sikh Cavalry and Paton’s column come from Lahore on the 19th and 20th, Chamberlain’s sowars from Multan on the 19th and 20th, Hawes from Jhang on the 26th, and more from Lahore and Multan on the 28th. Hold Gogera, and hold every post on the Multan road at the end of the month.', tag: 'Moves second · hold Gogera and all four road posts' },
+    },
+    generals: {
+      azure: { name: 'Rai Ahmad Khan Kharral', title: 'Chief of the Kharrals of Jhamra', leads: 'Ahmad Khan’s Horse' },
+      red: { name: 'Lieutenant N. W. Elphinstone', title: 'Officiating Deputy Commissioner, Gugera', leads: 'Gugera Levy' },
+    },
+    // The Company's roads in from Lahore and Multan; the clans' refuge is the
+    // open Sandal Bar behind Jhamra.
+    homeBase: { red: [[30.945, 73.455], [30.52, 72.545]], azure: [31.15, 73.12] },
+    // No great walls: Elphinstone's defence was the tahsil and the serai it
+    // commands, improvised in a night, which is a kacha fort to dig. Unlike
+    // walls it does not cover the garrison's flanks, so the clans' numbers count.
+    // The clans' villages are not posts to hold: they are won by riding to them.
+    strongpoints: ['gogera', 'kaureshah', 'harappa', 'chichawatni', 'kamalia'],
+    startOwners: { gogera: 'red', kaureshah: 'red', harappa: 'red', chichawatni: 'red', kamalia: 'red' },
+    startUnits: [
+      // Ahmad Khan back across the river at Jhamra with the Kharrals.
+      ['azure', 'Irregular Sowars', 'jhamra', 'Ahmad Khan’s Horse', 4], ['azure', 'Matchlockmen', 'jhamra', 'Kharral Matchlocks'],
+      // The Kathias, who stopped and robbed the mail cart on the Multan road.
+      ['azure', 'Mounted Matchlocks', [30.575, 72.78], 'Mohmand Kathia’s Horse', 4], ['azure', 'Matchlockmen', [30.555, 72.80], 'Kathia Matchlocks', 4],
+      // The Wattus gathering near Akbar to plunder it, a march from their
+      // villages in the Gishkori jungle.
+      ['azure', 'Matchlockmen', [30.89, 73.30], 'Bahlak Wattu’s Band', 3],
+      // The station: the new levy, a party of the Kuttar Mukhi battalion and
+      // police, and Berkeley's horsemen at the ferry where Ahmad Khan crossed.
+      ['red', 'Matchlockmen', 'gogera', 'Gugera Levy', 4], ['red', 'Sepoy Infantry', 'gogera', 'Kuttar Mukhi Battalion', 2],
+      ['red', 'Irregular Sowars', 'gogerakhas', 'Berkeley’s Horse', 1],
+      ['red', 'Matchlockmen', 'harappa', 'Harappa Tahsil', 1, { post: true }],
+      // Sarfraz Khan Kharral of Kamalia, who brought the warning, and the
+      // fifteen horsemen sent back with him to the thana.
+      ['red', 'Matchlockmen', 'kamalia', 'Kamalia Thana', 1, { post: true }], ['red', 'Irregular Sowars', 'kamalia', 'Sarfraz Khan’s Horse', 1],
+    ],
+    reinforcements: [
+      { round: 3, side: 'red', at: [30.945, 73.455], name: 'The 1st Sikh Cavalry', note: 'rode in from Lahore under Lieutenant Chichester, through rain falling in torrents', units: [['Irregular Sowars', '1st Sikh Cavalry', 4]] },
+      { round: 3, side: 'red', at: [30.52, 72.545], name: 'Captain Fraser', note: 'came up the Multan road by Tulumba with 80 sowars of the 1st Irregular Cavalry', units: [['Irregular Sowars', '1st Irregular Cavalry, Fraser’s Troop', 2]] },
+      { round: 4, side: 'red', at: [30.95, 73.39], name: 'Colonel Paton’s column', note: 'marched in from Lahore, a few miles out on the morning of the 20th', units: [['Horse Artillery', 'Paton’s Guns', 3], ['Line Infantry', 'HM 81st, one company', 2], ['Sepoy Infantry', 'Subhan Khan’s Regiment', 2], ['Irregular Sowars', 'Lahore Mounted Police', 1]] },
+      { round: 4, side: 'red', at: [30.52, 72.545], name: 'Major Chamberlain', note: 'followed with a hundred more of the 1st Irregular Cavalry', units: [['Irregular Sowars', '1st Irregular Cavalry', 2]] },
+      { round: 10, side: 'red', at: [31.05, 72.545], name: 'Captain Hawes', note: 'advanced from Jhang on Kamalia with a wing of the 2nd Irregular Cavalry and levies from Gujranwala', units: [['Irregular Sowars', '2nd Irregular Cavalry, wing', 4], ['Matchlockmen', 'Gujranwala Levies', 3]] },
+      { round: 12, side: 'red', at: [30.52, 72.545], name: 'Captain Dennis', note: 'came up from Multan with two guns manned by European volunteers', units: [['Light Field Gun', 'Volunteer Battery', 2], ['Sepoy Infantry', '11th Punjab Infantry and Police', 5], ['Irregular Sowars', '1st Irregular Cavalry, Dennis’s Troop', 2]] },
+      { round: 12, side: 'red', at: [30.945, 73.455], name: 'Captains Snow and McAndrew', note: 'came down from Lahore, skirmishing with the Mardanas on the way', units: [['Sepoy Infantry', 'Punjab Infantry', 4], ['Irregular Sowars', 'Lahore Light Horse', 2]] },
+    ],
+    // The clans that rose with Ahmad Khan once he came among them; whoever
+    // holds a clan's village takes its levies.
+    powers: [
+      { id: 'kharral', name: 'The Kharrals of Jhamra', chief: 'Rai Ahmad Khan Kharral', seat: 'jhamra', npc: false, side: 'azure', color: '#3f6f8f', note: 'Ahmad Khan’s country across the Ravi, and the open bar behind it', extraSeats: ['tandlianwala', [31.15, 73.12]] },
+      { id: 'gugera', name: 'Gugera District', chief: 'Lieutenant Elphinstone', seat: 'gogera', npc: false, side: 'red', color: '#94493a', note: 'The station and the posts on the Multan road', extraSeats: ['akbar', 'kaureshah', 'harappa', 'chichawatni', [30.945, 73.455], [30.52, 72.545]] },
+      { id: 'kamalia', name: 'Kamalia', chief: 'Sarfraz Khan Kharral', seat: 'kamalia', npc: false, side: 'red', color: '#8a5a44', note: 'The Kharral chief who warned the Company, and his walled town' },
+      { id: 'wattu', name: 'The Wattus', chief: 'Malik Bahlak Wattu', seat: 'gishkori', npc: true, side: null, color: '#3f7b4c', note: 'The Wattu villages in the jungle below Gogera', levy: { variant: 'Matchlockmen', name: 'Wattu Matchlocks' } },
+      { id: 'fatiana', name: 'The Fatianas', chief: 'Mehr Bahawal Fatiana', seat: 'jalli', npc: true, side: null, color: '#5c7a3a', note: 'The Fatianas and Tarhanas of the Jalli jungle', levy: { variant: 'Irregular Sowars', name: 'Fatiana Horse' } },
+      { id: 'mardana', name: 'The Mardanas', chief: 'Walidad Mardana', seat: 'mohammadpur', npc: true, side: null, color: '#6f6a3a', note: 'The Mardana villages on the Multan road', levy: { variant: 'Spearmen', name: 'Mardana Spearmen' } },
+    ],
+    // The bar was open grazing and thorn scrub, the Ravi lined with tall
+    // grass and tamarisk jungle; the canal colonies have since ploughed both.
+    jungle: [
+      // The bela along the river, every 4.5 km of its course.
+      ...[[31.116, 73.491], [31.099, 73.454], [31.08, 73.437], [31.058, 73.394], [31.038, 73.355], [31.019, 73.309], [30.992, 73.27], [30.977, 73.244],
+        [30.94, 73.232], [30.902, 73.236], [30.886, 73.198], [30.895, 73.156], [30.868, 73.137], [30.861, 73.108], [30.841, 73.077], [30.807, 73.073],
+        [30.793, 73.031], [30.769, 72.995], [30.757, 72.946], [30.743, 72.907], [30.713, 72.874], [30.724, 72.829], [30.708, 72.799], [30.701, 72.763],
+        [30.67, 72.762], [30.642, 72.734], [30.601, 72.728], [30.576, 72.68], [30.57, 72.633], [30.572, 72.581], [30.603, 72.561], [30.609, 72.53]]
+        .map(([lat, lon]) => ({ lat, lon, radiusKm: 3, tree: 0.72, shrub: 0.5 })),
+      // The jungles at Gishkori and Jalli, and the swamps by Kaure Shah.
+      { lat: 30.872, lon: 73.318, radiusKm: 3.5, tree: 0.8, shrub: 0.6 },
+      { lat: 30.785, lon: 72.955, radiusKm: 4.5, tree: 0.8, shrub: 0.6 },
+      { lat: 30.805, lon: 73.095, radiusKm: 2.5, tree: 0.7, shrub: 0.6 },
+      // Thorn scrub and grazing over the whole of both bars: fields only round
+      // the wells and villages, which the satellite record still shows.
+      ...[30.44, 30.62, 30.80, 30.98, 31.16].flatMap(lat => [72.58, 72.78, 72.98, 73.18, 73.38].map(lon => ({ lat, lon, radiusKm: 15, tree: 0.12, shrub: 0.32 }))),
+    ],
+    labels: [
+      { text: 'SANDAL BAR', lat: 31.10, lon: 72.85, cls: 'region', tier: 1 },
+      { text: 'GANJI BAR', lat: 30.47, lon: 73.22, cls: 'region', tier: 1 },
+      { text: 'Ravi', lat: 30.925, lon: 73.21, cls: 'water', tier: 1, angle: 80 },
+      { text: 'Old Beas', lat: 30.556, lon: 73.215, cls: 'water', tier: 2, angle: -5 },
     ],
   },
 

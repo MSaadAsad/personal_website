@@ -55,7 +55,7 @@ const CAMPAIGN_MAP = (() => {
   ];
   const REGIONS = [
     ['SIND SAGAR DOAB', 31.55, 71.62, -62, 15], ['CHAJ DOAB', 32.12, 72.88, -52, 11], ['RECHNA DOAB', 31.62, 73.72, -36, 11],
-    ['BARI DOAB', 30.92, 73.62, -32, 12], ['KASHMIR', 33.68, 74.55, 0, 13], ['POTHOHAR', 33.25, 72.75, 0, 11],
+    ['BARI DOAB', 30.84, 73.86, -32, 12], ['KASHMIR', 33.68, 74.55, 0, 13], ['POTHOHAR', 33.25, 72.75, 0, 11],
     ['DERAJAT', 30.85, 70.52, -84, 11], ['SIRHIND', 30.45, 75.35, 0, 11],
   ];
   // Where each campaign is marked: the place, the seal's offset from it (px),
@@ -71,6 +71,7 @@ const CAMPAIGN_MAP = (() => {
     multan1849: { at: [30.20, 71.47], off: [24, 14], side: 'r', name: 'Multan', year: '1848–49' },
     jhelum1857: { at: [32.925, 73.725], off: [20, 16], side: 'r', name: 'Jhelum' },
     aliwal: { at: [30.945, 75.614], off: [-20, -18], side: 'l', name: 'Aliwal' },
+    gogera: { at: [30.955, 73.33], off: [-22, 20], side: 'l', name: 'Gogera' },
   };
 
   const line = pts => 'M' + pts.map(p => px(p).map(f).join(' ')).join('L');

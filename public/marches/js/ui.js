@@ -173,7 +173,7 @@ function groundReport(hex, compact) {
   ];
   if (ROAD_NAMES[hex]) rows.push(['Road', ROAD_NAMES[hex]]);
   const rivers = [...new Set(h.river.filter(Boolean))];
-  if (rivers.length) rows.push(['Water', rivers.map(r => RIVER_CLASS[r].name).join(', ')]);
+  if (rivers.length) rows.push(['Water', `${rivers.map(r => `${RIVER_CLASS[r].name} +${RIVER_CLASS[r].def}`).join(', ')} against attacks across it`]);
   if (power) rows.push(['Sphere', `${power.name}${power.npc ? ` · ${S.allies[power.id] ? `allied to ${SIDES[S.allies[power.id]].short}` : 'uncommitted'}` : ''}`]);
   const sk = STRONG_HEX.get(hex), fk = FORT_HEX.get(hex);
   if (sk) rows.push(['Strongpoint', S.owners[sk] ? `held by ${SIDES[S.owners[sk]].name}` : 'unclaimed']);
@@ -262,7 +262,7 @@ function updateTooltip(clientX, clientY) {
 function doFortify() {
   const sel = S.selected && unitById(S.selected);
   if (!humanTurn() || !sel) return;
-  if (!canFortify(sel)) { toast('A kacha fort takes a foot formation’s whole day, out of the enemy’s reach, on ground without walls'); return; }
+  if (!canFortify(sel)) { toast('A kacha fort takes a foot formation’s whole day, out of the enemy’s reach, on ground without standing walls'); return; }
   fortify(sel);
 }
 function doMine() {
@@ -703,7 +703,7 @@ function renderChronicle() {
 }
 function accountHtml(b) {
   const a = b.account || CHRONICLE.fieldNotes(b), key = CHRONICLE.key();
-  const toll = s => `<span class="${s}"><b>${esc(SIDES[s].name)}</b> −${men(b.lost[s])}${b.broken[s] ? `, ${b.broken[s]} formation${b.broken[s] > 1 ? 's' : ''} lost` : ''}</span>`;
+  const toll = s => `<span class="${s}"><b>${esc(SIDES[s].name)}</b> ${b.lost[s] ? `−${men(b.lost[s])}` : 'no losses'}${b.broken[s] ? `, ${b.broken[s]} formation${b.broken[s] > 1 ? 's' : ''} lost` : ''}</span>`;
   const status = CHRON.writing.has(b.id) ? '<em class="writing">Claude is writing the account…</em>'
     : CHRON.errors.has(b.id) ? `<em class="error">Claude could not write it: ${esc(CHRON.errors.get(b.id))}</em>` : '';
   const by = a.by === 'claude' ? `Written by Claude (${esc(a.model)}) from the day’s dispatches.` : 'Field notes from the dispatches.';
@@ -1068,7 +1068,7 @@ function loadScript(src) {
 async function boot() {
   const id = chosenMap();
   try { localStorage.setItem('jhelum-marches-map', id); } catch { /* storage blocked */ }
-  await loadScript(`maps/${SCENARIOS[id].map || id}.js?v=42`);
+  await loadScript(`maps/${SCENARIOS[id].map || id}.js?v=43`);
   applyScenario(id);
   // The field manual quotes distances and march points for this map's hex size.
   const km = k => k >= 1 ? `${+k.toFixed(1)} km` : `${Math.round(k * 1000)} m`, mpOf = v => Math.round(VARIANTS[v].mp * MARCH_SCALE * PACE);

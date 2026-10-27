@@ -26,8 +26,16 @@ const CHRONICLE = (() => {
   const missed = melee => melee ? 'attacked, but made no impression on' : 'fired on, but the shot fell short of';
   const COMPASS = ['east', 'north-east', 'north', 'north-west', 'west', 'south-west', 'south', 'south-east'];
   const sideName = s => SIDES[s].name;
-  const unitText = u => `${u.name} (${u.variant}${u.general ? `, led by ${u.general}` : ''})`;
+  const unitText = (u, nm) => `${nm(u)} (${u.variant}${u.general ? `, led by ${u.general}` : ''})`;
   const strength = u => men(Math.max(0, u.hp));
+  // Formations that share a name (two Khalsa Topkhanas) are told apart by
+  // number, in the order they first appear in the engagement.
+  const ORD = ['1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th', '9th'];
+  function namesFor(evs) {
+    const ids = new Map();
+    for (const e of evs) for (const u of [e.att, e.def, e.unit]) if (u?.id) { const l = ids.get(u.name) || []; if (!l.includes(u.id)) l.push(u.id); ids.set(u.name, l); }
+    return u => { const l = ids.get(u.name), i = l ? l.indexOf(u.id) : -1; return l?.length > 1 && i >= 0 ? `${u.name} (${ORD[i] || i + 1})` : u.name; };
+  }
   const placeOf = key => placeTitle(key);
   // Compass direction from one hex to another (map north is up).
   function bearing(from, to) {
@@ -43,7 +51,7 @@ const CHRONICLE = (() => {
     const rel = near && near.dist ? ` ${near.dist * HEX_KM} km ${bearing(HEX_OF[near.key], hex)} of ${placeOf(near.key)}` : '';
     return `on ${kind}${rel} (${h.elev} m)`;
   }
-  function eventLine(e) {
+  function eventLine(e, nm) {
     const r = `Round ${e.round}`;
     switch (e.t) {
       case 'combat': {
@@ -51,40 +59,57 @@ const CHRONICLE = (() => {
         const how = [e.melee ? 'in melee' : 'at range', `coming from the ${bearing(e.hex, e.from)}`];
         if (Math.abs(rise) >= 60) how.push(rise > 0 ? `uphill (${rise} m)` : `downhill (${-rise} m)`);
         if (water) how.push(`across a ${RIVER_CLASS[water === 'ghat' ? 'major' : water]?.name || 'river'}`);
-        const loss = [e.lostDef ? `${e.def.name} lost ${e.lostDef} (now ${strength(e.def)})` : `${e.def.name} lost nothing`];
-        if (e.melee) loss.push(e.lostAtt ? `${e.att.name} lost ${e.lostAtt} (now ${strength(e.att)})` : `${e.att.name} lost nothing`);
+        const loss = [e.lostDef ? `${nm(e.def)} lost ${e.lostDef} (now ${strength(e.def)})` : `${nm(e.def)} lost nothing`];
+        if (e.melee) loss.push(e.lostAtt ? `${nm(e.att)} lost ${e.lostAtt} (now ${strength(e.att)})` : `${nm(e.att)} lost nothing`);
         const verb = e.outcome === 'miss' ? missed(e.melee) : OUTCOME[e.outcome];
-        return `${r} · ${sideName(e.att.side)}: ${unitText(e.att)} ${verb} ${unitText(e.def)} ${ground(e.hex)}, ${how.join(', ')}. ${loss.join('; ')}.`;
+        return `${r} · ${sideName(e.att.side)}: ${unitText(e.att, nm)} ${verb} ${unitText(e.def, nm)} ${ground(e.hex)}, ${how.join(', ')}. ${loss.join('; ')}.`;
       }
-      case 'breach': return `${r} · ${e.mine ? `A mine sprung by the ${e.unit.name} brought down` : `The guns of the ${e.unit.name} battered down`} the works of ${worksName(e)} (${e.left ? `${e.left} levels of defence still standing` : 'nothing left standing'}).`;
-      case 'countermine': return `${r} · ${unitText(e.unit)} of the ${sideName(e.side)} countermined ${ground(e.hex)}${e.broke ? ' and broke into the enemy’s gallery' : ', without finding the gallery'}.`;
-      case 'mine': return `${r} · ${unitText(e.unit)} of the ${sideName(e.side)} drove a mine ${ground(e.from)} towards the works of ${worksName({ place: HEXES[e.hex].place && settlementDef(e.hex) > 0 ? HEXES[e.hex].place : null, hex: e.hex })}.`;
-      case 'fortify': return `${r} · ${unitText(e.unit)} of the ${sideName(e.side)} dug a kacha fort ${ground(e.hex)}.`;
-      case 'destroyed': return `${r} · ${unitText(e.unit)} of the ${sideName(e.side)} was destroyed.`;
-      case 'surrender': return `${r} · ${unitText(e.unit)} of the ${sideName(e.side)} was ${e.why === 'surrounded' ? 'surrounded and laid down its arms' : 'cut off and surrendered'}.`;
-      case 'fallback': return `${r} · ${unitText(e.unit)} fell back in disorder ${ground(e.hex)} (${strength(e.unit)}).`;
-      case 'advance': return `${r} · ${e.unit.name} pressed forward ${ground(e.hex).replace(/^(at|on) /, 'onto ')}.`;
-      case 'capture': return `${r} · ${e.unit.name} took ${placeOf(e.place)} for the ${sideName(e.side)}${e.from ? ` from the ${sideName(e.from)}` : ''}.`;
+      case 'breach': return `${r} · ${e.mine ? `A mine sprung by the ${nm(e.unit)} brought down` : `The guns of the ${nm(e.unit)} battered down`} the works of ${worksName(e)} (${e.left ? `${e.left} levels of defence still standing` : 'nothing left standing'}).`;
+      case 'countermine': return `${r} · ${unitText(e.unit, nm)} of the ${sideName(e.side)} countermined ${ground(e.hex)}${e.broke ? ' and broke into the enemy’s gallery' : ', without finding the gallery'}.`;
+      case 'mine': return `${r} · ${unitText(e.unit, nm)} of the ${sideName(e.side)} drove a mine ${ground(e.from)} towards the works of ${worksName({ place: HEXES[e.hex].place && settlementDef(e.hex) > 0 ? HEXES[e.hex].place : null, hex: e.hex })}.`;
+      case 'fortify': return `${r} · ${unitText(e.unit, nm)} of the ${sideName(e.side)} dug a kacha fort ${ground(e.hex)}.`;
+      case 'destroyed': return `${r} · ${unitText(e.unit, nm)} of the ${sideName(e.side)} was destroyed.`;
+      case 'surrender': return `${r} · ${unitText(e.unit, nm)} of the ${sideName(e.side)} was ${e.why === 'surrounded' ? 'surrounded and laid down its arms' : 'cut off and surrendered'}.`;
+      case 'fallback': return `${r} · ${unitText(e.unit, nm)} fell back in disorder ${ground(e.hex)} (${strength(e.unit)}).`;
+      case 'advance': return `${r} · ${nm(e.unit)} pressed forward ${ground(e.hex).replace(/^(at|on) /, 'onto ')}.`;
+      case 'capture': return `${r} · ${nm(e.unit)} took ${placeOf(e.place)} for the ${sideName(e.side)}${e.from ? ` from the ${sideName(e.from)}` : ''}.`;
       case 'general': return `${r} · ${e.name}, general of the ${sideName(e.side)}, was taken prisoner.`;
       default: return null;
     }
   }
   // Battered works belong to a place, or to a kacha fort dug in open country.
   const worksName = e => e.place ? placeOf(e.place) : `the kacha fort ${ground(e.hex)}`;
-  // The same events as short sentences for the field notes.
-  function plainLine(e) {
+  // The same events as short sentences for the field notes. A formation named
+  // in the plural ("Khalsa Battalions", "HM 9th Lancers") takes a plural verb.
+  const plural = u => /[^s']s$/.test(u.name.replace(/\s*\(.*\)\s*$/, '').split(' at ')[0].trim().split(' ').pop());
+  // "the HM 9th Lancers", but "Byrne’s Guns": no article before a possessive name.
+  const possessive = u => /^[^ ]+(’s|'s) /.test(u.name);
+  const was = u => plural(u) ? 'were' : 'was', its = u => plural(u) ? 'their' : 'its', it = u => plural(u) ? 'them' : 'it';
+  function plainLine(e, nmBare) {
+    const nm = u => possessive(u) ? `\u0000${nmBare(u)}` : nmBare(u);
+    return plainText(e, nm)?.replace(/(The|the) \u0000/g, '');
+  }
+  function plainText(e, nm) {
     switch (e.t) {
-      case 'combat': return e.outcome === 'rout' ? `The ${e.att.name} smashed the ${e.def.name}${e.def.hp <= 0 ? '' : `, leaving it ${men(e.def.hp)} strong`}.` : null;
-      case 'breach': return `${e.mine ? `A mine sprung by the ${e.unit.name}` : `The guns of the ${e.unit.name}`} ${e.left ? 'brought down the works' : 'brought the last of the works down'} at ${worksName(e)}.`;
-      case 'destroyed': return `The ${e.unit.name} was destroyed.`;
-      case 'surrender': return `The ${e.unit.name} was ${e.why === 'surrounded' ? 'surrounded and laid down its arms' : 'cut off and surrendered'}.`;
-      case 'capture': return `The ${e.unit.name} took ${placeOf(e.place)}.`;
+      case 'combat': return e.outcome === 'rout' ? `The ${nm(e.att)} smashed the ${nm(e.def)}${e.def.hp <= 0 ? '' : `, leaving ${it(e.def)} ${men(e.def.hp)} strong`}.` : null;
+      case 'breach': return `${e.mine ? `A mine sprung by the ${nm(e.unit)}` : `The guns of the ${nm(e.unit)}`} ${e.left ? 'brought down the works' : 'brought the last of the works down'} at ${worksName(e)}.`;
+      case 'destroyed': return `The ${nm(e.unit)} ${was(e.unit)} destroyed.`;
+      case 'surrender': return `The ${nm(e.unit)} ${was(e.unit)} ${e.why === 'surrounded' ? `surrounded and laid down ${its(e.unit)} arms` : 'cut off and surrendered'}.`;
+      case 'capture': return `The ${nm(e.unit)} took ${placeOf(e.place)}.`;
       case 'general': return `${e.name} was taken prisoner.`;
       default: return null;
     }
   }
+  // Any fight as a sentence, for the blow that opened an engagement.
+  function fightLine(e, nm) {
+    const A = possessive(e.att) ? nm(e.att) : `The ${nm(e.att)}`, D = possessive(e.def) ? nm(e.def) : `the ${nm(e.def)}`;
+    return {
+      rout: `${A} smashed ${D}.`, hit: `${A} struck ${D}.`, standoff: `${A} fought ${D} to a standstill.`,
+      repulse: `${A} ${was(e.att)} thrown back by ${D}.`, miss: e.melee ? `${A} made no impression on ${D}.` : `${A} fired on ${D} without effect.`,
+    }[e.outcome];
+  }
   function brief(b) {
-    const evs = S.events.filter(e => e.battle === b.id), g = s => GENERALS[s];
+    const evs = S.events.filter(e => e.battle === b.id), g = s => GENERALS[s], nm = namesFor(evs);
     const result = b.victor ? `${sideName(b.victor)} came off better${b.kind === 'siege' && b.victor === b.defender ? ' (the place held)' : ''}` : 'indecisive';
     return [
       `CAMPAIGN: ${SCN.title}, ${SCN.year}. ${SCN.region}.`,
@@ -93,7 +118,7 @@ const CHRONICLE = (() => {
       `ENGAGEMENT: provisional name "${b.name}" (${b.kind}). Centred ${ground(b.focus)}. Rounds ${b.first}–${b.last} (${SCN.clock ? `each round is about ${SCN.clock.hours} hours, from ${roundName(b.first)}` : 'each round is about a day'}). The ${sideName(b.attacker)} struck first.`,
       `RESULT BY THE RULES: ${result}. Men lost (round figures; a full formation is about ${MEN_PER_FORMATION.toLocaleString('en')} men): ${sideName('azure')} ${men(b.lost.azure)}, ${sideName('red')} ${men(b.lost.red)}. Formations destroyed or surrendered: ${sideName('azure')} ${b.broken.azure}, ${sideName('red')} ${b.broken.red}.${S.winner ? ' The campaign ended with this engagement.' : ''}`,
       'EVENTS IN ORDER:',
-      ...evs.map(eventLine).filter(Boolean),
+      ...evs.map(e => eventLine(e, nm)).filter(Boolean),
     ].join('\n');
   }
 
@@ -159,18 +184,21 @@ Name the engagement. Keep the provisional name unless it misdescribes the fight;
   // ---- Field notes: the same facts without Claude ----------------------------
 
   function fieldNotes(b) {
-    const evs = S.events.filter(e => e.battle === b.id), A = sideName(b.attacker), D = sideName(b.defender);
+    const evs = S.events.filter(e => e.battle === b.id), A = sideName(b.attacker), D = sideName(b.defender), nm = namesFor(evs);
     const days = b.last - b.first + 1, first = evs.find(e => e.t === 'combat');
-    const turns = evs.filter(e => plainLine(e));
+    const turns = evs.filter(e => plainLine(e, nm));
+    // The opening blow is told even when it decided nothing, so the story
+    // starts where the fighting did.
+    const opening = first && !turns.includes(first) ? [fightLine(first, nm)] : [];
     const story = [
-      `On day ${b.first} the ${A} fell upon the ${D} ${ground(b.focus).replace(/ \([^)]*\)$/, '')}${first ? `, the ${first.att.name} leading against the ${first.def.name}` : ''}. ${b.kind === 'siege' ? `The siege lasted ${days} days.` : days > 1 ? `The fighting went on for ${days} days.` : 'It was over within the day.'}`,
-      turns.slice(0, 8).map(plainLine).join(' '),
-      `The ${sideName('azure')} lost ${men(b.lost.azure)} and the ${sideName('red')} ${men(b.lost.red)}. ${verdictOf(b)}.`,
+      `On day ${b.first} the ${A} fell upon the ${D} ${ground(b.focus).replace(/ \([^)]*\)$/, '')}${first ? `, ${possessive(first.att) ? '' : 'the '}${nm(first.att)} leading against ${possessive(first.def) ? '' : 'the '}${nm(first.def)}` : ''}. ${b.kind === 'siege' ? `The siege lasted ${days} days.` : days > 1 ? `The fighting went on for ${days} days.` : 'It was over within the day.'}`,
+      [...opening, ...turns.slice(0, 8).map(e => plainLine(e, nm))].join(' '),
+      `The ${sideName('azure')} lost ${b.lost.azure ? men(b.lost.azure) : 'no men'} and the ${sideName('red')} ${b.lost.red ? men(b.lost.red) : 'none'}. ${verdictOf(b)}.`,
     ].filter(Boolean);
     // Turning points: what changed hands or broke first, then the heaviest blows.
     const rank = { capture: 0, general: 0, breach: 1, surrender: 1, destroyed: 2, combat: 3 };
     const moments = turns.map((e, i) => ({ e, i })).sort((a, c) => rank[a.e.t] - rank[c.e.t] || a.i - c.i).slice(0, 5)
-      .sort((a, c) => a.i - c.i).map(({ e }) => ({ day: e.round, text: plainLine(e) }));
+      .sort((a, c) => a.i - c.i).map(({ e }) => ({ day: e.round, text: plainLine(e, nm) }));
     return { name: b.name, verdict: verdictOf(b), story: story.join('\n\n'), moments, by: 'notes' };
   }
   function verdictOf(b) {

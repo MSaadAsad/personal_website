@@ -50,7 +50,7 @@ const menCount = figures => { const r = MEN_PER_FIGURE < 100 ? 10 : 100; return 
 // A formation raised under strength (a company, a troop) never rallies past it.
 const maxHp = u => u.max || MAX_HP;
 const men = figures => `${menCount(figures).toLocaleString('en')} men`;
-const WAVER_BELOW = 0.4;       // below this share a formation falls back and cannot attack
+const WAVER_BELOW = 0.5;       // below this share (two figures of five) a formation falls back and cannot attack
 const SAVE_VERSION = 12;
 let GENERAL_RIDE = 12;     // hexes (24 km) he can ride to take command of another formation
 let GENERAL_REACH = 4;     // hexes (8 km) within which he can order a forced march
@@ -129,6 +129,7 @@ function makeUnit(side, variant, hex, id, name = null, figures = MAX_HP) {
 function clockAt(r) { const c = SCN.clock, h = c.from + (r - 1) * c.hours; return { day: c.day + Math.floor(h / 24), hour: h % 24 }; }
 function roundName(r = S.round) {
   if (!SCN.clock) return `Day ${r}`;
+  if (SCN.clock.hours >= 24) return `${clockAt(r).day} ${SCN.clock.month}`;  // a round is a day: just the date
   const { day, hour } = clockAt(r), time = hour === 0 ? 'midnight' : hour === 12 ? 'noon' : `${hour % 12} ${hour < 12 ? 'am' : 'pm'}`;
   return `${day} ${SCN.clock.month}, ${time}`;
 }
@@ -219,7 +220,7 @@ function pathTo(reach, from, to) {
   return path;
 }
 
-// A formation below 40% strength has lost its nerve: it falls back when hit
+// A formation down to two figures of five has lost its nerve: it falls back when hit
 // and cannot attack until it rallies.
 const wavering = u => u.hp < maxHp(u) * WAVER_BELOW;
 
@@ -272,6 +273,19 @@ function forcedMarch(u) {
   log(u.side, `Forced march: <b>${GENERALS[u.side].name}</b> drove the ${u.name} on through the night.`);
   save(); UI.refresh();
   return true;
+}
+// When the general's formation is destroyed he rides for the nearest friends
+// within reach, unless the enemy has closed round it: then he is taken.
+function generalFalls(u) {
+  const side = u.side, g = S.generals[side];
+  if (g.unitId !== u.id || g.captured) return;
+  const refuge = !pressureOn(u).encircled && S.units.filter(v => v.side === side && v !== u && hexDistance(v.hex, u.hex) <= GENERAL_RIDE)
+    .sort((a, b) => hexDistance(a.hex, u.hex) - hexDistance(b.hex, u.hex))[0];
+  if (!refuge) { captureGeneral(side); return; }
+  g.unitId = refuge.id;
+  note({ t: 'ride', side, id: refuge.id });
+  log(side, `<b>${GENERALS[side].name}</b> got clear of the wreck of the ${u.name} and rode to the ${refuge.name}.`);
+  UI.flash(`${GENERALS[side].name.toUpperCase()} ESCAPES`, side);
 }
 function captureGeneral(side) {
   const g = S.generals[side];
@@ -392,16 +406,19 @@ function worksOf(hex) {
   if (S.kacha?.[hex] > 0) return { name: 'Kacha fort', max: KACHA_DEF, left: S.kacha[hex] };
   return null;
 }
+// A kacha fort dug round a village or town, on top of its own works.
+const kachaRound = hex => settlementDef(hex) > 0 && S.kacha?.[hex] > 0 ? S.kacha[hex] : 0;
 // Defence still standing: a level counts whole while any part of it stands.
-const fortLevels = hex => Math.ceil(worksOf(hex)?.left || 0) + Math.ceil(S.walls?.[HEXES[hex].place] || 0);
+const fortLevels = hex => Math.ceil(worksOf(hex)?.left || 0) + Math.ceil(kachaRound(hex)) + Math.ceil(S.walls?.[HEXES[hex].place] || 0);
 
 // Wear `dmg` levels off the works at a hex: a great fortress's walls go
-// first, then the place's own works, then a kacha fort.
+// first, then a kacha fort (outside a village or town's own works), then the
+// place's own works.
 function wearWorks(hex, dmg) {
   const key = HEXES[hex].place;
   if (S.walls?.[key] > 0) { const t = Math.min(S.walls[key], dmg); S.walls[key] = r2(S.walls[key] - t); dmg = r2(dmg - t); }
+  if (dmg > 0 && S.kacha?.[hex] > 0) { const t = Math.min(S.kacha[hex], dmg); S.kacha[hex] = r2(S.kacha[hex] - t); dmg = r2(dmg - t); if (!S.kacha[hex]) delete S.kacha[hex]; }
   if (dmg > 0 && settlementDef(hex) > 0) { S.battered ||= {}; S.battered[key] = r2(Math.min(settlementDef(hex), (S.battered[key] || 0) + dmg)); }
-  else if (dmg > 0 && S.kacha?.[hex] > 0) { S.kacha[hex] = r2(Math.max(0, S.kacha[hex] - dmg)); if (!S.kacha[hex]) delete S.kacha[hex]; }
 }
 const worksTitle = hex => settlementDef(hex) > 0 ? MAP.places[HEXES[hex].place].name : 'the kacha fort';
 function noteBreach(att, hex, after, mine = false) {
@@ -486,8 +503,12 @@ function checkMines() {
 
 // A foot formation that spends its whole day digging throws up a kacha fort round
 // its hex, out of reach of the enemy.
+// Villages and towns can be dug in too: a ditch and bank thrown round the houses,
+// but not while they still have standing walls.
+const DIGGABLE = ['village', 'town'];
 const canFortify = u => !!u && isFoot(u) && !S.winner && u.side === S.turn && !u.moved && !u.attacked && u.mp >= fullMp(u)
-  && !settlementDef(u.hex) && !(S.kacha?.[u.hex] > 0)
+  && (!settlementDef(u.hex) || DIGGABLE.includes(MAP.places[HEXES[u.hex].place].kind)) && !(S.kacha?.[u.hex] > 0)
+  && !(S.walls?.[HEXES[u.hex].place] > 0)
   && !HEXES[u.hex].nbr.some(n => n >= 0 && S.units.some(e => e.side !== u.side && e.hex === n));
 function fortify(u) {
   if (!canFortify(u)) return false;
@@ -526,6 +547,7 @@ function defenceOf(def, attacker, attackFrom) {
   if (h.cover) parts.push([COVER[h.cover].name, COVER[h.cover].def]);
   const works = worksOf(def.hex), wall = Math.ceil(S.walls?.[h.place] || 0);
   if (works) parts.push([works.left < works.max ? `${works.name} (battered)` : works.name, Math.ceil(works.left)]);
+  if (kachaRound(def.hex)) parts.push(['Kacha fort', Math.ceil(kachaRound(def.hex))]);
   if (wall) parts.push([`${MAP.places[h.place].name} walls`, wall]);
   if (attacker && hexDistance(attackFrom, def.hex) === 1) {
     const river = HEXES[attackFrom].river[dirTo(attackFrom, def.hex)];
@@ -593,7 +615,7 @@ function resolve(m, att, def, melee) {
   if (m >= -2) return { outcome: 'standoff', dDef: 1, dAtt: bites ? 1 : 0 };
   return { outcome: 'repulse', dDef: 0, dAtt: bites ? damageOut(def, 2) : 1 };
 }
-// Breaks = destroyed, or pushed below 40% and forced back (a led formation holds).
+// Breaks = destroyed, or pushed down to two figures and forced back (a led formation holds).
 const breaks = (u, loss) => u.hp - loss <= 0 || (!ledBy(u) && settlementDef(u.hex) < SETTLEMENT_DEF.fort && u.hp - loss < maxHp(u) * WAVER_BELOW && loss > 0);
 
 function forecast(att, fromHex, target, mpLeft = att.mp) {
@@ -685,9 +707,9 @@ async function attack(att, target) {
     S.units = S.units.filter(v => v !== u);
     log(u.side, `${u.name} was destroyed.`);
     note({ t: 'destroyed', side: u.side, unit: muster(u), hex: u.hex });
-    if (S.generals[u.side].unitId === u.id && !S.generals[u.side].captured) captureGeneral(u.side);
+    generalFalls(u);
   }
-  // Below 40% a formation must fall back, unless the general holds it together
+  // Down to two figures a formation must fall back, unless the general holds it together
   // or it is garrisoning a fort, where it fights to the last. An encircled
   // formation has nowhere to go and surrenders instead.
   const garrisoned = settlementDef(defHex) >= SETTLEMENT_DEF.fort;
@@ -769,7 +791,8 @@ function describeBattle(b) {
   const attacker = fights[0]?.side ?? evs[0]?.side, defender = other(attacker);
   const lost = { azure: 0, red: 0 }, broken = { azure: 0, red: 0 };
   for (const e of fights) { lost[e.att.side] += e.lostAtt; lost[e.def.side] += e.lostDef; }
-  for (const e of evs) if (e.t === 'destroyed' || e.t === 'surrender') broken[e.side]++;
+  // Men who laid down their arms are lost too, as prisoners.
+  for (const e of evs) if (e.t === 'destroyed' || e.t === 'surrender') { broken[e.side]++; if (e.t === 'surrender') lost[e.side] += Math.max(0, e.unit.hp); }
   const taken = evs.filter(e => e.t === 'capture'), breaches = evs.filter(e => e.t === 'breach');
   const where = battlePlace(focus), key = where?.key, place = key ? placeTitle(key) : 'the open country';
   const walled = key && where.dist === 0 && (S.walls?.[key] !== undefined || settlementDef(focus) >= SETTLEMENT_DEF.fort);
@@ -779,8 +802,9 @@ function describeBattle(b) {
     : walled || (key && where.dist === 0 && taken.length) ? 'assault'
     : fights.length >= 3 || decisive ? 'battle' : 'skirmish';
   // Who won: a place taken decides it; a siege that never took the place was
-  // held; otherwise whoever bled the other clearly more.
-  const toll = s => lost[s] + 2 * broken[s];
+  // held; otherwise whoever bled the other clearly more, a formation broken
+  // counting for more than the men in it.
+  const toll = s => lost[s] + 3 * broken[s];
   const tookPlace = taken.filter(e => e.place === key).pop() || taken[taken.length - 1];
   const victor = tookPlace ? tookPlace.side
     : kind === 'siege' || kind === 'assault' ? defender
@@ -913,13 +937,15 @@ function roomNear(start, side) {
   return -1;
 }
 
-// Scripted happenings at the start of a round (Multan's magazine, say):
+// Scripted happenings at the start of a side's command on their round
+// (Multan's magazine, say; `side` defaults to the side that moves first):
 // walls change by `walls`, formations at `hurt.at` lose `hurt.hp` each, those named
 // in `defect.names` go over to `defect.to`, and those named in `depart` leave.
+// Formations that go over do so at the start of their new side's command, so
+// they march and strike before their old comrades can answer.
 function happen() {
-  if (S.turn !== FIRST) return;
   (SCN.events || []).forEach((ev, i) => {
-    if (ev.round !== S.round || S.happened?.[i]) return;
+    if (ev.round !== S.round || (ev.side || FIRST) !== S.turn || S.happened?.[i]) return;
     (S.happened ||= {})[i] = true;
     for (const [k, d] of Object.entries(ev.walls || {})) S.walls[k] = Math.max(0, (S.walls[k] || 0) + d);
     if (ev.hurt) for (const u of [...unitsAt(HEX_OF[ev.hurt.at])]) u.hp = Math.max(1, u.hp - ev.hurt.hp);
@@ -951,9 +977,10 @@ const boardSnapshot = () => JSON.parse(JSON.stringify({
 async function endTurn() {
   if (S.winner) return;
   const side = S.turn, zoc = enemyZoc(side);
-  // Formations that held still away from the enemy recover soldiers; the
-  // general's presence brings stragglers back faster.
-  for (const u of S.units) if (u.side === side && !u.moved && !u.attacked && u.hp < maxHp(u) && !zoc[u.hex] && stockOf(u) >= STOCK_HUNGRY) {
+  // Formations that held still away from the enemy, under a roof (a village,
+  // sarai, town, city or fort), recover soldiers; not out on the open ground.
+  // The general's presence brings stragglers back faster.
+  for (const u of S.units) if (u.side === side && !u.moved && !u.attacked && u.hp < maxHp(u) && !zoc[u.hex] && stockOf(u) >= STOCK_HUNGRY && settlementDef(u.hex) > 0) {
     const gain = Math.min(maxHp(u) - u.hp, nearGeneral(u) ? 2 : 1);
     u.hp += gain;
     log(side, `${u.name} rested and rallied +${men(gain)} (${men(u.hp)}).`);
@@ -972,7 +999,7 @@ async function endTurn() {
     if (u.hp <= 0) {
       S.units = S.units.filter(v => v !== u);
       log(side, `${u.name} melted away for want of supply.`);
-      if (S.generals[side].unitId === u.id && !S.generals[side].captured) captureGeneral(side);
+      generalFalls(u);
     }
   }
   // Local chiefs side with whoever holds their seat.
@@ -1016,6 +1043,8 @@ async function endTurn() {
     save(); UI.refresh(); return;
   }
   startTurn();
+  // A side with nothing left in the field (until reinforcements come) passes.
+  if (!S.units.some(u => u.side === S.turn)) { log(S.turn, `${SCN.clock ? roundName() : `Round ${S.round}`}: the ${SIDES[S.turn].name} has no formations in the field.`); return endTurn(); }
   log(S.turn, `${SCN.clock ? roundName() : `Round ${S.round}`}: the ${SIDES[S.turn].name} takes the initiative.${SCN.clock && isNight() && !isNight(S.round - (S.turn === FIRST ? 1 : 0)) ? ' Night has fallen.' : ''}`);
   save();
   UI.refresh();
@@ -1041,16 +1070,25 @@ const escaped = side => escapeGoal()?.side === side ? S.units.filter(u => u.side
 function checkVictory() {
   if (S.winner) return true;
   const g = SCN.goal;
-  if (g && goalMet(g.attacker) && S.roundEnded) { declareWinner(g.attacker, g.attackerWins); return true; }
+  // An `atEnd` goal is judged only when the days run out; a `prize` wins for
+  // its side (the attacker, unless `prizeSide` says) whenever that side holds
+  // it at the end of a round.
+  if (g?.prize && S.owners[g.prize] === (g.prizeSide || g.attacker) && S.roundEnded) { declareWinner(g.prizeSide || g.attacker, g.prizeWins); return true; }
+  if (g && !g.atEnd && goalMet(g.attacker) && S.roundEnded) { declareWinner(g.attacker, g.attackerWins); return true; }
   // Some goals also fall to the attacker if the defending general is taken.
   if (g && g.general && S.generals[other(g.attacker)].captured) { declareWinner(g.attacker, g.generalWins); return true; }
   if (g?.escape && S.turn === g.escape.side && escaped(g.escape.side) >= g.escape.need) { declareWinner(g.escape.side, g.escapeWins); return true; }
+  // A side making its escape that no longer has the men to do it has failed.
+  if (g?.escape) {
+    const s = g.escape.side, left = S.units.filter(u => u.side === s).reduce((n, u) => n + u.hp, 0)
+      + (SCN.reinforcements || []).filter((r, i) => r.side === s && !S.arrived?.[i]).reduce((n, r) => n + r.units.reduce((m, x) => m + (x[2] || MAX_HP), 0), 0);
+    if (left < g.escape.need) { declareWinner(other(s), g.defenderWins); return true; }
+  }
   const lead = S.vp.azure === S.vp.red ? null : S.vp.azure > S.vp.red ? 'azure' : 'red';
   if (lead && S.vp[lead] >= VP_TARGET) { declareWinner(lead, `${S.vp[lead]} war points to ${S.vp[other(lead)]}: the forts and ghats of the Jhelum answer to the ${SIDES[lead].name}.`); return true; }
   for (const side of ['azure', 'red']) {
     // (Not in a scenario with a fort to take: there one side may start out holding them all.)
     if (!g && STRONGPOINTS.every(k => S.owners[k] === side)) { declareWinner(side, 'Every strongpoint flies its standard.'); return true; }
-    if (!S.units.some(u => u.side === other(side))) { declareWinner(side, `The ${SIDES[other(side)].name} has broken and scattered.`); return true; }
   }
   return false;
 }
@@ -1066,7 +1104,24 @@ function aiGoalField(side) {
   const sources = [], esc = escapeGoal();
   // A side making its escape heads for the ground it must reach; the other hunts it.
   if (esc?.side === side) { HEXES.forEach((h, i) => { if (h.territory === esc.power) sources.push([i, 0]); }); return costField(sources).dist; }
-  if (esc) for (const u of believedEnemies(side)) sources.push([u.hex, 0]);
+  if (esc) {
+    // The hunters cut the road as well as chase: they make for the ground the
+    // hunted must cross on their quickest way to the refuge (a ford, a gap),
+    // the nearer the refuge the better, so they get ahead of the column
+    // instead of following it in.
+    // Only formations already close go for the column itself; the rest get
+    // across its road, as far ahead of it as they can.
+    const prey = believedEnemies(side), slack = Math.round(4 * MARCH_SCALE);
+    if (prey.length) {
+      const refuge = costField(HEXES.flatMap((h, i) => h.territory === esc.power ? [[i, 0]] : [])).dist;
+      const run = costField(prey.map(u => [u.hex, 0])).dist;
+      const shortest = Math.min(...prey.map(u => refuge[u.hex]));
+      for (let i = 0; i < HEXES.length; i++) if (refuge[i] > 0 && refuge[i] < shortest && run[i] + refuge[i] <= shortest + slack) sources.push([i, refuge[i] * 0.5]);
+    }
+    for (const u of prey) sources.push([u.hex, slack * 2]);
+    // Places decide nothing here: only the hunted and their road matter.
+    return costField(sources).dist;
+  }
   // Nearest objectives first: each one taken becomes a depot for the next.
   // Where only some of several goals must be held, walls count as distance:
   // the easier ones are worth taking first.
@@ -1169,7 +1224,7 @@ function aiPlan(u, goal, threat, garrisoned, looming, supply) {
     const h = HEXES[hex], cover = TERRAIN[h.terrain].def + (h.cover ? 1 : 0) + fortLevels(hex);
     let score = -goal[hex] * (wavering(u) ? 0.2 : 0.9 * pull);
     if (!Number.isFinite(score)) score = -999;
-    const sk = fleeing ? undefined : STRONG_HEX.get(hex);
+    const sk = escapeGoal() ? undefined : STRONG_HEX.get(hex);
     if (sk && S.owners[sk] !== u.side) score += 14;
     else if (sk && threat[hex] > 0 && !garrisoned.has(hex)) score += hex === here ? 5 : 9;
     // Foot and guns are drawn back into an under-garrisoned objective.
