@@ -1003,7 +1003,7 @@ function renderStart() {
     const sd = SCN.sides[side];
     return `<button data-start="${side}" class="pick ${side}"><small>Play as</small><b>${esc(sd.name)}</b><span>${esc(sd.pitch)}</span><em>${esc(sd.tag)}</em></button>`;
   }).join('');
-  $('#sidePick').querySelectorAll('[data-start]').forEach(b => b.onclick = () => startCampaign(b.dataset.start, $('#opponent').value === 'ai'));
+  $('#sidePick').querySelectorAll('[data-start]').forEach(b => b.onclick = () => briefThenStart(b.dataset.start, $('#opponent').value === 'ai'));
 }
 function showStart() {
   exitReplay();
@@ -1013,6 +1013,28 @@ function showStart() {
   if (saved) $('#continueBtn').querySelector('small').textContent = `Round ${S.round} · ${SIDES[S.player].name}${Object.values(S.ai).some(Boolean) ? ' vs computer' : ' · hot-seat'}`;
   d.showModal();
   $('#mapPick .active')?.focus();
+}
+// The rules in brief, shown once a side is chosen and before the map opens,
+// until the player asks not to see them again.
+const RULES_KEY = 'jhelum-marches-rules-hidden';
+function briefThenStart(player, ai) {
+  let hidden = false;
+  try { hidden = localStorage.getItem(RULES_KEY) === '1'; } catch { /* storage blocked */ }
+  if (hidden) { startCampaign(player, ai); return; }
+  const sd = SCN.sides[player], goal = $('#rulesGoal');
+  goal.className = `rules-goal ${player}`;
+  goal.innerHTML = `<b>${esc(sd.name)}</b>${esc(sd.pitch)}<em>${esc(sd.tag)}</em>`;
+  $('#rulesRound').textContent = SCN.clock ? `Each round is ${SCN.clock.hours} hours.` : 'Each round is one day.';
+  $('#rulesHide').checked = false;
+  const d = $('#rulesDialog');
+  $('#rulesBegin').onclick = () => {
+    if ($('#rulesHide').checked) try { localStorage.setItem(RULES_KEY, '1'); } catch { /* storage blocked */ }
+    d.close();
+    startCampaign(player, ai);
+  };
+  $('#rulesManual').onclick = () => $('#helpDialog').showModal();
+  d.showModal();
+  $('#rulesBegin').focus();
 }
 function startCampaign(player, ai) {
   clearSave();

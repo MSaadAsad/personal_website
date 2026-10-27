@@ -320,6 +320,17 @@ body[data-turn="red"] .turn-buttons .primary { color: #1f0d09; }
 .help-grid > div { padding: 12px 14px; border-radius: 8px; background: var(--panel-2); border-top: 2px solid var(--gold); }
 .help-grid h3 { margin: 0 0 4px; font: 700 16px var(--serif); }
 .help-grid p { margin: 0; font-size: 13px; color: #c9c2ad; }
+.rules { max-width: min(820px, calc(100vw - 32px)); }
+.rules-goal { margin: 0 0 14px; padding: 12px 14px; border-radius: 8px; border: 1px solid var(--line-2); background: #1c1a14; font-size: 14px; color: #cfc8b2; }
+.rules-goal b { display: block; margin-bottom: 2px; font: 700 17px var(--serif); }
+.rules-goal.azure b { color: var(--azure-ink); } .rules-goal.red b { color: var(--red-ink); }
+.rules-goal em { display: block; margin-top: 4px; font-style: normal; font-size: 12px; font-weight: 700; color: var(--gold-2); }
+.rules-foot { display: flex; align-items: center; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+.rules-hide { display: flex; align-items: center; gap: 8px; margin-right: auto; font-size: 13px; color: var(--muted); cursor: pointer; }
+.rules-hide input { width: 16px; height: 16px; accent-color: var(--gold); }
+.rules-foot button { height: 40px; padding: 0 18px; border-radius: 6px; font-weight: 700; }
+.rules-manual { border: 1px solid var(--line-2); background: var(--panel-2); }
+.rules .primary { border: 0; background: var(--gold); color: #1a1408; }
 .keys { margin: 14px 0 0; font-size: 12.5px; color: var(--muted); line-height: 2; }
 .victory { text-align: center; max-width: 480px; }
 .victory[data-side="azure"] h2 { color: var(--azure-ink); } .victory[data-side="red"] h2 { color: var(--red-ink); }

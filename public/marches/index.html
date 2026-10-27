@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Newsreader:opsz,wght@6..72,500;6..72,600;6..72,700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=60" />
+  <link rel="stylesheet" href="styles.css?v=61" />
 </head>
 <body class="loading" data-turn="azure">
   <header class="topbar">
@@ -154,6 +154,25 @@
     <label class="opponent">Fog of war <select id="fogPick"><option value="on" selected>On: see only what your troops can see</option><option value="off">Off: the whole field is open</option></select></label></div>
   </dialog>
 
+  <dialog id="rulesDialog" class="dialog rules">
+    <small class="kicker">Orders of the day</small>
+    <h2>Before you march</h2>
+    <div class="rules-goal" id="rulesGoal"></div>
+    <div class="help-grid">
+      <div><h3>Turns</h3><p>The two sides take turns. In your command, march and fight with each of your formations, then <b>End command</b> (E). <span id="rulesRound">Each round is one day.</span></p></div>
+      <div><h3>March</h3><p>Select a formation and click blue ground. Each hex is <span data-scale="hex">1 km</span>; foot have <span data-scale="foot">12</span> march points a day, horse <span data-scale="horse">18–21</span>. Roads cost 1 a hex, open plain 2, broken ground 3, hills 4. Stepping next to an enemy ends the march. Two formations may share a hex.</p></div>
+      <div><h3>Fight</h3><p>Click a red ring to attack, or a dashed one to march and attack. <b>Hover first</b> to see the odds. Each side rolls a d6 plus modifiers for ground, works, the general, numbers round the defender, fatigue and supply. Below 40% a formation falls back and cannot attack until it rallies; cut off, it surrenders.</p></div>
+      <div><h3>Guns &amp; walls</h3><p>Field guns fire <span data-scale="range">2 km</span> at what they can see. Settlements and forts add defence and great fortresses have walls on top: guns batter them down, and foot next to them can dig a <b>mine</b> (M). Foot can also dig a <b>kacha fort</b> (K) where they stand.</p></div>
+      <div><h3>Supply</h3><p>Every command your formations eat from their stock, and wagons from the places you hold bring more. Hungry troops fight worse and in the end desert. Guard your roads, and cut the enemy’s.</p></div>
+      <div><h3>Sight &amp; the general</h3><p>With fog of war on you see only what your troops can see; faded markers show where the enemy was last seen. Your general gives the formation he leads +1 attack and defence: <b>G</b> to ride to another, <b>F</b> for a forced march.</p></div>
+    </div>
+    <div class="rules-foot">
+      <label class="rules-hide"><input type="checkbox" id="rulesHide" /> Don’t show this again</label>
+      <button class="rules-manual" id="rulesManual">Full field manual</button>
+      <button class="primary" id="rulesBegin">Begin the campaign</button>
+    </div>
+  </dialog>
+
   <dialog id="helpDialog" class="dialog help">
     <button class="close" data-close aria-label="Close">×</button>
     <small class="kicker">Field manual</small>
@@ -200,13 +219,13 @@
     </details>
   </dialog>
 
-  <script src="js/scenarios.js?v=60"></script>
-  <script src="js/geo.js?v=60"></script>
-  <script src="js/game.js?v=60"></script>
-  <script src="js/sight.js?v=60"></script>
-  <script src="js/chronicle.js?v=60"></script>
-  <script src="js/campaignmap.js?v=60"></script>
-  <script src="js/render.js?v=60"></script>
-  <script src="js/ui.js?v=60"></script>
+  <script src="js/scenarios.js?v=61"></script>
+  <script src="js/geo.js?v=61"></script>
+  <script src="js/game.js?v=61"></script>
+  <script src="js/sight.js?v=61"></script>
+  <script src="js/chronicle.js?v=61"></script>
+  <script src="js/campaignmap.js?v=61"></script>
+  <script src="js/render.js?v=61"></script>
+  <script src="js/ui.js?v=61"></script>
 </body>
 </html>
