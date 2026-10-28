@@ -1036,6 +1036,124 @@ const SCENARIOS = {
     ],
   },
 
+  // Mudki and Ferozeshah, December 1845, after the despatches of Hardinge,
+  // Gough and Littler (London Gazette 20576, 23 February 1846). The Khalsa
+  // army crossed the Sutlej on the 11th and invested Ferozepur, where Littler
+  // held the town and the entrenched cantonment. Lal Singh took the main army
+  // out to Ferozeshah, ten miles from Ferozepur and as far from Mudki, to meet
+  // the relief; Tej Singh stayed before Ferozepur, with the Ghorcharas camped
+  // by the river. Gough came up from Ambala by Bassian and Charik, 150 miles in
+  // six days, and beat off Lal Singh's attack at Mudki on the evening of the
+  // 18th; HM 29th and the 1st Europeans joined him there on the 19th. On the
+  // 21st Littler slipped out of Ferozepur and joined Gough on the march, and
+  // the army stormed the camp at Ferozeshah that afternoon and the next
+  // morning, before Tej Singh came up and drew off again. A round is a day,
+  // from the 17th.
+  ferozeshah: {
+    title: 'Mudki and Ferozeshah',
+    year: 1845,
+    region: 'Sutlej · Ferozepur',
+    blurb: 'December 1845. On the 11th the Khalsa army crossed the Sutlej and invested Ferozepur, where Sir John Littler holds the town and the entrenched cantonment with some 7,000 men. Raja Lal Singh has taken the main army out to Ferozeshah, ten miles along the road to Mudki, to meet the relief, while Tej Singh stays before Ferozepur. Sir Hugh Gough is coming up from Ambala by forced marches, 150 miles in six days, with the Governor-General riding in his camp.',
+    first: 'azure',
+    vpTarget: Infinity,
+    roundLimit: 12,
+    clock: { day: 17, month: 'December', from: 6, hours: 24 },
+    goal: {
+      forts: ['ferozeshah', 'ferozepur'], attacker: 'red', short: 'Relieve Ferozepur and take Ferozeshah',
+      prize: 'ferozepur', prizeSide: 'azure',
+      prizeWins: 'Ferozepur falls to the Khalsa: the town, the cantonment, the magazine and Littler’s division are lost, and the road to Ludhiana and Delhi lies open.',
+      attackerWins: 'Ferozepur is relieved and the entrenched camp at Ferozeshah is stormed, with its guns, stores and standards. The Khalsa army falls back over the Sutlej, and for the moment the British bank is clear.',
+      defenderWins: 'The campaign closes with the Khalsa still entrenched at Ferozeshah and Gough’s worn-out army unable to break it. Ferozepur is still invested, and the British must wait for the reserves from Meerut.',
+    },
+    sides: {
+      azure: { name: 'Khalsa Army', short: 'Khalsa', adj: 'Khalsa', pitch: 'Lal Singh’s battalions and heavy guns hold Ferozeshah, Tej Singh’s army lies before Ferozepur and the Ghorcharas by the river. Gough is coming in from the east, tired out, with more troops behind him. Tej Singh will not stay: on the 22nd he draws off over the Sutlej. Storm Ferozepur before then, or keep Gough out of Ferozeshah until the 28th.', tag: 'Moves first · take Ferozepur, or hold Ferozeshah until 28 December' },
+      red: { name: 'Army of the Sutlej', short: 'British', adj: 'British', pitch: 'Gough’s army is at Charik, a long march short of Mudki, and Littler holds Ferozepur with Tej Singh watching him. HM 29th, the 1st Europeans and the heavy guns come up on the 19th. Join the two forces, hold Ferozepur, and take the Sikh camp at Ferozeshah.', tag: 'Moves second · hold Ferozepur, take Ferozeshah' },
+    },
+    generals: {
+      azure: { name: 'Raja Lal Singh', title: 'Wazir of the Lahore Darbar, commanding the Khalsa army', leads: 'Lal Singh’s Battalions' },
+      red: { name: 'General Sir Hugh Gough', title: 'Commander-in-Chief, India', leads: 'HM 9th Foot' },
+    },
+    // The Sikhs' roads home over the Sutlej, by Harike and by the fords below
+    // Ferozepur; the British road back to Bassian and Ludhiana.
+    homeBase: { azure: [[31.245, 74.93], [31.24, 74.62]], red: [30.70, 75.25] },
+    // Ferozepur's old fort and walled town, with Littler's entrenchments round
+    // the cantonment; the little fort at Mudki. Ferozeshah had no works until
+    // the Sikhs dug them, and here they must dig them too.
+    walls: { ferozepur: 3, mudki: 1 },
+    strongpoints: ['ferozepur', 'ferozeshah', 'mudki'],
+    startOwners: { ferozepur: 'red', mudki: 'red', ferozeshah: 'azure' },
+    startUnits: [
+      // Lal Singh's army at Ferozeshah, with the Akalis and the heavy guns.
+      ['azure', 'Khalsa Infantry', 'ferozeshah', 'Lal Singh’s Battalions'], ['azure', 'Heavy Battery', 'ferozeshah', 'Khalsa Heavy Guns', 4],
+      ['azure', 'Khalsa Infantry', [30.885, 74.775], 'Fauj-i-Ain Battalions'], ['azure', 'Light Field Gun', [30.885, 74.775], 'Khalsa Topkhana'],
+      ['azure', 'Khalsa Infantry', [30.872, 74.80], 'Fauj-i-Ain Battalions'], ['azure', 'Light Field Gun', [30.872, 74.80], 'Khalsa Topkhana'],
+      ['azure', 'Khalsa Infantry', [30.89, 74.795], 'Fauj-i-Khas Battalions'], ['azure', 'Dhal & Talwar', [30.89, 74.795], 'Akali Nihangs', 4],
+      ['azure', 'Khalsa Infantry', [30.868, 74.778], 'Fauj-i-Ain Battalions'], ['azure', 'Heavy Battery', [30.868, 74.778], 'Khalsa Heavy Guns', 4],
+      ['azure', 'Khalsa Infantry', [30.895, 74.81], 'Fauj-i-Ain Battalions'],
+      ['azure', 'Irregular Sowars', [30.91, 74.83], 'Lal Singh’s Ghorcharas'], ['azure', 'Irregular Sowars', [30.91, 74.83], 'Lal Singh’s Ghorcharas', 4],
+      // Tej Singh's army before Ferozepur, and the Ghorcharas camped by the river.
+      ['azure', 'Khalsa Infantry', [31.005, 74.70], 'Tej Singh’s Battalions'], ['azure', 'Khalsa Infantry', [31.005, 74.70], 'Tej Singh’s Battalions', 4],
+      ['azure', 'Khalsa Infantry', [31.015, 74.72], 'Tej Singh’s Battalions', 4], ['azure', 'Heavy Battery', [31.015, 74.72], 'Tej Singh’s Heavy Guns', 3],
+      ['azure', 'Khalsa Infantry', [31.02, 74.745], 'Tej Singh’s Battalions', 4], ['azure', 'Light Field Gun', [31.02, 74.745], 'Tej Singh’s Topkhana', 4],
+      ['azure', 'Irregular Sowars', [31.07, 74.76], 'Ghorcharas'], ['azure', 'Irregular Sowars', [31.07, 74.76], 'Ghorcharas', 4],
+      ['azure', 'Irregular Sowars', [31.08, 74.80], 'Ghorcharas', 4],
+      // The guard on the ferry at Harike.
+      ['azure', 'Matchlockmen', 'harike', 'Harike Ferry Guard', 3, { post: true }],
+      // Littler at Ferozepur: the 27th and the reserve company of artillery
+      // in the town and its works, the 63rd in the cantonment, and the field
+      // force he took out on the 21st.
+      ['red', 'Sepoy Infantry', 'ferozepur', '27th Bengal NI', 4, { post: true }], ['red', 'Heavy Battery', 'ferozepur', 'Reserve Artillery', 3, { post: true }],
+      ['red', 'Sepoy Infantry', [30.945, 74.625], '63rd Bengal NI', 4, { post: true }], ['red', 'Line Infantry', [30.945, 74.625], 'HM 62nd Foot', 5],
+      ['red', 'Sepoy Infantry', [30.935, 74.63], '12th and 14th Bengal NI', 5],
+      ['red', 'Sepoy Infantry', [30.95, 74.635], '33rd and 44th Bengal NI', 5], ['red', 'Sepoy Infantry', [30.95, 74.635], '54th Bengal NI', 3],
+      ['red', 'Light Dragoons', [30.94, 74.615], '8th Bengal Light Cavalry', 4], ['red', 'Irregular Sowars', [30.94, 74.615], '3rd Irregular Cavalry', 3],
+      ['red', 'Horse Artillery', [30.955, 74.615], 'Littler’s Horse Artillery', 4], ['red', 'Light Field Gun', [30.955, 74.615], 'Ferozepur Field Battery', 3],
+      // Gough's army at Charik, a long march short of Mudki: Smith's division, a brigade each
+      // of Gilbert's and M'Caskill's, Brooke's guns and the cavalry division.
+      ['red', 'Line Infantry', [30.722, 75.155], 'HM 31st Foot', 5], ['red', 'Sepoy Infantry', [30.722, 75.155], '24th and 47th Bengal NI', 5],
+      ['red', 'Line Infantry', [30.718, 75.17], 'HM 50th Foot', 5], ['red', 'Sepoy Infantry', [30.718, 75.17], '42nd and 48th Bengal NI', 5],
+      ['red', 'Line Infantry', [30.712, 75.185], 'HM 9th Foot', 5], ['red', 'Sepoy Infantry', [30.712, 75.185], '26th and 73rd Bengal NI', 5],
+      ['red', 'Line Infantry', [30.706, 75.20], 'HM 80th Foot', 5], ['red', 'Sepoy Infantry', [30.706, 75.20], '2nd, 16th and 45th Bengal NI', 5],
+      ['red', 'Light Dragoons', [30.727, 75.14], 'HM 3rd Light Dragoons', 4], ['red', 'Light Dragoons', [30.727, 75.14], 'Bodyguard and 5th Light Cavalry', 4],
+      ['red', 'Lancers', [30.737, 75.15], '4th Bengal Lancers', 4], ['red', 'Irregular Sowars', [30.737, 75.15], '9th Irregular Cavalry', 4],
+      ['red', 'Horse Artillery', [30.73, 75.165], 'Brooke’s Horse Artillery'], ['red', 'Light Field Gun', [30.73, 75.165], 'Field Batteries', 4],
+    ],
+    reinforcements: [
+      { round: 3, side: 'red', at: [30.70, 75.25], name: 'HM 29th and the 1st Europeans', note: 'came up by forced marches from the hills with the heavy guns', history: 'HM 29th Foot from Kasauli and the Company’s 1st European Light Infantry from Sabathu marched hard to overtake the army, and joined it at Mudki on the night of the 19th with a small division of heavy guns. The Governor-General offered the same evening to serve as Gough’s second in command.', units: [['Line Infantry', 'HM 29th Foot', 5], ['Line Infantry', '1st Bengal European Light Infantry', 5], ['Heavy Battery', 'Heavy Guns', 2]] },
+    ],
+    // Tej Singh came up on the 22nd, made two attempts on the lost camp, and
+    // drew off over the Sutlej with his army intact.
+    events: [
+      { title: 'Tej Singh draws off', history: 'On the afternoon of the 22nd Tej Singh brought up his fresh battalions, a large artillery and the Ghorcharas from before Ferozepur, drove in the British cavalry and twice tried to retake Ferozeshah. With the British guns out of shot he suddenly ceased fire and drew off, and his army fell back over the Sutlej. Many in the Khalsa believed then, and many have believed since, that their commanders had betrayed them.', round: 6, side: 'red', text: 'Tej Singh drew off his army and fell back over the Sutlej', flash: 'TEJ SINGH DRAWS OFF', depart: ['Tej Singh’s Battalions', 'Tej Singh’s Heavy Guns', 'Tej Singh’s Topkhana', 'Ghorcharas'] },
+    ],
+    powers: [
+      { id: 'lahore', name: 'Lahore Darbar', chief: 'Maharaja Duleep Singh', seat: 'harike', npc: false, side: 'azure', color: '#3f6f8f', note: 'The Majha over the Sutlej, and the Sikh camps on the left bank', extraSeats: ['sobraon', 'khemkaran', [31.20, 74.70], 'ferozeshah', 'arifke', 'mallanwala'] },
+      { id: 'company', name: 'Cis-Sutlej States', chief: 'The Company', seat: 'ferozepur', npc: false, side: 'red', color: '#94493a', note: 'Ferozepur and the protected country on the British bank', extraSeats: ['mudki', 'talwandi', 'zira', 'makhu', 'ghall', 'charik', 'baghapurana', [30.70, 75.25]] },
+      { id: 'faridkot', name: 'Faridkot', chief: 'Raja Pahar Singh', seat: 'faridkot', npc: true, side: null, color: '#3f7b4c', note: 'The Brar raja’s town and country south of Mudki', levy: { variant: 'Irregular Sowars', name: 'Faridkot Horse' }, history: 'Raja Pahar Singh of Faridkot, a Brar chief under British protection, sent supplies and men to the British army in the campaign, and was rewarded after the war with the lands of Kot Kapura.' },
+    ],
+    // "A dead flat, covered at short intervals with a low, but in some places
+    // thick, jhow jungle, and dotted with sandy hillocks" (Gough, 19 December);
+    // tamarisk and tall grass along the river.
+    jungle: [
+      ...[[31.035, 75.225], [31.059, 75.19], [31.082, 75.147], [31.123, 75.123], [31.134, 75.072], [31.147, 75.031], [31.144, 74.994], [31.138, 74.935],
+        [31.147, 74.887], [31.143, 74.84], [31.132, 74.8], [31.124, 74.756], [31.097, 74.722], [31.07, 74.689], [31.074, 74.656], [31.076, 74.63],
+        [31.034, 74.635], [31.03, 74.591], [30.991, 74.588], [30.994, 74.541], [31.215, 75.05], [31.194, 75.019], [31.177, 74.979]]
+        .map(([lat, lon]) => ({ lat, lon, radiusKm: 2.5, tree: 0.6, shrub: 0.5 })),
+      // The thick jhow in front of the Sikh line at Mudki, and before the face
+      // of the camp at Ferozeshah that looked towards Ferozepur.
+      { lat: 30.79, lon: 74.905, radiusKm: 4.5, tree: 0.2, shrub: 0.65 },
+      { lat: 30.872, lon: 74.742, radiusKm: 3.5, tree: 0.2, shrub: 0.65 },
+      // Low jhow at short intervals over the whole plain.
+      ...[30.66, 30.75, 30.84, 30.93, 31.02].flatMap((lat, i) => [74.56, 74.66, 74.76, 74.86, 74.96, 75.06, 75.16].map(lon => ({ lat, lon: lon + (i % 2) * 0.05, radiusKm: 4, tree: 0.1, shrub: 0.5 }))),
+    ],
+    labels: [
+      { text: 'MALWA', lat: 30.68, lon: 74.98, cls: 'region', tier: 1 },
+      { text: 'MAJHA', lat: 31.215, lon: 74.66, cls: 'region', tier: 1 },
+      { text: 'Sutlej', lat: 31.10, lon: 74.68, cls: 'water', tier: 1, angle: 40 },
+      { text: 'Beas', lat: 31.215, lon: 75.07, cls: 'water', tier: 2, angle: 45 },
+    ],
+  },
+
   // The Aliwal campaign, January 1846, after Gough's despatch of 1 February
   // and Sir Harry Smith's from the field of Aliwal (London Gazette 20588).
   // While the main armies faced each other at Sobraon, Sardar Ranjodh Singh

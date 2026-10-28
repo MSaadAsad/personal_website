@@ -72,6 +72,7 @@ const CAMPAIGN_MAP = (() => {
     jhelum1857: { at: [32.925, 73.725], off: [20, 16], side: 'r', name: 'Jhelum' },
     aliwal: { at: [30.945, 75.614], off: [-20, -18], side: 'l', name: 'Aliwal' },
     gogera: { at: [30.955, 73.33], off: [-22, 20], side: 'l', name: 'Gogera' },
+    ferozeshah: { at: [30.88, 74.79], off: [18, 24], side: 'r', name: 'Ferozeshah' },
   };
 
   const line = pts => 'M' + pts.map(p => px(p).map(f).join(' ')).join('L');
