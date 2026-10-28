@@ -286,6 +286,7 @@ function generalFalls(u) {
   note({ t: 'ride', side, id: refuge.id });
   log(side, `<b>${GENERALS[side].name}</b> got clear of the wreck of the ${u.name} and rode to the ${refuge.name}.`);
   UI.flash(`${GENERALS[side].name.toUpperCase()} ESCAPES`, side);
+  UI.dispatch({ side, kind: 'The general escapes', title: GENERALS[side].name, text: `The ${u.name} has broken, but ${GENERALS[side].name} got clear of the wreck and rode to the ${refuge.name}, who take up his standard.`, hex: refuge.hex });
 }
 function captureGeneral(side) {
   const g = S.generals[side];
@@ -294,6 +295,7 @@ function captureGeneral(side) {
   note({ t: 'general', side, name: GENERALS[side].name, hex: unitById(g.unitId)?.hex ?? null });
   log(other(side), `<b>${GENERALS[side].name} has been taken prisoner!</b> The ${SIDES[other(side)].name} gains ${GENERAL_RANSOM} war points.`);
   UI.flash(`${GENERALS[side].name.toUpperCase()} CAPTURED`, other(side));
+  UI.dispatch({ side: other(side), kind: 'General taken', title: GENERALS[side].name, text: `${GENERALS[side].name}, ${GENERALS[side].title.replace(/^./, c => c.toLowerCase())}, has fallen into the hands of the ${SIDES[other(side)].name}. The ${SIDES[side].name} fights on without him.`, hex: unitById(g.unitId)?.hex });
 }
 
 // ---------------------------------------------------------------------------
@@ -437,6 +439,7 @@ function shell(att, hex, hit) {
   noteBreach(att, hex, after);
   log(att.side, `<b>The guns battered down the works of ${worksTitle(hex)}</b> (${after ? `${after} defence left standing` : 'nothing left standing'}).`);
   UI.flash(after ? 'WALLS BATTERED' : 'THE WALLS ARE DOWN', att.side);
+  if (!after) UI.dispatch({ side: att.side, kind: 'Breach', title: `The works of ${worksTitle(hex)} are down`, text: `The ${att.name}’s guns have battered the defences of ${worksTitle(hex)} to the ground. Its garrison now stands in the open.`, hex });
 }
 
 // Mines: foot next to enemy works dig a gallery under them, a whole day at a
@@ -473,6 +476,7 @@ function digMine(u) {
     noteBreach(u, target, after, true);
     log(u.side, `<b>${u.name} sprang a mine under ${name}</b>: the works came down (${after ? `${after} defence left standing` : 'nothing left standing'}).`);
     UI.flash('MINE SPRUNG', u.side);
+    UI.dispatch({ side: u.side, kind: 'Mine', title: `A mine is sprung under ${name}`, text: `The ${u.name} fired the gallery dug under ${name}: the works came down, ${after ? `${after} defence left standing` : 'nothing left standing'}.`, hex: target });
   }
   save(); UI.refresh();
   return true;
@@ -884,10 +888,12 @@ function capture(u) {
   }
   const key = STRONG_HEX.get(u.hex);
   if (key && S.owners[key] !== u.side) {
-    note({ t: 'capture', side: u.side, unit: muster(u), place: key, hex: u.hex, from: S.owners[key] || null });
+    const from = S.owners[key] || null;
+    note({ t: 'capture', side: u.side, unit: muster(u), place: key, hex: u.hex, from });
     S.owners[key] = u.side;
     log(u.side, `<b>${u.name}</b> raised the ${SIDES[u.side].adj} standard over ${MAP.places[key].name}.`);
     UI.flash(`${MAP.places[key].name.toUpperCase()} TAKEN`, u.side);
+    UI.dispatch({ side: u.side, kind: 'Taken', title: MAP.places[key].name, text: `The ${u.name} raised the ${SIDES[u.side].adj} standard over ${MAP.places[key].name}${from ? `, taking it from the ${SIDES[from].name}` : ''}.`, hex: u.hex });
   }
 }
 function undoMove() {
@@ -925,6 +931,7 @@ function arrive() {
     }
     log(r.side, `<b>${r.name}</b> ${r.note || 'joined the army'}.`);
     UI.flash(`${r.name.toUpperCase()} ARRIVES`, r.side);
+    UI.dispatch({ side: r.side, kind: 'Reinforcements', title: r.name, text: `${r.name} ${r.note || 'joined the army'}.${r.units.length > 1 || r.units[0][1] !== r.name ? ` With them: ${r.units.map(([v, name]) => name).join(', ')}.` : ''}`, history: r.history, hex: at });
   });
 }
 function roomNear(start, side) {
@@ -955,6 +962,7 @@ function happen() {
     if (ev.depart) S.units = S.units.filter(u => !ev.depart.includes(u.name) || ledBy(u));
     log(ev.side || FIRST, `<b>${ev.text}</b>`);
     UI.flash(ev.flash || ev.text.toUpperCase(), ev.side || FIRST);
+    UI.dispatch({ side: ev.defect?.to || ev.side || FIRST, kind: 'Dispatch', title: ev.title || ev.text, text: `${ev.text}.`, history: ev.history, hex: ev.hurt ? HEX_OF[ev.hurt.at] : undefined });
   });
 }
 
@@ -1010,6 +1018,7 @@ async function endTurn() {
     S.allies[powerId] = side;
     log(side, `<b>${power.name}</b> pledged their levies to the ${SIDES[side].name}.`);
     UI.flash(`${power.name.toUpperCase()} JOINS`, side);
+    UI.dispatch({ side, kind: 'Allies', title: `${power.name} join the ${SIDES[side].short}`, text: `${power.chief} has pledged ${power.note.replace(/^The /, 'the ')} to the ${SIDES[side].name}${!S.levied[power.id] && unitsAt(hex).length < STACK_LIMIT ? `, and the ${power.levy.name} ride in to join` : ''}.`, history: power.history, hex });
     if (!S.levied[powerId] && unitsAt(hex).length < STACK_LIMIT) {
       S.levied[powerId] = true;
       S.units.push(makeUnit(side, power.levy.variant, hex, nextUnitId(side), power.levy.name));
@@ -1049,7 +1058,8 @@ async function endTurn() {
   save();
   UI.refresh();
   UI.banner();
-  if (S.ai[S.turn]) await runAI(S.turn);
+  // The computer waits until the dispatches have been read.
+  if (S.ai[S.turn]) { await UI.dispatchesRead(); await runAI(S.turn); }
 }
 
 function declareWinner(side, reason) {

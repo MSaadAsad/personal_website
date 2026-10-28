@@ -51,7 +51,7 @@ const SCENARIOS = {
       ['red', 'Dhal & Talwar', [32.885, 73.915], 'Dogra Swordsmen'], ['red', 'Matchlockmen', [32.885, 73.915], 'Dogra Musketeers'],
       ['red', 'Dhal & Talwar', [32.888, 73.955], 'Dogra Swordsmen'], ['red', 'Matchlockmen', [32.888, 73.955], 'Dogra Musketeers'],
       ['red', 'Spearmen', [32.857, 73.948], 'Dogra Spearmen'], ['red', 'Zamburak', [32.857, 73.948], 'Camel Guns'],
-      ['red', 'Irregular Sowars', [32.874, 73.86], 'Dogra Horse'], ['red', 'Irregular Sowars', [32.874, 73.86], 'Dogra Horse'],
+      ['red', 'Irregular Sowars', [32.867, 73.874], 'Dogra Horse'], ['red', 'Irregular Sowars', [32.867, 73.874], 'Dogra Horse'],
     ],
     powers: [
       { id: 'khari', name: 'Khari Khariyali jagirs', chief: 'Surat Singh, for the Lahore Darbar', seat: 'manglafort', npc: false, side: 'azure', color: '#3f7b4c', note: 'Chand Kaur’s estates, held by Sikh troops', extraSeats: ['sukhchainpur', 'kotkandhari', 'sarai', 'panjeri'], limits: [{ beyond: 'panjeri', toward: 'north-east', to: 'bhimber' }] },
@@ -130,7 +130,7 @@ const SCENARIOS = {
       ['red', 'Sepoy Infantry', 'dinga', '70th Bengal NI'], ['red', 'Sepoy Infantry', 'ramnagar', '69th Bengal NI'],
     ],
     reinforcements: [
-      { round: 8, side: 'azure', at: [32.70, 73.50], name: 'Chattar Singh’s army', note: 'came down from Attock and crossed the Jhelum', units: [['Khalsa Infantry', 'Chattar Singh’s Hazara Battalions'], ['Khalsa Infantry', 'Chattar Singh’s Battalions'], ['Irregular Sowars', 'Ghorcharas'], ['Irregular Sowars', 'Ghorcharas']] },
+      { round: 8, side: 'azure', at: [32.70, 73.50], name: 'Chattar Singh’s army', note: 'came down from Attock and crossed the Jhelum', history: 'Sardar Chattar Singh Attariwala, Sher Singh’s father, had risen in Hazara in August 1848. Attock fell to him and his Afghan allies in January 1849, and after Chillianwala he brought his army down to join his son on the Jhelum.', units: [['Khalsa Infantry', 'Chattar Singh’s Hazara Battalions'], ['Khalsa Infantry', 'Chattar Singh’s Battalions'], ['Irregular Sowars', 'Ghorcharas'], ['Irregular Sowars', 'Ghorcharas']] },
     ],
     powers: [
       { id: 'khalsa', name: 'Khalsa army', chief: 'Raja Sher Singh Attariwala', seat: 'rasul', npc: false, side: 'azure', color: '#3f6f8f', note: 'The Sikh camps and their foraging grounds', extraSeats: ['mong', 'lakhnawala', 'chillianwala'] },
@@ -186,10 +186,10 @@ const SCENARIOS = {
       ['azure', 'Khalsa Infantry', 'chotakalra', 'Khalsa Battalions'], ['azure', 'Light Field Gun', 'chotakalra', 'Khalsa Topkhana'],
       ['azure', 'Khalsa Infantry', [32.553, 74.105], 'Khalsa Battalions'], ['azure', 'Light Field Gun', [32.553, 74.105], 'Khalsa Topkhana'],
       ['azure', 'Khalsa Infantry', [32.578, 74.03], 'Khalsa Battalions'],
-      ['azure', 'Khalsa Infantry', 'kunjah', 'Khalsa Battalions'], ['azure', 'Irregular Sowars', 'kunjah', 'Ghorcharas'],
+      ['azure', 'Khalsa Infantry', 'kunjah', 'Khalsa Battalions'], ['azure', 'Irregular Sowars', [32.556, 73.971], 'Ghorcharas'],
       ['azure', 'Khalsa Infantry', 'jalalpur', 'Khalsa Battalions'], ['azure', 'Irregular Sowars', 'jalalpur', 'Ghorcharas'],
       ['azure', 'Irregular Sowars', 'kharian', 'Ghorcharas'],
-      ['azure', 'Khalsa Infantry', [32.48, 74.10], 'Ford Party'], ['azure', 'Irregular Sowars', [32.48, 74.10], 'Ghorcharas'],
+      ['azure', 'Khalsa Infantry', [32.501, 74.137], 'Ford Party'], ['azure', 'Irregular Sowars', [32.533, 74.146], 'Ghorcharas'],
       ['azure', 'Irregular Sowars', [32.58, 74.01], 'Afghan Horse'], ['azure', 'Irregular Sowars', [32.565, 73.995], 'Afghan Horse'],
       ['azure', 'Irregular Sowars', [32.57, 74.13], 'Ghorcharas'],
       ['azure', 'Matchlockmen', 'sarai', 'Sarai Alamgir Post', 5, { post: true }], ['azure', 'Irregular Sowars', 'rasul', 'Rasul Post', 5, { post: true }],
@@ -209,9 +209,9 @@ const SCENARIOS = {
       ['red', 'Sepoy Infantry', 'ramnagar', '69th Bengal NI'],
     ],
     reinforcements: [
-      { round: 3, side: 'red', at: [32.42, 73.90], name: 'Whish’s division', note: 'came up from Multan with the siege train', units: [['Line Infantry', 'HM 10th Foot'], ['Line Infantry', 'HM 32nd Foot'], ['Sepoy Infantry', '8th Bengal NI'], ['Heavy Battery', 'Multan Siege Train']] },
-      { round: 4, side: 'red', at: [32.42, 73.90], name: 'Dundas’s Bombay column', note: 'arrived by forced marches', units: [['Line Infantry', 'HM 60th Rifles'], ['Line Infantry', '1st Bombay Fusiliers'], ['Irregular Sowars', 'Scinde Horse'], ['Horse Artillery', 'Bombay Horse Artillery']] },
-      { round: 5, side: 'red', at: [32.43, 73.99], name: 'Markham’s brigade', note: 'crossed the Chenab at Kanokee in boats sent up from Ramnagar', units: [['Sepoy Infantry', '46th Bengal NI'], ['Sepoy Infantry', '72nd Bengal NI']] },
+      { round: 3, side: 'red', at: [32.42, 73.90], name: 'Whish’s division', note: 'came up from Multan with the siege train', history: 'Multan surrendered on 22 January 1849, freeing Major-General Whish’s division and its siege train. Whish marched north and joined Gough on 18 February, bringing the heavy guns Gough had lacked at Chillianwala.', units: [['Line Infantry', 'HM 10th Foot'], ['Line Infantry', 'HM 32nd Foot'], ['Sepoy Infantry', '8th Bengal NI'], ['Heavy Battery', 'Multan Siege Train']] },
+      { round: 4, side: 'red', at: [32.42, 73.90], name: 'Dundas’s Bombay column', note: 'arrived by forced marches', history: 'Brigadier Dundas’s column of the Bombay army, which had come up from Sindh for the siege of Multan, followed Whish north and reached Gough by forced marches on 19 February.', units: [['Line Infantry', 'HM 60th Rifles'], ['Line Infantry', '1st Bombay Fusiliers'], ['Irregular Sowars', 'Scinde Horse'], ['Horse Artillery', 'Bombay Horse Artillery']] },
+      { round: 5, side: 'red', at: [32.43, 73.99], name: 'Markham’s brigade', note: 'crossed the Chenab at Kanokee in boats sent up from Ramnagar', history: 'Brigadier Markham’s brigade crossed the Chenab at Kanokee in boats sent up from Ramnagar and came in on the 20th, the eve of the battle, closing the river line on the Sikh left.', units: [['Sepoy Infantry', '46th Bengal NI'], ['Sepoy Infantry', '72nd Bengal NI']] },
     ],
     powers: [
       { id: 'khalsa', name: 'Khalsa army', chief: 'Raja Sher Singh Attariwala', seat: 'gujrat', npc: false, side: 'azure', color: '#3f6f8f', note: 'The country the Sikh army forages', extraSeats: ['kunjah', 'jalalpur', 'kharian'] },
@@ -276,7 +276,7 @@ const SCENARIOS = {
       ['red', 'Irregular Sowars', [30.38, 71.575], 'Hari Singh Nalwa’s Horse'], ['red', 'Irregular Sowars', [30.38, 71.575], 'Ghorcharas'],
     ],
     reinforcements: [
-      { round: 8, side: 'red', at: [30.39, 71.66], name: 'The Zamzama', note: 'was dragged down from Lahore', units: [['Great Gun', 'Zamzama'], ['Khalsa Infantry', 'Beldars and Escort']] },
+      { round: 8, side: 'red', at: [30.39, 71.66], name: 'The Zamzama', note: 'was dragged down from Lahore', history: 'Cast at Lahore in 1757 for Ahmad Shah Durrani, the great gun was taken by the Bhangi misl and passed to Ranjit Singh. Hauled down to Multan for the siege, it breached the citadel near the Khizri Gate, and on 2 June 1818 Akali Sadhu Singh’s Nihangs stormed through.', units: [['Great Gun', 'Zamzama'], ['Khalsa Infantry', 'Beldars and Escort']] },
     ],
     powers: [
       { id: 'sadozai', name: 'Sadozai Multan', chief: 'Nawab Muzaffar Khan', seat: 'multan', npc: false, side: 'azure', color: '#3f6f8f', note: 'The Nawab’s province', extraSeats: ['shujabad', 'muzaffargarh', 'khangarh'] },
@@ -357,10 +357,10 @@ const SCENARIOS = {
       ['red', 'Matchlockmen', 'khangarh', 'Khangarh Levies'],
     ],
     reinforcements: [
-      { round: 6, side: 'red', at: [29.95, 71.75], name: 'Sheikh Imamuddin’s division', note: 'came in from the east', units: [['Khalsa Infantry', 'Sheikh Imamuddin’s Division'], ['Light Field Gun', 'Imamuddin’s Guns']] },
-      { round: 11, side: 'red', at: [30.335, 71.69], name: 'Whish’s division', note: 'came down from Lahore with the Bengal siege train', units: [['Line Infantry', 'HM 10th Foot'], ['Line Infantry', 'HM 32nd Foot'], ['Sepoy Infantry', '49th Bengal NI'], ['Sepoy Infantry', '72nd Bengal NI'], ['Heavy Battery', 'Bengal Siege Train'], ['Horse Artillery', 'Bengal Horse Artillery']] },
-      { round: 12, side: 'azure', at: 'multan', name: 'Mulraj’s new levies', note: 'were raised in the city', units: [['Matchlockmen', 'Multani Levies'], ['Matchlockmen', 'Multani Levies']] },
-      { round: 21, side: 'red', at: [29.635, 71.67], name: 'The Bombay column', note: 'came up from Sindh with its own siege train', units: [['Line Infantry', 'HM 60th Rifles'], ['Line Infantry', '1st Bombay Fusiliers'], ['Sepoy Infantry', '3rd Bombay NI'], ['Heavy Battery', 'Bombay Siege Train'], ['Irregular Sowars', 'Scinde Horse']] },
+      { round: 6, side: 'red', at: [29.95, 71.75], name: 'Sheikh Imamuddin’s division', note: 'came in from the east', history: 'Sheikh Imamuddin, once the Darbar’s governor of Kashmir, was sent from Lahore with Darbar troops to join Edwardes and the Daudpotras against Mulraj in the summer of 1848.', units: [['Khalsa Infantry', 'Sheikh Imamuddin’s Division'], ['Light Field Gun', 'Imamuddin’s Guns']] },
+      { round: 11, side: 'red', at: [30.335, 71.69], name: 'Whish’s division', note: 'came down from Lahore with the Bengal siege train', history: 'After Edwardes’s victories at Kineyree and Saddusam, the Company sent Major-General Whish with a Bengal division and siege train. He reached Multan in August 1848 and opened the first siege in September.', units: [['Line Infantry', 'HM 10th Foot'], ['Line Infantry', 'HM 32nd Foot'], ['Sepoy Infantry', '49th Bengal NI'], ['Sepoy Infantry', '72nd Bengal NI'], ['Heavy Battery', 'Bengal Siege Train'], ['Horse Artillery', 'Bengal Horse Artillery']] },
+      { round: 12, side: 'azure', at: 'multan', name: 'Mulraj’s new levies', note: 'were raised in the city', history: 'Mulraj paid for fresh levies out of the treasury of Multan and kept his garrison up through the months of the siege.', units: [['Matchlockmen', 'Multani Levies'], ['Matchlockmen', 'Multani Levies']] },
+      { round: 21, side: 'red', at: [29.635, 71.67], name: 'The Bombay column', note: 'came up from Sindh with its own siege train', history: 'A column of the Bombay army came up the Indus from Sindh with its own siege train in December 1848. With it Whish resumed the siege on 27 December.', units: [['Line Infantry', 'HM 60th Rifles'], ['Line Infantry', '1st Bombay Fusiliers'], ['Sepoy Infantry', '3rd Bombay NI'], ['Heavy Battery', 'Bombay Siege Train'], ['Irregular Sowars', 'Scinde Horse']] },
     ],
     powers: [
       { id: 'mulraj', name: 'Mulraj’s Multan', chief: 'Diwan Mulraj', seat: 'multanfort', npc: false, side: 'azure', color: '#3f6f8f', note: 'The rebel province', extraSeats: ['multan', 'shujabad', 'sikandarabad'] },
@@ -390,7 +390,7 @@ const SCENARIOS = {
     year: 1841,
     region: 'Lahore',
     blurb: 'January 1841. Maharaja Kharak Singh and his son Nau Nihal Singh are dead, and Kharak Singh’s widow, Maharani Chand Kaur, holds Lahore as regent, with Raja Gulab Singh’s Dogras in the fort. Kanwar Sher Singh, son of Ranjit Singh, comes down the Grand Trunk Road from Amritsar to take the throne, and the regiments at Mian Mir have declared for him. Round 1 is 12 January.',
-    first: 'red',
+    first: 'azure',
     vpTarget: Infinity,
     roundLimit: 8,
     goal: {
@@ -399,8 +399,8 @@ const SCENARIOS = {
       defenderWins: 'Lahore Fort still holds for Chand Kaur. Sher Singh must treat with the regent’s party, and the Khalsa army grows restless in the city it has looted.',
     },
     sides: {
-      azure: { name: 'Chand Kaur’s Garrison', short: 'Regency', adj: 'Regency', pitch: 'Gulab Singh’s Dogras hold Lahore Fort and the walled city for Maharani Chand Kaur. Hold the gardens and the river crossing as long as you can, then the walls: keep the fort for eight days, until terms can be made.', tag: 'Moves second · hold the fort for 8 days' },
-      red: { name: 'Sher Singh’s Army', short: 'Sher Singh', adj: 'Khalsa', pitch: 'Sher Singh’s army comes down the road from Amritsar, and the Mian Mir regiments are with him. Clear the regent’s outposts, force the city gates, bring the guns up to the Badshahi Mosque and the walls, and take Lahore Fort.', tag: 'Moves first · take the fort' },
+      azure: { name: 'Chand Kaur’s Garrison', short: 'Regency', adj: 'Regency', pitch: 'Gulab Singh’s Dogras hold Lahore Fort and the walled city for Maharani Chand Kaur. Hold the gardens and the river crossing as long as you can, then the walls: keep the fort for eight days, until terms can be made.', tag: 'Moves first · hold the fort for 8 days' },
+      red: { name: 'Sher Singh’s Army', short: 'Sher Singh', adj: 'Khalsa', pitch: 'Sher Singh’s army comes down the road from Amritsar, and the Mian Mir regiments are with him. Clear the regent’s outposts, force the city gates, bring the guns up to the Badshahi Mosque and the walls, and take Lahore Fort.', tag: 'Moves second · take the fort' },
     },
     generals: {
       azure: { name: 'Raja Gulab Singh', title: 'Holding the fort for Maharani Chand Kaur', leads: 'Gulab Singh’s Dogras' },
@@ -413,9 +413,9 @@ const SCENARIOS = {
     startOwners: { lahorefort: 'azure', lahore: 'azure', shalimar: 'azure', shahdara: 'azure', anarkali: null, mianmir: 'red' },
     startUnits: [
       // Chand Kaur: the fort, the walled city, and outposts at Shalimar and the Shahdara ferry.
-      ['azure', 'Dhal & Talwar', 'lahorefort', 'Gulab Singh’s Dogras'], ['azure', 'Light Field Gun', 'lahorefort', 'Fort Topkhana'],
-      ['azure', 'Matchlockmen', 'lahore', 'Dogra Musketeers'], ['azure', 'Khalsa Infantry', 'lahore', 'Chand Kaur’s Guard'],
-      ['azure', 'Matchlockmen', 'shalimar', 'Shalimar Guard'], ['azure', 'Irregular Sowars', 'shahdara', 'Dogra Horse'],
+      ['azure', 'Dhal & Talwar', [31.589, 74.316], 'Gulab Singh’s Dogras'], ['azure', 'Light Field Gun', 'lahorefort', 'Fort Topkhana'],
+      ['azure', 'Matchlockmen', [31.59, 74.319], 'Dogra Musketeers'], ['azure', 'Khalsa Infantry', [31.59, 74.319], 'Chand Kaur’s Guard'],
+      ['azure', 'Matchlockmen', [31.606, 74.346], 'River Pickets'], ['azure', 'Irregular Sowars', [31.631, 74.319], 'Dogra Horse'],
       // Sher Singh's army on the road from Amritsar, and the Mian Mir regiments.
       ['red', 'Khalsa Infantry', [31.601, 74.405], 'Sher Singh’s Battalions'], ['red', 'Khalsa Infantry', [31.601, 74.405], 'Khalsa Battalions'],
       ['red', 'Khalsa Infantry', [31.594, 74.400], 'Khalsa Battalions'], ['red', 'Khalsa Infantry', [31.594, 74.400], 'Khalsa Battalions'],
@@ -429,7 +429,7 @@ const SCENARIOS = {
       ['red', 'Light Field Gun', [31.54, 74.37], 'Mian Mir Topkhana'], ['red', 'Khalsa Infantry', [31.54, 74.37], 'Mian Mir Battalions'],
     ],
     reinforcements: [
-      { round: 3, side: 'red', at: 'anarkali', name: 'The Fauj-i-Khas', note: 'came over to Sher Singh from Anarkali', units: [['Khalsa Infantry', 'Fauj-i-Khas'], ['Khalsa Infantry', 'Fauj-i-Khas']] },
+      { round: 3, side: 'red', at: 'anarkali', name: 'The Fauj-i-Khas', note: 'came over to Sher Singh from Anarkali', history: 'The Fauj-i-Khas, the brigade drilled on the French model by Ventura and Allard, lay round Anarkali. Like most of the Khalsa army it declared for Kanwar Sher Singh against the regent Chand Kaur.', units: [['Khalsa Infantry', 'Fauj-i-Khas'], ['Khalsa Infantry', 'Fauj-i-Khas']] },
     ],
     powers: [
       { id: 'regency', name: 'The regent’s Lahore', chief: 'Maharani Chand Kaur', seat: 'lahorefort', npc: false, side: 'azure', color: '#3f6f8f', note: 'The fort, the walled city and its outposts', extraSeats: ['lahore', 'shalimar', 'shahdara'] },
@@ -471,9 +471,9 @@ const SCENARIOS = {
     homeBase: { azure: null, red: [[30.07, 70.94], [29.63, 71.15], [30.34, 71.69]] },
     walls: { multan: 5, multanfort: 9 },
     events: [
-      { round: 15, side: 'azure', text: 'Raja Sher Singh and the Darbar troops went over to Mulraj, and Whish raised the siege', flash: 'SHER SINGH GOES OVER', defect: { names: ['Sher Singh’s Sikhs', 'Sher Singh’s Ghorcharas'], to: 'azure' } },
-      { round: 18, side: 'azure', text: 'Sher Singh marched north from Multan to join his father’s rising', flash: 'SHER SINGH MARCHES NORTH', depart: ['Sher Singh’s Sikhs', 'Sher Singh’s Ghorcharas'] },
-      { round: 23, side: 'red', text: 'The great magazine in Multan’s citadel blew up', flash: 'THE MAGAZINE EXPLODES', walls: { multanfort: -1 }, hurt: { at: 'multanfort', hp: 2 } },
+      { title: 'Sher Singh goes over to Mulraj', history: 'On 14 September 1848 Raja Sher Singh and the Darbar troops went over to Mulraj. With a third of his besieging force gone, Whish raised the siege and fell back to wait for reinforcements.', round: 15, side: 'azure', text: 'Raja Sher Singh and the Darbar troops went over to Mulraj, and Whish raised the siege', flash: 'SHER SINGH GOES OVER', defect: { names: ['Sher Singh’s Sikhs', 'Sher Singh’s Ghorcharas'], to: 'azure' } },
+      { title: 'Sher Singh marches north', history: 'Mulraj never trusted his new ally. In October Sher Singh left Multan to join his father’s rising in the north, and the revolt became the Second Anglo-Sikh War.', round: 18, side: 'azure', text: 'Sher Singh marched north from Multan to join his father’s rising', flash: 'SHER SINGH MARCHES NORTH', depart: ['Sher Singh’s Sikhs', 'Sher Singh’s Ghorcharas'] },
+      { title: 'The magazine explodes', history: 'On 30 December 1848 a British shell fell on the great magazine in Multan’s citadel. The explosion killed several hundred of the garrison and destroyed much of Mulraj’s powder; he gave up the citadel on 22 January 1849.', round: 23, side: 'red', text: 'The great magazine in Multan’s citadel blew up', flash: 'THE MAGAZINE EXPLODES', walls: { multanfort: -1 }, hurt: { at: 'multanfort', hp: 2 } },
     ],
     strongpoints: ['multanfort', 'multan', 'shujabad', 'sikandarabad', 'khangarh', 'muzaffargarh'],
     startOwners: { multanfort: 'azure', multan: 'azure', shujabad: 'azure', sikandarabad: 'azure', khangarh: 'red', muzaffargarh: null },
@@ -500,11 +500,11 @@ const SCENARIOS = {
       ['red', 'Matchlockmen', 'khangarh', 'Khangarh Levies'],
     ],
     reinforcements: [
-      { round: 6, side: 'red', at: [29.95, 71.75], name: 'Sheikh Imamuddin’s division', note: 'came in from the east', units: [['Khalsa Infantry', 'Sheikh Imamuddin’s Division'], ['Light Field Gun', 'Imamuddin’s Guns']] },
-      { round: 9, side: 'red', at: [30.335, 71.69], name: 'Raja Sher Singh’s Darbar troops', note: 'came down the Lahore road', units: [['Khalsa Infantry', 'Sher Singh’s Sikhs'], ['Khalsa Infantry', 'Sher Singh’s Sikhs'], ['Khalsa Infantry', 'Sher Singh’s Sikhs'], ['Irregular Sowars', 'Sher Singh’s Ghorcharas']] },
-      { round: 11, side: 'red', at: [30.335, 71.69], name: 'Whish’s division', note: 'came down from Lahore with the Bengal siege train', units: [['Line Infantry', 'HM 10th Foot'], ['Line Infantry', 'HM 32nd Foot'], ['Sepoy Infantry', '49th Bengal NI'], ['Sepoy Infantry', '72nd Bengal NI'], ['Heavy Battery', 'Bengal Siege Train'], ['Horse Artillery', 'Bengal Horse Artillery']] },
-      { round: 12, side: 'azure', at: 'multan', name: 'Mulraj’s new levies', note: 'were raised in the city', units: [['Matchlockmen', 'Multani Levies'], ['Matchlockmen', 'Multani Levies']] },
-      { round: 21, side: 'red', at: [29.635, 71.67], name: 'The Bombay column', note: 'came up from Sindh with its own siege train', units: [['Line Infantry', 'HM 60th Rifles'], ['Line Infantry', '1st Bombay Fusiliers'], ['Sepoy Infantry', '3rd Bombay NI'], ['Heavy Battery', 'Bombay Siege Train'], ['Irregular Sowars', 'Scinde Horse']] },
+      { round: 6, side: 'red', at: [29.95, 71.75], name: 'Sheikh Imamuddin’s division', note: 'came in from the east', history: 'Sheikh Imamuddin, once the Darbar’s governor of Kashmir, was sent from Lahore with Darbar troops to join Edwardes and the Daudpotras against Mulraj in the summer of 1848.', units: [['Khalsa Infantry', 'Sheikh Imamuddin’s Division'], ['Light Field Gun', 'Imamuddin’s Guns']] },
+      { round: 9, side: 'red', at: [30.335, 71.69], name: 'Raja Sher Singh’s Darbar troops', note: 'came down the Lahore road', history: 'Raja Sher Singh Attariwala was sent down from Lahore with Darbar troops to help the British besiege Multan, though his father Chattar Singh was already moving towards revolt in Hazara.', units: [['Khalsa Infantry', 'Sher Singh’s Sikhs'], ['Khalsa Infantry', 'Sher Singh’s Sikhs'], ['Khalsa Infantry', 'Sher Singh’s Sikhs'], ['Irregular Sowars', 'Sher Singh’s Ghorcharas']] },
+      { round: 11, side: 'red', at: [30.335, 71.69], name: 'Whish’s division', note: 'came down from Lahore with the Bengal siege train', history: 'After Edwardes’s victories at Kineyree and Saddusam, the Company sent Major-General Whish with a Bengal division and siege train. He reached Multan in August 1848 and opened the first siege in September.', units: [['Line Infantry', 'HM 10th Foot'], ['Line Infantry', 'HM 32nd Foot'], ['Sepoy Infantry', '49th Bengal NI'], ['Sepoy Infantry', '72nd Bengal NI'], ['Heavy Battery', 'Bengal Siege Train'], ['Horse Artillery', 'Bengal Horse Artillery']] },
+      { round: 12, side: 'azure', at: 'multan', name: 'Mulraj’s new levies', note: 'were raised in the city', history: 'Mulraj paid for fresh levies out of the treasury of Multan and kept his garrison up through the months of the siege.', units: [['Matchlockmen', 'Multani Levies'], ['Matchlockmen', 'Multani Levies']] },
+      { round: 21, side: 'red', at: [29.635, 71.67], name: 'The Bombay column', note: 'came up from Sindh with its own siege train', history: 'A column of the Bombay army came up the Indus from Sindh with its own siege train in December 1848. With it Whish resumed the siege on 27 December.', units: [['Line Infantry', 'HM 60th Rifles'], ['Line Infantry', '1st Bombay Fusiliers'], ['Sepoy Infantry', '3rd Bombay NI'], ['Heavy Battery', 'Bombay Siege Train'], ['Irregular Sowars', 'Scinde Horse']] },
     ],
     powers: [
       { id: 'mulraj', name: 'Mulraj’s Multan', chief: 'Diwan Mulraj', seat: 'multanfort', npc: false, side: 'azure', color: '#3f6f8f', note: 'The rebel province', extraSeats: ['multan', 'shujabad', 'sikandarabad'] },
@@ -628,12 +628,12 @@ const SCENARIOS = {
       ['azure', 'Matchlockmen', 'rohtas', 'Rohtas Garrison'], ['azure', 'Jingal', 'rohtas', 'Rohtas Wall Guns'],
       ['azure', 'Matchlockmen', 'dina', 'Dina Post'],
       // The Sukerchakia and Bhangi horse on the Gujrat side.
-      ['red', 'Irregular Sowars', [32.90, 73.79], 'Charat Singh’s Sowars'], ['red', 'Mounted Matchlocks', [32.90, 73.79], 'Sukerchakia Sowars'],
-      ['red', 'Irregular Sowars', [32.88, 73.81], 'Sukerchakia Sowars'], ['red', 'Mounted Matchlocks', [32.88, 73.81], 'Sukerchakia Sowars'],
-      ['red', 'Irregular Sowars', [32.925, 73.78], 'Gujjar Singh’s Sowars'], ['red', 'Mounted Matchlocks', [32.925, 73.78], 'Bhangi Sowars'],
-      ['red', 'Irregular Sowars', [32.86, 73.80], 'Bhangi Sowars'], ['red', 'Zamburak', [32.86, 73.80], 'Bhangi Zamburaks'],
-      ['red', 'Matchlockmen', 'sarai', 'Bhangi Musketeers'], ['red', 'Zamburak', 'sarai', 'Bhangi Zamburaks'],
-      ['red', 'Dhal & Talwar', [32.895, 73.765], 'Akali Nihangs'], ['red', 'Dhal & Talwar', [32.895, 73.765], 'Akali Nihangs'],
+      ['red', 'Irregular Sowars', [32.883, 73.821], 'Charat Singh’s Sowars'], ['red', 'Mounted Matchlocks', [32.887, 73.812], 'Sukerchakia Sowars'],
+      ['red', 'Irregular Sowars', [32.873, 73.821], 'Sukerchakia Sowars'], ['red', 'Mounted Matchlocks', [32.88, 73.81], 'Sukerchakia Sowars'],
+      ['red', 'Irregular Sowars', [32.896, 73.831], 'Gujjar Singh’s Sowars'], ['red', 'Mounted Matchlocks', [32.901, 73.821], 'Bhangi Sowars'],
+      ['red', 'Irregular Sowars', [32.855, 73.821], 'Bhangi Sowars'], ['red', 'Zamburak', [32.86, 73.80], 'Bhangi Zamburaks'],
+      ['red', 'Matchlockmen', [32.896, 73.775], 'Bhangi Musketeers'], ['red', 'Zamburak', [32.892, 73.784], 'Bhangi Zamburaks'],
+      ['red', 'Dhal & Talwar', [32.887, 73.775], 'Akali Nihangs'], ['red', 'Dhal & Talwar', [32.887, 73.775], 'Akali Nihangs'],
       ['red', 'Irregular Sowars', [32.84, 73.79], 'Sukerchakia Sowars'], ['red', 'Irregular Sowars', [32.84, 73.79], 'Bhangi Sowars'],
       ['red', 'Irregular Sowars', [33.0, 73.835], 'Akali Sowars'], ['red', 'Zamburak', [33.0, 73.835], 'Sukerchakia Zamburaks'],
     ],
@@ -689,7 +689,7 @@ const SCENARIOS = {
       ['red', 'Dhal & Talwar', [32.83, 73.86], 'Akali Nihangs'], ['red', 'Irregular Sowars', [32.83, 73.86], 'Sukerchakia Sowars'],
     ],
     reinforcements: [
-      { round: 3, side: 'red', at: [33.04, 73.84], name: 'Gujjar Singh’s Bhangis', note: 'came round by Jatlan', units: [['Irregular Sowars', 'Gujjar Singh’s Sowars'], ['Mounted Matchlocks', 'Bhangi Sowars'], ['Irregular Sowars', 'Bhangi Sowars'], ['Zamburak', 'Bhangi Zamburaks'], ['Matchlockmen', 'Bhangi Musketeers'], ['Dhal & Talwar', 'Akali Nihangs']] },
+      { round: 3, side: 'red', at: [33.04, 73.84], name: 'Gujjar Singh’s Bhangis', note: 'came round by Jatlan', history: 'Gujjar Singh Bhangi shared the advance over the Jhelum with Charat Singh Sukerchakia. In this open campaign his misl comes in separately, round by Jatlan.', units: [['Irregular Sowars', 'Gujjar Singh’s Sowars'], ['Mounted Matchlocks', 'Bhangi Sowars'], ['Irregular Sowars', 'Bhangi Sowars'], ['Zamburak', 'Bhangi Zamburaks'], ['Matchlockmen', 'Bhangi Musketeers'], ['Dhal & Talwar', 'Akali Nihangs']] },
     ],
     powers: [
       { id: 'durrani', name: 'Durrani Rohtas', chief: 'Sarbuland Khan', seat: 'rohtas', npc: false, side: 'azure', color: '#3f6f8f', note: 'The faujdari of Rohtas', extraSeats: ['jhelum', 'dina', 'bakrala'] },
@@ -758,11 +758,11 @@ const SCENARIOS = {
       // Lehna Singh at Shabqadar.
       ['azure', 'Khalsa Infantry', 'shabqadar', 'Lehna Singh’s Garrison'], ['azure', 'Jingal', 'shabqadar', 'Shabqadar Wall Guns'],
       // Akbar Khan's army coming down the Khyber past Ali Masjid.
-      ['red', 'Irregular Sowars', [34.022, 71.300], 'Akbar Khan’s Horse'], ['red', 'Irregular Sowars', [34.022, 71.300], 'Durrani Horse'],
-      ['red', 'Irregular Sowars', [34.025, 71.285], 'Qizilbash Horse'], ['red', 'Irregular Sowars', [34.025, 71.285], 'Durrani Horse'],
-      ['red', 'Irregular Sowars', [34.028, 71.255], 'Shamsuddin Khan’s Horse'], ['red', 'Light Field Gun', [34.028, 71.255], 'Afghan Topkhana'],
+      ['red', 'Irregular Sowars', [34.027, 71.291], 'Akbar Khan’s Horse'], ['red', 'Irregular Sowars', [34.027, 71.291], 'Durrani Horse'],
+      ['red', 'Irregular Sowars', [34.041, 71.244], 'Qizilbash Horse'], ['red', 'Irregular Sowars', [34.041, 71.244], 'Durrani Horse'],
+      ['red', 'Irregular Sowars', [34.045, 71.253], 'Shamsuddin Khan’s Horse'], ['red', 'Light Field Gun', [34.028, 71.255], 'Afghan Topkhana'],
       ['red', 'Light Field Gun', [34.020, 71.268], 'Afghan Topkhana'], ['red', 'Light Field Gun', [34.020, 71.268], 'Afghan Topkhana'],
-      ['red', 'Matchlockmen', [34.015, 71.315], 'Afzal Khan’s Jezailchis'], ['red', 'Matchlockmen', [34.015, 71.315], 'Jezailchis'],
+      ['red', 'Matchlockmen', [34.022, 71.3], 'Afzal Khan’s Jezailchis'], ['red', 'Matchlockmen', [34.022, 71.3], 'Jezailchis'],
       ['red', 'Dhal & Talwar', [34.032, 71.310], 'Ghazis'], ['red', 'Dhal & Talwar', [34.032, 71.310], 'Ghazis'],
       ['red', 'Dhal & Talwar', [34.035, 71.275], 'Ghazis'], ['red', 'Zamburak', [34.035, 71.275], 'Afghan Zamburaks'],
       // The Afridis rising in the hills on either side of the mouth of the pass.
@@ -772,7 +772,7 @@ const SCENARIOS = {
       ['red', 'Irregular Sowars', [34.305, 71.445], 'Haji Khan’s Horse'],
     ],
     reinforcements: [
-      { round: 11, side: 'azure', at: [34.005, 71.82], name: 'The army from Lahore', note: 'came up the Attock road by forced marches', units: [['Khalsa Infantry', 'Fauj-i-Khas'], ['Khalsa Infantry', 'Fauj-i-Khas'], ['Khalsa Infantry', 'Khalsa Battalions'], ['Light Dragoons', 'Ghorchara Khas'], ['Irregular Sowars', 'Ghorcharas'], ['Light Field Gun', 'Topkhana-i-Khas']] },
+      { round: 11, side: 'azure', at: [34.005, 71.82], name: 'The army from Lahore', note: 'came up the Attock road by forced marches', history: 'The best of the Sikh troops had gone to Lahore for Kanwar Nau Nihal Singh’s wedding. When word of the siege came they marched back up the Attock road by forced marches, and when they came up the Afghans withdrew by night.', units: [['Khalsa Infantry', 'Fauj-i-Khas'], ['Khalsa Infantry', 'Fauj-i-Khas'], ['Khalsa Infantry', 'Khalsa Battalions'], ['Light Dragoons', 'Ghorchara Khas'], ['Irregular Sowars', 'Ghorcharas'], ['Light Field Gun', 'Topkhana-i-Khas']] },
     ],
     powers: [
       { id: 'khalsa', name: 'Sikh Peshawar', chief: 'Sardar Hari Singh Nalwa', seat: 'balahisar', npc: false, side: 'azure', color: '#3f6f8f', note: 'The Peshawar valley under Sikh rule', extraSeats: ['peshawar', 'jamrud', 'shabqadar'] },
@@ -824,7 +824,7 @@ const SCENARIOS = {
     },
     sides: {
       azure: { name: '14th Native Infantry', short: '14th N.I.', adj: 'sepoy', pitch: 'Some five hundred of the 14th, armed, in their own lines with the quarter-guard and loopholed huts round you. The bridge of boats is held against you and the boats are taken up. Get 200 men across into Kashmir by the Mangla ford, or by boats you seize, before the evening of the 8th.', tag: 'Moves second · reach Kashmir with 200 men' },
-      red: { name: 'Rawalpindi Column', short: 'Column', adj: 'Company', pitch: 'HM 24th, Cookes’s guns, Miller’s police and Lind’s Mooltanee horse and foot are round the cantonment at first light, with half the Mooltanee horse across the river. The 14th must not get away: keep them from the Mangla ford and the far bank until they are destroyed.', tag: 'Moves first · let fewer than 200 escape' },
+      red: { name: 'Rawalpindi Column', short: 'Column', adj: 'Company', pitch: 'HM 24th, Cookes’s guns, Miller’s police and Lind’s Mooltanee horse and foot are closing on the cantonment at first light, with half the Mooltanee horse across the river. The 14th must not get away: keep them from the Mangla ford and the far bank until they are destroyed.', tag: 'Moves first · let fewer than 200 escape' },
     },
     generals: {
       azure: { name: 'Mirza Dildar Baig', title: 'Leader of the mutineers of the 14th', leads: '14th N.I., Right Wing' },
@@ -838,20 +838,21 @@ const SCENARIOS = {
     startUnits: [
       // The 14th in its lines, its Sikhs gone over.
       ['azure', 'Line Infantry', 'lines14', '14th N.I., Right Wing'], ['azure', 'Line Infantry', 'lines14', '14th N.I., Left Wing'],
-      // The 24th and the police coming down off the high ground by the fakir's takia.
-      ['red', 'Line Infantry', [32.936, 73.703], 'HM 24th Foot'], ['red', 'Matchlockmen', [32.936, 73.703], 'Miller’s Police Battalion', 3],
-      ['red', 'Matchlockmen', [32.939, 73.713], 'Mooltanee Foot'], ['red', 'Sepoy Infantry', [32.939, 73.713], 'Sikh Company of the 14th', 2],
-      // The guns and half the Mooltanee horse on the right of the cantonment, between the lines and the town.
-      ['red', 'Horse Artillery', [32.925, 73.726], 'Cookes’s Horse Artillery', 4], ['red', 'Irregular Sowars', [32.925, 73.726], 'Lind’s Mooltanee Horse'],
+      // The 24th and the police coming down off the high ground by the fakir's takia,
+      // far enough out that the 14th has a move before the first shot.
+      ['red', 'Line Infantry', [32.98, 73.704], 'HM 24th Foot'], ['red', 'Matchlockmen', [32.98, 73.704], 'Miller’s Police Battalion', 3],
+      ['red', 'Matchlockmen', [32.98, 73.713], 'Mooltanee Foot'], ['red', 'Sepoy Infantry', [32.98, 73.713], 'Sikh Company of the 14th', 2],
+      // The guns and half the Mooltanee horse coming up behind them.
+      ['red', 'Horse Artillery', [32.996, 73.727], 'Cookes’s Horse Artillery', 4], ['red', 'Irregular Sowars', [32.973, 73.634], 'Lind’s Mooltanee Horse'],
       // The bridge held by police since first light; the other half of the horse across the river.
-      ['red', 'Matchlockmen', 'jhelum', 'Punjab Police', 2, { post: true }], ['red', 'Irregular Sowars', 'jhelum', 'Mounted Police', 1],
+      ['red', 'Matchlockmen', 'jhelum', 'Punjab Police', 2, { post: true }], ['red', 'Irregular Sowars', 'jhelum', 'Mounted Police', 1, { post: true }],
       ['red', 'Irregular Sowars', [32.937, 73.751], 'Mooltanee Horse, far bank', 4, { post: true }],
       ['red', 'Matchlockmen', 'dina', 'Dina Thana', 1, { post: true }],
       // The Maharaja's post at the Kashmir end of the Mangla ford, which gave up those who came through.
       ['red', 'Matchlockmen', [33.101, 73.673], 'Gulab Singh’s Post at the Ford', 2, { post: true }],
     ],
     events: [
-      { round: 3, side: 'red', text: 'A shell blows up the regimental magazine in the lines of the 39th', flash: 'THE MAGAZINE BLOWS UP', hurt: { at: 'lines39', hp: 1 } },
+      { title: 'The magazine blows up', history: 'In the fighting for the lines on the morning of 7 July a shell blew up the magazine of the 39th, while the 14th held its quarter-guard and loopholed huts against HM 24th.', round: 3, side: 'red', text: 'A shell blows up the regimental magazine in the lines of the 39th', flash: 'THE MAGAZINE BLOWS UP', hurt: { at: 'lines39', hp: 1 } },
     ],
     powers: [
       { id: 'jhelum', name: 'Jhelum District', chief: 'Major Clement Browne, Deputy Commissioner', seat: 'jhelum', npc: false, side: 'red', color: '#94493a', note: 'The Company’s district on the right bank', extraSeats: ['dina', 'rohtas', 'mangla', 'kalagujran'] },
@@ -903,14 +904,14 @@ const SCENARIOS = {
       // The column at Dina.
       ['red', 'Line Infantry', 'dina', 'HM 24th Foot'], ['red', 'Horse Artillery', 'dina', 'Cookes’s Horse Artillery', 4],
       ['red', 'Matchlockmen', [33.022, 73.612], 'Miller’s Police Battalion', 3], ['red', 'Matchlockmen', [33.022, 73.612], 'Mooltanee Foot'],
-      ['red', 'Irregular Sowars', [33.015, 73.625], 'Lind’s Mooltanee Horse'],
+      ['red', 'Irregular Sowars', [33.032, 73.625], 'Lind’s Mooltanee Horse'],
       // Half the horse on the road through the cantonment for the river.
-      ['red', 'Irregular Sowars', [32.940, 73.700], 'Mooltanee Horse, advance', 4],
-      ['red', 'Matchlockmen', 'jhelum', 'Punjab Police', 2, { post: true }], ['red', 'Irregular Sowars', 'jhelum', 'Mounted Police', 1],
+      ['red', 'Irregular Sowars', [32.973, 73.634], 'Mooltanee Horse, advance', 4],
+      ['red', 'Matchlockmen', 'jhelum', 'Punjab Police', 2, { post: true }], ['red', 'Irregular Sowars', 'jhelum', 'Mounted Police', 1, { post: true }],
       ['red', 'Matchlockmen', [33.101, 73.673], 'Gulab Singh’s Post at the Ford', 2, { post: true }],
     ],
     reinforcements: [
-      { round: 11, side: 'red', at: [33.095, 73.535], name: 'Colonel Browne with the 24th', note: 'came down the road from Rawalpindi by forced marches', units: [['Line Infantry', 'HM 24th, second detachment', 4]] },
+      { round: 11, side: 'red', at: [33.095, 73.535], name: 'Colonel Browne with the 24th', note: 'came down the road from Rawalpindi by forced marches', history: 'The rest of HM 24th Foot lay at Rawalpindi, where the 58th Native Infantry were disarmed the same morning. In this open campaign a second detachment is sent down the Grand Trunk Road after Ellice.', units: [['Line Infantry', 'HM 24th, second detachment', 4]] },
     ],
     powers: [
       { id: 'jhelum', name: 'Jhelum District', chief: 'Major Clement Browne, Deputy Commissioner', seat: 'jhelum', npc: false, side: 'red', color: '#94493a', note: 'The Company’s district on the right bank', extraSeats: ['dina', 'rohtas', 'mangla', 'kalagujran'] },
@@ -976,12 +977,12 @@ const SCENARIOS = {
     startOwners: { gogera: 'red', kaureshah: 'red', harappa: 'red', chichawatni: 'red', kamalia: 'red' },
     startUnits: [
       // Ahmad Khan back across the river at Jhamra with the Kharrals.
-      ['azure', 'Irregular Sowars', 'jhamra', 'Ahmad Khan’s Horse', 4], ['azure', 'Matchlockmen', 'jhamra', 'Kharral Matchlocks'],
+      ['azure', 'Irregular Sowars', [31.069, 73.281], 'Ahmad Khan’s Horse', 4], ['azure', 'Matchlockmen', [31.055, 73.308], 'Kharral Matchlocks'],
       // The Kathias, who stopped and robbed the mail cart on the Multan road.
       ['azure', 'Mounted Matchlocks', [30.575, 72.78], 'Mohmand Kathia’s Horse', 4], ['azure', 'Matchlockmen', [30.555, 72.80], 'Kathia Matchlocks', 4],
       // The Wattus gathering near Akbar to plunder it, a march from their
       // villages in the Gishkori jungle.
-      ['azure', 'Matchlockmen', [30.89, 73.30], 'Bahlak Wattu’s Band', 3],
+      ['azure', 'Matchlockmen', [30.906, 73.263], 'Bahlak Wattu’s Band', 3],
       // The station: the new levy, a party of the Kuttar Mukhi battalion and
       // police, and Berkeley's horsemen at the ferry where Ahmad Khan crossed.
       ['red', 'Matchlockmen', 'gogera', 'Gugera Levy', 4], ['red', 'Sepoy Infantry', 'gogera', 'Kuttar Mukhi Battalion', 2],
@@ -992,13 +993,13 @@ const SCENARIOS = {
       ['red', 'Matchlockmen', 'kamalia', 'Kamalia Thana', 1, { post: true }], ['red', 'Irregular Sowars', 'kamalia', 'Sarfraz Khan’s Horse', 1],
     ],
     reinforcements: [
-      { round: 3, side: 'red', at: [30.945, 73.455], name: 'The 1st Sikh Cavalry', note: 'rode in from Lahore under Lieutenant Chichester, through rain falling in torrents', units: [['Irregular Sowars', '1st Sikh Cavalry', 4]] },
-      { round: 3, side: 'red', at: [30.52, 72.545], name: 'Captain Fraser', note: 'came up the Multan road by Tulumba with 80 sowars of the 1st Irregular Cavalry', units: [['Irregular Sowars', '1st Irregular Cavalry, Fraser’s Troop', 2]] },
-      { round: 4, side: 'red', at: [30.95, 73.39], name: 'Colonel Paton’s column', note: 'marched in from Lahore, a few miles out on the morning of the 20th', units: [['Horse Artillery', 'Paton’s Guns', 3], ['Line Infantry', 'HM 81st, one company', 2], ['Sepoy Infantry', 'Subhan Khan’s Regiment', 2], ['Irregular Sowars', 'Lahore Mounted Police', 1]] },
-      { round: 4, side: 'red', at: [30.52, 72.545], name: 'Major Chamberlain', note: 'followed with a hundred more of the 1st Irregular Cavalry', units: [['Irregular Sowars', '1st Irregular Cavalry', 2]] },
-      { round: 10, side: 'red', at: [31.05, 72.545], name: 'Captain Hawes', note: 'advanced from Jhang on Kamalia with a wing of the 2nd Irregular Cavalry and levies from Gujranwala', units: [['Irregular Sowars', '2nd Irregular Cavalry, wing', 4], ['Matchlockmen', 'Gujranwala Levies', 3]] },
-      { round: 12, side: 'red', at: [30.52, 72.545], name: 'Captain Dennis', note: 'came up from Multan with two guns manned by European volunteers', units: [['Light Field Gun', 'Volunteer Battery', 2], ['Sepoy Infantry', '11th Punjab Infantry and Police', 5], ['Irregular Sowars', '1st Irregular Cavalry, Dennis’s Troop', 2]] },
-      { round: 12, side: 'red', at: [30.945, 73.455], name: 'Captains Snow and McAndrew', note: 'came down from Lahore, skirmishing with the Mardanas on the way', units: [['Sepoy Infantry', 'Punjab Infantry', 4], ['Irregular Sowars', 'Lahore Light Horse', 2]] },
+      { round: 3, side: 'red', at: [30.945, 73.455], name: 'The 1st Sikh Cavalry', note: 'rode in from Lahore under Lieutenant Chichester, through rain falling in torrents', history: 'Two hundred sowars of the 1st Sikh Cavalry, raised at Lahore that summer for service in Hindustan, were sent the 75 miles to Gogera as soon as the express came in. They rode in on the 19th through torrential rain, the horses too tired to move again that day.', units: [['Irregular Sowars', '1st Sikh Cavalry', 4]] },
+      { round: 3, side: 'red', at: [30.52, 72.545], name: 'Captain Fraser', note: 'came up the Multan road by Tulumba with 80 sowars of the 1st Irregular Cavalry', history: 'At the Commissioner’s call the brigadier at Multan sent Captain Fraser with 80 sowars of the 1st Irregular Cavalry, the old Skinner’s Horse, up the road by Tulumba on the 17th.', units: [['Irregular Sowars', '1st Irregular Cavalry, Fraser’s Troop', 2]] },
+      { round: 4, side: 'red', at: [30.95, 73.39], name: 'Colonel Paton’s column', note: 'marched in from Lahore, a few miles out on the morning of the 20th', history: 'Lieutenant-Colonel Paton followed the Sikh cavalry from Lahore with three horse-artillery guns, a company of HM 81st carried in native carriages, a company of Subhan Khan’s regiment and mounted police. He reached Gogera at eight on the 20th, as the clans came on through the jowar fields, and his guns drove them off with grape.', units: [['Horse Artillery', 'Paton’s Guns', 3], ['Line Infantry', 'HM 81st, one company', 2], ['Sepoy Infantry', 'Subhan Khan’s Regiment', 2], ['Irregular Sowars', 'Lahore Mounted Police', 1]] },
+      { round: 4, side: 'red', at: [30.52, 72.545], name: 'Major Chamberlain', note: 'followed with a hundred more of the 1st Irregular Cavalry', history: 'Major Crawford Chamberlain followed Fraser on the 18th with a hundred more of the 1st Irregular Cavalry. The clans shut him up in the serai at Chichawatni, where he held out until Paton’s column relieved him.', units: [['Irregular Sowars', '1st Irregular Cavalry', 2]] },
+      { round: 10, side: 'red', at: [31.05, 72.545], name: 'Captain Hawes', note: 'advanced from Jhang on Kamalia with a wing of the 2nd Irregular Cavalry and levies from Gujranwala', history: 'Captain Hawes, officiating Deputy Commissioner of Jhang, was told to advance on Kamalia with the best force he could muster, a wing of the 2nd Irregular Cavalry and levies from Gujranwala, to shut the clans into their own country.', units: [['Irregular Sowars', '2nd Irregular Cavalry, wing', 4], ['Matchlockmen', 'Gujranwala Levies', 3]] },
+      { round: 12, side: 'red', at: [30.52, 72.545], name: 'Captain Dennis', note: 'came up from Multan with two guns manned by European volunteers', history: 'On Chamberlain’s news the brigadier at Multan sent two guns manned by European volunteers, 250 infantry of the 11th Punjab Infantry and 3rd Police Battalion, and a hundred sowars under Captain Dennis. They reached Chichawatni on the 28th.', units: [['Light Field Gun', 'Volunteer Battery', 2], ['Sepoy Infantry', '11th Punjab Infantry and Police', 5], ['Irregular Sowars', '1st Irregular Cavalry, Dennis’s Troop', 2]] },
+      { round: 12, side: 'red', at: [30.945, 73.455], name: 'Captains Snow and McAndrew', note: 'came down from Lahore, skirmishing with the Mardanas on the way', history: 'A detachment from Lahore under Captains Snow and McAndrew ran into the Mardanas near Mohammadpur in the night, skirmished, and reached Chichawatni on the 28th.', units: [['Sepoy Infantry', 'Punjab Infantry', 4], ['Irregular Sowars', 'Lahore Light Horse', 2]] },
     ],
     // The clans that rose with Ahmad Khan once he came among them; whoever
     // holds a clan's village takes its levies.
@@ -1006,9 +1007,9 @@ const SCENARIOS = {
       { id: 'kharral', name: 'The Kharrals of Jhamra', chief: 'Rai Ahmad Khan Kharral', seat: 'jhamra', npc: false, side: 'azure', color: '#3f6f8f', note: 'Ahmad Khan’s country across the Ravi, and the open bar behind it', extraSeats: ['tandlianwala', [31.15, 73.12]] },
       { id: 'gugera', name: 'Gugera District', chief: 'Lieutenant Elphinstone', seat: 'gogera', npc: false, side: 'red', color: '#94493a', note: 'The station and the posts on the Multan road', extraSeats: ['akbar', 'kaureshah', 'harappa', 'chichawatni', [30.945, 73.455], [30.52, 72.545]] },
       { id: 'kamalia', name: 'Kamalia', chief: 'Sarfraz Khan Kharral', seat: 'kamalia', npc: false, side: 'red', color: '#8a5a44', note: 'The Kharral chief who warned the Company, and his walled town' },
-      { id: 'wattu', name: 'The Wattus', chief: 'Malik Bahlak Wattu', seat: 'gishkori', npc: true, side: null, color: '#3f7b4c', note: 'The Wattu villages in the jungle below Gogera', levy: { variant: 'Matchlockmen', name: 'Wattu Matchlocks' } },
-      { id: 'fatiana', name: 'The Fatianas', chief: 'Mehr Bahawal Fatiana', seat: 'jalli', npc: true, side: null, color: '#5c7a3a', note: 'The Fatianas and Tarhanas of the Jalli jungle', levy: { variant: 'Irregular Sowars', name: 'Fatiana Horse' } },
-      { id: 'mardana', name: 'The Mardanas', chief: 'Walidad Mardana', seat: 'mohammadpur', npc: true, side: null, color: '#6f6a3a', note: 'The Mardana villages on the Multan road', levy: { variant: 'Spearmen', name: 'Mardana Spearmen' } },
+      { id: 'wattu', name: 'The Wattus', chief: 'Malik Bahlak Wattu', seat: 'gishkori', npc: true, side: null, color: '#3f7b4c', note: 'The Wattu villages in the jungle below Gogera', levy: { variant: 'Matchlockmen', name: 'Wattu Matchlocks' }, history: 'The Wattus of the Ravi rose with Ahmad Khan. Malik Bahlak Wattu of Khudiya gathered them at Nooray di Dal near Gishkori, the jungle where Ahmad Khan fell on the 21st.' },
+      { id: 'fatiana', name: 'The Fatianas', chief: 'Mehr Bahawal Fatiana', seat: 'jalli', npc: true, side: null, color: '#5c7a3a', note: 'The Fatianas and Tarhanas of the Jalli jungle', levy: { variant: 'Irregular Sowars', name: 'Fatiana Horse' }, history: 'Mehr Bahawal Fatiana, the bravest and most influential of the chiefs in Cave-Browne’s account, led the Fatianas, Tarhanas and Mardanas who killed Berkeley near Kaure Shah on the 22nd. Murad Fatiana struck the first blow.' },
+      { id: 'mardana', name: 'The Mardanas', chief: 'Walidad Mardana', seat: 'mohammadpur', npc: true, side: null, color: '#6f6a3a', note: 'The Mardana villages on the Multan road', levy: { variant: 'Spearmen', name: 'Mardana Spearmen' }, history: 'Walidad Mardana’s men intercepted Elphinstone’s expresses near Mohammadpur and took the Harappa tahsil, and with the Fatianas held the Lahore–Multan road for eight days.' },
     ],
     // The bar was open grazing and thorn scrub, the Ravi lined with tall
     // grass and tamarisk jungle; the canal colonies have since ploughed both.
@@ -1063,7 +1064,7 @@ const SCENARIOS = {
     },
     sides: {
       azure: { name: 'Sikh Army', short: 'Sikhs', adj: 'Sikh', pitch: 'Ranjodh Singh’s battalions, guns and Ghorcharas are over the river from Phillaur, with Ladwa’s men and posts at Dharamkot, Budhowal and the Talwan ghat. Raid the British road and Ludhiana, and keep at least one post on the left bank. Avitabile’s battalions cross at Talwan on day 9.', tag: 'Moves second · keep a post on the left bank for 16 days' },
-      red: { name: 'Smith’s Division', short: 'British', adj: 'British', pitch: 'Smith’s brigade and Cureton’s cavalry are before Dharamkot; Godby holds Ludhiana and the 53rd Jagraon, with the Shekhawati brigade at Bassian. The Gurkhas come from Delhi on day 4 and Wheeler on day 9. Take Dharamkot, Budhowal and Aliwal.', tag: 'Moves first · take Dharamkot, Budhowal and Aliwal' },
+      red: { name: 'Smith’s Division', short: 'British', adj: 'British', pitch: 'Smith’s brigade and Cureton’s cavalry are on the road to Dharamkot; Godby holds Ludhiana and the 53rd Jagraon, with the Shekhawati brigade at Bassian. The Gurkhas come from Delhi on day 4 and Wheeler on day 9. Take Dharamkot, Budhowal and Aliwal.', tag: 'Moves first · take Dharamkot, Budhowal and Aliwal' },
     },
     generals: {
       azure: { name: 'Sardar Ranjodh Singh Majithia', title: 'Commanding the Sikh army on the upper Sutlej', leads: 'Ranjodh Singh’s Battalions' },
@@ -1087,12 +1088,13 @@ const SCENARIOS = {
       // The guard on the ghat of Talwan, and the fort at Phillaur across the river.
       ['azure', 'Matchlockmen', 'aliwal', 'Najibs at the Ghat', 2],
       ['azure', 'Khalsa Infantry', 'phillaur', 'Phillaur Garrison', 3, { post: true }], ['azure', 'Jingal', 'phillaur', 'Phillaur Wall Guns', 3, { post: true }],
-      // Smith before Dharamkot with his first brigade and Cureton's cavalry.
-      ['red', 'Line Infantry', [30.93, 75.255], 'HM 31st Foot', 4], ['red', 'Sepoy Infantry', [30.93, 75.255], '24th Bengal NI', 4],
-      ['red', 'Sepoy Infantry', [30.92, 75.245], '47th Bengal NI', 4], ['red', 'Light Field Gun', [30.92, 75.245], 'Light Field Battery'],
-      ['red', 'Lancers', [30.915, 75.27], 'HM 16th Lancers', 4], ['red', 'Light Dragoons', [30.915, 75.27], '3rd Bengal Light Cavalry', 4],
-      ['red', 'Light Dragoons', [30.905, 75.255], 'Governor-General’s Bodyguard', 2], ['red', 'Irregular Sowars', [30.905, 75.255], '4th Irregular Cavalry', 4],
-      ['red', 'Horse Artillery', [30.91, 75.24], 'Alexander’s Troop'], ['red', 'Horse Artillery', [30.91, 75.24], 'Turton’s Troop'],
+      // Smith on the road to Dharamkot with his first brigade and Cureton's cavalry,
+      // a march short of it.
+      ['red', 'Line Infantry', [30.899, 75.2], 'HM 31st Foot', 4], ['red', 'Sepoy Infantry', [30.899, 75.2], '24th Bengal NI', 4],
+      ['red', 'Sepoy Infantry', [30.904, 75.191], '47th Bengal NI', 4], ['red', 'Light Field Gun', [30.927, 75.181], 'Light Field Battery'],
+      ['red', 'Lancers', [30.877, 75.191], 'HM 16th Lancers', 4], ['red', 'Light Dragoons', [30.877, 75.191], '3rd Bengal Light Cavalry', 4],
+      ['red', 'Light Dragoons', [30.881, 75.181], 'Governor-General’s Bodyguard', 2], ['red', 'Irregular Sowars', [30.868, 75.172], '4th Irregular Cavalry', 4],
+      ['red', 'Horse Artillery', [30.881, 75.181], 'Alexander’s Troop'], ['red', 'Horse Artillery', [30.886, 75.172], 'Turton’s Troop'],
       // Godby at Ludhiana with three native battalions and the fort's howitzers.
       ['red', 'Sepoy Infantry', 'ludhiana', '30th Bengal NI', 4], ['red', 'Sepoy Infantry', 'ludhiana', 'Ludhiana Fort Guard', 2, { post: true }],
       ['red', 'Sepoy Infantry', [30.915, 75.835], '36th Bengal NI', 4], ['red', 'Heavy Battery', [30.915, 75.835], 'Two 8-inch Howitzers', 2],
@@ -1102,9 +1104,9 @@ const SCENARIOS = {
       ['red', 'Irregular Sowars', [30.665, 75.53], 'Shekhawati Cavalry', 3],
     ],
     reinforcements: [
-      { round: 4, side: 'red', at: [30.90, 75.905], name: 'The brigade from Delhi', note: 'came up the Grand Trunk Road to Ludhiana', units: [['Sepoy Infantry', 'Sirmoor Battalion', 4], ['Sepoy Infantry', 'Nusseree Battalion', 4]] },
-      { round: 9, side: 'red', at: [30.95, 75.165], name: 'Wheeler’s brigade', note: 'came up from headquarters by Dharamkot with more cavalry and guns', units: [['Line Infantry', 'HM 50th Foot', 4], ['Sepoy Infantry', '48th Bengal NI', 4], ['Light Dragoons', '1st and 5th Bengal Light Cavalry', 4], ['Horse Artillery', 'Lane’s Troop'], ['Light Field Gun', 'Mill’s and Boileau’s Batteries']] },
-      { round: 9, side: 'azure', at: [30.99, 75.607], name: 'Avitabile’s battalions', note: 'crossed the Sutlej at the ghat of Talwan with twelve guns and a large force of horse', units: [['Khalsa Infantry', 'Avitabile’s Battalions'], ['Khalsa Infantry', 'Avitabile’s Battalions'], ['Khalsa Infantry', 'Avitabile’s Battalions', 3], ['Light Field Gun', 'Avitabile’s Guns'], ['Irregular Sowars', 'Ghorcharas', 4]] },
+      { round: 4, side: 'red', at: [30.90, 75.905], name: 'The brigade from Delhi', note: 'came up the Grand Trunk Road to Ludhiana', history: 'The Sirmoor and Nusseree battalions, Gurkha regiments raised after the Anglo-Nepal War, came up the Grand Trunk Road to Ludhiana and fought under Smith at Aliwal.', units: [['Sepoy Infantry', 'Sirmoor Battalion', 4], ['Sepoy Infantry', 'Nusseree Battalion', 4]] },
+      { round: 9, side: 'red', at: [30.95, 75.165], name: 'Wheeler’s brigade', note: 'came up from headquarters by Dharamkot with more cavalry and guns', history: 'Gough sent Brigadier-General Wheeler from headquarters with HM 50th, the 48th Native Infantry, more cavalry and guns. He joined Smith before Aliwal, giving him the strength to attack.', units: [['Line Infantry', 'HM 50th Foot', 4], ['Sepoy Infantry', '48th Bengal NI', 4], ['Light Dragoons', '1st and 5th Bengal Light Cavalry', 4], ['Horse Artillery', 'Lane’s Troop'], ['Light Field Gun', 'Mill’s and Boileau’s Batteries']] },
+      { round: 9, side: 'azure', at: [30.99, 75.607], name: 'Avitabile’s battalions', note: 'crossed the Sutlej at the ghat of Talwan with twelve guns and a large force of horse', history: 'Some 4,000 of Avitabile’s regulars, the battalions drilled by the Italian general who had governed Peshawar, crossed to Ranjodh Singh at the ghat of Talwan with twelve guns and more horse before the battle of the 28th.', units: [['Khalsa Infantry', 'Avitabile’s Battalions'], ['Khalsa Infantry', 'Avitabile’s Battalions'], ['Khalsa Infantry', 'Avitabile’s Battalions', 3], ['Light Field Gun', 'Avitabile’s Guns'], ['Irregular Sowars', 'Ghorcharas', 4]] },
     ],
     powers: [
       { id: 'lahore', name: 'Lahore Darbar', chief: 'Maharaja Duleep Singh', seat: 'phillaur', npc: false, side: 'azure', color: '#3f6f8f', note: 'The Jullundur Doab across the Sutlej, with the Sikh posts on the left bank', extraSeats: ['talwan', 'nurmahal', [31.10, 75.40], 'aliwal', 'dharamkot'] },

@@ -338,6 +338,16 @@ body[data-turn="red"] .turn-buttons .primary { color: #1f0d09; }
 .actions { display: flex; justify-content: center; gap: 8px; margin-top: 18px; }
 .actions button { height: 40px; padding: 0 18px; border-radius: 6px; font-weight: 700; }
 .victory .primary { border: 0; background: var(--gold); color: #1a1408; }
+/* Dispatches: the campaign's main events, with their history. */
+.dispatch { max-width: 520px; }
+.dispatch[data-side="azure"] h2 { color: var(--azure-ink); } .dispatch[data-side="red"] h2 { color: var(--red-ink); }
+.dispatch > p { color: #cfc8b2; line-height: 1.55; }
+.dispatch-history { margin-top: 14px; padding: 12px 14px; border-left: 3px solid var(--gold); background: #ffffff08; border-radius: 0 6px 6px 0; }
+.dispatch-history small { color: var(--gold); font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+.dispatch-history p { margin: 6px 0 0; color: #b9b29c; font-size: 14px; line-height: 1.55; font-style: italic; }
+.dispatch-history[hidden] { display: none; }
+.dispatch .actions { justify-content: flex-end; }
+.dispatch .primary { border: 0; background: var(--gold); color: #1a1408; }
 
 /* ---------- Responsive ---------- */
 @media (max-width: 1240px) {

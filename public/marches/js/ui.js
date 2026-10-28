@@ -138,7 +138,7 @@ function renderInspector() {
     html += `<div class="unit-card ${sel.side}"><div class="unit-badge ${sel.side}">${unitPortrait(sel, 'portrait')}</div><div><small>${SIDES[sel.side].name} · ${TYPE_NAME[v.type]}</small><h2>${esc(sel.name)}</h2><p>${pipsHtml(sel.hp, maxHp(sel))} ${men(sel.hp)}</p><p class="${wavering(sel) ? 'warn' : ''}">${status}</p></div></div>${statBlock(sel)}<p class="trait">${v.trait}</p>`;
     const st = stockOf(sel), days = wagonDays(sel.side, sel.hex), got = deliveryFor(days), net = got - STOCK_USE;
     const level = st < STOCK_DESERT ? 'cut' : st < STOCK_HUNGRY ? 'warn' : 'ok';
-    const effect = st < STOCK_DESERT ? 'starving: −2 attack, −1 defence, losing ${men(1)} every command' : st < STOCK_HUNGRY ? 'hungry: −1 attack, −1 defence, cannot rally' : st < STOCK_SHORT ? 'short: −1 attack' : 'well supplied';
+    const effect = st < STOCK_DESERT ? `starving: −2 attack, −1 defence, losing ${men(1)} every command` : st < STOCK_HUNGRY ? 'hungry: −1 attack, −1 defence, cannot rally' : st < STOCK_SHORT ? 'short: −1 attack' : 'well supplied';
     html += `<div class="supply-card ${level}"><div class="supply-top"><b>Supplies ${st}%</b><span>${effect}</span></div><div class="supply-bar"><i style="width:${st}%"></i><em style="left:${STOCK_DESERT}%"></em><em style="left:${STOCK_HUNGRY}%"></em></div>`
       + `<small>${Number.isFinite(days) ? `Wagons need ${days < 0.05 ? 'no time — at the depot' : `${days.toFixed(1)} day${days >= 1.05 ? 's' : ''}`} to reach it: +${got}% a day against −${STOCK_USE}% eaten (${net >= 0 ? '+' : ''}${net}%).` : 'No wagons can reach it: the road is cut or there is no friendly depot. −20% a day.'}</small></div>`;
     if (ledBy(sel)) html += `<p class="led-note">★ Led by ${GENERALS[sel.side].name}: +1 attack, +1 defence, never falls back.</p>`;
@@ -150,8 +150,8 @@ function renderInspector() {
       const hint = sel.attacked ? (sel.mp > 0 ? 'It has struck; horse can ride on with its remaining march points.' : 'This formation has fought and is done for the round.')
         : V.targets.length ? 'Red rings are in range. Click one to attack, or click blue ground to march.'
         : V.farTargets.length ? 'Dashed rings can be reached and attacked in one order.'
-        : wavering(sel) ? 'Pull it back out of contact and let it rest to rally.'
-        : 'Click blue ground to march. Holding still out of contact rallies ${men(1)} (${men(2)} near the general).';
+        : wavering(sel) ? 'Pull it back into a village, town or fort out of contact and let it rest to rally.'
+        : `Click blue ground to march. Holding still in a village, town or fort out of contact rallies ${men(1)} (${men(2)} near the general).`;
       html += `<p class="hint">${hint}</p>`;
     }
   }
@@ -428,6 +428,41 @@ UI.victory = (side, reason) => {
   renderVictoryBattles();
   setTimeout(() => { if (!d.open) d.showModal(); }, 600);
 };
+// Dispatches: the campaign's main events (a column comes in, a magazine blows
+// up, a general falls, a post is taken), shown one at a time with their
+// history. Only when someone is playing, never in a replay; the computer waits
+// for them to be read before it moves.
+const DISPATCHES = [];
+let dispatchWaiters = [];
+UI.dispatch = d => {
+  if (!S || S.replay || (S.ai.azure && S.ai.red)) return;
+  DISPATCHES.push({ when: roundName(), ...d });
+  showDispatch();
+};
+UI.dispatchesRead = () => DISPATCHES.length || $('#dispatchDialog').open ? new Promise(r => dispatchWaiters.push(r)) : Promise.resolve();
+function showDispatch() {
+  const dlg = $('#dispatchDialog');
+  if (dlg.open || !DISPATCHES.length) return;
+  const d = DISPATCHES.shift();
+  dlg.dataset.side = d.side || '';
+  dlg.dataset.hex = d.hex ?? '';
+  $('#dispatchKicker').textContent = `${d.when}${d.kind ? ` · ${d.kind}` : ''}${d.side ? ` · ${SIDES[d.side].name}` : ''}`;
+  $('#dispatchTitle').textContent = d.title;
+  $('#dispatchText').textContent = d.text || '';
+  const h = $('#dispatchHistory'); h.hidden = !d.history; h.querySelector('p').textContent = d.history || '';
+  $('#dispatchShow').hidden = d.hex === undefined || d.hex === null || d.hex < 0;
+  $('#dispatchNext').textContent = DISPATCHES.length ? `Next dispatch (${DISPATCHES.length} more)` : 'Continue';
+  dlg.showModal();
+}
+function initDispatches() {
+  const dlg = $('#dispatchDialog');
+  $('#dispatchNext').onclick = () => dlg.close();
+  $('#dispatchShow').onclick = () => { const hex = +dlg.dataset.hex; dlg.close(); if (HEXES[hex]) flyTo(HEXES[hex].x, HEXES[hex].y, Math.max(R.cam.z, 1.6), 420); };
+  dlg.addEventListener('close', () => {
+    if (DISPATCHES.length) return void setTimeout(showDispatch, 120);
+    const w = dispatchWaiters; dispatchWaiters = []; w.forEach(f => f());
+  });
+}
 let overlayTimer = 0;
 UI.cameraChanged = () => {
   drawMinimapView();
@@ -933,6 +968,7 @@ function bindControls() {
   $('#newBtn').onclick = () => showStart();
   $('#panelToggle').onclick = () => document.body.classList.toggle('panel-open');
   document.querySelectorAll('dialog [data-close]').forEach(b => b.onclick = () => b.closest('dialog').close());
+  initDispatches();
   for (const id of ['#roster', '#objectives', '#powers']) $(id).addEventListener('click', e => {
     const row = e.target.closest('[data-unit], [data-hex]');
     if (!row) return;
@@ -1024,7 +1060,7 @@ function briefThenStart(player, ai) {
   const sd = SCN.sides[player], goal = $('#rulesGoal');
   goal.className = `rules-goal ${player}`;
   goal.innerHTML = `<b>${esc(sd.name)}</b>${esc(sd.pitch)}<em>${esc(sd.tag)}</em>`;
-  $('#rulesRound').textContent = SCN.clock ? `Each round is ${SCN.clock.hours} hours.` : 'Each round is one day.';
+  $("#rulesRound").textContent = SCN.clock && SCN.clock.hours < 24 ? `Each round is ${SCN.clock.hours} hours.` : 'Each round is one day.';
   $('#rulesHide').checked = false;
   const d = $('#rulesDialog');
   $('#rulesBegin').onclick = () => {
@@ -1042,7 +1078,7 @@ function startCampaign(player, ai) {
   R.unitEls.clear();
   newCampaign({ player, ai, fog: $('#fogPick').value === 'on' });
   V.started = true;
-  log(FIRST, SCN.goal ? `${SCN.title}, ${SCN.year}: the campaign opens. ${SIDES[SCN.goal.attacker].name} must ${SCN.goal.short[0].toLowerCase() + SCN.goal.short.slice(1)} before ${SCN.clock ? roundName(ROUND_LIMIT) + ' is out' : `day ${ROUND_LIMIT} is out`}.` : 'The banners are raised. Hold the strongpoints to earn war points; win the local chiefs to raise their levies.');
+  log(FIRST, (SCN.goal ? `${SCN.title}, ${SCN.year}: the campaign opens. ${SIDES[SCN.goal.attacker].name} must ${SCN.goal.short[0].toLowerCase() + SCN.goal.short.slice(1)} before ${SCN.clock ? roundName(ROUND_LIMIT) + ' is out' : `day ${ROUND_LIMIT} is out`}.` : 'The banners are raised. Hold the strongpoints to earn war points; win the local chiefs to raise their levies.' ));
   save();
   $('#startDialog').close();
   refresh();
