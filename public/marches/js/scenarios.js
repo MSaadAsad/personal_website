@@ -386,6 +386,7 @@ const SCENARIOS = {
   // Khari Khariyali (see the Battle for Khari).
   lahore: {
     group: 'lahore', mode: 'open',
+    gunRange: 4,  // 250 m hexes: a field gun reaches about a kilometre
     title: 'The Siege of Lahore, 1841',
     year: 1841,
     region: 'Lahore',
@@ -520,6 +521,7 @@ const SCENARIOS = {
   // already round the city and the guns on the minarets.
   lahoreh: {
     map: 'lahore', group: 'lahore', mode: 'historic',
+    gunRange: 4,  // 250 m hexes: a field gun reaches about a kilometre
     title: 'The Siege of Lahore, 1841',
     year: 1841,
     region: 'Lahore',

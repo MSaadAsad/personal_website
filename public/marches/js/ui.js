@@ -125,7 +125,7 @@ function generalPortrait(side) {
 
 function statBlock(u) {
   const v = VARIANTS[u.variant];
-  return `<div class="stats"><div><small>March</small><b>${u.side === S.turn ? `${u.mp}<span>/${fullMp(u)}</span>` : fullMp(u)}</b></div><div><small>Attack</small><b>${v.atk}</b></div><div><small>Defence</small><b>${v.def}</b></div><div><small>Range</small><b>${v.range}</b></div></div>`;
+  return `<div class="stats"><div><small>March</small><b>${u.side === S.turn ? `${u.mp}<span>/${fullMp(u)}</span>` : fullMp(u)}</b></div><div><small>Attack</small><b>${v.atk}</b></div><div><small>Defence</small><b>${v.def}</b></div><div><small>Range</small><b>${rangeOf(u.variant)}</b></div></div>`;
 }
 function pipsHtml(hp, max = MAX_HP) { return `<span class="hp-pips${hp < max * WAVER_BELOW ? ' low' : ''}" title="${men(hp)} of ${men(max)}">${Array.from({ length: max }, (_, i) => `<i class="${i < hp ? 'on' : ''}"></i>`).join('')}</span>`; }
 
@@ -1108,7 +1108,7 @@ async function boot() {
   applyScenario(id);
   // The field manual quotes distances and march points for this map's hex size.
   const km = k => k >= 1 ? `${+k.toFixed(1)} km` : `${Math.round(k * 1000)} m`, mpOf = v => Math.round(VARIANTS[v].mp * MARCH_SCALE * PACE);
-  const hexKm = MAP.hexKm || 1, scale = { hex: km(hexKm), foot: mpOf('Matchlockmen'), horse: `${mpOf('Lancers')}–${mpOf('Irregular Sowars')}`, attack: ATTACK_MP, range: km(2 * hexKm) };
+  const hexKm = MAP.hexKm || 1, scale = { hex: km(hexKm), foot: mpOf('Matchlockmen'), horse: `${mpOf('Lancers')}–${mpOf('Irregular Sowars')}`, attack: ATTACK_MP, range: km(rangeOf('Light Field Gun') * hexKm), rangeHexes: ['', 'one', 'two', 'three', 'four', 'five', 'six'][rangeOf('Light Field Gun')] };
   document.querySelectorAll('[data-scale]').forEach(e => { e.textContent = scale[e.dataset.scale]; });
   document.title = `${SCN.title} — ${SCN.year}`;
   $('#brandTitle').textContent = SCN.title;

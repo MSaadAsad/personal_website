@@ -224,11 +224,14 @@ function pathTo(reach, from, to) {
 // and cannot attack until it rallies.
 const wavering = u => u.hp < maxHp(u) * WAVER_BELOW;
 
+// Guns that fire at range reach farther on a map of small hexes (SCN.gunRange).
+const rangeOf = variant => { const r = VARIANTS[variant].range; return r > 1 && SCN.gunRange ? SCN.gunRange : r; };
+
 // Melee across a great river is impossible; fire can reach over it.
 // `mpLeft`: the march points the formation would have left at `fromHex`.
 function canStrike(u, fromHex, target, mpLeft = u.mp) {
   if (wavering(u) || mpLeft < ATTACK_MP) return false;
-  const range = VARIANTS[u.variant].range, d = hexDistance(fromHex, target.hex);
+  const range = rangeOf(u.variant), d = hexDistance(fromHex, target.hex);
   if (d > range || d === 0) return false;
   if (d === 1) { const dir = dirTo(fromHex, target.hex); if (HEXES[fromHex].river[dir] === 'major') return range > 1; }
   return d === 1 || seenBy(u.side, target);  // fire at range needs a line of sight
@@ -1153,7 +1156,7 @@ function aiThreat(side, turns = 1) {
     const reach = reachable(e);
     e.mp = saved;
     const hit = new Uint8Array(HEXES.length), w = v.atk / 4 * (0.4 + 0.6 * e.hp / MAX_HP);
-    for (const from of [e.hex, ...reach.cost.keys()]) for (const h of rangeHexes(from, v.range)) hit[h] = 1;
+    for (const from of [e.hex, ...reach.cost.keys()]) for (const h of rangeHexes(from, rangeOf(e.variant))) hit[h] = 1;
     for (let i = 0; i < hit.length; i++) if (hit[i]) threat[i] += w;
   }
   return threat;
@@ -1247,9 +1250,9 @@ function aiPlan(u, goal, threat, garrisoned, looming, supply) {
     // out of the batteries' ring.
     if (v.type === 'guns' && v.range > 1 && works.length) {
       const d = Math.min(...works.map(w => hexDistance(hex, w)));
-      if (d <= 1) score -= 14; else if (d === v.range) score += 9;
+      if (d <= 1) score -= 14; else if (d === rangeOf(u.variant)) score += 9;
     } else {
-      const ring = v.type === 'guns' ? v.range : 2, battering = walledEnemy.some(w => hexDistance(hex, w) === ring);
+      const ring = v.type === 'guns' ? rangeOf(u.variant) : 2, battering = walledEnemy.some(w => hexDistance(hex, w) === ring);
       if (battering) score += v.type === 'guns' ? 5 : -4;
     }
     const seat = SEAT_HEX.get(hex);
