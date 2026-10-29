@@ -15,6 +15,7 @@ const SCENARIOS = {
     region: 'Khari Khariyali · Mangla',
     blurb: 'After the siege of Lahore, Chand Kaur’s estates in Khari Khariyali, the strip of floodplain between the Mirpur ridge and the Jhelum, pass to Raja Gulab Singh. The Sikh troops holding them under Surat Singh will not give them up. Diwan Hari Chand marches the Dogra army in: Aurangabad, Sukhchainpur, Kot Kandhari, and then Mangla Fort on its hill in the meander of the Jhelum, which even Ranjit Singh could not take.',
     first: 'red',
+    standards: { azure: 'khalsa', red: 'dogra' },  // battle standards when a unit's name does not say
     vpTarget: Infinity,
     roundLimit: 16,
     goal: {
@@ -83,6 +84,7 @@ const SCENARIOS = {
     region: 'Chaj Doab · Chillianwala',
     blurb: 'January 1849. Sher Singh has drawn the Khalsa army up on the Jhelum: its left on the low ridges at Rasul, its centre hidden in thick jungle, its right on the villages towards Lakhnawala, with an outpost in Chillianwala. Lord Gough marches up from the Chenab by Helan and Dinga to bring him to battle before Chattar Singh’s army arrives from Attock. Multan still holds out, so no help will come from Whish.',
     first: 'red',
+    standards: { azure: 'khalsa', red: 'company' },  // battle standards when a unit's name does not say
     vpTarget: Infinity,
     roundLimit: 12,
     goal: {
@@ -157,6 +159,7 @@ const SCENARIOS = {
     region: 'Chaj Doab · Gujrat',
     blurb: 'February 1849. After Chillianwala, short of food, Raja Sher Singh and his father Chattar Singh have taken the Khalsa army and Akram Khan’s Afghan horse from Rasul to Gujrat, meaning to cross the Chenab and march on Lahore. Their camp nearly encircles the town behind the dry bed of the Dwara and the fortified Kalra villages. Lord Gough has come down to the Chenab south-west of the town; Whish’s division, Dundas’s Bombay column and Markham’s brigade are coming up to join him. Byrne’s sepoys watch the fords at Wazirabad.',
     first: 'azure',
+    standards: { azure: 'khalsa', red: 'company' },  // battle standards when a unit's name does not say
     vpTarget: Infinity,
     roundLimit: 6,
     goal: {
@@ -239,6 +242,7 @@ const SCENARIOS = {
     region: 'Multan',
     blurb: '1818. Ranjit Singh has sent his son Kharak Singh, with Misr Diwan Chand in command, to take Multan from its Afghan governor, Nawab Muzaffar Khan Sadozai. The Nawab holds the walled city and its citadel, with garrisons in Shujabad, Muzaffargarh and Khangarh and levies in the field. The Sikh army comes down the Lahore road; the great Zamzama gun is being dragged after it.',
     first: 'red',
+    standards: { azure: 'sadozai', red: 'khalsa', by: [['Pathan', 'sadozai'], ['^Multan', 'sadozai']] },  // battle standards when a unit's name does not say
     vpTarget: Infinity,
     roundLimit: 15,
     goal: {
@@ -313,6 +317,7 @@ const SCENARIOS = {
     region: 'Shujabad · Multan',
     blurb: '17 June 1848. Diwan Mulraj’s army under Rung Ram lies across the Multan road below Shujabad. The Nawab of Bahawalpur’s Daudpotras are at Goweyn fifteen miles south, and Herbert Edwardes, with his Pathan levies and Cortlandt’s Sikh regulars, is across the Chenab at the Gaggianwalluh ferry with a handful of boats. Whoever reaches the Kineyree ferry first decides the opening; behind it all stand the walls of Multan.',
     first: 'red',
+    standards: { azure: 'khalsa', red: 'company' },  // battle standards when a unit's name does not say
     vpTarget: Infinity,
     roundLimit: 24,
     goal: {
@@ -392,6 +397,7 @@ const SCENARIOS = {
     region: 'Lahore',
     blurb: 'January 1841. Maharaja Kharak Singh and his son Nau Nihal Singh are dead, and Kharak Singh’s widow, Maharani Chand Kaur, holds Lahore as regent, with Raja Gulab Singh’s Dogras in the fort. Kanwar Sher Singh, son of Ranjit Singh, comes down the Grand Trunk Road from Amritsar to take the throne, and the regiments at Mian Mir have declared for him. Round 1 is 12 January.',
     first: 'azure',
+    standards: { azure: 'dogra', red: 'khalsa', by: [['Chand Kaur', 'khalsa'], ['Fort Topkhana', 'dogra']] },  // battle standards when a unit's name does not say
     vpTarget: Infinity,
     roundLimit: 8,
     goal: {
@@ -452,6 +458,7 @@ const SCENARIOS = {
     region: 'Shujabad · Multan',
     blurb: '17 June 1848. Diwan Mulraj’s army under Rung Ram lies across the Multan road below Shujabad. The Nawab of Bahawalpur’s Daudpotras are at Goweyn fifteen miles south, and Herbert Edwardes, with his Pathan levies and Cortlandt’s Sikh regulars, is across the Chenab at the Gaggianwalluh ferry with a handful of boats. Whoever reaches the Kineyree ferry first decides the opening; behind it all stand the walls of Multan.',
     first: 'red',
+    standards: { azure: 'khalsa', red: 'company' },  // battle standards when a unit's name does not say
     vpTarget: Infinity,
     roundLimit: 24,
     goal: {
@@ -527,6 +534,7 @@ const SCENARIOS = {
     region: 'Lahore',
     blurb: 'January 1841. Sher Singh’s Khalsa army, some 26,000 foot, 8,000 horse and 45 guns, has come down the Amritsar road and camped at Budhu ka Awa, and the regiments at Mian Mir and the Fauj-i-Khas at Anarkali have declared for him. Raja Gulab Singh’s 5,000 Dogras and guards hold Lahore Fort and the walled city for Maharani Chand Kaur. Round 1 is 13 January, with Sher Singh’s army drawn up outside the city; on the evening of the 17th Dhian Singh arranged a ceasefire.',
     first: 'azure',
+    standards: { azure: 'dogra', red: 'khalsa', by: [['Chand Kaur', 'khalsa'], ['Fort Topkhana', 'dogra']] },  // battle standards when a unit's name does not say
     vpTarget: Infinity,
     roundLimit: 7,
     goal: {
@@ -580,68 +588,151 @@ const SCENARIOS = {
     ],
   },
 
-  // Rohtas, 1764, after Hari Ram Gupta, History of the Sikhs III (1999),
-  // pp. 213-14, and Ganda Singh, Ahmad Shah Durrani (1959), pp. 294-95. After
-  // the sack of Sirhind, Charat Singh Sukerchakia and Gujjar Singh Bhangi
-  // pushed north-west over the Jhelum. Sarbuland Khan, Ahmad Shah's uncle and
-  // his faujdar at Rohtas, met them with (Gupta) 12,000 men, was beaten and shut
-  // himself in the fort. The siege made no progress until Charat Singh feigned
-  // a retreat, drew the garrison out and took Sarbuland Khan, whom he let go
-  // for a ransom of two lakh. The Sikh numbers are not recorded; the misls
-  // fought mostly as horse, with Akali foot. Round 1 is the day the Sikhs reach
-  // the Jhelum. Rohtas itself was not stormed in 1764 (or in 1767, when it fell
-  // from within after a siege of months), so the Sikhs win by taking two of the
-  // faujdari's seats, or its faujdar.
+  // The Jammu succession war, 1774, after Hari Ram Gupta, History of the Sikhs
+  // IV (1999), p. 215, and Trans-Sutlej Sikhs (1939), p. 34; Hutchison and
+  // Vogel, History of the Panjab Hill States I, p. 89; and Bhagat Singh, A
+  // History of the Sikh Misals (1993), p. 153. Raja Ranjit Dev of Jammu meant
+  // his younger son Dalel Singh to succeed him; the elder, Brij Raj Dev, rose
+  // and called in Charat Singh Sukerchakia and Jai Singh Kanhaiya, who camped
+  // on the Basantar at the edge of Jammu and the Sialkot country. Ranjit Dev
+  // called in Jhanda Singh Bhangi, whose vassal he was, and the hill rajas of
+  // Chamba, Kangra, Nurpur and Basohli. The skirmishing became a battle near
+  // Zafarwal that went on for 23 days without a decision. Then Charat Singh
+  // was killed when his own matchlock burst, and Jhanda Singh was shot in his
+  // camp by a man said to have been bribed by Jai Singh. His brother Ganda
+  // Singh drew the Bhangis off, and Ranjit Dev came to terms: Brij Raj Dev was
+  // his heir, and Jammu paid the Kanhaiyas tribute. No numbers are recorded.
+  // The 23 days are compressed into twelve: Charat Singh falls on day 10 and
+  // Jhanda Singh on day 11.
+  jammu: {
+    title: 'The Jammu Succession War',
+    year: 1774,
+    region: 'Jammu · Basantar',
+    blurb: '1774. Raja Ranjit Dev of Jammu means his younger son to rule after him. The elder, Brij Raj Dev, has risen and called in Charat Singh of the Sukerchakias and Jai Singh of the Kanhaiyas, who are camped on the Basantar below Zafarwal. Ranjit Dev has called in Jhanda Singh Bhangi from Sialkot and the hill rajas of Chamba, Kangra, Nurpur and Basohli.',
+    first: 'azure',
+    standards: { azure: 'dogra', red: 'nishan' },  // battle standards when a unit's name does not say
+    vpTarget: Infinity,
+    roundLimit: 12,
+    goal: {
+      forts: ['basantar'], attacker: 'azure', short: 'Break the camp on the Basantar',
+      attackerWins: 'The camp on the Basantar is broken and the misls ride for home. Brij Raj Dev is a fugitive, and Ranjit Dev may leave Jammu to whichever son he likes.',
+      defenderWins: 'The camp on the Basantar still stands when the Bhangis go home. Ranjit Dev comes to terms: Brij Raj Dev is his heir, and Jammu pays the Kanhaiyas a lakh and a quarter a year.',
+    },
+    sides: {
+      azure: { name: 'Jammu and the Bhangis', short: 'Jammu', adj: 'Jammu', pitch: 'Jhanda Singh’s Bhangis are at Sialkot and Ranjit Dev’s Dogras at Jammu, and the hill rajas’ levies are coming down the Samba road. Break Charat Singh’s and Jai Singh’s camp on the Basantar. The Bhangis will not stay for ever.', tag: 'Moves first · take the Basantar camp in 12 days' },
+      red: { name: 'Brij Raj Dev’s Allies', short: 'Misls', adj: 'Sukerchakia', pitch: 'Charat Singh’s Sukerchakias and Jai Singh’s Kanhaiyas hold the camp on the Basantar and Zafarwal, with Brij Raj Dev’s Dogras. Two armies are coming at you. Hold the camp for twelve days, and the Bhangis will tire of it before you do.', tag: 'Moves second · hold the camp for 12 days' },
+    },
+    generals: {
+      azure: { name: 'Sardar Jhanda Singh', title: 'Chief of the Bhangi misl', leads: 'Jhanda Singh’s Sowars' },
+      red: { name: 'Sardar Charat Singh', title: 'Chief of the Sukerchakia misl', leads: 'Charat Singh’s Sowars' },
+    },
+    // Jammu and Sialkot; the Kanhaiya country over the Ravi, and the Sukerchakias' towards Gujranwala.
+    homeBase: { azure: [[32.7186, 74.8581], [32.4945, 74.5416]], red: [[32.18, 75.05], [32.18, 74.62]] },
+    strongpoints: ['zafarwal', 'basantar'],
+    startOwners: { zafarwal: 'red', basantar: 'red' },
+    startUnits: [
+      // Jhanda Singh's Bhangis at Sialkot.
+      ['azure', 'Irregular Sowars', [32.48, 74.56], 'Jhanda Singh’s Sowars'], ['azure', 'Irregular Sowars', [32.48, 74.56], 'Bhangi Sowars'],
+      ['azure', 'Irregular Sowars', [32.47, 74.58], 'Bhangi Sowars'], ['azure', 'Mounted Matchlocks', [32.47, 74.58], 'Bhangi Sowars'],
+      ['azure', 'Irregular Sowars', [32.505, 74.575], 'Bhangi Sowars'], ['azure', 'Mounted Matchlocks', [32.505, 74.575], 'Bhangi Sowars'],
+      ['azure', 'Matchlockmen', 'sialkot', 'Bhangi Musketeers'], ['azure', 'Zamburak', 'sialkot', 'Bhangi Zamburaks'],
+      ['azure', 'Matchlockmen', [32.485, 74.535], 'Bhangi Musketeers'], ['azure', 'Zamburak', [32.485, 74.535], 'Bhangi Zamburaks'],
+      // Ranjit Dev's Dogras at Jammu.
+      ['azure', 'Matchlockmen', 'jammu', 'Jammu Garrison', 5, { post: true }],
+      ['azure', 'Dhal & Talwar', [32.70, 74.86], 'Ranjit Dev’s Dogras'], ['azure', 'Dhal & Talwar', [32.70, 74.86], 'Ranjit Dev’s Dogras'],
+      ['azure', 'Matchlockmen', 'samba', 'Samba Garrison', 3, { post: true }],
+      ['azure', 'Matchlockmen', [32.705, 74.835], 'Dogra Matchlockmen'], ['azure', 'Irregular Sowars', [32.705, 74.835], 'Dogra Horse'],
+      // Charat Singh's and Jai Singh's camp on the Basantar, with Zafarwal held.
+      ['red', 'Irregular Sowars', 'basantar', 'Charat Singh’s Sowars'], ['red', 'Dhal & Talwar', 'basantar', 'Akali Nihangs'],
+      ['red', 'Irregular Sowars', [32.29, 75.01], 'Sukerchakia Sowars'], ['red', 'Mounted Matchlocks', [32.29, 75.01], 'Sukerchakia Sowars'],
+      ['red', 'Irregular Sowars', [32.27, 75.00], 'Sukerchakia Sowars'], ['red', 'Zamburak', [32.27, 75.00], 'Sukerchakia Zamburaks'],
+      ['red', 'Irregular Sowars', [32.30, 75.045], 'Jai Singh’s Sowars'], ['red', 'Irregular Sowars', [32.30, 75.045], 'Kanhaiya Sowars'],
+      ['red', 'Mounted Matchlocks', [32.265, 75.04], 'Kanhaiya Sowars'], ['red', 'Matchlockmen', [32.265, 75.04], 'Kanhaiya Musketeers'],
+      ['red', 'Dhal & Talwar', [32.31, 74.99], 'Brij Raj Dev’s Dogras'], ['red', 'Zamburak', [32.31, 74.99], 'Kanhaiya Zamburaks'],
+      ['red', 'Matchlockmen', 'zafarwal', 'Zafarwal Post'],
+    ],
+    reinforcements: [
+      { round: 2, side: 'azure', at: [32.50, 75.21], name: 'The hill rajas’ levies', note: 'came down the Samba road', history: 'Ranjit Dev called on the Pahari states, Chamba, Kangra, Nurpur and Basohli, who sent their levies down out of the hills to fight beside the Bhangis.', units: [['Matchlockmen', 'Chamba Levies'], ['Spearmen', 'Nurpur Levies'], ['Matchlockmen', 'Basohli Levies'], ['Spearmen', 'Kangra Levies']] },
+    ],
+    events: [
+      { title: 'Charat Singh falls', history: 'On the twenty-third day of the fighting Charat Singh’s matchlock burst in his hands and the splinters struck him in the forehead. He died on the field. His young son Maha Singh took his place: he was to be the father of Ranjit Singh.', round: 10, side: 'red', text: 'Charat Singh was killed when his own matchlock burst', flash: 'CHARAT SINGH FALLS', falls: 'red' },
+      { title: 'Jhanda Singh is shot', history: 'Soon after, Jhanda Singh Bhangi was shot from behind as he walked alone in his camp, by a Mazhabi Sikh of his own service who is said to have been bribed by Jai Singh Kanhaiya. His brother Ganda Singh lost heart and drew the Bhangis off from Jammu.', round: 11, side: 'azure', text: 'Jhanda Singh Bhangi was shot in his camp, and Ganda Singh drew the Bhangis off', flash: 'JHANDA SINGH IS SHOT', falls: 'azure', depart: ['Jhanda Singh’s Sowars', 'Bhangi Sowars', 'Bhangi Musketeers', 'Bhangi Zamburaks'] },
+    ],
+    powers: [
+      { id: 'jammu', name: 'Jammu', chief: 'Raja Ranjit Dev', seat: 'jammu', npc: false, side: 'azure', color: '#3f6f8f', note: 'The Dogra raj of Jammu and its hills', extraSeats: ['bahu', 'purmandal', 'samba', 'vijaypur', 'bishnah', [32.50, 75.21]] },
+      { id: 'bhangi', name: 'The Bhangis', chief: 'Sardar Jhanda Singh', seat: 'sialkot', npc: false, side: 'azure', color: '#4f7d99', note: 'The Bhangi country round Sialkot', extraSeats: ['chaprar', 'pasrur'] },
+      { id: 'allies', name: 'Brij Raj Dev’s allies', chief: 'Sardar Jai Singh Kanhaiya', seat: 'basantar', npc: false, side: 'red', color: '#94493a', note: 'The Kanhaiya and Sukerchakia camps', extraSeats: ['zafarwal', 'shakargarh', [32.18, 75.05], [32.18, 74.62]] },
+    ],
+    labels: [
+      { text: 'DUGGAR', lat: 32.76, lon: 75.03, cls: 'region', tier: 1 },
+      { text: 'Tawi', lat: 32.69, lon: 74.72, cls: 'water', tier: 2, angle: 10 },
+      { text: 'Degh', lat: 32.44, lon: 74.96, cls: 'water', tier: 2, angle: 45 },
+      { text: 'Basantar', lat: 32.235, lon: 75.07, cls: 'water', tier: 2, angle: 60 },
+    ],
+  },
+
+  // Rohtas, December 1779, after Hari Ram Gupta, Studies in Later Mughal
+  // History of the Punjab (2000), pp. 237-41, and History of the Sikhs IV
+  // (2001), pp. 432-35, with Ashiq Muhammad Khan, The Last Phase of Muslim Rule
+  // in Multan (1998), p. 157. The Bhangis had held Multan since 1772 and the
+  // country round Rohtas since 1767. In late 1779 Timur Shah marched to take
+  // Multan back, and when the Bhangi chiefs shot his envoy Haji Ali Khan he
+  // sent Zangi Khan ahead with 18,000 Yusufzais, Durranis, Mughals and
+  // Qizilbash by little-known roads, in secret. Zangi Khan halted some 25 km
+  // short of the Sikh camps, seized anyone going towards them, and fell on
+  // them before daybreak. The Sikhs (Gupta presumes about 5,500) fought but
+  // broke: some 3,000 were killed, 500 drowned in the Jhelum and 2,000 got
+  // over to the far bank. The Sikh chiefs are not named. Round 1 is the day
+  // Zangi Khan comes down the Bakrala pass; Timur Shah could not stay, and was
+  // before Multan in January 1780.
   rohtas: {
     map: 'rohtas', group: 'rohtas', mode: 'historic',
     title: 'The Battle of Rohtas',
-    year: 1764,
+    year: 1779,
     region: 'Jhelum · Rohtas',
-    blurb: '1764. After the sack of Sirhind, Charat Singh of the Sukerchakia misl and Gujjar Singh of the Bhangis ride north-west over the Chenab to the Jhelum. Sarbuland Khan, Ahmad Shah Abdali’s uncle and his faujdar at Rohtas, comes down to the river with some 12,000 Afghans to stop them. Behind him stands Sher Shah’s fortress, four kilometres of wall round a broken hilltop that no army has stormed.',
-    first: 'red',
+    blurb: 'December 1779. The Bhangi misl holds Multan and the country round Rohtas, and its chiefs have shot Timur Shah’s envoy. Timur Shah is marching on Multan, and he has sent Zangi Khan ahead with 18,000 Yusufzais, Durranis, Mughals and Qizilbash by little-known roads, in secret. The Bhangi camps lie between Rohtas and the Jhelum, and no one in them knows he is coming.',
+    first: 'azure',
+    standards: { azure: 'durrani', red: 'nishan' },  // battle standards when a unit's name does not say
     vpTarget: Infinity,
-    roundLimit: 11,
+    roundLimit: 7,
     goal: {
-      forts: ['rohtas', 'jhelum', 'dina'], need: 2, attacker: 'red', short: 'Win the faujdari', general: true,
-      attackerWins: 'The faujdari of Rohtas is lost to the Afghans: the Sukerchakias and the Bhangis hold the country from the Jhelum to the Salt Range, and the road to Kabul is cut.',
-      generalWins: 'Drawn out by a feigned retreat, Sarbuland Khan is cut off and taken. Charat Singh lets Ahmad Shah’s uncle go for two lakh of rupees, and the country from the Jhelum to the Indus passes to the Sikh chiefs.',
-      defenderWins: 'Sarbuland Khan still holds the faujdari of Rohtas as the season closes, and the road from Kabul stays open to Ahmad Shah.',
+      forts: ['rohtas', 'jhelum'], need: 1, attacker: 'azure', short: 'Take Rohtas or the Jhelum crossing',
+      attackerWins: 'The Bhangis are driven over the Jhelum, leaving their dead on the road and their drowned in the river. Rohtas or the crossing falls to Zangi Khan, and Timur Shah marches on Multan with the north secure behind him.',
+      defenderWins: 'The Bhangis still hold Rohtas and the Jhelum when Timur Shah must turn south for Multan. Zangi Khan’s surprise has cost the misl dearly, but not the country.',
     },
     sides: {
-      azure: { name: 'Durrani Army', short: 'Durrani', adj: 'Durrani', pitch: 'Sarbuland Khan’s Afghans hold the Jhelum crossing, with Rohtas behind them. Stop the Sikhs at the river, keep at least two of Rohtas, Jhelum and Dina, and do not let the faujdar be taken.', tag: 'Moves second · hold the faujdari for 11 days' },
-      red: { name: 'Sikh Misls', short: 'Misls', adj: 'Sikh', pitch: 'Charat Singh’s and Gujjar Singh’s horse come up from Gujrat. Cross the Jhelum and beat Sarbuland Khan in the field. Hold two of Rohtas, Jhelum and Dina at the end of a day, or draw the faujdar out and take him.', tag: 'Moves first · take the faujdari or its faujdar' },
+      azure: { name: 'Durrani Army', short: 'Durrani', adj: 'Durrani', pitch: 'Zangi Khan’s 18,000 are coming down the Bakrala pass, and the Bhangi camps below do not know it. Fall on them, drive them over the Jhelum, and take Rohtas or the town of Jhelum before Timur Shah must march for Multan.', tag: 'Moves first · take Rohtas or Jhelum in 7 days' },
+      red: { name: 'Bhangi Misl', short: 'Bhangis', adj: 'Bhangi', pitch: 'Your camps lie between Rohtas and the Jhelum, with the fort’s garrison behind you and the crossing at your back. An Afghan army is on the road from the pass. Hold both Rohtas and Jhelum for seven days and Timur Shah must go south without them.', tag: 'Moves second · hold Rohtas and Jhelum for 7 days' },
     },
     generals: {
-      azure: { name: 'Sarbuland Khan', title: 'Faujdar of Rohtas, uncle of Ahmad Shah Abdali', leads: 'Sarbuland Khan’s Guard' },
-      red: { name: 'Sardar Charat Singh', title: 'Chief of the Sukerchakia misl', leads: 'Charat Singh’s Sowars' },
+      azure: { name: 'Zangi Khan', title: 'Commander of Timur Shah’s advance army', leads: 'Zangi Khan’s Durranis' },
+      red: { name: 'The Bhangi Sardars', title: 'The chiefs of the Bhangi camps (the sources do not name them)', leads: 'The Sardars’ Sowars' },
     },
-    // The Afghans' road home over the Bakrala pass; the Sikhs' back to Gujrat.
+    // The Afghans' road back over the Bakrala pass; the Sikhs' over the river to Gujrat.
     homeBase: { azure: [33.10, 73.445], red: [32.81, 73.86] },
     walls: { rohtas: 2 },
     strongpoints: ['rohtas', 'jhelum', 'dina', 'sarai'],
-    startOwners: { rohtas: 'azure', jhelum: 'azure', dina: 'azure', sarai: 'red' },
+    startOwners: { rohtas: 'red', jhelum: 'red', dina: 'red', sarai: 'red' },
     startUnits: [
-      // Sarbuland Khan's army at the Jhelum crossing, Rohtas behind it.
-      ['azure', 'Irregular Sowars', [32.952, 73.68], 'Sarbuland Khan’s Guard'], ['azure', 'Irregular Sowars', [32.952, 73.68], 'Durrani Horse'],
-      ['azure', 'Matchlockmen', 'jhelum', 'Afghan Jezailchis'], ['azure', 'Zamburak', 'jhelum', 'Durrani Zamburaks'],
-      ['azure', 'Dhal & Talwar', [32.935, 73.70], 'Afghan Swordsmen'], ['azure', 'Matchlockmen', [32.935, 73.70], 'Afghan Jezailchis'],
-      ['azure', 'Irregular Sowars', [32.97, 73.70], 'Durrani Horse'], ['azure', 'Zamburak', [32.97, 73.70], 'Durrani Zamburaks'],
-      ['azure', 'Irregular Sowars', [32.915, 73.69], 'Qizilbash Horse'], ['azure', 'Dhal & Talwar', [32.915, 73.69], 'Afghan Swordsmen'],
-      ['azure', 'Matchlockmen', 'rohtas', 'Rohtas Garrison'], ['azure', 'Jingal', 'rohtas', 'Rohtas Wall Guns'],
-      ['azure', 'Matchlockmen', 'dina', 'Dina Post'],
-      // The Sukerchakia and Bhangi horse on the Gujrat side.
-      ['red', 'Irregular Sowars', [32.883, 73.821], 'Charat Singh’s Sowars'], ['red', 'Mounted Matchlocks', [32.887, 73.812], 'Sukerchakia Sowars'],
-      ['red', 'Irregular Sowars', [32.873, 73.821], 'Sukerchakia Sowars'], ['red', 'Mounted Matchlocks', [32.88, 73.81], 'Sukerchakia Sowars'],
-      ['red', 'Irregular Sowars', [32.896, 73.831], 'Gujjar Singh’s Sowars'], ['red', 'Mounted Matchlocks', [32.901, 73.821], 'Bhangi Sowars'],
-      ['red', 'Irregular Sowars', [32.855, 73.821], 'Bhangi Sowars'], ['red', 'Zamburak', [32.86, 73.80], 'Bhangi Zamburaks'],
-      ['red', 'Matchlockmen', [32.896, 73.775], 'Bhangi Musketeers'], ['red', 'Zamburak', [32.892, 73.784], 'Bhangi Zamburaks'],
-      ['red', 'Dhal & Talwar', [32.887, 73.775], 'Akali Nihangs'], ['red', 'Dhal & Talwar', [32.887, 73.775], 'Akali Nihangs'],
-      ['red', 'Irregular Sowars', [32.84, 73.79], 'Sukerchakia Sowars'], ['red', 'Irregular Sowars', [32.84, 73.79], 'Bhangi Sowars'],
-      ['red', 'Irregular Sowars', [33.0, 73.835], 'Akali Sowars'], ['red', 'Zamburak', [33.0, 73.835], 'Sukerchakia Zamburaks'],
+      // Zangi Khan's army at the head of the pass.
+      ['azure', 'Irregular Sowars', [33.098, 73.448], 'Zangi Khan’s Durranis'], ['azure', 'Irregular Sowars', [33.098, 73.448], 'Durrani Horse'],
+      ['azure', 'Irregular Sowars', [33.104, 73.462], 'Durrani Horse'], ['azure', 'Irregular Sowars', [33.104, 73.462], 'Durrani Horse'],
+      ['azure', 'Irregular Sowars', [33.088, 73.442], 'Mughal Horse'], ['azure', 'Mounted Matchlocks', [33.088, 73.442], 'Qizilbash Horse'],
+      ['azure', 'Mounted Matchlocks', [33.106, 73.475], 'Qizilbash Horse'], ['azure', 'Irregular Sowars', [33.106, 73.475], 'Durrani Horse'],
+      ['azure', 'Dhal & Talwar', [33.08, 73.44], 'Yusufzai Swordsmen'], ['azure', 'Dhal & Talwar', [33.08, 73.44], 'Yusufzai Swordsmen'],
+      ['azure', 'Matchlockmen', [33.094, 73.438], 'Yusufzai Jezailchis'], ['azure', 'Matchlockmen', [33.094, 73.438], 'Yusufzai Jezailchis'],
+      ['azure', 'Dhal & Talwar', [33.106, 73.44], 'Yusufzai Swordsmen'], ['azure', 'Zamburak', [33.106, 73.44], 'Durrani Zamburaks'],
+      ['azure', 'Matchlockmen', [33.07, 73.438], 'Afghan Jezailchis'], ['azure', 'Zamburak', [33.07, 73.438], 'Durrani Zamburaks'],
+      // The Bhangi camps between Rohtas and the river, with the fort and the town held.
+      ['red', 'Irregular Sowars', [32.955, 73.655], 'The Sardars’ Sowars'], ['red', 'Mounted Matchlocks', [32.955, 73.655], 'Bhangi Sowars'],
+      ['red', 'Irregular Sowars', [32.945, 73.685], 'Bhangi Sowars'], ['red', 'Dhal & Talwar', [32.945, 73.685], 'Akali Nihangs'],
+      ['red', 'Matchlockmen', [32.965, 73.70], 'Bhangi Musketeers'], ['red', 'Zamburak', [32.965, 73.70], 'Bhangi Zamburaks'],
+      ['red', 'Matchlockmen', 'rohtas', 'Rohtas Garrison', 5, { post: true }], ['red', 'Jingal', 'rohtas', 'Rohtas Wall Guns', 5, { post: true }],
+      ['red', 'Matchlockmen', 'jhelum', 'Jhelum Post'],
     ],
     powers: [
-      { id: 'durrani', name: 'Durrani Rohtas', chief: 'Sarbuland Khan', seat: 'rohtas', npc: false, side: 'azure', color: '#3f6f8f', note: 'The faujdari of Rohtas', extraSeats: ['jhelum', 'dina', 'bakrala'] },
-      { id: 'misls', name: 'The misls', chief: 'Sardar Charat Singh', seat: [32.85, 73.84], npc: false, side: 'red', color: '#94493a', note: 'Gujjar Singh’s country towards Gujrat', extraSeats: ['sarai', 'jatlan'] },
+      { id: 'durrani', name: 'Timur Shah', chief: 'Timur Shah Durrani', seat: 'bakrala', npc: false, side: 'azure', color: '#3f6f8f', note: 'The road from Peshawar over the Bakrala pass', extraSeats: [[33.10, 73.445]] },
+      { id: 'misls', name: 'The Bhangis', chief: 'The Bhangi Sardars', seat: 'rohtas', npc: false, side: 'red', color: '#94493a', note: 'The Bhangi country from Rohtas to Gujrat', extraSeats: ['jhelum', 'dina', 'sarai', 'jatlan', [32.85, 73.84]] },
     ],
     labels: [
       { text: 'Jhelum', lat: 32.86, lon: 73.66, cls: 'water', tier: 1, angle: 50 },
@@ -649,53 +740,57 @@ const SCENARIOS = {
     ],
   },
 
-  // Open campaign: the season before, the Afghans spread across their posts
-  // and the two misls coming separately, Gujjar Singh by Jatlan.
+  // Open campaign: the Bhangis have word that Zangi Khan is on the road. Their
+  // camps are stronger and on guard, and Gujjar Singh's horse comes up from
+  // Gujrat on day 3; Timur Shah gives Zangi Khan longer.
   rohtaso: {
     map: 'rohtas', group: 'rohtas', mode: 'open',
     title: 'The Battle of Rohtas',
-    year: 1764,
+    year: 1779,
     region: 'Jhelum · Rohtas',
-    blurb: '1764, before the armies meet. Sarbuland Khan’s Afghans are spread across the faujdari of Rohtas, at the fort, at Jhelum and Dina. Charat Singh rides up the Gujrat road for the Jhelum crossing; Gujjar Singh’s Bhangis are coming round by Jatlan.',
-    first: 'red',
+    blurb: 'December 1779, with the alarm given. The Bhangis have word that an Afghan army is coming down from the pass and are gathering at Rohtas and the Jhelum, and Gujjar Singh is riding up from Gujrat. Zangi Khan must take the fort and the crossing before Timur Shah turns south for Multan.',
+    first: 'azure',
+    standards: { azure: 'durrani', red: 'nishan' },  // battle standards when a unit's name does not say
     vpTarget: Infinity,
-    roundLimit: 18,
+    roundLimit: 10,
     goal: {
-      forts: ['rohtas', 'jhelum', 'dina'], need: 2, attacker: 'red', short: 'Win the faujdari', general: true,
-      attackerWins: 'The faujdari of Rohtas is lost to the Afghans: the Sukerchakias and the Bhangis hold the country from the Jhelum to the Salt Range, and the road to Kabul is cut.',
-      generalWins: 'Sarbuland Khan is cut off and taken. Charat Singh lets Ahmad Shah’s uncle go for two lakh of rupees, and the country from the Jhelum to the Indus passes to the Sikh chiefs.',
-      defenderWins: 'Sarbuland Khan still holds the faujdari of Rohtas as the season closes, and the road from Kabul stays open to Ahmad Shah.',
+      forts: ['rohtas', 'jhelum'], need: 1, attacker: 'azure', short: 'Take Rohtas or the Jhelum crossing',
+      attackerWins: 'The Bhangis are driven over the Jhelum. Rohtas or the crossing falls to Zangi Khan, and Timur Shah marches on Multan with the north secure behind him.',
+      defenderWins: 'The Bhangis still hold Rohtas and the Jhelum when Timur Shah must turn south for Multan, and the misl keeps the country from the river to the Salt Range.',
     },
     sides: {
-      azure: { name: 'Durrani Army', short: 'Durrani', adj: 'Durrani', pitch: 'Sarbuland Khan’s Afghans hold Rohtas, Jhelum and Dina. Gather before the two misls join, beat one of them at the river, keep two of Rohtas, Jhelum and Dina, and keep the faujdar out of their hands.', tag: 'Moves second · hold the faujdari for 18 days' },
-      red: { name: 'Sikh Misls', short: 'Misls', adj: 'Sikh', pitch: 'Charat Singh comes up the Gujrat road; Gujjar Singh’s Bhangis reach Jatlan on day 3. Cross the Jhelum, join hands, and hold two of Rohtas, Jhelum and Dina at the end of a day, or take the faujdar.', tag: 'Moves first · take the faujdari or its faujdar' },
+      azure: { name: 'Durrani Army', short: 'Durrani', adj: 'Durrani', pitch: 'Zangi Khan’s army is coming down the Bakrala pass, and the Bhangis know it. Beat their camps before Gujjar Singh comes up from Gujrat, and take Rohtas or the town of Jhelum before Timur Shah must march for Multan.', tag: 'Moves first · take Rohtas or Jhelum in 10 days' },
+      red: { name: 'Bhangi Misl', short: 'Bhangis', adj: 'Bhangi', pitch: 'An Afghan army is on the road from the pass. Gather your camps, hold the fort and the crossing, and Gujjar Singh’s horse will come up from Gujrat on day 3. Hold both Rohtas and Jhelum for ten days.', tag: 'Moves second · hold Rohtas and Jhelum for 10 days' },
     },
     generals: {
-      azure: { name: 'Sarbuland Khan', title: 'Faujdar of Rohtas, uncle of Ahmad Shah Abdali', leads: 'Sarbuland Khan’s Guard' },
-      red: { name: 'Sardar Charat Singh', title: 'Chief of the Sukerchakia misl', leads: 'Charat Singh’s Sowars' },
+      azure: { name: 'Zangi Khan', title: 'Commander of Timur Shah’s advance army', leads: 'Zangi Khan’s Durranis' },
+      red: { name: 'The Bhangi Sardars', title: 'The chiefs of the Bhangi camps (the sources do not name them)', leads: 'The Sardars’ Sowars' },
     },
     homeBase: { azure: [33.10, 73.445], red: [32.81, 73.86] },
     walls: { rohtas: 2 },
     strongpoints: ['rohtas', 'jhelum', 'dina', 'sarai'],
-    startOwners: { rohtas: 'azure', jhelum: 'azure', dina: 'azure', sarai: null },
+    startOwners: { rohtas: 'red', jhelum: 'red', dina: 'red', sarai: 'red' },
     startUnits: [
-      ['azure', 'Irregular Sowars', [32.975, 73.60], 'Sarbuland Khan’s Guard'], ['azure', 'Irregular Sowars', [32.975, 73.60], 'Durrani Horse'],
-      ['azure', 'Dhal & Talwar', [32.985, 73.585], 'Afghan Swordsmen'], ['azure', 'Zamburak', [32.985, 73.585], 'Durrani Zamburaks'],
-      ['azure', 'Matchlockmen', 'rohtas', 'Rohtas Garrison'], ['azure', 'Jingal', 'rohtas', 'Rohtas Wall Guns'],
-      ['azure', 'Matchlockmen', 'jhelum', 'Afghan Jezailchis'], ['azure', 'Zamburak', 'jhelum', 'Durrani Zamburaks'],
-      ['azure', 'Matchlockmen', 'dina', 'Dina Post'],
-      ['azure', 'Dhal & Talwar', [32.95, 73.64], 'Afghan Swordsmen'], ['azure', 'Irregular Sowars', 'bakrala', 'Qizilbash Horse'],
-      ['red', 'Irregular Sowars', [32.83, 73.845], 'Charat Singh’s Sowars'], ['red', 'Mounted Matchlocks', [32.83, 73.845], 'Sukerchakia Sowars'],
-      ['red', 'Irregular Sowars', [32.815, 73.83], 'Sukerchakia Sowars'], ['red', 'Mounted Matchlocks', [32.815, 73.83], 'Sukerchakia Sowars'],
-      ['red', 'Matchlockmen', [32.845, 73.855], 'Sukerchakia Musketeers'], ['red', 'Zamburak', [32.845, 73.855], 'Sukerchakia Zamburaks'],
-      ['red', 'Dhal & Talwar', [32.83, 73.86], 'Akali Nihangs'], ['red', 'Irregular Sowars', [32.83, 73.86], 'Sukerchakia Sowars'],
+      ['azure', 'Irregular Sowars', [33.098, 73.448], 'Zangi Khan’s Durranis'], ['azure', 'Irregular Sowars', [33.098, 73.448], 'Durrani Horse'],
+      ['azure', 'Irregular Sowars', [33.104, 73.462], 'Durrani Horse'], ['azure', 'Irregular Sowars', [33.104, 73.462], 'Durrani Horse'],
+      ['azure', 'Irregular Sowars', [33.088, 73.442], 'Mughal Horse'], ['azure', 'Mounted Matchlocks', [33.088, 73.442], 'Qizilbash Horse'],
+      ['azure', 'Mounted Matchlocks', [33.106, 73.475], 'Qizilbash Horse'], ['azure', 'Irregular Sowars', [33.106, 73.475], 'Durrani Horse'],
+      ['azure', 'Dhal & Talwar', [33.08, 73.44], 'Yusufzai Swordsmen'], ['azure', 'Dhal & Talwar', [33.08, 73.44], 'Yusufzai Swordsmen'],
+      ['azure', 'Matchlockmen', [33.094, 73.438], 'Yusufzai Jezailchis'], ['azure', 'Matchlockmen', [33.094, 73.438], 'Yusufzai Jezailchis'],
+      ['azure', 'Dhal & Talwar', [33.106, 73.44], 'Yusufzai Swordsmen'], ['azure', 'Zamburak', [33.106, 73.44], 'Durrani Zamburaks'],
+      ['azure', 'Matchlockmen', [33.07, 73.438], 'Afghan Jezailchis'], ['azure', 'Zamburak', [33.07, 73.438], 'Durrani Zamburaks'],
+      ['red', 'Irregular Sowars', [32.955, 73.655], 'The Sardars’ Sowars'], ['red', 'Mounted Matchlocks', [32.955, 73.655], 'Bhangi Sowars'],
+      ['red', 'Irregular Sowars', [32.945, 73.685], 'Bhangi Sowars'], ['red', 'Dhal & Talwar', [32.945, 73.685], 'Akali Nihangs'],
+      ['red', 'Matchlockmen', [32.965, 73.70], 'Bhangi Musketeers'], ['red', 'Zamburak', [32.965, 73.70], 'Bhangi Zamburaks'],
+      ['red', 'Matchlockmen', 'rohtas', 'Rohtas Garrison', 5, { post: true }], ['red', 'Jingal', 'rohtas', 'Rohtas Wall Guns', 5, { post: true }],
+      ['red', 'Matchlockmen', 'jhelum', 'Jhelum Post'],
     ],
     reinforcements: [
-      { round: 3, side: 'red', at: [33.04, 73.84], name: 'Gujjar Singh’s Bhangis', note: 'came round by Jatlan', history: 'Gujjar Singh Bhangi shared the advance over the Jhelum with Charat Singh Sukerchakia. In this open campaign his misl comes in separately, round by Jatlan.', units: [['Irregular Sowars', 'Gujjar Singh’s Sowars'], ['Mounted Matchlocks', 'Bhangi Sowars'], ['Irregular Sowars', 'Bhangi Sowars'], ['Zamburak', 'Bhangi Zamburaks'], ['Matchlockmen', 'Bhangi Musketeers'], ['Dhal & Talwar', 'Akali Nihangs']] },
+      { round: 3, side: 'red', at: [32.81, 73.86], name: 'Gujjar Singh’s horse', note: 'came up from Gujrat', history: 'Gujjar Singh Bhangi, who had shared the taking of Rohtas in 1767, held Gujrat across the Jhelum. No source puts him at Rohtas in 1779: in this open campaign the Bhangis have warning, and his horse comes up in time.', units: [['Irregular Sowars', 'Gujjar Singh’s Sowars'], ['Mounted Matchlocks', 'Bhangi Sowars'], ['Zamburak', 'Bhangi Zamburaks']] },
     ],
     powers: [
-      { id: 'durrani', name: 'Durrani Rohtas', chief: 'Sarbuland Khan', seat: 'rohtas', npc: false, side: 'azure', color: '#3f6f8f', note: 'The faujdari of Rohtas', extraSeats: ['jhelum', 'dina', 'bakrala'] },
-      { id: 'misls', name: 'The misls', chief: 'Sardar Charat Singh', seat: [32.85, 73.84], npc: false, side: 'red', color: '#94493a', note: 'Gujjar Singh’s country towards Gujrat', extraSeats: ['jatlan'] },
+      { id: 'durrani', name: 'Timur Shah', chief: 'Timur Shah Durrani', seat: 'bakrala', npc: false, side: 'azure', color: '#3f6f8f', note: 'The road from Peshawar over the Bakrala pass', extraSeats: [[33.10, 73.445]] },
+      { id: 'misls', name: 'The Bhangis', chief: 'The Bhangi Sardars', seat: 'rohtas', npc: false, side: 'red', color: '#94493a', note: 'The Bhangi country from Rohtas to Gujrat', extraSeats: ['jhelum', 'dina', 'sarai', 'jatlan', [32.85, 73.84]] },
     ],
     labels: [
       { text: 'Jhelum', lat: 32.86, lon: 73.66, cls: 'water', tier: 1, angle: 50 },
@@ -728,6 +823,7 @@ const SCENARIOS = {
     region: 'Peshawar · Khyber',
     blurb: 'April 1837. Hari Singh Nalwa has built a fort at Jamrud, at the very mouth of the Khyber, and the best of the Sikh army has gone to Lahore for Nau Nihal Singh’s wedding. Now Dost Muhammad’s son Akbar Khan is coming down the pass with the Afghan army and its guns, the Afridis rising in the hills on either side, and Haji Khan’s Mohmand levies are descending on Shabqadar. Mahan Singh holds Jamrud with a few hundred men; Hari Singh is at Peshawar with what the wedding left him; the Lahore army is days away.',
     first: 'red',
+    standards: { azure: 'khalsa', red: 'durrani' },  // battle standards when a unit's name does not say
     vpTarget: Infinity,
     roundLimit: 14,
     goal: {
@@ -815,6 +911,7 @@ const SCENARIOS = {
     region: 'Jhelum · Mangla',
     blurb: 'July 1857. Delhi has fallen to the mutineers, and in the Punjab the Company is disarming every Hindustani regiment it does not trust. At dawn on the 7th a column from Rawalpindi, HM 24th, three horse-artillery guns, police and raw Mooltanee levies, closes on the cantonment at Jhelum to take the arms of the 14th Native Infantry. The 14th will not give them up. Their only way out is across the river into the Maharaja of Kashmir’s country, and the bridge of boats is already in the hands of the police.',
     first: 'red',
+    standards: { azure: 'rebel', red: 'punjab' },  // battle standards when a unit's name does not say
     vpTarget: Infinity,
     roundLimit: 14,
     menPerFormation: 250,
@@ -879,6 +976,7 @@ const SCENARIOS = {
     region: 'Jhelum · Mangla',
     blurb: 'Evening, 6 July 1857. Colonel Ellice’s column has halted at Dina, a march short of Jhelum, and opened its sealed orders: the 14th Native Infantry is to be disarmed in the morning. Half the Mooltanee horse are riding on through the cantonment to cross the river. The 14th, still armed in its lines, has heard enough to be wary. Strike first, or slip away before the column comes up.',
     first: 'red',
+    standards: { azure: 'rebel', red: 'punjab' },  // battle standards when a unit's name does not say
     vpTarget: Infinity,
     roundLimit: 16,
     menPerFormation: 250,
@@ -947,6 +1045,7 @@ const SCENARIOS = {
     region: 'Ravi · Gogera',
     blurb: 'September 1857. The Company’s army is before Delhi and the Punjab has been stripped of troops to feed the siege. On the night of the 16th the chiefs of the Ravi clans slip away from Gogera to rise in their villages, and at dawn Rai Ahmad Khan Kharral, across the river at Jhamra, declares for the King of Delhi. The Lahore–Multan road, the Punjab’s only line to Bombay, runs through the district, held by a few police posts and a levy of raw recruits.',
     first: 'azure',
+    standards: { azure: 'kharal', red: 'punjab' },  // battle standards when a unit's name does not say
     vpTarget: Infinity,
     roundLimit: 14,
     menPerFormation: 250,
@@ -1057,6 +1156,7 @@ const SCENARIOS = {
     region: 'Sutlej · Ferozepur',
     blurb: 'December 1845. On the 11th the Khalsa army crossed the Sutlej and invested Ferozepur, where Sir John Littler holds the town and the entrenched cantonment with some 7,000 men. Raja Lal Singh has taken the main army out to Ferozeshah, ten miles along the road to Mudki, to meet the relief, while Tej Singh stays before Ferozepur. Sir Hugh Gough is coming up from Ambala by forced marches, 150 miles in six days, with the Governor-General riding in his camp.',
     first: 'azure',
+    standards: { azure: 'khalsa', red: 'company' },  // battle standards when a unit's name does not say
     vpTarget: Infinity,
     roundLimit: 12,
     clock: { day: 17, month: 'December', from: 6, hours: 24 },
@@ -1175,6 +1275,7 @@ const SCENARIOS = {
     region: 'Sutlej · Ludhiana',
     blurb: 'January 1846. While the main armies face each other at Sobraon, Sardar Ranjodh Singh Majithia has crossed the upper Sutlej from Phillaur with a large force and the Raja of Ladwa’s men. He threatens Ludhiana, held by three native battalions, and the British road through Jagraon and Bassian. Sir Harry Smith has just taken the grain fort of Dharamkot, sixty miles to the west, and is ordered to clear the left bank.',
     first: 'red',
+    standards: { azure: 'khalsa', red: 'company' },  // battle standards when a unit's name does not say
     vpTarget: Infinity,
     roundLimit: 16,
     goal: {

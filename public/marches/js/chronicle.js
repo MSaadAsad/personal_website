@@ -73,7 +73,7 @@ const CHRONICLE = (() => {
       case 'fallback': return `${r} · ${unitText(e.unit, nm)} fell back in disorder ${ground(e.hex)} (${strength(e.unit)}).`;
       case 'advance': return `${r} · ${nm(e.unit)} pressed forward ${ground(e.hex).replace(/^(at|on) /, 'onto ')}.`;
       case 'capture': return `${r} · ${nm(e.unit)} took ${placeOf(e.place)} for the ${sideName(e.side)}${e.from ? ` from the ${sideName(e.from)}` : ''}.`;
-      case 'general': return `${r} · ${e.name}, general of the ${sideName(e.side)}, was taken prisoner.`;
+      case 'general': return `${r} · ${e.name}, general of the ${sideName(e.side)}, was ${e.fallen ? 'killed' : 'taken prisoner'}.`;
       default: return null;
     }
   }
@@ -96,7 +96,7 @@ const CHRONICLE = (() => {
       case 'destroyed': return `The ${nm(e.unit)} ${was(e.unit)} destroyed.`;
       case 'surrender': return `The ${nm(e.unit)} ${was(e.unit)} ${e.why === 'surrounded' ? `surrounded and laid down ${its(e.unit)} arms` : 'cut off and surrendered'}.`;
       case 'capture': return `The ${nm(e.unit)} took ${placeOf(e.place)}.`;
-      case 'general': return `${e.name} was taken prisoner.`;
+      case 'general': return `${e.name} was ${e.fallen ? 'killed' : 'taken prisoner'}.`;
       default: return null;
     }
   }

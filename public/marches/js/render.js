@@ -660,6 +660,81 @@ function gunPiece(variant) {
     + `<path d="M-2.8 -24L-1.6 -22.6" stroke="#c9b48a" stroke-width=".9" stroke-linecap="round"/>`;
   return `<g transform="scale(.9)">${farLegs}${body}${nearLegs}${gun}</g>`;
 }
+// Battle standards. Each group carries its own, whichever side it fights
+// on: triangular nishans for the misls, the Akalis, the Dogras and the hill
+// rajas; square colours for the Khalsa regulars, the Afghans, Bahawalpur and
+// the Company's army (its own regiments and the Crown's alike). Simple, not
+// heraldically exact. A unit's group comes from the scenario's own
+// `standards.by`, then the rules below, or else the scenario's default for
+// its side.
+const STANDARDS = {
+  nishan:     { tri: true, field: '#e8952a' },
+  akali:      { tri: true, field: '#25347a' },
+  hills:      { tri: true, field: '#a8262f', edge: '#e3b23c' },
+  tribal:     { tri: true, field: '#f1ecdf', lower: '#2f7a45' },
+  kharal:     { tri: true, field: '#2f6b3a' },
+  dogra:      { tri: true, field: '#e8952a', edge: '#7a1f1a' },
+  khalsa:     { field: '#e39a2b', disc: '#2a2a5a' },
+  durrani:    { field: '#1f1d1a', crescent: '#f3efe4' },
+  sadozai:    { field: '#2d6a3e', crescent: '#f3efe4' },
+  bahawalpur: { field: '#2d6a3e', hoist: '#b5302b', crescent: '#f3efe4' },
+  company:    { stripes: ['#b5302b', '#f3efe4'], canton: true },
+  punjab:     { field: '#23395d', band: '#b5302b' },
+  rebel:      { field: '#2f6b3a', lower: '#e39a2b' },
+};
+const STANDARD_RULES = [
+  [/Akali|Nihang/, 'akali'],
+  [/^14th N\.I\./, 'rebel'],
+  [/Daudpotra|Bahawalpur/, 'bahawalpur'],
+  [/Bengal NI|Bombay NI|Light Cavalry|Bengal Lancers|Irregular Cavalry|Irregular Horse|Scinde Horse|Shekhawati|Nusseree|Sirmoor|Ludhiana Fort|Bodyguard|Byrne’s Sepoys/, 'company'],
+  [/\bHM\b|Europeans?\b|Bombay Fusiliers|Horse Artillery|Siege Train|Heavy Battery \(|Howitzers|Troop$|Byrne’s Guns|Field Batter|Light Field Battery|Batteries$|Reserve Artillery|^Heavy Guns$|Paton’s Guns|Volunteer Battery/, 'company'],
+  [/Punjab|Police|Mooltanee|Lahore Light Horse|Levy$|Gujranwala Levies|Tahsil|Thana|Sikh Cavalry|Kuttar Mukhi|Subhan Khan|Sarfraz Khan|Berkeley/, 'punjab'],
+  [/Kharral|Kathia|Wattu|Fatiana|Mardana|Ahmad Khan/, 'kharal'],
+  [/Chamba|Nurpur|Basohli|Kangra/, 'hills'],
+  [/Dogra|Gulab Singh|Ranjit Dev|Brij Raj|Jammu Garrison|Samba Garrison/, 'dogra'],
+  [/Durrani|Qizilbash|Mughal Horse|Afghan|Akbar Khan|Shamsuddin|Afzal Khan|^Jezailchis$/, 'durrani'],
+  [/Yusufzai|Ghazis|Afridi|Bajauri|Mohmand Levies|Haji Khan|Pathan|Edwardes|Khangarh Levies/, 'tribal'],
+  [/Fauj|Battalion|Topkhana|Ghorchara Khas|Cortlandt|Imamuddin|Najibs|Avitabile|Zamburkhana|Bala Hisar|Peshawar Guard|Beldars|Zamzama|Ilahi Bakhsh/, 'khalsa'],
+  [/Ghorcharas|Sowars|Ladwa|Faridkot|Ramgarhia|Nalwa|Bhangi|Kanhaiya|Sukerchakia|Sher Singh’s Sikhs|Khalsa Horse/, 'nishan'],
+];
+function standardOf(u) {
+  const by = (SCN.standards?.by || []).find(([re]) => new RegExp(re).test(u.name));
+  if (by) return by[1];
+  const rule = STANDARD_RULES.find(([re]) => re.test(u.name));
+  return rule ? rule[1] : SCN.standards?.[u.side] || null;
+}
+// The flag itself, flying from a pole at (x, y): w wide and h high.
+function standardSvg(key, x, y, w, h, stroke, sw) {
+  const s = STANDARDS[key], line = `stroke="${stroke}" stroke-width="${sw}" stroke-linejoin="round"`, f = n => Math.round(n * 100) / 100;
+  if (!s) return '';
+  if (s.tri) {
+    const L = w * 1.2, tip = `${f(x + L)} ${f(y + h / 2)}`;
+    let out = `<path d="M${x} ${y}L${tip}L${x} ${f(y + h)}Z" fill="${s.field}"/>`;
+    if (s.lower) out += `<path d="M${x} ${f(y + h / 2)}L${tip}L${x} ${f(y + h)}Z" fill="${s.lower}"/>`;
+    return out + `<path d="M${x} ${y}L${tip}L${x} ${f(y + h)}Z" fill="none" ${s.edge ? `stroke="${s.edge}" stroke-width="${f(h * .12)}"` : line}/>`
+      + (s.edge ? `<path d="M${x} ${y}L${tip}L${x} ${f(y + h)}Z" fill="none" ${line}/>` : '');
+  }
+  const cx = x + w / 2, cy = y + h / 2;
+  let out = '';
+  if (s.stripes) {
+    const n = 5;
+    for (let i = 0; i < n; i++) out += `<rect x="${x}" y="${f(y + i * h / n)}" width="${w}" height="${f(h / n + .05)}" fill="${s.stripes[i % 2]}"/>`;
+    const cw = w * .45, ch = h * .6;
+    out += `<rect x="${x}" y="${y}" width="${f(cw)}" height="${f(ch)}" fill="#25346e"/>`
+      + `<path d="M${f(x + cw / 2)} ${y}V${f(y + ch)}M${x} ${f(y + ch / 2)}H${f(x + cw)}" stroke="#f3efe4" stroke-width="${f(ch * .3)}"/>`
+      + `<path d="M${f(x + cw / 2)} ${y}V${f(y + ch)}M${x} ${f(y + ch / 2)}H${f(x + cw)}" stroke="#b5302b" stroke-width="${f(ch * .16)}"/>`;
+  } else {
+    out += `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${s.field}"/>`;
+    if (s.lower) out += `<rect x="${x}" y="${f(cy)}" width="${w}" height="${f(h / 2)}" fill="${s.lower}"/>`;
+    if (s.band) out += `<rect x="${x}" y="${f(cy - h * .14)}" width="${w}" height="${f(h * .28)}" fill="${s.band}"/>`;
+    if (s.hoist) out += `<rect x="${x}" y="${y}" width="${f(w * .28)}" height="${h}" fill="${s.hoist}"/>`;
+    const mx = s.hoist ? cx + w * .12 : cx;
+    if (s.disc) out += `<circle cx="${f(mx)}" cy="${f(cy)}" r="${f(h * .24)}" fill="${s.disc}"/>`;
+    if (s.crescent) out += `<circle cx="${f(mx)}" cy="${f(cy)}" r="${f(h * .27)}" fill="${s.crescent}"/><circle cx="${f(mx + h * .11)}" cy="${f(cy - h * .03)}" r="${f(h * .23)}" fill="${s.field}"/>`;
+  }
+  return out + `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="none" ${line}/>`;
+}
+
 // Figure slots in the order they fall: flanks first, standard-bearer last.
 const SLOTS = {
   foot:  [[11, 52, 1.2], [53, 52, 1.2], [21.5, 43, 1.05], [42.5, 43, 1.05], [32, 52, 1.2]],
@@ -670,9 +745,11 @@ const SLOTS = {
 function unitSprite(u, cls = 'sprite') {
   const v = VARIANTS[u.variant], p = PALETTE[u.side], led = ledBy(u), slots = SLOTS[v.type], look = v.look || u.variant;
   const flagW = led ? 15 : 11, flagH = led ? 10 : 7.5, poleTop = led ? 3 : 8;
+  const std = standardOf(u), edge = led ? '#f2d27c' : INK, ew = led ? 1.3 : 0.7;
   const standard = `<path d="M32 44V${poleTop}" stroke="${INK}" stroke-width="2.2"/><path d="M32 44V${poleTop}" stroke="${led ? '#e8c46a' : WOOD}" stroke-width="1.1"/>`
-    + `<path d="M33 ${poleTop + 1}h${flagW}l-3 ${flagH / 2} 3 ${flagH / 2}h-${flagW}z" fill="${p.flag}" stroke="${led ? '#f2d27c' : INK}" stroke-width="${led ? 1.3 : 0.7}"/>`
-    + (led ? `<path d="M38.6 ${poleTop + 3.2}l1 2 2.2.3-1.6 1.5.4 2.2-2-1-2 1 .4-2.2-1.6-1.5 2.2-.3z" fill="#fff3c4"/><circle cx="32" cy="${poleTop - 1}" r="2" fill="#f2d27c" stroke="${INK}" stroke-width=".6"/>` : '');
+    + (std ? standardSvg(std, 33, poleTop + 1, flagW, flagH, edge, ew)
+      : `<path d="M33 ${poleTop + 1}h${flagW}l-3 ${flagH / 2} 3 ${flagH / 2}h-${flagW}z" fill="${p.flag}" stroke="${edge}" stroke-width="${ew}"/>`)
+    + (led ? `<circle cx="32" cy="${poleTop - 1}" r="2" fill="#f2d27c" stroke="${INK}" stroke-width=".6"/>` : '');
   const figures = slots.map(([x, y, sc], i) => {
     const art = v.type === 'horse' ? riderFigure(look, p, HORSE_COATS[(i + u.id.length) % HORSE_COATS.length]) : footFigure(v.type === 'guns' ? 'crew' : look, p);
     return { y, svg: `<g class="fig" data-i="${i}"><g transform="translate(${x} ${y}) scale(${sc})">${art}</g></g>` };
@@ -750,23 +827,93 @@ function fogPath() {
   if (key !== FOG.key) { FOG.key = key; FOG.d = HEXES.filter(h => !vis[h.id]).map(h => linePath(hexCorners(h.x, h.y)) + 'Z').join(''); }
   return FOG.d;
 }
+// The supply layer: a strong wash and a solid edge where the wagons keep a
+// formation fed, a faint wash and a dashed edge where they still reach, the
+// wagon road from each formation back to its nearest depot, and a red ring
+// round any formation the wagons cannot reach at all.
+// Where to draw the wagons' way: by road wherever there is one, and round,
+// not through, the hexes other formations stand in. Only passable ground (as
+// supplyField reckons it) is used; the supply itself is not changed.
+function wagonRoutes(side, field) {
+  const occupied = new Set(S.units.filter(u => u.side === side).map(u => u.hex));
+  const dist = new Float64Array(HEXES.length).fill(Infinity), heap = new MinHeap();
+  for (const hex of supplySources(side)) if (hex >= 0) { dist[hex] = 0; heap.push(0, hex); }
+  while (heap.size) {
+    const a = heap.pop(), d = dist[a];
+    for (let dir = 0; dir < 6; dir++) {
+      const b = HEXES[a].nbr[dir];
+      if (b < 0 || !Number.isFinite(field[b])) continue;
+      const step = (HEXES[a].road[dir] ? 1 : 4) + (occupied.has(b) ? 6 : 0);
+      if (d + step < dist[b]) { dist[b] = d + step; heap.push(dist[b], b); }
+    }
+  }
+  return dist;
+}
+// Chaikin's corner cutting, twice, keeping the two ends.
+function roundCorners(pts) {
+  for (let pass = 0; pass < 2 && pts.length > 2; pass++) {
+    const out = [pts[0]];
+    for (let i = 0; i < pts.length - 1; i++) {
+      const [x0, y0] = pts[i], [x1, y1] = pts[i + 1];
+      if (i > 0) out.push([x0 * .75 + x1 * .25, y0 * .75 + y1 * .25]);
+      if (i < pts.length - 2) out.push([x0 * .25 + x1 * .75, y0 * .25 + y1 * .75]);
+    }
+    out.push(pts[pts.length - 1]); pts = out;
+  }
+  return pts;
+}
+function drawSupply(o, side) {
+  const field = supplyField(side), color = SIDES[side].color;
+  const zone = new Uint8Array(HEXES.length);
+  for (const h of HEXES) { const days = field[h.id] / WAGON_MP; zone[h.id] = days <= SUSTAINED ? 2 : deliveryFor(days) > 0 ? 1 : 0; }
+  let fed = '', thin = '', fedRim = '', thinRim = '';
+  for (const h of HEXES) {
+    if (!zone[h.id]) continue;
+    const cell = linePath(hexCorners(h.x, h.y)) + 'Z';
+    if (zone[h.id] === 2) fed += cell; else thin += cell;
+    for (let dir = 0; dir < 6; dir++) {
+      const n = h.nbr[dir], z = n < 0 ? 0 : zone[n];
+      if (zone[h.id] === 2 && z < 2) fedRim += linePath(edgeCorners(h.x, h.y, dir));
+      else if (z === 0) thinRim += linePath(edgeCorners(h.x, h.y, dir));
+    }
+  }
+  svgEl('path', { d: fed, class: 'supply-area', fill: color }, o);
+  svgEl('path', { d: thin, class: 'supply-area thin', fill: color }, o);
+  svgEl('path', { d: thinRim, class: 'supply-rim thin', stroke: color }, o);
+  svgEl('path', { d: fedRim, class: 'supply-rim', stroke: color }, o);
+  // Wagon roads: step down the drawing field from each formation to a depot,
+  // start the line at the edge of the formation's hex and round its corners.
+  const route = wagonRoutes(side, field), roads = { fed: '', thin: '', far: '' };
+  const cut = [];
+  for (const u of S.units) if (u.side === side) {
+    let a = u.hex;
+    if (!Number.isFinite(field[a])) { cut.push(u); continue; }
+    const pts = [[HEXES[a].x, HEXES[a].y]];
+    while (route[a] > 0) {
+      let best = -1;
+      for (const b of HEXES[a].nbr) if (b >= 0 && route[b] < (best < 0 ? route[a] : route[best])) best = b;
+      if (best < 0) break;
+      a = best; pts.push([HEXES[a].x, HEXES[a].y]);
+    }
+    if (pts.length < 2) continue;
+    pts[0] = [(pts[0][0] + pts[1][0]) / 2, (pts[0][1] + pts[1][1]) / 2];
+    roads[['far', 'thin', 'fed'][zone[u.hex]]] += linePath(roundCorners(pts));
+  }
+  for (const [k, d] of Object.entries(roads)) if (d) {
+    svgEl('path', { d, class: 'supply-road-shadow' }, o);
+    svgEl('path', { d, class: `supply-road ${k}`, ...(k === 'fed' ? { stroke: color } : {}) }, o);
+  }
+  for (const hex of new Set(supplySources(side))) if (hex >= 0) {
+    const h = HEXES[hex];
+    svgEl('polygon', { points: ptsAttr(hexCorners(h.x, h.y, 3)), class: 'supply-depot', stroke: color }, o);
+  }
+  for (const u of cut) { const h = HEXES[u.hex]; svgEl('polygon', { points: ptsAttr(hexCorners(h.x, h.y, 2)), class: 'supply-cut' }, o); }
+}
 function drawOverlay(sel, reach, targets, pathHexes, pathCost, ferryPick = null, supplySide = null) {
   const o = R.overlay;
   o.innerHTML = '';
   if (fogOn()) svgEl('path', { d: fogPath(), class: 'fog' }, o);
-  if (supplySide) {
-    const field = supplyField(supplySide);
-    let d = '';
-    // Strong wash where the wagons keep a formation fed; faint where they still reach.
-    let reach = '';
-    for (const h of HEXES) {
-      const days = field[h.id] / WAGON_MP;
-      if (days <= SUSTAINED) d += linePath(hexCorners(h.x, h.y)) + 'Z';
-      else if (deliveryFor(days) > 0) reach += linePath(hexCorners(h.x, h.y)) + 'Z';
-    }
-    svgEl('path', { d, class: 'supply-area', fill: SIDES[supplySide].color }, o);
-    svgEl('path', { d: reach, class: 'supply-area thin', fill: SIDES[supplySide].color }, o);
-  }
+  if (supplySide) drawSupply(o, supplySide);
   for (const f of S.ferries || []) ferryGlyph(o, f.a, f.b, 'ferry');
   if (ferryPick) for (const site of ferryPick.sites) {
     const h = HEXES[site];

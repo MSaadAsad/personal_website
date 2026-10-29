@@ -104,23 +104,25 @@ function renderGeneral() {
   $('#genPortrait').innerHTML = generalPortrait(side);
   $('#genName').textContent = info.name;
   $('#genTitle').textContent = info.title;
-  $('#genLeads').innerHTML = g.captured ? 'Taken prisoner — his orders are lost'
+  $('#genLeads').innerHTML = g.fallen ? 'Killed — his orders are lost' : g.captured ? 'Taken prisoner — his orders are lost'
     : `Leading the <button class="link" id="genJump">${esc(lead.name)}</button>${placeName(lead.hex) ? ` at ${esc(placeName(lead.hex))}` : ''}`;
   const ride = $('#rideBtn'), force = $('#forceBtn');
   const rideOk = human && sel && canRide(side, sel), forceOk = human && sel && canForce(sel);
   ride.disabled = !rideOk;
-  ride.title = g.captured ? 'The general is captured' : g.rode ? 'He has already ridden this command' : `Select a formation within ${GENERAL_RIDE} hexes of him, then press G`;
+  ride.title = g.fallen ? 'The general is dead' : g.captured ? 'The general is captured' : g.rode ? 'He has already ridden this command' : `Select a formation within ${GENERAL_RIDE} hexes of him, then press G`;
   ride.querySelector('span').textContent = rideOk ? `Lead ${sel.name}` : g.rode ? 'Already rode' : 'Ride to…';
   force.disabled = !forceOk;
-  force.title = g.captured ? 'The general is captured' : g.forced ? 'Forced march already ordered this command' : `Select a formation within ${GENERAL_REACH} hexes of him that has not fought, then press F: its march is refilled`;
+  force.title = g.fallen ? 'The general is dead' : g.captured ? 'The general is captured' : g.forced ? 'Forced march already ordered this command' : `Select a formation within ${GENERAL_REACH} hexes of him that has not fought, then press F: its march is refilled`;
   force.querySelector('span').textContent = g.forced ? 'March ordered' : 'Force march';
   card.title = `G: ride to the selected formation and lead it (once per command, within ${GENERAL_RIDE} hexes). F: forced march for a formation within ${GENERAL_REACH} hexes.`;
   const jump = $('#genJump');
   if (jump) jump.onclick = () => { if (humanTurn() && lead.side === S.turn) select(lead.id); flyTo(HEXES[lead.hex].x, HEXES[lead.hex].y, Math.max(R.cam.z, 0.75)); };
 }
 function generalPortrait(side) {
-  const p = PALETTE[side];
-  return `<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M8 47V6" stroke="${INK}" stroke-width="2.4"/><path d="M8 47V6" stroke="#e8c46a" stroke-width="1.2"/><path d="M9 7h20l-5 6 5 6H9z" fill="${p.flag}" stroke="#f2d27c" stroke-width="1.2"/><path d="M16.5 10l1 2 2.2.3-1.6 1.5.4 2.2-2-1-2 1 .4-2.2-1.6-1.5 2.2-.3z" fill="#fff3c4"/><circle cx="8" cy="5" r="2.2" fill="#f2d27c"/><g transform="translate(29 46) scale(1.75)">${riderFigure('Irregular Sowars', { ...p, turban: '#f2d27c' }, '#e9e1d2')}</g></svg>`;
+  const p = PALETTE[side], lead = S.units.find(u => u.id === S.generals[side]?.unitId), std = lead && standardOf(lead);
+  const flag = std ? standardSvg(std, 9, 7, 20, 12, '#f2d27c', 1.2)
+    : `<path d="M9 7h20l-5 6 5 6H9z" fill="${p.flag}" stroke="#f2d27c" stroke-width="1.2"/><path d="M16.5 10l1 2 2.2.3-1.6 1.5.4 2.2-2-1-2 1 .4-2.2-1.6-1.5 2.2-.3z" fill="#fff3c4"/>`;
+  return `<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M8 47V6" stroke="${INK}" stroke-width="2.4"/><path d="M8 47V6" stroke="#e8c46a" stroke-width="1.2"/>${flag}<circle cx="8" cy="5" r="2.2" fill="#f2d27c"/><g transform="translate(29 46) scale(1.75)">${riderFigure('Irregular Sowars', { ...p, turban: '#f2d27c' }, '#e9e1d2')}</g></svg>`;
 }
 
 function statBlock(u) {
@@ -522,6 +524,7 @@ function exitReplay() {
 // Lay the board out as it stood at the start of frame k.
 function loadFrame(k) {
   const f = RP.frames[k], b = JSON.parse(JSON.stringify(f.board));
+  MINI.trails = [];
   S = { ...RP.real, ...b, replay: true, ai: { azure: true, red: true }, winner: null, selected: null, undo: null, log: [], battles: [], events: [] };
   V.animating = null;
   refresh();
@@ -546,6 +549,7 @@ async function playReplay() {
     for (let i = RP.frames[RP.frame].ev; i < stop; i++) {
       if (!(await replayGate(token))) return;
       await replayEvent(RP.events[i]);
+      drawMinimap();
     }
     if (token !== RP.token) return;
     RP.frame++;
@@ -564,12 +568,12 @@ async function replayEvent(e) {
   };
   const drop = id => { S.units = S.units.filter(u => u.id !== id); syncUnits(); };
   switch (e.t) {
-    case 'move': return march(unit(e.id), e.path);
+    case 'move': if (e.path?.length > 1) MINI.trails.push({ side: unit(e.id)?.side || 'azure', path: e.path }); return march(unit(e.id), e.path);
     case 'fallback': return march(unit(e.unit.id), e.path || [unit(e.unit.id)?.hex, e.hex]);
     case 'advance': return march(unit(e.unit.id), [e.from ?? unit(e.unit.id)?.hex, e.hex]);
     case 'destroyed': case 'surrender': drop(e.unit.id); if (nearFocus(e.hex)) await sleep(300 / RP.speed); return;
     case 'ride': S.generals[e.side].unitId = e.id; syncUnits(); return;
-    case 'general': S.generals[e.side].captured = true; syncUnits(); return;
+    case 'general': Object.assign(S.generals[e.side], { captured: true, fallen: !!e.fallen }); syncUnits(); return;
     case 'breach':
       if (e.place && e.walls !== undefined) S.walls[e.place] = e.walls; else if (e.place && e.left !== undefined && S.walls[e.place] !== undefined) S.walls[e.place] = e.left;
       if (e.place && e.battered !== undefined) (S.battered ||= {})[e.place] = e.battered;
@@ -803,10 +807,43 @@ function toast(text, side) {
 // ---------------------------------------------------------------------------
 // Minimap and scale bar
 
-const MINI = { canvas: null, base: null, scale: 1 };
+// The overview map, small in the corner or enlarged (the button in its
+// corner). Formations are drawn as rectangles in the military fashion: a
+// cross for foot, a diagonal for horse, a dot for guns, gold round the
+// general's. In a replay it follows every move and traces each march.
+const MINI = { canvas: null, base: null, scale: 1, big: false, trails: [] };
 function initMinimap() {
   MINI.canvas = $('#minimap');
-  const w = 168, h = Math.round(w * BOARD_H / BOARD_W);
+  try { MINI.big = localStorage.getItem('jhelum-marches-bigmap') === '1'; } catch { /* storage blocked */ }
+  $('#miniExpand').onclick = () => {
+    MINI.big = !MINI.big;
+    try { localStorage.setItem('jhelum-marches-bigmap', MINI.big ? '1' : '0'); } catch { /* storage blocked */ }
+    sizeMinimap(); drawMinimap();
+  };
+  sizeMinimap();
+  window.addEventListener('resize', () => { if (MINI.big) { sizeMinimap(); drawMinimap(); } });
+  const pick = e => {
+    const r = MINI.canvas.getBoundingClientRect();
+    const bx = (e.clientX - r.left) / r.width * BOARD_W, by = (e.clientY - r.top) / r.height * BOARD_H;
+    const vw = R.view.clientWidth, vh = R.view.clientHeight;
+    R.cam.x = vw / 2 - bx * R.cam.z; R.cam.y = vh / 2 - by * R.cam.z;
+    clampCamera(); applyCamera();
+  };
+  let dragging = false;
+  MINI.canvas.addEventListener('pointerdown', e => { dragging = true; MINI.canvas.setPointerCapture(e.pointerId); pick(e); });
+  MINI.canvas.addEventListener('pointermove', e => { if (dragging) pick(e); });
+  MINI.canvas.addEventListener('pointerup', () => { dragging = false; });
+}
+function sizeMinimap() {
+  // Enlarged, it sits top left and stops short of the command bar.
+  const fit = Math.min(R.view.clientWidth * .5, (R.view.clientHeight - 190) * BOARD_W / BOARD_H);
+  const w = MINI.big ? Math.max(168, Math.round(Math.min(560, fit))) : 168, h = Math.round(w * BOARD_H / BOARD_W);
+  $('.minimap-hud').classList.toggle('big', MINI.big);
+  document.body.classList.toggle('bigmap', MINI.big);
+  document.body.style.setProperty('--mini-w', `${w + 12}px`);
+  $('#miniExpand').textContent = MINI.big ? '⤡' : '⤢';
+  const label = MINI.big ? 'Shrink the overview map' : 'Enlarge the overview map';
+  $('#miniExpand').title = label; $('#miniExpand').setAttribute('aria-label', label);
   MINI.canvas.width = w * 2; MINI.canvas.height = h * 2;
   MINI.canvas.style.width = `${w}px`; MINI.canvas.style.height = `${h}px`;
   MINI.scale = (w * 2) / BOARD_W;
@@ -820,34 +857,61 @@ function initMinimap() {
     line.forEach(([x, y], i) => ctx[i ? 'lineTo' : 'moveTo'](kmToPx(x) * MINI.scale, kmToPx(y) * MINI.scale));
     ctx.stroke();
   }
-  const pick = e => {
-    const r = MINI.canvas.getBoundingClientRect();
-    const bx = (e.clientX - r.left) / r.width * BOARD_W, by = (e.clientY - r.top) / r.height * BOARD_H;
-    const vw = R.view.clientWidth, vh = R.view.clientHeight;
-    R.cam.x = vw / 2 - bx * R.cam.z; R.cam.y = vh / 2 - by * R.cam.z;
-    clampCamera(); applyCamera();
-  };
-  let dragging = false;
-  MINI.canvas.addEventListener('pointerdown', e => { dragging = true; MINI.canvas.setPointerCapture(e.pointerId); pick(e); });
-  MINI.canvas.addEventListener('pointermove', e => { if (dragging) pick(e); });
-  MINI.canvas.addEventListener('pointerup', () => { dragging = false; });
+  // Enlarged, it shows the roads and names the main places too.
+  if (MINI.big) {
+    ctx.strokeStyle = '#8a6a44'; ctx.lineWidth = 1.6; ctx.globalAlpha = .75;
+    for (const road of MAP.roads || []) for (const line of road.lines || []) {
+      ctx.beginPath();
+      line.forEach(([x, y], i) => ctx[i ? 'lineTo' : 'moveTo'](kmToPx(x) * MINI.scale, kmToPx(y) * MINI.scale));
+      ctx.stroke();
+    }
+    ctx.globalAlpha = 1; ctx.font = '600 21px Newsreader, Georgia, serif'; ctx.textBaseline = 'middle';
+    ctx.lineWidth = 4; ctx.strokeStyle = '#efe4c4'; ctx.fillStyle = '#2b241a';
+    for (const p of Object.values(MAP.places)) if (p.tier === 1) {
+      const x = kmToPx(p.x) * MINI.scale + 16, y = kmToPx(p.y) * MINI.scale;
+      ctx.strokeText(p.name, x, y); ctx.fillText(p.name, x, y);
+    }
+  }
+  MINI.layer = null;
+}
+// One formation's symbol, centred on (x, y); k scales it with the map.
+function miniSymbol(ctx, x, y, type, color, led, k) {
+  const w = 13 * k, h = 9 * k, l = x - w / 2, t = y - h / 2;
+  ctx.fillStyle = color; ctx.fillRect(l, t, w, h);
+  ctx.strokeStyle = '#111'; ctx.lineWidth = 1.3 * k; ctx.beginPath();
+  if (type === 'foot') { ctx.moveTo(l, t); ctx.lineTo(l + w, t + h); ctx.moveTo(l + w, t); ctx.lineTo(l, t + h); }
+  else if (type === 'horse') { ctx.moveTo(l, t + h); ctx.lineTo(l + w, t); }
+  ctx.stroke();
+  if (type === 'guns') { ctx.beginPath(); ctx.arc(x, y, h * .24, 0, Math.PI * 2); ctx.fillStyle = '#111'; ctx.fill(); }
+  ctx.strokeStyle = led ? '#f2d27c' : '#111'; ctx.lineWidth = (led ? 2.6 : 1.6) * k; ctx.strokeRect(l, t, w, h);
 }
 function drawMinimap() {
   if (!MINI.canvas) return;
   MINI.layer ??= Object.assign(document.createElement('canvas'), { width: MINI.canvas.width, height: MINI.canvas.height });
-  const ctx = MINI.layer.getContext('2d'), s = MINI.scale;
+  const ctx = MINI.layer.getContext('2d'), s = MINI.scale, k = Math.min(1.5, Math.max(1, MINI.canvas.width / 600));
   ctx.drawImage(MINI.base, 0, 0);
-  for (const k of STRONGPOINTS) {
-    const h = HEXES[HEX_OF[k]], o = S.owners[k];
+  for (const key of STRONGPOINTS) {
+    const h = HEXES[HEX_OF[key]], o = S.owners[key], d = 5 * k;
     ctx.save(); ctx.translate(h.x * s, h.y * s); ctx.rotate(Math.PI / 4);
-    ctx.fillStyle = o ? SIDES[o].color : '#d8c58e'; ctx.strokeStyle = '#1b1a14'; ctx.lineWidth = 2;
-    ctx.fillRect(-5, -5, 10, 10); ctx.strokeRect(-5, -5, 10, 10); ctx.restore();
+    ctx.fillStyle = o ? SIDES[o].color : '#d8c58e'; ctx.strokeStyle = '#1b1a14'; ctx.lineWidth = 2 * k;
+    ctx.fillRect(-d, -d, 2 * d, 2 * d); ctx.strokeRect(-d, -d, 2 * d, 2 * d); ctx.restore();
   }
-  for (const u of S.units) {
-    if (!playerSees(u)) continue;
-    const h = HEXES[u.hex];
-    ctx.beginPath(); ctx.arc(h.x * s, h.y * s, 5, 0, Math.PI * 2);
-    ctx.fillStyle = SIDES[u.side].color; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#111'; ctx.stroke();
+  if (RP.active) for (const t of MINI.trails) {
+    ctx.beginPath(); t.path.forEach((hex, i) => ctx[i ? 'lineTo' : 'moveTo'](HEXES[hex].x * s, HEXES[hex].y * s));
+    ctx.strokeStyle = SIDES[t.side].color; ctx.globalAlpha = .85; ctx.lineWidth = 2.2 * k; ctx.lineJoin = ctx.lineCap = 'round';
+    ctx.setLineDash([5 * k, 4 * k]); ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha = 1;
+  }
+  // Two formations in a hex make a stacked counter: the general's (or the
+  // first) in front, the other's edge showing behind it.
+  const stacks = new Map();
+  for (const u of S.units) if (playerSees(u)) { if (!stacks.has(u.hex)) stacks.set(u.hex, []); stacks.get(u.hex).push(u); }
+  for (const [hex, us] of stacks) {
+    const h = HEXES[hex], front = us.find(ledBy) || us[0], x = h.x * s, y = h.y * s, o = 2.5 * k;
+    for (const u of us) if (u !== front) {
+      ctx.fillStyle = SIDES[u.side].color; ctx.strokeStyle = '#111'; ctx.lineWidth = 1.4 * k;
+      ctx.fillRect(x - 6.5 * k + o, y - 4.5 * k - o, 13 * k, 9 * k); ctx.strokeRect(x - 6.5 * k + o, y - 4.5 * k - o, 13 * k, 9 * k);
+    }
+    miniSymbol(ctx, x, y, VARIANTS[front.variant].type, SIDES[front.side].color, ledBy(front), k);
   }
   drawMinimapView();
 }
@@ -1104,7 +1168,7 @@ function loadScript(src) {
 async function boot() {
   const id = chosenMap();
   try { localStorage.setItem('jhelum-marches-map', id); } catch { /* storage blocked */ }
-  await loadScript(`maps/${SCENARIOS[id].map || id}.js?v=44`);
+  await loadScript(`maps/${SCENARIOS[id].map || id}.js?v=47`);
   applyScenario(id);
   // The field manual quotes distances and march points for this map's hex size.
   const km = k => k >= 1 ? `${+k.toFixed(1)} km` : `${Math.round(k * 1000)} m`, mpOf = v => Math.round(VARIANTS[v].mp * MARCH_SCALE * PACE);

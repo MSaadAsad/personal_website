@@ -951,6 +951,8 @@ function roomNear(start, side) {
 // (Multan's magazine, say; `side` defaults to the side that moves first):
 // walls change by `walls`, formations at `hurt.at` lose `hurt.hp` each, those named
 // in `defect.names` go over to `defect.to`, and those named in `depart` leave.
+// `falls` names a side whose general is killed: his orders are lost, and
+// his formation can then march off with the rest.
 // Formations that go over do so at the start of their new side's command, so
 // they march and strike before their old comrades can answer.
 function happen() {
@@ -959,6 +961,11 @@ function happen() {
     (S.happened ||= {})[i] = true;
     for (const [k, d] of Object.entries(ev.walls || {})) S.walls[k] = Math.max(0, (S.walls[k] || 0) + d);
     if (ev.hurt) for (const u of [...unitsAt(HEX_OF[ev.hurt.at])]) u.hp = Math.max(1, u.hp - ev.hurt.hp);
+    if (ev.falls && !S.generals[ev.falls].captured) {
+      const g = S.generals[ev.falls];
+      Object.assign(g, { captured: true, fallen: true });
+      note({ t: 'general', side: ev.falls, name: GENERALS[ev.falls].name, hex: unitById(g.unitId)?.hex ?? null, fallen: true });
+    }
     // Formations that change sides (never the one a general rides with), and
     // ones that march off the map altogether.
     if (ev.defect) for (const u of S.units) if (ev.defect.names.includes(u.name) && u.side !== ev.defect.to && !ledBy(u)) { u.side = ev.defect.to; u.stock = 100; }

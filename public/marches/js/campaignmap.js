@@ -64,6 +64,7 @@ const CAMPAIGN_MAP = (() => {
     khari: { at: [33.07, 73.70], off: [26, -18], side: 'r', name: 'Khari' },
     jamrud: { at: [34.0033, 71.3784], off: [-18, 26], side: 'l', name: 'Jamrud' },
     rohtas: { at: [32.97, 73.58], off: [-26, -12], side: 'l', name: 'Rohtas' },
+    jammu: { at: [32.72, 74.86], off: [20, -14], side: 'r', name: 'Jammu' },
     chillianwala: { at: [32.66, 73.60], off: [-22, 18], side: 'l', name: 'Chillianwala' },
     gujrat: { at: [32.57, 74.08], off: [12, -20], side: 'r', name: 'Gujrat' },
     lahore: { at: [31.58, 74.33], off: [0, 0], side: 'l', name: 'Lahore' },
@@ -144,7 +145,7 @@ const CAMPAIGN_MAP = (() => {
   function cartouche() {
     const [x0] = px([0, 74.05]), [, y0] = px([30.18, 0]), w = W - M - 12 - x0, km = K / 111.32; // px per km
     let s = `<g class="cm-cartouche" transform="translate(${f(x0)} ${f(y0)})"><rect width="${f(w)}" height="96" rx="3" class="cm-cart-box"/><rect x="4" y="4" width="${f(w - 8)}" height="88" rx="2" class="cm-cart-in"/>`;
-    s += `<text x="${f(w / 2)}" y="30" class="cm-cart-title">THE PANJAB</text><text x="${f(w / 2)}" y="47" class="cm-cart-sub">and its marches, 1764–1857</text>`;
+    s += `<text x="${f(w / 2)}" y="30" class="cm-cart-title">THE PANJAB</text><text x="${f(w / 2)}" y="47" class="cm-cart-sub">and its marches, 1774–1857</text>`;
     const bar = 100 * km, bx = (w - bar) / 2;
     for (let i = 0; i < 4; i++) s += `<rect x="${f(bx + i * bar / 4)}" y="62" width="${f(bar / 4)}" height="4" class="${i % 2 ? 'cm-scale-b' : 'cm-scale-a'}"/>`;
     s += `<text x="${f(bx)}" y="78" class="cm-cart-km">0</text><text x="${f(bx + bar / 2)}" y="78" class="cm-cart-km">50</text><text x="${f(bx + bar)}" y="78" class="cm-cart-km">100 km</text></g>`;
