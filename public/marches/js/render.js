@@ -25,7 +25,7 @@ function smoothPath(kmPts) {
 
 const R = {
   view: null, board: null, relief: null, mapSvg: null, overlay: null, units: null, labels: null, markers: null,
-  cam: { x: 0, y: 0, z: 0.5 }, labelItems: [], unitEls: new Map(), hover: -1,
+  cam: { x: 0, y: 0, z: 0.5 }, labelItems: [], unitEls: new Map(), hover: -1, peek: -1,
 };
 
 // ---------------------------------------------------------------------------
@@ -790,7 +790,7 @@ function syncUnits(animating = null) {
     });
     node._hp = u.hp;
     const pile = stacks.get(u.hex), idx = pile.indexOf(u), mine = S.turn === u.side && !S.ai[u.side];
-    node.className = `unit ${u.side} type-${VARIANTS[u.variant].type}${playerSees(u) ? '' : ' fogged'}${u.id === S.selected ? ' selected' : ''}${mine && !canActCached(u) ? ' spent' : ''}${mine && canActCached(u) ? ' ready' : ''}${wavering(u) ? ' wavering' : ''}${ledBy(u) ? ' led' : ''}${stockOf(u) < STOCK_HUNGRY ? ' oos' : ''}`;
+    node.className = `unit ${u.side} type-${VARIANTS[u.variant].type}${playerSees(u) ? '' : ' fogged'}${u.id === S.selected ? ' selected' : ''}${mine && !canActCached(u) ? ' spent' : ''}${mine && canActCached(u) ? ' ready' : ''}${wavering(u) ? ' wavering' : ''}${ledBy(u) ? ' led' : ''}${stockOf(u) < STOCK_HUNGRY ? ' oos' : ''}${u.hex === R.peek ? ' peeked' : ''}`;
     node.title = `${u.name} · ${SIDES[u.side].name} · ${men(u.hp)} of ${men(maxHp(u))}${wavering(u) ? ' · wavering' : ''}${ledBy(u) ? ` · led by ${GENERALS[u.side].name}` : ''}} · supplies ${stockOf(u)}%`;
     if (animating === u.id) continue;
     const h = HEXES[u.hex], spread = 8 * unitScale(R.cam.z), off = pile.length > 1 ? (idx - (pile.length - 1) / 2) * spread * 2 : 0;
@@ -950,6 +950,10 @@ function drawOverlay(sel, reach, targets, pathHexes, pathCost, ferryPick = null,
       const t = svgEl('text', { x: f1(end[0]), y: f1(end[1] + 4), class: 'march-cost' }, o);
       t.textContent = pathCost;
     }
+  }
+  if (R.peek >= 0) {
+    const h = HEXES[R.peek];
+    svgEl('polygon', { points: ptsAttr(hexCorners(h.x, h.y, 2)), class: 'peek-hex' }, o);
   }
   if (R.hover >= 0) {
     const h = HEXES[R.hover];

@@ -1,7 +1,7 @@
 'use strict';
 // Interface: input, panels, tooltip, minimap, animation and dialogs.
 
-const V = { reach: null, targets: [], farTargets: [], hoverHex: -1, pendingHex: -1, animating: null, busy: false, followAI: true, speed: 1 };
+const V = { reach: null, targets: [], farTargets: [], hoverHex: -1, pendingHex: -1, peek: -1, animating: null, busy: false, followAI: true, speed: 1 };
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 const pct = p => `${Math.round(p * 100)}%`;
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -22,7 +22,9 @@ function refresh() {
       for (const e of S.units) if (e.side !== sel.side && !near.has(e.hex) && strikeHexFor(sel, e) !== null) { near.add(e.hex); V.farTargets.push(e); }
     }
   } else { V.reach = null; V.targets = []; V.farTargets = []; if (sel && sel.side !== S.turn) S.selected = sel.id; }
+  R.peek = V.peek;
   syncUnits(V.animating);
+  syncActions();
   drawMarkers();
   layoutLabels();
   redrawOverlay();
@@ -283,6 +285,60 @@ function startFerry() {
   refresh();
 }
 
+// The spadework a foot formation can do, as buttons beside it on the map:
+// the ones it can do now are lit, the rest say what they need.
+const ACT_ICON = {
+  ferry: '<path d="M2 10h12l-2.5 3.5h-7z"/><path d="M8 2.5V10M8 3l4 5H8"/>',
+  fort: '<path d="M1.5 13.5h13M3 13.5V7h2v2h2V7h2v2h2V7h2v6.5"/>',
+  mine: '<path d="M3 13.5l6.5-6.5"/><path d="M4.5 4.5c3.5-1.5 7-.5 9 3.5-2.5-1.5-5-2-7.5-1.5z"/>',
+};
+function spadework(u) {
+  if (!u || !humanTurn() || u.side !== S.turn || !isFoot(u)) return [];
+  const h = HEXES[u.hex], fresh = !u.moved && !u.attacked && u.mp >= fullMp(u), acts = [];
+  if (HEXES.some(x => x.river.includes('major'))) {
+    const ok = ferrySites(u).length > 0;
+    acts.push({ id: 'ferry', key: 'B', label: V.ferryPick ? 'Pick far bank' : 'Ferry', ok,
+      why: ok ? `Lash boats across the ${nearestMajorRiver(u.hex)}: once per campaign, costs this command and ${men(FERRY_COST)}`
+        : S.ferryBuilt[u.side] ? 'Your one ferry of the campaign is already built'
+        : !h.river.includes('major') ? 'A ferry is built from the bank of a great river: march a foot formation to the water’s edge'
+        : u.attacked ? 'It has fought this round' : 'Too few men left to spare for the boats' });
+  }
+  {
+    const ok = canFortify(u), enemyNext = h.nbr.some(n => n >= 0 && S.units.some(e => e.side !== u.side && e.hex === n));
+    acts.push({ id: 'fort', key: 'K', label: 'Kacha fort', ok,
+      why: ok ? `Dig a mud wall and ditch here: the whole day, +${KACHA_DEF} defence`
+        : !fresh ? 'Takes a whole day: only a formation that has not marched or fought'
+        : S.kacha?.[u.hex] > 0 ? 'There is a kacha fort here already'
+        : S.walls?.[h.place] > 0 ? 'These works already have walls'
+        : enemyNext ? 'Not with the enemy next to it' : 'There is no room to dig inside this town' });
+  }
+  if (canCountermine(u)) acts.push({ id: 'mine', key: 'M', label: 'Countermine', ok: true, why: `The enemy is mining towards these works: break into the gallery on a 4 or better` });
+  else if (Object.values(HEX_OF).some(x => fortLevels(x) > 0)) {
+    const ok = canMine(u);
+    acts.push({ id: 'mine', key: 'M', label: 'Mine', ok,
+      why: ok ? `Dig a gallery under ${worksTitle(mineTarget(u))}: ${MINE_DAYS} days, then it brings down ${MINE_LEVELS} levels of the works`
+        : !fresh ? 'Takes a whole day: only a formation that has not marched or fought' : 'A mine is begun next to walls the enemy holds' });
+  }
+  return acts;
+}
+function syncActions() {
+  const box = $('#unitActions'), sel = S.selected && unitById(S.selected), acts = V.busy ? [] : spadework(sel);
+  box.hidden = !acts.length;
+  if (!acts.length) return;
+  const h = HEXES[sel.hex];
+  box.style.setProperty('--x', `${h.x.toFixed(1)}px`);
+  box.style.setProperty('--y', `${h.y.toFixed(1)}px`);
+  box.innerHTML = acts.map(a => `<button class="act${a.ok ? '' : ' off'}${a.id === 'ferry' && V.ferryPick ? ' on' : ''}" data-act="${a.id}" title="${esc(a.why)}"><svg viewBox="0 0 16 16" aria-hidden="true">${ACT_ICON[a.id]}</svg><span>${a.label}</span><kbd>${a.key}</kbd></button>`).join('');
+}
+function onAction(e) {
+  const b = e.target.closest('.act');
+  if (!b) return;
+  const a = spadework(S.selected && unitById(S.selected)).find(x => x.id === b.dataset.act);
+  if (!a) return;
+  if (!a.ok) { toast(a.why); return; }
+  if (a.id === 'ferry') startFerry(); else if (a.id === 'fort') doFortify(); else doMine();
+}
+
 async function onHexClick(hex, selectOnly = false) {
   if (!humanTurn() || hex < 0) return;
   if (V.ferryPick) {
@@ -294,6 +350,15 @@ async function onHexClick(hex, selectOnly = false) {
   const sel = S.selected && unitById(S.selected), here = unitsAt(hex);
   const own = here.filter(u => u.side === S.turn), enemy = here.find(u => u.side !== S.turn);
   const mine = sel && sel.side === S.turn, reach = V.reach;  // order() clears V.reach while busy
+  // Clicking a stack again steps through its formations, then sets them
+  // aside to show the ground they stand on: the fort, ghat or village.
+  if (V.peek === hex) { V.peek = -1; select((own[0] || here[0])?.id ?? null); return; }
+  V.peek = -1;
+  if (sel && sel.hex === hex) {
+    const pile = here.filter(u => u.side === sel.side), i = pile.indexOf(sel);
+    if (i < pile.length - 1) select(pile[i + 1].id); else peekAt(hex);
+    return;
+  }
   if (mine && enemy && !sel.attacked) {
     if (V.targets.some(t => t.hex === hex)) return order(() => attack(sel, enemy));
     const from = strikeHexFor(sel, enemy);
@@ -302,13 +367,15 @@ async function onHexClick(hex, selectOnly = false) {
   // A friendly hex the selection can reach (with room) is a march into that
   // stack; Shift-click, or a friend out of reach, selects them instead.
   if (mine && reach?.cost.has(hex) && !selectOnly) return order(() => moveUnit(sel, hex, reach));
-  if (own.length) {
-    const i = own.findIndex(u => u.id === S.selected);
-    select(own[(i + 1) % own.length].id);
-    return;
-  }
+  if (own.length) { select(own[0].id); return; }
   if (enemy) { S.selected = enemy.id; refresh(); return; }
   select(null);
+}
+function peekAt(hex) {
+  V.peek = hex;
+  S.selected = null;
+  refresh();
+  toast(`${placeName(hex) || 'The ground'} beneath the stack · click again to pick up the formations`);
 }
 // Would clicking this hex issue a march or an attack for the selection?
 function isOrderHex(hex) {
@@ -340,6 +407,7 @@ function doRide() {
 }
 function select(id) {
   S.selected = id;
+  V.peek = -1;
   refresh();
 }
 function selectNext() {
@@ -1011,6 +1079,7 @@ function bindInput() {
     else if (k === 'g') doRide();
     else if (k === 'k') doFortify();
     else if (k === 'm') doMine();
+    else if (k === 'b') startFerry();
     else if (k === 'escape') { if (RP.active) exitReplay(); else { V.ferryPick = null; select(null); } }
     else if (k === ' ' && RP.active && !e.target.closest('button')) { e.preventDefault(); $('#rpPlay').click(); }
     else if (k === '?' || k === 'h') $('#helpDialog').showModal();
@@ -1024,6 +1093,9 @@ function bindControls() {
   $('#undoBtn').onclick = () => { if (humanTurn() && undoMove()) toast('March undone'); };
   $('#forceBtn').onclick = doForce;
   $('#rideBtn').onclick = doRide;
+  const acts = $('#unitActions');
+  for (const ev of ['pointerdown', 'pointerup', 'wheel']) acts.addEventListener(ev, e => e.stopPropagation());
+  acts.addEventListener('click', onAction);
   $('#inspector').addEventListener('click', e => { if (e.target.closest('#ferryBtn')) startFerry(); if (e.target.closest('#fortifyBtn')) doFortify(); if (e.target.closest('#mineBtn')) doMine(); });
   $('#zoomIn').onclick = () => zoomAt(R.cam.z * 1.3, R.view.clientWidth / 2, R.view.clientHeight / 2);
   $('#zoomOut').onclick = () => zoomAt(R.cam.z / 1.3, R.view.clientWidth / 2, R.view.clientHeight / 2);
@@ -1168,7 +1240,7 @@ function loadScript(src) {
 async function boot() {
   const id = chosenMap();
   try { localStorage.setItem('jhelum-marches-map', id); } catch { /* storage blocked */ }
-  await loadScript(`maps/${SCENARIOS[id].map || id}.js?v=48`);
+  await loadScript(`maps/${SCENARIOS[id].map || id}.js?v=49`);
   applyScenario(id);
   // The field manual quotes distances and march points for this map's hex size.
   const km = k => k >= 1 ? `${+k.toFixed(1)} km` : `${Math.round(k * 1000)} m`, mpOf = v => Math.round(VARIANTS[v].mp * MARCH_SCALE * PACE);

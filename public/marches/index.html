@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Newsreader:opsz,wght@6..72,500;6..72,600;6..72,700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=81" />
+  <link rel="stylesheet" href="styles.css?v=82" />
 </head>
 <body class="loading" data-turn="azure">
   <header class="topbar">
@@ -51,6 +51,7 @@
           <svg id="overlay" aria-hidden="true"></svg>
           <div id="markers"></div>
           <div id="units"></div>
+          <div id="unitActions" hidden></div>
           <div id="labels"></div>
         </div>
         <div id="tooltip" hidden></div>
@@ -186,14 +187,14 @@
       <div><h3>Fight</h3><p>Every formation is about 1,000 men, shown as five figures of 200 on its stand; losses take figures off. Click a red ring to attack, or a dashed ring to march and attack in one order. Hover first to see the odds and expected losses. Each side rolls a d6 and adds modifiers. Win by 3+ to smash (600 men lost); tie or win by less to strike (400), with 200 lost back in melee. Every 800 enemy men standing next to the defender cost it 1 defence (up to 3), and a formation encircled (enemies on three sides, or on opposite sides) loses 1 more and surrenders rather than falling back. Lose by 1–2 in melee and both lose 200; lose by 3+ and you are repulsed. A formation deals damage in proportion to the soldiers it has left. Settlements give defence (villages, towns and sarais +1, cities +2, forts +3) and great fortresses have walls on top. Guns wear all of these down: every bombardment chips away part of a level and a hit brings one down, the great walls first, and all guns get a bonus against works still standing. A defender 60 m above its attacker gets +1 (+2 at 180 m), and attacking downhill gives the attacker +1. Cavalry is poor wherever the ground rises more than 100 m within a hex: +2 to march there, −1 attacking into it and −1 defending in it. Field guns (light field guns, horse artillery, heavy batteries) fire <span data-scale="rangeHexes">two</span> hexes (<span data-scale="range">2 km</span>); camel swivels and jingals must close to the next hex like everyone else. Guns firing at range and skirmishers risk nothing.</p></div>
       <div><h3>Fatigue</h3><p>An attack takes a quarter of a foot formation's day (<span data-scale="attack">3</span> march points), and a formation needs that much left to make one. Afterwards foot and guns are done for the day; only horse can strike and ride on with what remains (a raid). A formation that has not marched in its latest command fights at +1 (holding its ground). One that used more than a third of its march fights at −1, more than two thirds at −2, both attacking and when attacked before its next command.</p></div>
       <div><h3>Sight</h3><p>With fog of war on, you see only what your formations can see: every hex with a clear line from the watcher’s eye to a man standing there, over the surveyed ground and the curve of the earth. On flat ground a man on foot sees another man’s head to about 10 km, but a hill, a wall or a tower sees much further, and woods and settlements block the view. The eye makes out a formation to about 10 km (12 km for horse, 16 km from high walls or a hill), and a column that marched in its latest command raises dust that shows 4 km beyond that. Troops in woods, a settlement or a kacha fort are seen only from 1.5 km, so you may see the enemy before he sees you. Held strongpoints and forts keep a 3 km watch. Ground out of sight is shaded; faded markers show where enemy formations were last seen, or reported at the outset. Guns fire only at what they can see, and a march that runs into an enemy it could not see halts on contact.</p></div>
-      <div><h3>Dig in</h3><p>A foot formation that has not moved or fought, out of the enemy’s reach, can spend its whole day digging a <b>kacha fort</b> (K): a mud wall and ditch round its hex, in open country or round a village or town without standing walls, +2 defence to whoever holds it (on top of the village or town's own). Guns wear it down like any other works.</p><p>Foot next to enemy-held works can <b>dig a mine</b> (M) under them: three whole days' digging, and on the third it is sprung and brings down two levels of the works at once. Keep a formation at the gallery's mouth, or it is lost. Foot inside the works can <b>countermine</b> (M) for a day, and break into the gallery on a 4 or better. Only foot dig forts, mines and ferries.</p></div>
+      <div><h3>Dig in</h3><p>A foot formation that has not moved or fought, out of the enemy’s reach, can spend its whole day digging a <b>kacha fort</b> (K): a mud wall and ditch round its hex, in open country or round a village or town without standing walls, +2 defence to whoever holds it (on top of the village or town's own). Guns wear it down like any other works.</p><p>Foot next to enemy-held works can <b>dig a mine</b> (M) under them: three whole days' digging, and on the third it is sprung and brings down two levels of the works at once. Keep a formation at the gallery's mouth, or it is lost. Foot inside the works can <b>countermine</b> (M) for a day, and break into the gallery on a 4 or better. Only foot dig forts, mines and ferries; the buttons beside a selected foot formation on the map show which it can do.</p></div>
       <div><h3>Retreat &amp; rally</h3><p>A formation pushed down to two figures (400 men) falls back up to two hexes and cannot attack until it rallies. If it is cut off it surrenders. A formation that neither marches nor fights, away from the enemy and resting in a village, sarai, town, city or fort, rallies 200 men, or 400 near the general. Out on open ground it does not.</p></div>
       <div><h3>The general</h3><p>Your general rides with one formation: +1 attack, +1 defence, and it never falls back. Once per command he can <b>take command</b> of another formation within 24 km (G) and order a <b>forced march</b> for one within 8 km (F). If his formation is destroyed he rides off to the nearest friends within 24 km; only if it was surrounded, or no one is near, is he captured, and the enemy gains 5 war points.</p></div>
       <div><h3>Supply &amp; forts</h3><p>Every formation carries a supply stock. Each command it eats 20%, and wagons from your supply zone (the strongpoints, forts and allied seats you hold, and any home base) bring in more: 40% at a depot, about 20% two wagon-days away, nothing beyond three and a half days or if enemies cut the road. Below 60% a formation attacks at −1; below 40% it is hungry (−1 defence too, no rallying); below 20% its men desert each command until it marches back. Forts belong to whoever last garrisoned them. A fort or town the enemy has closed on from two or more sides is besieged: it supplies no one, its garrison lives on half rations from its magazines, and it starves over a week or two. Tick <b>Supply</b> under the minimap to see where your wagons reach.</p></div>
       <div><h3>Chronicle</h3><p>Fights close together in place and time make one engagement, named after the nearest place: a battle, an assault, or a siege if a fort is invested for days. When one ends, Claude writes its account (the turning points, what it cost) from what happened on the map. Add your own Anthropic API key under <b>Chronicle</b> (C); without one you get field notes. Crossed swords mark where each was fought. <b>Replay the battle</b> (or the whole campaign) plays the troop movements back on the map: pause, change speed, or click the bar to jump to any command; Esc returns to the game.</p></div>
       <div><h3>Allies &amp; ground</h3><p>End a command in a local chief's seat to win them over: they send one levy formation and add +1 defence in their sphere. Vegetation is from satellite land cover: thorn scrub and pine slow a march and give cover, and scrub forest (phulai and kao thicket) gives +2.</p></div>
     </div>
-    <p class="keys"><kbd>N</kbd> next unit <kbd>E</kbd> end command <kbd>U</kbd> undo <kbd>G</kbd> general takes command <kbd>F</kbd> forced march <kbd>K</kbd> dig a kacha fort <kbd>M</kbd> dig a mine <kbd>C</kbd> chronicle <kbd>Esc</kbd> deselect <kbd>+</kbd><kbd>−</kbd> zoom <kbd>0</kbd> whole map · drag to pan, scroll to zoom, right-click to deselect</p>
+    <p class="keys"><kbd>N</kbd> next unit <kbd>E</kbd> end command <kbd>U</kbd> undo <kbd>G</kbd> general takes command <kbd>F</kbd> forced march <kbd>K</kbd> dig a kacha fort <kbd>M</kbd> dig a mine <kbd>B</kbd> build a ferry <kbd>C</kbd> chronicle <kbd>Esc</kbd> deselect <kbd>+</kbd><kbd>−</kbd> zoom <kbd>0</kbd> whole map · drag to pan, scroll to zoom, right-click to deselect · click a stack again to step through it, and once more to see the ground beneath</p>
   </dialog>
 
   <dialog id="dispatchDialog" class="dialog dispatch">
@@ -228,13 +229,13 @@
     </details>
   </dialog>
 
-  <script src="js/scenarios.js?v=81"></script>
-  <script src="js/geo.js?v=81"></script>
-  <script src="js/game.js?v=81"></script>
-  <script src="js/sight.js?v=81"></script>
-  <script src="js/chronicle.js?v=81"></script>
-  <script src="js/campaignmap.js?v=81"></script>
-  <script src="js/render.js?v=81"></script>
-  <script src="js/ui.js?v=81"></script>
+  <script src="js/scenarios.js?v=82"></script>
+  <script src="js/geo.js?v=82"></script>
+  <script src="js/game.js?v=82"></script>
+  <script src="js/sight.js?v=82"></script>
+  <script src="js/chronicle.js?v=82"></script>
+  <script src="js/campaignmap.js?v=82"></script>
+  <script src="js/render.js?v=82"></script>
+  <script src="js/ui.js?v=82"></script>
 </body>
 </html>

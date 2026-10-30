@@ -637,17 +637,20 @@ const SCENARIOS = {
     strongpoints: ['dera', 'harike', 'patti'],
     startOwners: { dera: 'red', harike: 'red', patti: 'azure' },
     startUnits: [
-      // Labh Singh's battalions from Lahore, coming down the Patti road.
-      ['azure', 'Irregular Sowars', [31.295, 74.81], 'Labh Singh’s Gorchars'], ['azure', 'Light Field Gun', [31.295, 74.81], 'Lahore Topkhana'],
+      // Labh Singh's battalions from Lahore, strung out down the Patti road.
+      ['azure', 'Irregular Sowars', [31.295, 74.81], 'Labh Singh’s Gorchars'], ['azure', 'Light Field Gun', [31.2922, 74.8143], 'Lahore Topkhana'],
       ['azure', 'Khalsa Infantry', [31.30, 74.795], 'Lahore Battalions'],
-      ['azure', 'Khalsa Infantry', [31.29, 74.79], 'Court’s Battalion'], ['azure', 'Light Field Gun', [31.29, 74.79], 'Lahore Topkhana'],
+      ['azure', 'Khalsa Infantry', [31.29, 74.79], 'Court’s Battalion'], ['azure', 'Light Field Gun', [31.285, 74.775], 'Lahore Topkhana'],
       // Bir Singh's camp at Harike, with Attar Singh's and Kashmira Singh's men.
-      ['red', 'Irregular Sowars', 'dera', 'Sandhanwalia Sowars', 4], ['red', 'Matchlockmen', 'dera', 'Bir Singh’s Musketeers'],
-      ['red', 'Matchlockmen', [31.158, 74.948], 'Bir Singh’s Musketeers'], ['red', 'Light Field Gun', [31.158, 74.948], 'Bir Singh’s Guns', 3],
-      ['red', 'Irregular Sowars', [31.152, 74.962], 'Kashmira Singh’s Sowars', 3], ['red', 'Dhal & Talwar', [31.152, 74.962], 'Akali Nihangs', 4],
-      ['red', 'Irregular Sowars', 'harike', 'Bir Singh’s Horse', 3], ['red', 'Matchlockmen', 'harike', 'Bir Singh’s Musketeers', 2],
-      // The Baba's followers, who had swelled to some thousands.
-      ['red', 'Spearmen', [31.162, 74.958], 'Bir Singh’s Followers', 4], ['red', 'Spearmen', [31.162, 74.958], 'Bir Singh’s Followers', 4],
+      ['red', 'Irregular Sowars', 'dera', 'Sandhanwalia Sowars', 4], ['red', 'Matchlockmen', [31.15, 74.95], 'Bir Singh’s Musketeers'],
+      ['red', 'Matchlockmen', [31.158, 74.945], 'Bir Singh’s Musketeers'], ['red', 'Light Field Gun', [31.16, 74.955], 'Bir Singh’s Guns', 3],
+      ['red', 'Irregular Sowars', [31.152, 74.962], 'Kashmira Singh’s Sowars', 3], ['red', 'Dhal & Talwar', [31.145, 74.958], 'Akali Nihangs', 4],
+      ['red', 'Irregular Sowars', 'harike', 'Bir Singh’s Horse', 3], ['red', 'Matchlockmen', [31.172, 74.952], 'Bir Singh’s Musketeers', 2],
+      // The Baba's followers, who had swelled to some thousands, and the
+      // villages round the dera that kept his langar.
+      ['red', 'Spearmen', [31.165, 74.965], 'Bir Singh’s Followers', 4], ['red', 'Spearmen', [31.158, 74.97], 'Bir Singh’s Followers', 4],
+      ['red', 'Spearmen', [31.1984, 74.9325], 'Burj Followers', 1, { post: true }],
+      ['red', 'Spearmen', [31.2186, 74.9531], 'Nathupur Followers', 1, { post: true }],
     ],
     reinforcements: [
       { round: 3, side: 'azure', at: [31.30, 74.95], name: 'Mahtab Singh Majithia’s division', note: 'came down from Amritsar by Tarn Taran', history: 'General Mahtab Singh Majithia had been sent ahead to Amritsar with his battalion, on the pretext of a quarrel with the British, to write to Attar Singh in friendship and draw him over the Sutlej. He now marched on the camp.', units: [['Khalsa Infantry', 'Majithia Battalions'], ['Light Field Gun', 'Majithia Topkhana', 3]] },
@@ -717,20 +720,25 @@ const SCENARIOS = {
     strongpoints: ['gujranwala', 'eminabad'],
     startOwners: { gujranwala: 'red', eminabad: 'azure' },
     startUnits: [
-      // Ubaid Khan's army on the high road at Kamoke, a march short of Eminabad.
-      ['azure', 'Irregular Sowars', [31.96, 74.22], 'Ubaid Khan’s Horse'], ['azure', 'Light Field Gun', [31.96, 74.22], 'Governor’s Guns', 4],
-      ['azure', 'Irregular Sowars', [31.95, 74.235], 'Durrani Horse'], ['azure', 'Mounted Matchlocks', [31.95, 74.235], 'Mughal Horse'],
-      ['azure', 'Matchlockmen', [31.945, 74.215], 'Lahore Barqandazes'], ['azure', 'Matchlockmen', [31.945, 74.215], 'Lahore Barqandazes'],
-      ['azure', 'Dhal & Talwar', [31.94, 74.23], 'Rohilla Swordsmen'], ['azure', 'Light Field Gun', [31.94, 74.23], 'Governor’s Guns', 4],
-      ['azure', 'Zamburak', [31.955, 74.205], 'Durrani Zamburaks'], ['azure', 'Irregular Sowars', [31.955, 74.205], 'Durrani Horse'],
+      // Ubaid Khan's army on the high road about Kamoke, a march short of
+      // Eminabad, its camps spread over the villages either side.
+      ['azure', 'Irregular Sowars', 'kamoke', 'Ubaid Khan’s Horse'], ['azure', 'Light Field Gun', [31.96, 74.235], 'Governor’s Guns', 4],
+      ['azure', 'Irregular Sowars', [31.9828, 74.2933], 'Durrani Horse'], ['azure', 'Mounted Matchlocks', [31.9939, 74.1346], 'Mughal Horse'],
+      ['azure', 'Matchlockmen', [31.945, 74.215], 'Lahore Barqandazes'], ['azure', 'Matchlockmen', 'sadhoke', 'Lahore Barqandazes'],
+      ['azure', 'Dhal & Talwar', [31.935, 74.25], 'Rohilla Swordsmen'], ['azure', 'Light Field Gun', [31.92, 74.23], 'Governor’s Guns', 4],
+      ['azure', 'Zamburak', [31.95, 74.19], 'Durrani Zamburaks'], ['azure', 'Irregular Sowars', [31.9207, 74.3133], 'Durrani Horse'],
       // The Sikhs in the governor's pay: Sahib Singh's horse, and the men enrolled in the Jullundur Doab.
-      ['azure', 'Irregular Sowars', [31.935, 74.245], 'Sahib Singh’s Sikhs', 3], ['azure', 'Matchlockmen', [31.935, 74.245], 'Doaba Sikhs', 4],
+      ['azure', 'Irregular Sowars', [31.97, 74.265], 'Sahib Singh’s Sikhs', 3], ['azure', 'Matchlockmen', [31.879, 74.2441], 'Doaba Sikhs', 4],
       // The governor's post in Eminabad, where he would entrench.
       ['azure', 'Matchlockmen', 'eminabad', 'Eminabad Post', 2, { post: true }],
-      // Charat Singh's garrison in the fort, and his horse under its walls.
+      // Charat Singh's garrison in the fort, his horse in the villages round it,
+      // and his posts up the high road.
       ['red', 'Matchlockmen', 'gujranwala', 'Gujranwala Garrison', 5, { post: true }], ['red', 'Irregular Sowars', 'gujranwala', 'Charat Singh’s Sowars'],
-      ['red', 'Irregular Sowars', [32.165, 74.20], 'Sukerchakia Sowars'], ['red', 'Mounted Matchlocks', [32.165, 74.20], 'Sukerchakia Sowars', 4],
-      ['red', 'Matchlockmen', [32.16, 74.18], 'Sukerchakia Musketeers'], ['red', 'Zamburak', [32.16, 74.18], 'Sukerchakia Zamburaks'],
+      ['red', 'Irregular Sowars', [32.1567, 74.1159], 'Sukerchakia Sowars'], ['red', 'Mounted Matchlocks', [32.1991, 74.2441], 'Sukerchakia Sowars', 4],
+      ['red', 'Matchlockmen', [32.2079, 74.1825], 'Sukerchakia Musketeers'], ['red', 'Zamburak', [32.1715, 74.2208], 'Sukerchakia Zamburaks'],
+      ['red', 'Matchlockmen', 'qiladidar', 'Qila Didar Singh Post', 2, { post: true }],
+      ['red', 'Matchlockmen', 'wazirabad', 'Wazirabad Post', 2, { post: true }],
+      ['red', 'Matchlockmen', 'daska', 'Daska Post', 2, { post: true }],
     ],
     reinforcements: [
       { round: 3, side: 'red', at: [31.97, 74.62], name: 'Jassa Singh Ahluwalia', note: 'came up from Amritsar with the Dal Khalsa', history: 'Word of the siege went round the misls, and Jassa Singh Ahluwalia, the leader of the Dal Khalsa, rode for Gujranwala from Amritsar with his own horse and the Nihangs.', units: [['Irregular Sowars', 'Ahluwalia Sowars'], ['Irregular Sowars', 'Ahluwalia Sowars'], ['Dhal & Talwar', 'Akali Nihangs']] },
@@ -1007,33 +1015,39 @@ const SCENARIOS = {
     // The Sikh roads back over the Indus at Hund and Attock; the Afghans' to
     // Peshawar and the Yusufzai country.
     homeBase: { azure: [[34.01, 72.425], [33.89, 72.30]], red: [[34.005, 71.775], [34.12, 71.775], [34.20, 72.03]] },
-    walls: { attock: 3, jahangira: 1, akora: 1 },  // Akbar's fort; the little forts at Jahangira and Akora
+    walls: { attock: 3, hund: 1, jahangira: 1, akora: 1 },  // Akbar's forts at Attock and Hund; the little forts at Jahangira and Akora
     strongpoints: ['teri', 'nowshera', 'jahangira', 'akora', 'attock'],
     startOwners: { teri: 'red', nowshera: 'red', jahangira: 'azure', akora: 'azure', attock: 'azure' },
     startUnits: [
-      // Ranjit Singh's army over the Indus, camped above Jahangira.
-      ['azure', 'Irregular Sowars', [33.985, 72.27], 'Ranjit Singh’s Ghorchara Khas'], ['azure', 'Dhal & Talwar', [33.985, 72.27], 'Phula Singh’s Akali Nihangs'],
-      ['azure', 'Khalsa Infantry', [33.995, 72.255], 'Gorkha Battalion'], ['azure', 'Light Field Gun', [33.995, 72.255], 'Diwan Chand’s Topkhana'],
-      ['azure', 'Khalsa Infantry', [33.975, 72.255], 'Fauj-i-Khas Battalions'], ['azure', 'Zamburak', [33.975, 72.255], 'Zamburkhana'],
-      ['azure', 'Irregular Sowars', [34.00, 72.285], 'Ghorcharas'], ['azure', 'Irregular Sowars', [34.00, 72.285], 'Ghorcharas'],
-      ['azure', 'Khalsa Infantry', [34.005, 72.265], 'Fauj-i-Ain Battalions'], ['azure', 'Mounted Matchlocks', [34.005, 72.265], 'Ghorcharas'],
+      // Ranjit Singh's army over the Indus, its camps strung along the Hund
+      // road from Tordher back to the ford.
+      ['azure', 'Irregular Sowars', [33.985, 72.27], 'Ranjit Singh’s Ghorchara Khas'], ['azure', 'Dhal & Talwar', [34.005, 72.26], 'Phula Singh’s Akali Nihangs'],
+      ['azure', 'Khalsa Infantry', [33.97, 72.255], 'Gorkha Battalion'], ['azure', 'Light Field Gun', [33.9909, 72.2879], 'Diwan Chand’s Topkhana'],
+      ['azure', 'Khalsa Infantry', [34.02, 72.28], 'Fauj-i-Khas Battalions'], ['azure', 'Zamburak', [34.005, 72.31], 'Zamburkhana'],
+      ['azure', 'Irregular Sowars', [34.03, 72.32], 'Ghorcharas'], ['azure', 'Irregular Sowars', [33.9955, 72.359], 'Ghorcharas'],
+      ['azure', 'Khalsa Infantry', [33.975, 72.30], 'Fauj-i-Ain Battalions'], ['azure', 'Mounted Matchlocks', [34.0494, 72.3647], 'Ghorcharas'],
       // Kharak Singh, Hari Singh Nalwa and Ventura on the right bank at Attock and Khairabad.
-      ['azure', 'Khalsa Infantry', [33.905, 72.215], 'Ventura’s Battalions'], ['azure', 'Light Field Gun', [33.905, 72.215], 'Ventura’s Topkhana'],
-      ['azure', 'Irregular Sowars', [33.91, 72.20], 'Nalwa’s Sowars'], ['azure', 'Khalsa Infantry', [33.91, 72.20], 'Fauj-i-Ain Battalions'],
-      // The posts taken by the advance guard.
+      ['azure', 'Khalsa Infantry', 'khairabad', 'Ventura’s Battalions'], ['azure', 'Light Field Gun', [33.9276, 72.2029], 'Ventura’s Topkhana'],
+      ['azure', 'Irregular Sowars', [33.915, 72.19], 'Nalwa’s Sowars'], ['azure', 'Khalsa Infantry', [33.88, 72.235], 'Fauj-i-Ain Battalions'],
+      // The posts taken by the advance guard, and the fort over the ford.
       ['azure', 'Matchlockmen', 'jahangira', 'Jahangira Post', 2, { post: true }],
       ['azure', 'Matchlockmen', 'akora', 'Akora Post', 2, { post: true }],
       ['azure', 'Jingal', 'attock', 'Attock Garrison', 3, { post: true }],
-      // The ghazis on the Teri hill and by Pir Sabaq.
-      ['red', 'Dhal & Talwar', 'teri', 'Yusufzai Ghazis'], ['red', 'Matchlockmen', 'teri', 'Yusufzai Jezailchis'],
-      ['red', 'Dhal & Talwar', [34.035, 72.035], 'Yusufzai Ghazis'], ['red', 'Matchlockmen', [34.035, 72.035], 'Khattak Jezailchis'],
-      ['red', 'Dhal & Talwar', [34.042, 72.015], 'Khattak Ghazis'], ['red', 'Spearmen', [34.042, 72.015], 'Yusufzai Ghazis'],
-      ['red', 'Irregular Sowars', [34.03, 72.05], 'Muhammad Zaman Khan’s Horse'], ['red', 'Matchlockmen', [34.03, 72.05], 'Sadiq Khan’s Khattaks'],
+      ['azure', 'Matchlockmen', 'hund', 'Hund Post', 2, { post: true }],
+      // The ghazis on the Teri hill and in the villages about Pir Sabaq.
+      ['red', 'Dhal & Talwar', 'teri', 'Yusufzai Ghazis'], ['red', 'Matchlockmen', 'pirsabaq', 'Yusufzai Jezailchis'],
+      ['red', 'Dhal & Talwar', [34.045, 72.03], 'Yusufzai Ghazis'], ['red', 'Matchlockmen', [34.03, 72.0], 'Khattak Jezailchis'],
+      ['red', 'Dhal & Talwar', [34.055, 72.005], 'Khattak Ghazis'], ['red', 'Spearmen', 'risalpur', 'Yusufzai Ghazis'],
+      ['red', 'Irregular Sowars', [34.06, 72.045], 'Muhammad Zaman Khan’s Horse'], ['red', 'Matchlockmen', [33.9417, 71.973], 'Sadiq Khan’s Khattaks'],
       ['red', 'Matchlockmen', 'nowshera', 'Nowshera Ghazis', 3],
       // Azim Khan's army on the south bank, west of Nowshera.
-      ['red', 'Irregular Sowars', [34.005, 71.93], 'Azim Khan’s Durranis'], ['red', 'Irregular Sowars', [34.005, 71.93], 'Durrani Horse'],
-      ['red', 'Mounted Matchlocks', [34.0, 71.91], 'Qizilbash Horse'], ['red', 'Light Field Gun', [34.0, 71.91], 'Afghan Guns', 3],
-      ['red', 'Matchlockmen', [33.995, 71.94], 'Afghan Jezailchis'], ['red', 'Zamburak', [33.995, 71.94], 'Durrani Zamburaks'],
+      ['red', 'Irregular Sowars', [34.005, 71.93], 'Azim Khan’s Durranis'], ['red', 'Irregular Sowars', 'pirpai', 'Durrani Horse'],
+      ['red', 'Mounted Matchlocks', [33.9331, 71.8786], 'Qizilbash Horse'], ['red', 'Light Field Gun', [33.995, 71.95], 'Afghan Guns', 3],
+      ['red', 'Matchlockmen', [33.985, 71.915], 'Afghan Jezailchis'], ['red', 'Zamburak', [33.99, 71.885], 'Durrani Zamburaks'],
+      // The villages of the Yusufzai plain and the Khattak hills, up for the holy war.
+      ['red', 'Matchlockmen', [34.1441, 72.095], 'Toru Ghazis', 2, { post: true }],
+      ['red', 'Matchlockmen', 'mardan', 'Mardan Ghazis', 2, { post: true }],
+      ['red', 'Matchlockmen', 'cherat', 'Cherat Khattaks', 2, { post: true }],
     ],
     events: [
       { title: 'Azim Khan withdraws', history: 'On the night after the battle Azim Khan, told by Yar Muhammad’s letters that the Sikhs meant to seize his harem and treasure at Michni, and distrusting his own brothers, broke up his camp. His army melted away in the dark and he went back over the passes to Jalalabad, where he died within two months.', round: 4, side: 'red', text: 'Azim Khan broke up his camp and went back over the passes', flash: 'AZIM KHAN WITHDRAWS', depart: ['Azim Khan’s Durranis', 'Durrani Horse', 'Qizilbash Horse', 'Afghan Guns', 'Afghan Jezailchis', 'Durrani Zamburaks'] },
@@ -1437,15 +1451,20 @@ const SCENARIOS = {
     strongpoints: ['gurdaspur', 'trimmu', 'batala'],
     startOwners: { gurdaspur: 'red', batala: 'red' },
     startUnits: [
-      // The mutineers at Nurkot.
-      ['azure', 'Sepoy Infantry', 'nurkot', '46th N.I., Right Wing'], ['azure', 'Sepoy Infantry', 'nurkot', '46th N.I., Left Wing'],
-      ['azure', 'Sepoy Infantry', [32.205, 75.125], '46th N.I., Grenadiers'], ['azure', 'Light Field Gun', [32.205, 75.125], 'The Station Gun', 1],
-      ['azure', 'Sepoy Infantry', [32.195, 75.10], '46th N.I., Light Company', 4], ['azure', 'Light Dragoons', [32.195, 75.10], '9th Light Cavalry, Right Wing', 4],
-      // Nicholson's column, come in to Gurdaspur that afternoon, and the civil station.
+      // The mutineers halted in the villages about Nurkot.
+      ['azure', 'Sepoy Infantry', 'nurkot', '46th N.I., Right Wing'], ['azure', 'Sepoy Infantry', [32.2098, 75.1507], '46th N.I., Left Wing'],
+      ['azure', 'Sepoy Infantry', [32.205, 75.125], '46th N.I., Grenadiers'], ['azure', 'Light Field Gun', [32.19, 75.12], 'The Station Gun', 1],
+      ['azure', 'Sepoy Infantry', [32.2072, 75.0565], '46th N.I., Light Company', 4], ['azure', 'Light Dragoons', [32.185, 75.09], '9th Light Cavalry, Right Wing', 4],
+      // Nicholson's column, come in to Gurdaspur that afternoon and camped
+      // about the town, and the civil station.
       ['red', 'Line Infantry', 'gurdaspur', 'HM 52nd Light Infantry'], ['red', 'Matchlockmen', 'gurdaspur', 'Gurdaspur Police', 2, { post: true }],
-      ['red', 'Line Infantry', [32.035, 75.39], 'HM 52nd, Ekka Companies'], ['red', 'Horse Artillery', [32.035, 75.39], 'Dawes’s Horse Artillery', 4],
-      ['red', 'Light Field Gun', [32.05, 75.39], 'Bourchier’s Field Battery', 3], ['red', 'Matchlockmen', [32.05, 75.39], 'Police Battalion Company', 2],
-      ['red', 'Mounted Matchlocks', [32.04, 75.41], '3rd and 6th Punjab Infantry', 4], ['red', 'Irregular Sowars', [32.04, 75.41], 'Mounted Police Ressalahs', 3],
+      ['red', 'Line Infantry', [32.0019, 75.3802], 'HM 52nd, Ekka Companies'], ['red', 'Horse Artillery', [32.05, 75.375], 'Dawes’s Horse Artillery', 4],
+      ['red', 'Light Field Gun', [32.03, 75.41], 'Bourchier’s Field Battery', 3], ['red', 'Matchlockmen', [32.02, 75.39], 'Police Battalion Company', 2],
+      ['red', 'Mounted Matchlocks', [32.06, 75.42], '3rd and 6th Punjab Infantry', 4], ['red', 'Irregular Sowars', [32.045, 75.43], 'Mounted Police Ressalahs', 3],
+      // The district police in the tahsil towns.
+      ['red', 'Matchlockmen', 'kalanaur', 'Kalanaur Police', 1, { post: true }],
+      ['red', 'Matchlockmen', 'derababananak', 'Dera Baba Nanak Police', 1, { post: true }],
+      ['red', 'Matchlockmen', 'batala', 'Batala Police', 1, { post: true }],
     ],
     events: [
       { title: 'Two spies taken', history: 'On the evening of the 11th Nicholson himself saw two men in the camp bazaar at Gurdaspur whom he knew for sepoys of the 46th in disguise. They had been sent ahead to raise the 2nd Irregular Cavalry, and were taken before they could reach it.', round: 1, side: 'red', text: 'Two disguised sepoys of the 46th, sent to raise the cavalry at Gurdaspur, were taken in the camp bazaar', flash: 'TWO SPIES TAKEN' },
@@ -1720,32 +1739,37 @@ const SCENARIOS = {
     startUnits: [
       // Tej Singh's army in the works.
       ['azure', 'Khalsa Infantry', 'sobraon', 'Tej Singh’s Battalions'], ['azure', 'Heavy Battery', 'sobraon', 'Khalsa Heavy Guns', 4],
-      ['azure', 'Khalsa Infantry', [31.14, 74.856], 'Fauj-i-Ain Battalions'], ['azure', 'Zamburak', [31.14, 74.856], 'Zamburkhana'],
-      ['azure', 'Khalsa Infantry', [31.132, 74.862], 'Sham Singh’s Battalions'], ['azure', 'Light Field Gun', [31.132, 74.862], 'Khalsa Topkhana'],
+      ['azure', 'Khalsa Infantry', [31.14, 74.856], 'Fauj-i-Ain Battalions'], ['azure', 'Zamburak', 'littlesobraon', 'Zamburkhana'],
+      ['azure', 'Khalsa Infantry', [31.138, 74.870], 'Sham Singh’s Battalions'], ['azure', 'Light Field Gun', [31.138, 74.854], 'Khalsa Topkhana'],
       ['azure', 'Khalsa Infantry', [31.133, 74.874], 'Fauj-i-Ain Battalions'], ['azure', 'Light Field Gun', [31.133, 74.874], 'Khalsa Topkhana'],
       ['azure', 'Khalsa Infantry', [31.14, 74.878], 'Fauj-i-Ain Battalions'], ['azure', 'Dhal & Talwar', [31.14, 74.878], 'Akali Nihangs', 4],
-      ['azure', 'Irregular Sowars', [31.143, 74.865], 'Ghorcharas', 4], ['azure', 'Khalsa Infantry', [31.143, 74.865], 'Fauj-i-Khas Battalions'],
+      ['azure', 'Khalsa Infantry', [31.143, 74.865], 'Fauj-i-Khas Battalions'],
       ['azure', 'Light Field Gun', [31.128, 74.868], 'Khalsa Topkhana'],
-      // The heavy guns on the high north bank, and the camp behind the bridge.
+      // The heavy guns on the high north bank, and the camps behind the bridge.
       ['azure', 'Heavy Battery', [31.16, 74.853], 'North Bank Guns', 4, { post: true }],
       ['azure', 'Heavy Battery', [31.162, 74.874], 'North Bank Guns', 4, { post: true }],
-      ['azure', 'Khalsa Infantry', [31.172, 74.855], 'Fauj-i-Ain Battalions', 4],
-      // Lal Singh's horse upstream towards Harike, and the ferry guard.
-      ['azure', 'Irregular Sowars', [31.175, 74.92], 'Lal Singh’s Ghorcharas'], ['azure', 'Irregular Sowars', [31.175, 74.92], 'Lal Singh’s Ghorcharas'],
-      ['azure', 'Irregular Sowars', [31.18, 74.90], 'Lal Singh’s Ghorcharas', 4],
+      ['azure', 'Irregular Sowars', 'sobraonkalan', 'Ghorcharas', 4], ['azure', 'Khalsa Infantry', [31.2086, 74.9043], 'Fauj-i-Ain Battalions', 4],
+      // Lal Singh's horse upstream towards Harike and down at the Nagar ford,
+      // the ferry guard, and the posts in the Majha behind.
+      ['azure', 'Irregular Sowars', [31.175, 74.92], 'Lal Singh’s Ghorcharas'], ['azure', 'Irregular Sowars', [31.19, 74.95], 'Lal Singh’s Ghorcharas'],
+      ['azure', 'Irregular Sowars', [31.1606, 74.7954], 'Lal Singh’s Ghorcharas', 4],
       ['azure', 'Matchlockmen', 'harike', 'Harike Ferry Guard', 2, { post: true }],
-      // Dick's and Gilbert's divisions on the Ferozepur road by Arifke.
-      ['red', 'Line Infantry', [31.035, 74.74], 'HM 10th and 53rd Foot'], ['red', 'Sepoy Infantry', [31.035, 74.74], '43rd and 59th Bengal NI'],
-      ['red', 'Line Infantry', [31.028, 74.725], 'HM 80th Foot'], ['red', 'Sepoy Infantry', [31.028, 74.725], '33rd and 63rd Bengal NI'],
-      ['red', 'Line Infantry', [31.04, 74.725], 'HM 9th and 62nd Foot'], ['red', 'Sepoy Infantry', [31.04, 74.725], '26th Bengal NI', 3],
-      ['red', 'Line Infantry', [31.022, 74.745], 'HM 29th Foot'], ['red', 'Sepoy Infantry', [31.022, 74.745], '41st and 68th Bengal NI'],
-      ['red', 'Line Infantry', [31.03, 74.76], '1st Bengal Europeans'], ['red', 'Sepoy Infantry', [31.03, 74.76], '16th Grenadiers and Sirmoor Battalion'],
-      ['red', 'Light Dragoons', [31.015, 74.73], 'HM 3rd Light Dragoons', 4], ['red', 'Lancers', [31.015, 74.73], 'HM 9th Lancers', 4],
-      ['red', 'Light Dragoons', [31.02, 74.71], '4th and 5th Bengal Light Cavalry', 4], ['red', 'Irregular Sowars', [31.02, 74.71], '2nd and 9th Irregular Cavalry', 4],
-      ['red', 'Horse Artillery', [31.045, 74.745], 'Horse Artillery Troops'], ['red', 'Light Field Gun', [31.045, 74.745], 'Field Batteries', 4],
+      ['azure', 'Matchlockmen', 'patti', 'Patti Post', 2, { post: true }],
+      ['azure', 'Matchlockmen', 'kasur', 'Kasur Garrison', 2, { post: true }],
+      // Dick's and Gilbert's divisions camped in the villages about Arifke.
+      ['red', 'Line Infantry', 'arifke', 'HM 10th and 53rd Foot'], ['red', 'Sepoy Infantry', [31.035, 74.76], '43rd and 59th Bengal NI'],
+      ['red', 'Line Infantry', [31.025, 74.72], 'HM 80th Foot'], ['red', 'Sepoy Infantry', [31.0051, 74.7396], '33rd and 63rd Bengal NI'],
+      ['red', 'Line Infantry', [31.05, 74.715], 'HM 9th and 62nd Foot'], ['red', 'Sepoy Infantry', [31.015, 74.765], '26th Bengal NI', 3],
+      ['red', 'Line Infantry', [31.02, 74.79], 'HM 29th Foot'], ['red', 'Sepoy Infantry', [30.971, 74.8234], '41st and 68th Bengal NI'],
+      ['red', 'Line Infantry', [30.995, 74.77], '1st Bengal Europeans'], ['red', 'Sepoy Infantry', [30.9567, 74.7694], '16th Grenadiers and Sirmoor Battalion'],
+      ['red', 'Light Dragoons', [31.0686, 74.6647], 'HM 3rd Light Dragoons', 4], ['red', 'Lancers', [31.045, 74.69], 'HM 9th Lancers', 4],
+      ['red', 'Light Dragoons', [30.99, 74.71], '4th and 5th Bengal Light Cavalry', 4], ['red', 'Irregular Sowars', [30.985, 74.745], '2nd and 9th Irregular Cavalry', 4],
+      ['red', 'Horse Artillery', [31.03, 74.70], 'Horse Artillery Troops'], ['red', 'Light Field Gun', [31.0, 74.725], 'Field Batteries', 4],
       // Grey at Attari, watching the Nagar ford; Littler at Ferozepur.
-      ['red', 'Sepoy Infantry', 'attari', 'Grey’s Bengal NI', 4], ['red', 'Light Dragoons', 'attari', '8th Bengal Light Cavalry', 3],
+      ['red', 'Sepoy Infantry', 'attari', 'Grey’s Bengal NI', 4], ['red', 'Light Dragoons', [30.9464, 74.6754], '8th Bengal Light Cavalry', 3],
       ['red', 'Sepoy Infantry', 'ferozepur', '27th Bengal NI', 4, { post: true }], ['red', 'Heavy Battery', 'ferozepur', 'Reserve Artillery', 3, { post: true }],
+      ['red', 'Matchlockmen', 'zira', 'Zira Police', 1, { post: true }],
+      ['red', 'Matchlockmen', 'ferozeshah', 'Ferozeshah Post', 1, { post: true }],
     ],
     reinforcements: [
       { round: 4, side: 'red', at: [31.05, 75.01], name: 'Smith’s division', note: 'came back down the river from Aliwal', history: 'After Aliwal Sir Harry Smith’s division marched back down the left bank, and rejoined the army before Sobraon on 8 February with Cureton’s cavalry and HM 16th Lancers.', units: [['Line Infantry', 'HM 31st Foot'], ['Sepoy Infantry', '47th Bengal NI and Nusseree Battalion'], ['Line Infantry', 'HM 50th Foot'], ['Sepoy Infantry', '42nd Bengal NI', 4], ['Lancers', 'HM 16th Lancers', 4]] },
