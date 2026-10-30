@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Newsreader:opsz,wght@6..72,500;6..72,600;6..72,700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=82" />
+  <link rel="stylesheet" href="styles.css?v=83" />
 </head>
 <body class="loading" data-turn="azure">
   <header class="topbar">
@@ -147,13 +147,14 @@
   <dialog id="startDialog" class="dialog start">
     <small class="kicker">Choose a campaign</small>
     <div class="map-pick" id="mapPick"></div>
+    <small class="start-meta" id="startMeta"></small>
     <h2 id="startTitle">The Jhelum Marches</h2>
     <p class="lede" id="startLede"></p>
     <div class="mode-pick" id="modePick"></div>
     <button class="continue" id="continueBtn" hidden><b>Continue campaign</b><small></small></button>
+    <div class="opponent-row"><label class="opponent"><span>Opponent</span><select id="opponent"><option value="ai" selected>Computer</option><option value="human">Second player (hot-seat)</option></select></label>
+    <label class="opponent"><span>Fog of war</span><select id="fogPick"><option value="on" selected>On: see only what your troops can see</option><option value="off">Off: the whole field is open</option></select></label></div>
     <div class="side-pick" id="sidePick"></div>
-    <div class="opponent-row"><label class="opponent">Opponent <select id="opponent"><option value="ai" selected>Computer</option><option value="human">Second player (hot-seat)</option></select></label>
-    <label class="opponent">Fog of war <select id="fogPick"><option value="on" selected>On: see only what your troops can see</option><option value="off">Off: the whole field is open</option></select></label></div>
   </dialog>
 
   <dialog id="rulesDialog" class="dialog rules">
@@ -229,13 +230,13 @@
     </details>
   </dialog>
 
-  <script src="js/scenarios.js?v=82"></script>
-  <script src="js/geo.js?v=82"></script>
-  <script src="js/game.js?v=82"></script>
-  <script src="js/sight.js?v=82"></script>
-  <script src="js/chronicle.js?v=82"></script>
-  <script src="js/campaignmap.js?v=82"></script>
-  <script src="js/render.js?v=82"></script>
-  <script src="js/ui.js?v=82"></script>
+  <script src="js/scenarios.js?v=83"></script>
+  <script src="js/geo.js?v=83"></script>
+  <script src="js/game.js?v=83"></script>
+  <script src="js/sight.js?v=83"></script>
+  <script src="js/chronicle.js?v=83"></script>
+  <script src="js/campaignmap.js?v=83"></script>
+  <script src="js/render.js?v=83"></script>
+  <script src="js/ui.js?v=83"></script>
 </body>
 </html>

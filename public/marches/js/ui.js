@@ -1169,11 +1169,12 @@ function renderStart() {
     return `<button class="mode ${id === MAP_ID ? 'active' : ''}" data-mode="${id}"><b>${label}</b><small>${note}</small></button>`;
   }).join('');
   $('#modePick').querySelectorAll('[data-mode]').forEach(b => b.onclick = () => go(b.dataset.mode));
+  $('#startMeta').textContent = [SCN.year, SCN.region].filter(Boolean).join(' · ');
   $('#startTitle').textContent = SCN.title;
   $('#startLede').textContent = SCN.blurb;
   $('#sidePick').innerHTML = ['azure', 'red'].map(side => {
     const sd = SCN.sides[side];
-    return `<button data-start="${side}" class="pick ${side}"><small>Play as</small><b>${esc(sd.name)}</b><span>${esc(sd.pitch)}</span><em>${esc(sd.tag)}</em></button>`;
+    return `<button data-start="${side}" class="pick ${side}"><small>Play as</small><b>${esc(sd.name)}</b><span>${esc(sd.pitch)}</span><footer><em>${esc(sd.tag)}</em><i>Take command</i></footer></button>`;
   }).join('');
   $('#sidePick').querySelectorAll('[data-start]').forEach(b => b.onclick = () => briefThenStart(b.dataset.start, $('#opponent').value === 'ai'));
 }
