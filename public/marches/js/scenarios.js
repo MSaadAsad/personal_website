@@ -703,7 +703,7 @@ const SCENARIOS = {
       defenderWins: 'Ubaid Khan’s siege has failed. Gujranwala still stands when he must march back to Lahore, and the misls follow him to its walls.',
     },
     sides: {
-      azure: { name: 'Governor of Lahore', short: 'Durrani', adj: 'Durrani', pitch: 'Your army is on the high road below Eminabad, with the guns and fifteen hundred Sikhs in your pay. Charat Singh is shut up in his fort at Gujranwala, and the misls are gathering to the east. Take the fort in ten days, and keep Eminabad behind you. Do not trust the Sikhs in your ranks too long.', tag: 'Moves first · take Gujranwala in 10 days' },
+      azure: { name: 'Governor of Lahore', short: 'Durrani', adj: 'Durrani', pitch: 'Your army is on the high road below Eminabad, with the guns and fifteen hundred Sikhs in your pay. Charat Singh is shut up in his fort at Gujranwala, and the misls are gathering to the east. Take the fort in ten days, and keep Eminabad behind you. Your hired contingents may not hold once the misls are up: finish the siege quickly.', tag: 'Moves first · take Gujranwala in 10 days' },
       red: { name: 'Charat Singh and the Misls', short: 'Misls', adj: 'Sukerchakia', pitch: 'You hold your fort at Gujranwala with a strong garrison and your own horse. Jassa Singh Ahluwalia, the Bhangis and Jai Singh Kanhaiya are coming. Hold the fort, harry the besiegers, and when the misls are up, break the governor’s camp at Eminabad.', tag: 'Moves second · hold Gujranwala, or take Eminabad' },
     },
     generals: {
