@@ -239,18 +239,6 @@ const HISTORIES = {
    "Adrian Greenwood, Victoria’s Scottish Lion: The Life of Colin Campbell (2015), ch. 5"
   ]
  },
- "manupur": {
-  "history": [
-   "Ahmad Shah Durrani, made king of the Afghans in 1747, invaded India within months. He took Lahore in January 1748 and crossed the Sutlej at Ludhiana on 1 March. The Mughal army under the wazir Qamar-ud-din Khan, with Prince Ahmad, Safdar Jang, Muin-ul-Mulk and Raja Ishwari Singh of Jaipur, had left its baggage in Sirhind and turned north for the ford at Machhiwara; the Shah slipped past it and took Sirhind, with the wazir's treasure and household, on 2 March.",
-   "On 3 March the Mughals camped at Manupur, on dry ground with too few wells. The Shah dug lines about five miles out from Sirhind. He had one heavy gun and seven light ones against several hundred Mughal guns, but some 700 camel swivels and better horse. For a week the wazir would not give battle, hoping to starve the Afghans with the help of Ala Singh of Patiala and Rai Kalha. On 9 March the Shah mounted his heavy gun on a hillock over the camp, and on the morning of the 11th a ball struck the wazir at prayer. His son Muin-ul-Mulk hid his death and led the attack. Ishwari Singh's Rajputs fled, but Safdar Jang's musketeers took the swivels on the right, and the rockets the Afghans had seized at Lahore caught fire and set off their powder, burning about a thousand men.",
-   "The Shah fell back to a mud fort and then Sirhind, and that night drew off for the Sutlej. The Mughals did not pursue. Emperor Muhammad Shah died a few weeks later; Muin-ul-Mulk was made governor of Lahore, and the Shah returned in the winter."
-  ],
-  "sources": [
-   "Ganda Singh, Ahmad Shah Durrani: Father of Modern Afghanistan (1959), pp. 54–72",
-   "Jadunath Sarkar, Fall of the Mughal Empire I (1964), pp. 212–19",
-   "Hari Ram Gupta, History of the Sikhs II (1978), pp. 83–91"
-  ]
- },
  "murree": {
   "history": [
    "By the late summer of 1857 nearly every fit British soldier in the Punjab had been sent to the siege of Delhi. The hill station of Murree held the wives and children of the northern stations from Jhelum to Peshawar, with a few convalescents from the European regiments and two companies of Sikhs sent up from Hazara as a guard. The Dhund clans of the hills round Murree, with men from the Karral and Hazara country, planned a rising; the Mutiny Report says the plot began with headmen of the Rawalpindi side, among them Sher Baz Khan.",
@@ -283,6 +271,18 @@ const HISTORIES = {
    "Bhagat Singh, A History of the Sikh Misals (1993), pp. 119 ff.",
    "J. D. Cunningham, A History of the Sikhs (1849), p. 118",
    "Khushwant Singh, A History of the Sikhs, vol. I"
+  ]
+ },
+ "muzaffarabad": {
+  "history": [
+   "When Hajji Karimdad Khan, Timur Shah's governor of Kashmir, died in 1783, Kabul confirmed his youngest son, Azad Khan, in his place. Azad Khan drove out his elder brothers, stopped sending the revenue, and took into his pay some three thousand Sikhs and other adventurers. Timur Shah sent about thirty thousand men under the brothers, with Faiz Talab Khan Muhammadzai, Nawaz Jang Bangash and Burhan Khan Popalzai. At the Kishanganga near Muzaffarabad Azad Khan's commander Mulla A'zam Khan was killed and some two thousand of his men drowned or were cut down, but his cousin Pahlawan Khan rallied the army, captured Burhan Khan and drove the Durranis back. Near Baramulla Azad Khan beat them again and took Nawaz Jang prisoner.",
+   "Timur Shah left Kabul in December 1785 and camped at Peshawar. Prince Humayun crossed the Indus at Attock with twenty thousand men, Faiz Talab Khan and Karim Beg joined him with ten thousand, and a larger army followed under Madad Khan Durrani and Payandah Khan. The Durrani commanders worked on Azad Khan's supporters with bribes and threats. His officer Shadi Khan tried a night attack, which Madad Khan saw coming and threw back, and the fighting that followed settled nothing; but when Azad Khan found proof that his own commanders were dealing with the enemy, he left the field.",
+   "He fled into the hills to his father-in-law, Raja Rustam Khan, who took him in and then, under threat from Madad Khan, disarmed his men and locked him up. When Islam Khan's horsemen came to take him, Azad Khan shot himself, on 11 December 1786. Timur Shah had him buried with honour, sent for his mother from Qandahar with a gift of two lakhs, and Kashmir stayed in Durrani hands until Ranjit Singh took it in 1819. The order of battle here is the game's: Azad Khan's numbers are not recorded, and which of his chiefs went over is not said."
+  ],
+  "sources": [
+   "Hari Ram Gupta, Studies in Later Mughal History of the Panjab, 1707–1793 (1944)",
+   "Fayz Muhammad Katib Hazarah, Siraj al-Tawarikh, trans. R. D. McChesney and M. M. Khorrami (2012)",
+   "\"Rebellion of Azad Khan\", Wikipedia"
   ]
  }
 };

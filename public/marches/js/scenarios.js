@@ -2065,97 +2065,6 @@ const SCENARIOS = {
   // given as 60,000–70,000 fighting men; the Afghans as at most 12,000
   // (Sarkar) or the Shah's 30,000 horse at Lahore (Ganda Singh); here
   // some 57,000 and 26,000. Rounds are days, from 3 March.
-  manupur: {
-    title: 'The Battle of Manupur',
-    year: 1748,
-    region: 'Sirhind · Manupur',
-    blurb: 'March 1748. Ahmad Shah Durrani, eight months king of the Afghans, has taken Lahore and crossed the Sutlej. He has caught the Mughal army out of position, taken Sirhind with the wazir’s baggage and his household, and dug in on the road to Delhi. The emperor’s army, four or five times his number, is camped at Manupur on dry ground with too few wells. The wazir Qamar-ud-din Khan means to starve the Afghans out with his guns and the local chiefs, and will not give battle.',
-    first: 'red',
-    standards: { azure: 'mughal', red: 'durrani', by: [['Ala Singh', 'nishan'], ['Rajputs|Kachhwaha', 'dogra'], ['Qizilbash', 'sadozai']] },  // battle standards when a unit's name does not say
-    vpTarget: Infinity,
-    roundLimit: 11,
-    clock: { day: 3, month: 'March', from: 6, hours: 24 },
-    goal: {
-      forts: ['sirhind'], attacker: 'azure', short: 'Retake Sirhind',
-      prize: 'manupur', prizeSide: 'red',
-      prizeWins: 'The Afghans are in the Mughal camp at Manupur. The emperor’s army breaks up on the road to Delhi, and Ahmad Shah has done in eight months what Nadir Shah did in a year.',
-      attackerWins: 'Sirhind is the emperor’s again. The Shah has drawn off in the night for the Sutlej, with Muin-ul-Mulk’s horse at his heels, and the road to Delhi is shut to him. Muin-ul-Mulk, the hero of Manupur, is made governor of Lahore.',
-      defenderWins: 'The Afghans still hold Sirhind and the road to Delhi. The Mughal army, short of water and fodder, cannot stay at Manupur, and the emperor must buy the Shah off.',
-    },
-    sides: {
-      azure: { name: 'The Imperial Army', short: 'Mughal', adj: 'Mughal', pitch: 'Your army lies at Manupur, short of water, with hundreds of guns, Mir Mannu’s Turanis, Safdar Jang’s men, the Prince’s centre and Ishwari Singh’s Rajputs. The Afghans hold Sirhind and your baggage. Wear them down, or break their lines and retake Sirhind.', tag: 'Moves second · retake Sirhind in 11 days' },
-      red: { name: 'The Durrani Army', short: 'Durrani', adj: 'Durrani', pitch: 'You hold Sirhind and the Mughal baggage, dug in five miles out on the Delhi road, with one heavy gun, a few light ones and seven hundred camel swivels. Keep your horse loose round their camp, cut their water and fodder, and do not let them reach Sirhind.', tag: 'Moves first · hold Sirhind, or take their camp' },
-    },
-    generals: {
-      azure: { name: 'Qamar-ud-din Khan', title: 'Wazir of the Empire, commanding for Prince Ahmad', leads: 'The Wazir’s Guard' },
-      red: { name: 'Ahmad Shah Durrani', title: 'Shah of the Durranis', leads: 'The Shah’s Ghulams' },
-    },
-    // The road back to Delhi and Ambala; the Shah's road back over the Sutlej at Ludhiana.
-    homeBase: { azure: [[30.89, 76.195], [30.78, 76.08]], red: [[30.53, 76.55], [30.53, 76.38]] },
-    walls: { sirhindfort: 2, sirhind: 2, durranilines: 2, manupur: 1 },  // the Mughal fort, the town wall, the Shah's lines, the Mughal camp's trench
-    strongpoints: ['sirhind', 'sirhindfort', 'durranilines', 'manupur', 'tibba'],
-    startOwners: { sirhind: 'red', sirhindfort: 'red', durranilines: 'red', manupur: 'azure' },
-    startUnits: [
-      // The imperial army drawn up round its camp at Manupur, facing the Afghan
-      // lines: Mannu's vanguard ahead, Safdar Jang on the right, Ishwari Singh's
-      // Rajputs on the left, the Prince's centre and guns in the camp, Nasir Khan behind.
-      ['azure', 'Irregular Sowars', 'manupur', 'The Wazir’s Guard', 5, { stock: 45 }], ['azure', 'Heavy Battery', 'manupur', 'Imperial Heavy Guns', 5, { stock: 45 }],
-      ['azure', 'Heavy Battery', [30.7453, 76.2535], 'Imperial Heavy Guns', 5, { stock: 45 }], ['azure', 'Light Field Gun', [30.7453, 76.2535], 'Imperial Topkhana', 5, { stock: 45 }],
-      ['azure', 'Light Field Gun', [30.7688, 76.2895], 'Imperial Topkhana', 5, { stock: 45 }], ['azure', 'Light Field Gun', [30.7688, 76.2895], 'Imperial Topkhana', 5, { stock: 45 }],
-      ['azure', 'Light Field Gun', [30.7639, 76.2654], 'Imperial Topkhana', 5, { stock: 45 }], ['azure', 'Heavy Battery', [30.7639, 76.2654], 'Imperial Heavy Guns', 5, { stock: 45 }],
-      ['azure', 'Matchlockmen', [30.7558, 76.2443], 'Imperial Infantry', 5, { stock: 45 }], ['azure', 'Matchlockmen', [30.7558, 76.2443], 'Imperial Infantry', 5, { stock: 45 }],
-      ['azure', 'Matchlockmen', [30.7794, 76.2803], 'Imperial Infantry', 5, { stock: 45 }], ['azure', 'Matchlockmen', [30.7794, 76.2803], 'Imperial Infantry', 5, { stock: 45 }],
-      ['azure', 'Matchlockmen', [30.7729, 76.2576], 'Imperial Infantry', 5, { stock: 45 }], ['azure', 'Matchlockmen', [30.7729, 76.2576], 'Imperial Infantry', 5, { stock: 45 }],
-      ['azure', 'Irregular Sowars', [30.7627, 76.2289], 'Imperial Horse', 5, { stock: 45 }], ['azure', 'Irregular Sowars', [30.7627, 76.2289], 'Imperial Horse', 5, { stock: 45 }],
-      ['azure', 'Irregular Sowars', [30.794, 76.2769], 'Imperial Horse', 5, { stock: 45 }], ['azure', 'Irregular Sowars', [30.794, 76.2769], 'Imperial Horse', 5, { stock: 45 }],
-      ['azure', 'Irregular Sowars', [30.7838, 76.2482], 'Imperial Horse', 5, { stock: 45 }], ['azure', 'Irregular Sowars', [30.7838, 76.2482], 'Imperial Horse', 5, { stock: 45 }],
-      ['azure', 'Spearmen', [30.7494, 76.2216], 'Imperial Foot', 5, { stock: 45 }], ['azure', 'Spearmen', [30.7494, 76.2216], 'Imperial Foot', 5, { stock: 45 }],
-      ['azure', 'Irregular Sowars', [30.7411, 76.2713], 'Mannu’s Turani Horse', 5, { stock: 45 }], ['azure', 'Irregular Sowars', [30.7411, 76.2713], 'Mannu’s Turani Horse', 5, { stock: 45 }],
-      ['azure', 'Irregular Sowars', [30.7548, 76.2922], 'Mannu’s Turani Horse', 5, { stock: 45 }], ['azure', 'Irregular Sowars', [30.7548, 76.2922], 'Mannu’s Turani Horse', 5, { stock: 45 }],
-      ['azure', 'Matchlockmen', [30.7522, 76.2779], 'Mannu’s Musketeers', 5, { stock: 45 }], ['azure', 'Matchlockmen', [30.7522, 76.2779], 'Mannu’s Musketeers', 5, { stock: 45 }],
-      ['azure', 'Irregular Sowars', [30.7262, 76.2277], 'Safdar Jang’s Horse', 5, { stock: 45 }], ['azure', 'Irregular Sowars', [30.7262, 76.2277], 'Safdar Jang’s Horse', 5, { stock: 45 }],
-      ['azure', 'Irregular Sowars', [30.7286, 76.2114], 'Safdar Jang’s Horse', 5, { stock: 45 }], ['azure', 'Irregular Sowars', [30.7286, 76.2114], 'Safdar Jang’s Horse', 5, { stock: 45 }],
-      ['azure', 'Matchlockmen', [30.7311, 76.2422], 'Safdar Jang’s Musketeers', 5, { stock: 45 }], ['azure', 'Irregular Sowars', [30.7311, 76.2422], 'Safdar Jang’s Horse', 5, { stock: 45 }],
-      ['azure', 'Matchlockmen', [30.7366, 76.228], 'Safdar Jang’s Musketeers', 5, { stock: 45 }], ['azure', 'Matchlockmen', [30.7366, 76.228], 'Safdar Jang’s Musketeers', 5, { stock: 45 }],
-      ['azure', 'Irregular Sowars', [30.7851, 76.3177], 'Ishwari Singh’s Rajputs', 5, { stock: 45 }], ['azure', 'Irregular Sowars', [30.7851, 76.3177], 'Ishwari Singh’s Rajputs', 5, { stock: 45 }],
-      ['azure', 'Irregular Sowars', [30.7991, 76.3194], 'Ishwari Singh’s Rajputs', 5, { stock: 45 }], ['azure', 'Irregular Sowars', [30.7991, 76.3194], 'Ishwari Singh’s Rajputs', 5, { stock: 45 }],
-      ['azure', 'Matchlockmen', [30.7758, 76.307], 'Kachhwaha Foot', 5, { stock: 45 }], ['azure', 'Irregular Sowars', [30.7758, 76.307], 'Ishwari Singh’s Rajputs', 5, { stock: 45 }],
-      ['azure', 'Irregular Sowars', [30.7867, 76.2266], 'Nasir Khan’s Rearguard', 5, { stock: 45 }], ['azure', 'Irregular Sowars', [30.7867, 76.2266], 'Nasir Khan’s Rearguard', 5, { stock: 45 }],
-      ['azure', 'Irregular Sowars', [30.8044, 76.2536], 'Nasir Khan’s Rearguard', 5, { stock: 45 }], ['azure', 'Irregular Sowars', [30.8044, 76.2536], 'Nasir Khan’s Rearguard', 5, { stock: 45 }],
-      ['azure', 'Matchlockmen', [30.7902, 76.2449], 'Rearguard Foot', 5, { stock: 45 }], ['azure', 'Matchlockmen', [30.7902, 76.2449], 'Rearguard Foot', 5, { stock: 45 }],
-      ['azure', 'Irregular Sowars', [30.7601, 76.2075], 'Adina Beg’s Horse', 5, { stock: 45 }], ['azure', 'Irregular Sowars', [30.7601, 76.2075], 'Adina Beg’s Horse', 5, { stock: 45 }],
-      ['azure', 'Irregular Sowars', [30.7369, 76.1853], 'Ala Singh’s Sikhs', 5, { stock: 45 }], ['azure', 'Irregular Sowars', [30.7369, 76.1853], 'Rai Kalha’s Horse', 5, { stock: 45 }],
-      // The Durrani army in its camp in the gardens of Sirhind; Sirhind town
-      // and fort are garrisoned.
-      ['red', 'Matchlockmen', 'sirhind', 'Sirhind Garrison', 4, { post: true }], ['red', 'Light Field Gun', 'sirhind', 'Afghan Light Guns'],
-      ['red', 'Matchlockmen', 'sirhindfort', 'Fort Garrison', 3, { post: true }], ['red', 'Great Gun', 'sirhindfort', 'The Shah’s Heavy Gun'],
-      ['red', 'Lancers', 'badshahibagh', 'The Shah’s Ghulams'], ['red', 'Lancers', 'badshahibagh', 'Durrani Lancers'],
-      // The lines are dug but not yet manned: the Shah's foot and swivels lie
-      // behind them, the horse on either flank of the Sirhind gardens.
-      ['red', 'Matchlockmen', [30.6588, 76.3573], 'Taqi Khan’s Jezailchis'], ['red', 'Zamburak', [30.6588, 76.3573], 'Camel Swivels'],
-      ['red', 'Matchlockmen', [30.6616, 76.3674], 'Taqi Khan’s Jezailchis'], ['red', 'Zamburak', [30.6616, 76.3674], 'Camel Swivels'],
-      ['red', 'Zamburak', [30.6464, 76.3556], 'Camel Swivels'], ['red', 'Zamburak', [30.6464, 76.3556], 'Camel Swivels'],
-      ['red', 'Mounted Matchlocks', [30.6618, 76.3774], 'Taqi Khan’s Qizilbash'], ['red', 'Mounted Matchlocks', [30.6618, 76.3774], 'Taqi Khan’s Qizilbash'],
-      ['red', 'Irregular Sowars', [30.6292, 76.3454], 'Jahan Khan’s Horse'], ['red', 'Irregular Sowars', [30.6292, 76.3454], 'Jahan Khan’s Horse'],
-      ['red', 'Irregular Sowars', [30.621, 76.3525], 'Jahan Khan’s Horse'], ['red', 'Irregular Sowars', [30.621, 76.3525], 'Jahan Khan’s Horse'],
-      ['red', 'Irregular Sowars', [30.6695, 76.3922], 'Shah Pasand Khan’s Horse'], ['red', 'Irregular Sowars', [30.6695, 76.3922], 'Shah Pasand Khan’s Horse'],
-      ['red', 'Irregular Sowars', [30.6613, 76.3993], 'Shah Pasand Khan’s Horse'], ['red', 'Irregular Sowars', [30.6613, 76.3993], 'Shah Pasand Khan’s Horse'],
-      ['red', 'Irregular Sowars', [30.6537, 76.3807], 'Durrani Horse'], ['red', 'Irregular Sowars', [30.6537, 76.3807], 'Durrani Horse'],
-      ['red', 'Irregular Sowars', [30.6298, 76.3676], 'Durrani Horse'], ['red', 'Irregular Sowars', [30.6298, 76.3676], 'Durrani Horse'],
-    ],
-    events: [
-      { title: 'The gun on the hillock', history: 'On 9 March Ahmad Shah mounted the only heavy gun he had on a hillock that looked over the Mughal camp. Its shot fell among the tents and the baggage animals, and the wazir could no longer wait for the Afghans to starve.', round: 7, side: 'red', text: 'The Shah mounted his heavy gun on a hillock over the Mughal camp', flash: 'THE GUN ON THE HILLOCK', hurt: { at: 'manupur', hp: 1 } },
-      { title: 'The wazir is struck', history: 'On the morning of 11 March, as Qamar-ud-din Khan sat at prayer in his tent, a cannon ball struck him in the waist, and he died of the wound. His son Muin-ul-Mulk hid his death, told only the captains, and led the army out to battle. When Ishwari Singh learned of it, his Rajputs on the left broke and fled.', round: 9, side: 'azure', text: 'A cannon ball struck the wazir at his prayers; Ishwari Singh’s Rajputs fled the field', flash: 'THE WAZIR IS STRUCK', falls: 'azure', depart: ['Ishwari Singh’s Rajputs', 'Kachhwaha Foot'] },
-      { title: 'The rockets catch fire', history: 'In the thick of the fighting the rockets the Afghans had taken from the Lahore arsenal caught fire, perhaps through carelessness. Thousands flew up and set off the Afghan powder; about a thousand Afghans and Persians were burnt, and the Shah’s ranks broke into disorder.', round: 9, side: 'red', text: 'The rockets taken at Lahore caught fire and blew up the Afghan powder', flash: 'THE ROCKETS CATCH FIRE', hurt: { at: 'durranilines', hp: 2 } },
-    ],
-    powers: [
-      { id: 'mughal', name: 'The Imperial Camp', chief: 'Qamar-ud-din Khan', seat: 'manupur', npc: false, side: 'azure', color: '#3f6f4f', note: 'Manupur and the villages round the camp', extraSeats: ['samrala', 'khanna', [30.89, 76.195], [30.78, 76.08]] },
-      { id: 'durrani', name: 'The Shah’s Lines', chief: 'Ahmad Shah Durrani', seat: 'durranilines', npc: false, side: 'red', color: '#4a4a4a', note: 'Sirhind, its gardens and the Shah’s lines', extraSeats: ['sirhind', 'sirhindfort', 'badshahibagh', [30.53, 76.55], [30.53, 76.38]] },
-    ],
-    labels: [
-      { text: 'MALWA', lat: 30.60, lon: 76.20, cls: 'region', tier: 1 },
-    ],
-  },
 
   // Murree, September 1857, after Cave-Browne, The Punjab and Delhi in 1857 II
   // (1861), pp. 223–26, quoting the Punjab Mutiny Report, with the Rawalpindi
@@ -2404,6 +2313,79 @@ const SCENARIOS = {
     ],
     labels: [
       { text: 'MAJHA', lat: 31.74, lon: 75.05, cls: 'region', tier: 1 },
+    ],
+  },
+  // Muzaffarabad, 1786: Timur Shah's second army against Azad Khan, the
+  // rebel governor of Kashmir, at the gate of the valley. After the account
+  // of the rebellion in Hari Ram Gupta, Studies in Later Mughal History of
+  // the Panjab (1944), and the Siraj al-Tawarikh. Azad Khan's numbers are not
+  // recorded; Madad Khan's "larger army" is set at 22,000.
+  muzaffarabad: {
+    title: 'The Battle of Muzaffarabad',
+    year: 1786,
+    era: 'durrani',
+    region: 'Jhelum · Kishanganga',
+    blurb: '1786. Azad Khan, the young Afghan governor of Kashmir, has stopped sending the revenue to Kabul, hired three thousand Sikhs and beaten Timur Shah’s first army twice, at the Kishanganga and near Baramulla. Now the Shah has come to Peshawar himself. Prince Humayun has crossed the Indus with twenty thousand, Faiz Talab Khan and Karim Beg have joined him, and Madad Khan and Payandah Khan are coming up behind with more. Azad Khan holds Muzaffarabad, where the Kishanganga meets the Jhelum, and the valley road to Baramulla.',
+    first: 'azure',
+    menPerFormation: 2000,
+    standards: { azure: 'durrani', red: 'sadozai', by: [['Sikh', 'nishan'], ['Bomba|Khakha', 'tribal']] },
+    vpTarget: Infinity,
+    roundLimit: 16,
+    goal: {
+      forts: ['ruttaqila', 'baramulla'], attacker: 'azure', general: true, short: 'Take the fort at Muzaffarabad and Baramulla, or Azad Khan',
+      attackerWins: 'The Rutta Qila at Muzaffarabad and Baramulla are in Durrani hands and the road into the valley is open. Azad Khan’s chiefs are going over one by one; he will flee to the hills, where his own father-in-law will give him up. Kashmir is Timur Shah’s again.',
+      generalWins: 'Azad Khan is taken. Timur Shah orders him buried with honour, and sends for his mother from Qandahar with a gift of two lakhs.',
+      defenderWins: 'Azad Khan still holds the gate of Kashmir. A third Durrani army has broken on the Jhelum, and the valley’s revenue stays in Srinagar.',
+    },
+    sides: {
+      azure: { name: 'The Durrani Army', short: 'Durrani', adj: 'Durrani', pitch: 'Prince Humayun’s twenty thousand and Faiz Talab Khan’s ten are on the Pakhli plain, and Madad Khan and Payandah Khan are a few marches behind. Force the Kunhar, take the Red Fort at Muzaffarabad, the Rutta Qila, and push up the Jhelum valley to Baramulla. Gold may do what the last two armies could not: Azad Khan’s chiefs can be bought.', tag: 'Moves first · take the Rutta Qila and Baramulla, or Azad Khan' },
+      red: { name: 'Azad Khan', short: 'Kashmir', adj: 'Kashmiri', pitch: 'You have beaten two of the Shah’s armies. Your cousin Pahlawan Khan, Shadi Khan and your Sikh horse hold Muzaffarabad, its Red Fort and the crossings; the valley road behind you runs by Hattian and Uri to Baramulla. Hold both ends of it for sixteen days, and keep your chiefs loyal.', tag: 'Moves second · hold the Rutta Qila or Baramulla for 16 days' },
+    },
+    generals: {
+      azure: { name: 'Prince Humayun', title: 'Timur Shah’s son, commanding the army sent into Kashmir', leads: 'Prince Humayun’s Horse' },
+      red: { name: 'Azad Khan', title: 'Governor of Kashmir, in rebellion against Timur Shah', leads: 'Azad Khan’s Guard' },
+    },
+    // The Durranis' road back to Attock and Peshawar; Azad Khan's to Srinagar.
+    homeBase: { azure: [34.30, 73.13], red: [34.18, 74.42] },
+    walls: { ruttaqila: 2 },
+    strongpoints: ['ruttaqila', 'muzaffarabad', 'baramulla', 'uri', 'garhi', 'pakhli'],
+    startOwners: { ruttaqila: 'red', muzaffarabad: 'red', baramulla: 'red', uri: 'red', garhi: 'red', pakhli: 'azure' },
+    startUnits: [
+      // Prince Humayun's army and Faiz Talab Khan's on the Pakhli plain.
+      ['azure', 'Irregular Sowars', 'pakhli', 'Prince Humayun’s Horse'], ['azure', 'Light Field Gun', 'pakhli', 'Durrani Topkhana'],
+      ['azure', 'Irregular Sowars', [34.355, 73.165], 'Durrani Horse'], ['azure', 'Irregular Sowars', [34.355, 73.165], 'Durrani Horse'],
+      ['azure', 'Mounted Matchlocks', [34.312, 73.170], 'Qizilbash Horse'], ['azure', 'Irregular Sowars', [34.312, 73.170], 'Durrani Horse'],
+      ['azure', 'Mounted Matchlocks', [34.300, 73.215], 'Qizilbash Horse'], ['azure', 'Zamburak', [34.300, 73.215], 'Durrani Zamburaks'],
+      ['azure', 'Matchlockmen', [34.345, 73.225], 'Afghan Jezailchis'], ['azure', 'Matchlockmen', [34.345, 73.225], 'Afghan Jezailchis'],
+      ['azure', 'Irregular Sowars', [34.425, 73.255], 'Faiz Talab Khan’s Horse'], ['azure', 'Dhal & Talwar', [34.425, 73.255], 'Khattak Swordsmen'],
+      ['azure', 'Mounted Matchlocks', [34.395, 73.205], 'Karim Beg’s Horse'], ['azure', 'Dhal & Talwar', [34.395, 73.205], 'Khattak Swordsmen'],
+      ['azure', 'Matchlockmen', [34.375, 73.180], 'Afghan Jezailchis'],
+      // Azad Khan at Muzaffarabad, with the crossings held and the valley road behind.
+      ['red', 'Matchlockmen', 'ruttaqila', 'Azad Khan’s Guard'], ['red', 'Jingal', 'ruttaqila', 'Rutta Qila Wall Guns', 4, { post: true }],
+      ['red', 'Matchlockmen', 'muzaffarabad', 'Muzaffarabad Town Guard', 4, { post: true }],
+      ['red', 'Matchlockmen', 'garhi', 'Garhi Post', 3, { post: true }],
+      ['red', 'Dhal & Talwar', [34.392, 73.455], 'Pahlawan Khan’s Afghans'], ['red', 'Matchlockmen', [34.392, 73.455], 'Shadi Khan’s Musketeers'],
+      ['red', 'Irregular Sowars', [34.352, 73.505], 'Sikh Sowars'], ['red', 'Mounted Matchlocks', [34.352, 73.505], 'Sikh Sowars', 3],
+      ['red', 'Matchlockmen', [34.205, 73.500], 'Bomba Levies', 4], ['red', 'Dhal & Talwar', 'hattian', 'Khakha Levies', 4],
+      ['red', 'Irregular Sowars', 'chakothi', 'Kashmiri Horse', 4],
+      ['red', 'Matchlockmen', 'uri', 'Uri Post', 3, { post: true }],
+      ['red', 'Matchlockmen', 'baramulla', 'Baramulla Garrison', 4, { post: true }],
+    ],
+    reinforcements: [
+      { round: 3, side: 'azure', at: [34.30, 73.13], name: 'Madad Khan and Payandah Khan', note: 'came up the road from Attock with the main army', history: 'Behind Prince Humayun came a larger army under Madad Khan Durrani and Payandah Khan Barakzai, the father of Fateh Khan and Dost Muhammad. It was Madad Khan who saw off Shadi Khan’s night attack and whose threats made Azad Khan’s father-in-law give him up.', units: [['Irregular Sowars', 'Madad Khan’s Durranis'], ['Irregular Sowars', 'Madad Khan’s Durranis'], ['Irregular Sowars', 'Payandah Khan’s Barakzais'], ['Irregular Sowars', 'Payandah Khan’s Barakzais'], ['Mounted Matchlocks', 'Qizilbash Horse'], ['Matchlockmen', 'Afghan Jezailchis'], ['Matchlockmen', 'Afghan Jezailchis'], ['Dhal & Talwar', 'Yusufzai Swordsmen'], ['Dhal & Talwar', 'Yusufzai Swordsmen'], ['Zamburak', 'Durrani Zamburaks'], ['Light Field Gun', 'Durrani Topkhana']] },
+    ],
+    events: [
+      { title: 'Gold and threats', history: 'The Durrani commanders worked on Azad Khan’s supporters with bribes and threats, and evidence of his own officers’ dealings with them broke his nerve. The sources do not say who went over; here it is the hill clans of the Jhelum valley.', round: 6, side: 'azure', text: 'The Bomba and Khakha levies took Durrani gold and went over', flash: 'GOLD AND THREATS', defect: { to: 'azure', names: ['Bomba Levies', 'Khakha Levies'] } },
+    ],
+    powers: [
+      { id: 'durrani', name: 'Timur Shah’s Army', chief: 'Prince Humayun', seat: 'pakhli', npc: false, side: 'azure', color: '#3f3d3a', note: 'The Pakhli plain and the road back to Attock', extraSeats: [[34.30, 73.13], [34.36, 73.17], [34.42, 73.25]] },
+      { id: 'kashmir', name: 'Azad Khan’s Kashmir', chief: 'Azad Khan', seat: 'ruttaqila', npc: false, side: 'red', color: '#2d6a3e', note: 'Muzaffarabad and the Jhelum valley road to Baramulla', extraSeats: ['muzaffarabad', 'garhi', 'kohala', 'dupatta', 'hattian', 'chakothi', 'uri', 'rampur', 'baramulla', [34.18, 74.42]] },
+    ],
+    labels: [
+      { text: 'Jhelum', lat: 34.14, lon: 73.98, cls: 'water', tier: 1, angle: -10 },
+      { text: 'Kishanganga', lat: 34.45, lon: 73.55, cls: 'water', tier: 1, angle: 50 },
+      { text: 'Kunhar', lat: 34.46, lon: 73.37, cls: 'water', tier: 2, angle: -70 },
+      { text: 'PAKHLI', lat: 34.37, lon: 73.20, cls: 'region', tier: 1 },
     ],
   },
 };

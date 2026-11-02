@@ -16,6 +16,8 @@ const GENERAL_PICTURES = [
 ["Sansar Chand", "sansar-chand", "Raja Sansar Chand of Kangra, c. 1800–10 (Brooklyn Museum)"],
 ["Jassa Singh Ramgarhia", "jassa-singh-ramgarhia", "Jassa Singh Ramgarhia, Purkhu workshop, c. 1760–80"],
 ["Shah Zaman", "shah-zaman", "Shah Zaman Durrani, durbar painting, c. 1793–1800"],
+["Prince Humayun", "rep-durrani-shah-wali-khan", "Stand-in: Shah Wali Khan, Ahmad Shah’s wazir, 1760s. No portrait of Prince Humayun is known"],
+["Azad Khan", "rep-afghan-bangash", "Stand-in: Nawab Muhammad Khan Bangash, an Afghan noble, c. 1730 (BnF). No portrait of Azad Khan is known"],
 ["Ranjit Singh Sukerchakia", "ranjit-singh-young", "Ranjit Singh as a young man, from his meeting with Holkar, c. 1805"],
 ["Fateh Singh Man", "fateh-singh-man", "“Futteh Sing Maun”, after a Lahore painting, 1847 (Smyth)"],
 ["Mir Mannu|Muin-ul-Mulk", "rep-afghan-bangash", "Stand-in: Nawab Muhammad Khan Bangash, a Mughal noble, c. 1730 (BnF). No portrait of Mir Mannu is known"],

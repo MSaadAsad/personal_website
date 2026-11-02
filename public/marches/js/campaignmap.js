@@ -83,11 +83,11 @@ const CAMPAIGN_MAP = (() => {
     lahore1752: { at: [31.604, 74.394], side: 'l', lab: [0, -7], name: 'Lahore' },
     attock: { at: [33.922, 72.362], side: 'r', name: 'Attock' },
     ramnagar: { at: [32.331, 73.779], side: 'l', lab: [0, 6], name: 'Ramnagar' },
-    manupur: { at: [30.7585, 76.2702], side: 'l', name: 'Manupur' },
     murree: { at: [33.9056, 73.3926], side: 'r', lab: [0, -6], name: 'Murree' },
     jammu1845: { at: [32.72, 74.86], side: 'l', nudge: [-5, 3], name: 'Jammu' },
     batala: { at: [31.762, 75.205], side: 'r', name: 'Batala' },
     trimmu: { at: [32.16, 75.32], side: 'l', name: 'Trimmu Ghat' },
+    muzaffarabad: { at: [34.37, 73.471], side: 'r', name: 'Muzaffarabad' },
   };
   // Battles fought by the same army one after another: a march arrow from
   // each to the next, [from, to, what marched].

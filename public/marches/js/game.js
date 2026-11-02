@@ -1119,7 +1119,11 @@ function happen() {
     }
     // Formations that change sides (never the one a general rides with), and
     // ones that march off the map altogether.
-    if (ev.defect) for (const u of S.units) if (ev.defect.names.includes(u.name) && u.side !== ev.defect.to && !ledBy(u)) { u.side = ev.defect.to; u.stock = 100; }
+    if (ev.defect) for (const u of S.units) if (ev.defect.names.includes(u.name) && u.side !== ev.defect.to && !ledBy(u)) {
+      u.side = ev.defect.to; u.stock = 100;
+      // Men who go over march out to the nearest open ground, leaving their old comrades' post behind.
+      if (unitsAt(u.hex).some(v => v.side !== u.side)) { const to = roomNear(u.hex, u.side); if (to >= 0) u.hex = to; }
+    }
     if (ev.depart) S.units = S.units.filter(u => !ev.depart.includes(u.name) || ledBy(u));
     log(ev.side || FIRST, `<b>${ev.text}</b>`);
     UI.flash(ev.flash || ev.text.toUpperCase(), ev.side || FIRST);
