@@ -10,8 +10,8 @@
   <meta name="description" content="Hex-and-counter campaigns on surveyed maps of the Punjab, 1761–1857: Gujranwala, Jammu, Rohtas, Multan, Nowshera, Jamrud, Lahore, Khari, Sobraon, Chillianwala, Gujrat, Jhelum and Trimmu Ghat." />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Newsreader:opsz,wght@6..72,500;6..72,600;6..72,700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=83" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Newsreader:opsz,wght@6..72,500;6..72,600;6..72,700&family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css?v=131" />
 </head>
 <body class="loading" data-turn="azure">
   <header class="topbar">
@@ -108,10 +108,10 @@
           <strong id="genName">General</strong>
           <span id="genLeads"></span>
           <div class="gen-actions">
-            <button id="rideBtn"><span>Take command</span></button>
-            <button id="forceBtn"><span>Forced march</span></button>
+            <button id="rideBtn"><kbd>G</kbd><span>Take command</span></button>
+            <button id="forceBtn"><kbd>F</kbd><span>Forced march</span></button>
           </div>
-          <p class="gen-rules">Leads: +1 attack &amp; defence, never falls back · rally ×2 nearby · escapes if his formation falls, unless it is surrounded</p>
+          <p class="gen-perks" title="The formation he leads: +1 attack and defence, and it never falls back. Formations near him rally twice as fast. If his formation falls he escapes, unless it is surrounded."><span>+1 attack</span><span>+1 defence</span><span>Never falls back</span><span>Rally ×2 near him</span></p>
         </div>
       </section>
       <section class="card inspector-card"><div id="inspector"></div></section>
@@ -144,16 +144,38 @@
   <div class="toast" id="toast" aria-live="polite"></div>
   <div class="battle-notice" id="battleNotice" role="status" hidden></div>
 
+  <dialog id="homeDialog" class="dialog home">
+    <div class="home-map" id="homeMap"></div>
+    <div class="home-text">
+      <h1 class="home-title">The Five Rivers</h1>
+      <div class="home-rule" aria-hidden="true"><i></i><span>❦</span><i></i></div>
+      <ol class="home-contents" id="homeContents"></ol>
+      <div class="home-actions">
+        <button class="home-go" id="homeGo">Open the campaigns</button>
+        <button class="home-cont" id="homeContinue" hidden><b>Continue</b><small></small></button>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog id="historyDialog" class="dialog history">
+    <button class="close" data-close aria-label="Close">×</button>
+    <small class="kicker">What actually happened</small>
+    <h2 id="historyTitle"></h2>
+    <div class="history-text" id="historyText"></div>
+    <h3 class="history-h">Sources</h3>
+    <ul class="history-sources" id="historySources"></ul>
+  </dialog>
+
   <dialog id="startDialog" class="dialog start">
     <small class="kicker">Choose a campaign</small>
     <div class="map-pick" id="mapPick"></div>
-    <small class="start-meta" id="startMeta"></small>
+    <div class="start-meta-row"><small class="start-meta" id="startMeta"></small><button class="history-btn" id="historyBtn">History &amp; sources</button></div>
     <h2 id="startTitle">The Jhelum Marches</h2>
     <p class="lede" id="startLede"></p>
     <div class="mode-pick" id="modePick"></div>
     <button class="continue" id="continueBtn" hidden><b>Continue campaign</b><small></small></button>
-    <div class="opponent-row"><label class="opponent"><span>Opponent</span><select id="opponent"><option value="ai" selected>Computer</option><option value="human">Second player (hot-seat)</option></select></label>
-    <label class="opponent"><span>Fog of war</span><select id="fogPick"><option value="on" selected>On: see only what your troops can see</option><option value="off">Off: the whole field is open</option></select></label></div>
+    <div class="opponent-row"><div class="opponent"><span id="oppLabel">Opponent</span><div class="seg" role="radiogroup" aria-labelledby="oppLabel" data-for="opponent"><button role="radio" data-v="ai">Computer</button><button role="radio" data-v="human">Second player <small>hot-seat</small></button></div><select id="opponent" hidden><option value="ai" selected>Computer</option><option value="human">Second player (hot-seat)</option></select></div>
+    <div class="opponent"><span id="fogLabel">Fog of war</span><div class="seg" role="radiogroup" aria-labelledby="fogLabel" data-for="fogPick"><button role="radio" data-v="on" title="See only what your troops can see">On <small>your troops’ sight</small></button><button role="radio" data-v="off" title="The whole field is open">Off <small>whole field open</small></button></div><select id="fogPick" hidden><option value="on" selected>On: see only what your troops can see</option><option value="off">Off: the whole field is open</option></select></div></div>
     <div class="side-pick" id="sidePick"></div>
   </dialog>
 
@@ -161,12 +183,14 @@
     <small class="kicker">Orders of the day</small>
     <h2>Before you march</h2>
     <div class="rules-goal" id="rulesGoal"></div>
+    <h3 class="oob-head">Order of battle</h3>
+    <div class="oob" id="rulesOob"></div>
     <div class="help-grid">
       <div><h3>Turns</h3><p>The two sides take turns. In your command, march and fight with each of your formations, then <b>End command</b> (E). <span id="rulesRound">Each round is one day.</span> Main events (a column arriving, a post taken, a general falling) come as dispatches with their history.</p></div>
-      <div><h3>March</h3><p>Select a formation and click blue ground. Each hex is <span data-scale="hex">1 km</span>; foot have <span data-scale="foot">12</span> march points a day, horse <span data-scale="horse">18–21</span>. Roads cost 1 a hex, open plain 2, broken ground 3, hills 4. Stepping next to an enemy ends the march. Two formations may share a hex.</p></div>
-      <div><h3>Fight</h3><p>Click a red ring to attack, or a dashed one to march and attack. <b>Hover first</b> to see the odds. Each side rolls a d6 plus modifiers for ground, works, the general, numbers round the defender, fatigue and supply. Down to two figures (400 men) a formation falls back and cannot attack until it rallies; cut off, it surrenders. Formations rally only resting in a village, town or fort.</p></div>
+      <div><h3>March</h3><p>Select a formation and click blue ground. Each hex is <span data-scale="hex">1 km</span>; foot have <span data-scale="foot">12</span> march points a day, horse <span data-scale="horse">18–21</span>. Roads cost 1 a hex, open plain 2, broken ground 3, hills 3, mountains 4. Stepping next to an enemy ends the march. Two formations may share a hex.</p></div>
+      <div><h3>Fight</h3><p>Click a red ring to attack, or a dashed one to march and attack. <b>Hover first</b> to see the odds. Each side rolls a d6 plus modifiers for ground, works, the general, numbers round the defender, fatigue and supply. Down to two figures (400 men) a formation falls back and cannot attack until it rallies; cut off, it surrenders. Formations rally only resting in a village, town or fort. Every blow also tests a formation's <b>morale</b>; one whose nerve breaks wavers, and panic can spread to its neighbours.</p></div>
       <div><h3>Guns &amp; walls</h3><p>Field guns fire <span data-scale="range">2 km</span> at what they can see. Settlements and forts add defence and great fortresses have walls on top: guns batter them down, and foot next to them can dig a <b>mine</b> (M). Foot can also dig a <b>kacha fort</b> (K) where they stand, in open country or round a village or town.</p></div>
-      <div><h3>Supply</h3><p>Every command your formations eat from their stock, and wagons from the places you hold bring more. Hungry troops fight worse and in the end desert. Guard your roads, and cut the enemy’s.</p></div>
+      <div><h3>Supply</h3><p>Every command your formations eat from their stock, and wagons from the places you hold bring more. Villages and towns feed what the wagons leave short until they are stripped bare, and beating the enemy wins you his baggage. Hungry troops fight worse and in the end desert. Guard your roads, and cut the enemy’s.</p></div>
       <div><h3>Sight &amp; the general</h3><p>With fog of war on you see only what your troops can see; faded markers show where the enemy was last seen. Your general gives the formation he leads +1 attack and defence: <b>G</b> to ride to another, <b>F</b> for a forced march.</p></div>
     </div>
     <div class="rules-foot">
@@ -182,7 +206,7 @@
     <h2>How to command</h2>
     <div class="help-grid">
       <div><h3>Win</h3><p>At the end of every round each strongpoint (◆) scores a war point for its holder. First to the target with the lead wins, and so does holding them all; at the round limit the higher score wins. Most campaigns have their own goal instead, shown when you start. Wiping out the enemy never wins by itself: the places the campaign is fought over decide it.</p></div>
-      <div><h3>March</h3><p>Select a formation and click blue ground. You can split a march across several clicks. Each hex is <span data-scale="hex">1 km</span> across. Roads cost 1 per hex, open plain 2, broken ground 3, hills 4 and mountains 6; a foot formation has <span data-scale="foot">12</span> march points a day, so about 12 km by road or 6 km across open country; horse <span data-scale="horse">18–21</span>. Scrub and forest add 1, horse pays extra in rough ground, and guns pay extra in hills.</p></div>
+      <div><h3>March</h3><p>Select a formation and click blue ground. You can split a march across several clicks. Each hex is <span data-scale="hex">1 km</span> across. Roads cost 1 per hex, open plain 2, broken ground 3, hills 3 and mountains 4; a foot formation has <span data-scale="foot">12</span> march points a day, so about 12 km by road or 6 km across open country; horse <span data-scale="horse">18–21</span>. Scrub and forest add 1, horse pays extra in rough ground, and guns pay extra in hills.</p></div>
       <div><h3>Rivers</h3><p>Great rivers (the Jhelum and Chenab) can only be crossed at a ghat (ferry bar on the map). Once per campaign a foot formation on the bank can <b>build a ferry</b>: it costs that formation its command and 200 men, and afterwards either army may cross there. Fordable rivers such as the Poonch cost +3, and nalas +1. Defenders behind water gain defence.</p></div>
       <div><h3>Contact</h3><p>Stepping next to an enemy ends your march. Formations may share a hex two at a time: with a formation selected, click a friendly hex within its march to join that stack (Shift-click to select the formation there instead).</p></div>
       <div><h3>Fight</h3><p>Every formation is about 1,000 men, shown as five figures of 200 on its stand; losses take figures off. Click a red ring to attack, or a dashed ring to march and attack in one order. Hover first to see the odds and expected losses. Each side rolls a d6 and adds modifiers. Win by 3+ to smash (600 men lost); tie or win by less to strike (400), with 200 lost back in melee. Every 800 enemy men standing next to the defender cost it 1 defence (up to 3), and a formation encircled (enemies on three sides, or on opposite sides) loses 1 more and surrenders rather than falling back. Lose by 1–2 in melee and both lose 200; lose by 3+ and you are repulsed. A formation deals damage in proportion to the soldiers it has left. Settlements give defence (villages, towns and sarais +1, cities +2, forts +3) and great fortresses have walls on top. Guns wear all of these down: every bombardment chips away part of a level and a hit brings one down, the great walls first, and all guns get a bonus against works still standing. A defender 60 m above its attacker gets +1 (+2 at 180 m), and attacking downhill gives the attacker +1. Cavalry is poor wherever the ground rises more than 100 m within a hex: +2 to march there, −1 attacking into it and −1 defending in it. Field guns (light field guns, horse artillery, heavy batteries) fire <span data-scale="rangeHexes">two</span> hexes (<span data-scale="range">2 km</span>); camel swivels and jingals must close to the next hex like everyone else. Guns firing at range and skirmishers risk nothing.</p></div>
@@ -190,12 +214,13 @@
       <div><h3>Sight</h3><p>With fog of war on, you see only what your formations can see: every hex with a clear line from the watcher’s eye to a man standing there, over the surveyed ground and the curve of the earth. On flat ground a man on foot sees another man’s head to about 10 km, but a hill, a wall or a tower sees much further, and woods and settlements block the view. The eye makes out a formation to about 10 km (12 km for horse, 16 km from high walls or a hill), and a column that marched in its latest command raises dust that shows 4 km beyond that. Troops in woods, a settlement or a kacha fort are seen only from 1.5 km, so you may see the enemy before he sees you. Held strongpoints and forts keep a 3 km watch. Ground out of sight is shaded; faded markers show where enemy formations were last seen, or reported at the outset. Guns fire only at what they can see, and a march that runs into an enemy it could not see halts on contact.</p></div>
       <div><h3>Dig in</h3><p>A foot formation that has not moved or fought, out of the enemy’s reach, can spend its whole day digging a <b>kacha fort</b> (K): a mud wall and ditch round its hex, in open country or round a village or town without standing walls, +2 defence to whoever holds it (on top of the village or town's own). Guns wear it down like any other works.</p><p>Foot next to enemy-held works can <b>dig a mine</b> (M) under them: three whole days' digging, and on the third it is sprung and brings down two levels of the works at once. Keep a formation at the gallery's mouth, or it is lost. Foot inside the works can <b>countermine</b> (M) for a day, and break into the gallery on a 4 or better. Only foot dig forts, mines and ferries; the buttons beside a selected foot formation on the map show which it can do.</p></div>
       <div><h3>Retreat &amp; rally</h3><p>A formation pushed down to two figures (400 men) falls back up to two hexes and cannot attack until it rallies. If it is cut off it surrenders. A formation that neither marches nor fights, away from the enemy and resting in a village, sarai, town, city or fort, rallies 200 men, or 400 near the general. Out on open ground it does not.</p></div>
+      <div><h3>Morale</h3><p>Every formation has a morale: Wavering, Shaken, Steady, Eager or Inspired. Each blow it takes tests its nerve with a d6, and every blow after the first in the same command makes the test harder. Usually it holds or slips a step, never more, unless the blow was a rout; now and then the blow steels it. The general (+2, or +1 beside him) and walls or works (+1) steady it; hunger and encirclement (−1) do not. Eager gives +1 attack, Inspired +1 attack and defence, Shaken −1 attack. A Wavering formation cannot attack, defends at −1 and falls back when hit. When a formation is destroyed, surrenders or loses its nerve, panic tests the friends beside it, and can run down a line. Winning lifts it: a rout or a repulse always heartens the winners a step, a successful attack half the time. Out of contact, a formation that did not fight steadies a step, and an eager one cools.</p></div>
       <div><h3>The general</h3><p>Your general rides with one formation: +1 attack, +1 defence, and it never falls back. Once per command he can <b>take command</b> of another formation within 24 km (G) and order a <b>forced march</b> for one within 8 km (F). If his formation is destroyed he rides off to the nearest friends within 24 km; only if it was surrounded, or no one is near, is he captured, and the enemy gains 5 war points.</p></div>
-      <div><h3>Supply &amp; forts</h3><p>Every formation carries a supply stock. Each command it eats 20%, and wagons from your supply zone (the strongpoints, forts and allied seats you hold, and any home base) bring in more: 40% at a depot, about 20% two wagon-days away, nothing beyond three and a half days or if enemies cut the road. Below 60% a formation attacks at −1; below 40% it is hungry (−1 defence too, no rallying); below 20% its men desert each command until it marches back. Forts belong to whoever last garrisoned them. A fort or town the enemy has closed on from two or more sides is besieged: it supplies no one, its garrison lives on half rations from its magazines, and it starves over a week or two. Tick <b>Supply</b> under the minimap to see where your wagons reach.</p></div>
-      <div><h3>Chronicle</h3><p>Fights close together in place and time make one engagement, named after the nearest place: a battle, an assault, or a siege if a fort is invested for days. When one ends, Claude writes its account (the turning points, what it cost) from what happened on the map. Add your own Anthropic API key under <b>Chronicle</b> (C); without one you get field notes. Crossed swords mark where each was fought. <b>Replay the battle</b> (or the whole campaign) plays the troop movements back on the map: pause, change speed, or click the bar to jump to any command; Esc returns to the game.</p></div>
+      <div><h3>Supply &amp; forts</h3><p>Every formation carries a supply stock. Each command it eats 20%, and wagons from your supply zone (the strongpoints, forts and allied seats you hold, and any home base) bring in more: 40% at a depot, about 20% two wagon-days away, nothing beyond three and a half days or if enemies cut the road. Below 60% a formation attacks at −1; below 40% it is hungry (−1 defence too, no rallying); below 20% its men desert each command until it marches back. Forts belong to whoever last garrisoned them. A fort or town the enemy has closed on from two or more sides is besieged: it supplies no one, its garrison lives on half rations from its magazines, and it starves over a week or two. <b>Living off the land:</b> a formation that ends its command in a village, sarai, town or city eats from its granaries whatever the wagons leave short, up to a day’s rations. A village holds three formation-days of food, a town six, a city ten; stripped bare, it greys on the map and fills again over a week. <b>Spoils:</b> routing or destroying an enemy formation gives the victor its baggage (+20%), and taking a fort or walled town from the enemy refills the formations that march in from its magazines, unless a siege has already eaten them. Tick <b>Supply</b> under the minimap to see where your wagons reach.</p></div>
+      <div><h3>Chronicle</h3><p>Fights close together in place and time make one engagement, named after the nearest place: a battle, an assault, or a siege if a fort is invested for days. When one ends, its account (the turning points, what it cost) is written up from what happened on the map, under <b>Chronicle</b> (C). Crossed swords mark where each was fought. <b>Replay the battle</b> (or the whole campaign) plays the troop movements back on the map: pause, change speed, or click the bar to jump to any command; Esc returns to the game.</p></div>
       <div><h3>Allies &amp; ground</h3><p>End a command in a local chief's seat to win them over: they send one levy formation and add +1 defence in their sphere. Vegetation is from satellite land cover: thorn scrub and pine slow a march and give cover, and scrub forest (phulai and kao thicket) gives +2.</p></div>
     </div>
-    <p class="keys"><kbd>N</kbd> next unit <kbd>E</kbd> end command <kbd>U</kbd> undo <kbd>G</kbd> general takes command <kbd>F</kbd> forced march <kbd>K</kbd> dig a kacha fort <kbd>M</kbd> dig a mine <kbd>B</kbd> build a ferry <kbd>C</kbd> chronicle <kbd>Esc</kbd> deselect <kbd>+</kbd><kbd>−</kbd> zoom <kbd>0</kbd> whole map · drag to pan, scroll to zoom, right-click to deselect · click a stack again to step through it, and once more to see the ground beneath</p>
+    <p class="keys"><kbd>N</kbd> next unit <kbd>E</kbd> end command <kbd>U</kbd> undo <kbd>G</kbd> general takes command <kbd>F</kbd> forced march <kbd>K</kbd> dig a kacha fort <kbd>M</kbd> dig a mine <kbd>B</kbd> build a ferry <kbd>C</kbd> chronicle <kbd>Esc</kbd> deselect <kbd>+</kbd><kbd>−</kbd> zoom <kbd>0</kbd> whole map · drag to pan, scroll to zoom, right-click to deselect · click a formation for its plate · click a stack again to step through it, and once more to see the ground beneath</p>
   </dialog>
 
   <dialog id="dispatchDialog" class="dialog dispatch">
@@ -210,6 +235,7 @@
     <small class="kicker">The marches are decided</small>
     <h2 id="victoryTitle">Victory</h2>
     <p id="victoryCopy"></p>
+    <div class="oob oob-result" id="victoryOob"></div>
     <div class="victory-battles" id="victoryBattles"></div>
     <div class="actions"><button class="primary" id="victoryNew" autofocus>New campaign</button><button class="ghost" id="victoryReplay">▶ Replay the campaign</button><button class="ghost" data-close>Review the map</button></div>
   </dialog>
@@ -222,21 +248,19 @@
       <nav id="chronList" aria-label="Battles"></nav>
       <article id="chronBody"></article>
     </div>
-    <details class="chron-settings" id="chronSettings">
-      <summary>Chronicler · <span id="chronStatus"></span></summary>
-      <p>When a battle or siege ends, Claude (<code id="chronModel"></code>) names it and writes the account from what happened on the map. This uses your own Anthropic API key, kept only in this browser and sent only to api.anthropic.com. Each account costs a few cents. Without a key the chronicle keeps field notes instead.</p>
-      <div class="key-row"><input type="password" id="apiKey" placeholder="sk-ant-…" autocomplete="off" spellcheck="false" aria-label="Anthropic API key"><button id="saveKey">Save key</button><button class="ghost" id="forgetKey">Forget</button></div>
-      <label class="auto"><input type="checkbox" id="autoChron"> Write each account as soon as a battle ends</label>
-    </details>
   </dialog>
 
-  <script src="js/scenarios.js?v=83"></script>
-  <script src="js/geo.js?v=83"></script>
-  <script src="js/game.js?v=83"></script>
-  <script src="js/sight.js?v=83"></script>
-  <script src="js/chronicle.js?v=83"></script>
-  <script src="js/campaignmap.js?v=83"></script>
-  <script src="js/render.js?v=83"></script>
-  <script src="js/ui.js?v=83"></script>
+  <script src="js/scenarios.js?v=131"></script>
+  <script src="js/geo.js?v=131"></script>
+  <script src="js/game.js?v=131"></script>
+  <script src="js/sight.js?v=131"></script>
+  <script src="js/chronicle.js?v=131"></script>
+  <script src="js/histories.js?v=131"></script>
+  <script src="js/panjab-rivers.js?v=131"></script>
+  <script src="js/campaignmap.js?v=131"></script>
+  <script src="js/pictures.js?v=131"></script>
+  <script src="js/portraits.js?v=131"></script>
+  <script src="js/render.js?v=131"></script>
+  <script src="js/ui.js?v=131"></script>
 </body>
 </html>

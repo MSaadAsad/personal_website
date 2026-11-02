@@ -6,22 +6,20 @@
 // real coordinates (lat, lon) in an equirectangular projection true at 31.5°N.
 
 const CAMPAIGN_MAP = (() => {
-  const LON0 = 70.25, LON1 = 75.85, LAT0 = 34.40, LAT1 = 29.45, COS = Math.cos(31.5 * Math.PI / 180);
+  const LON0 = 69.9, LON1 = 76.7, LAT0 = 34.6, LAT1 = 29.3, COS = Math.cos(31.5 * Math.PI / 180);
   const M = 22, W = 700, IW = W - 2 * M, K = IW / ((LON1 - LON0) * COS), IH = Math.round(K * (LAT0 - LAT1)), H = IH + 2 * M;
   const px = ([lat, lon]) => [M + (lon - LON0) * COS * K, M + (LAT0 - lat) * K];
   const f = v => v.toFixed(1);
   const rand = (seed => () => { seed = (seed + 0x6d2b79f5) | 0; let t = Math.imul(seed ^ (seed >>> 15), 1 | seed); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; });
 
+  // The Indus and the five rivers from Natural Earth (js/panjab-rivers.js,
+  // made by tools/campaign-relief.py); the Kabul by hand. [name, width, points].
   const RIVERS = [
-    // name, width, points (north to south), [label segment, side]
-    ['Indus', 3, [[34.40, 72.92], [34.09, 72.70], [33.95, 72.38], [33.89, 72.24], [33.48, 71.93], [32.96, 71.55], [32.58, 71.53], [31.83, 70.97], [31.2, 70.85], [30.70, 70.68], [30.05, 70.78], [29.40, 70.52]], 4],
-    ['Jhelum', 2.2, [[34.40, 73.47], [34.0, 73.52], [33.73, 73.60], [33.30, 73.67], [33.13, 73.64], [32.93, 73.73], [32.69, 73.53], [32.58, 73.05], [32.29, 72.35], [31.70, 72.30], [31.15, 72.15]], 7],
-    ['Kabul', 2.2, [[34.30, 70.95], [34.25, 71.15], [34.16, 71.36], [34.10, 71.66], [34.02, 71.98], [33.92, 72.20], [33.89, 72.24]], 2],
-    ['Chenab', 2.4, [[32.89, 74.74], [32.67, 74.47], [32.45, 74.10], [32.33, 73.78], [31.72, 72.98], [31.27, 72.32], [31.15, 72.15], [30.65, 71.85], [30.20, 71.33], [29.60, 71.08], [29.35, 71.0]], 3],
-    ['Ravi', 2, [[32.37, 75.60], [32.05, 75.05], [31.80, 74.62], [31.62, 74.30], [31.30, 73.60], [30.95, 73.00], [30.73, 72.40], [30.68, 71.85]], 4],
-    ['Beas', 1.8, [[32.05, 75.85], [31.60, 75.40], [31.17, 74.95]], 1],
-    ['Sutlej', 2.4, [[30.97, 75.85], [31.00, 75.60], [31.17, 74.95], [30.95, 74.60], [30.40, 73.90], [29.95, 73.15], [29.60, 72.30], [29.40, 71.68], [29.35, 71.0]], 4],
+    ...PANJAB_RIVERS,
+    ['Kabul', 2.2, [[34.42, 69.9], [34.41, 70.45], [34.30, 70.95], [34.25, 71.15], [34.16, 71.36], [34.10, 71.66], [34.02, 71.98], [33.92, 72.20], [33.89, 72.24]]],
   ];
+  // Where each river's name is written.
+  const RIVER_LABELS = { Indus: [32.55, 71.52], Jhelum: [32.45, 72.65], Chenab: [31.95, 73.35], Ravi: [31.05, 73.35], Beas: [31.55, 75.38], Sutlej: [30.15, 73.55], Kabul: [34.18, 71.3] };
   // Hill ranges as ridge lines, hachured on both flanks.
   const RIDGES = [
     [[34.40, 71.00], [34.15, 71.18], [33.97, 71.15], [33.75, 70.95]],                                      // the Khyber hills
@@ -46,41 +44,62 @@ const CAMPAIGN_MAP = (() => {
   ];
   // name, lat, lon, label side (r/l/a/b), city? (2: the capital, starred)
   const TOWNS = [
-    ['Attock', 33.89, 72.24, 'r'], ['Peshawar', 34.01, 71.58, 'r', 1], ['Rawalpindi', 33.60, 73.05, 'r'], ['Jhelum', 32.93, 73.72, 'r'],
+    ['Attock', 33.89, 72.24, 'r'], ['Peshawar', 34.01, 71.58, 'b', 1], ['Rawalpindi', 33.60, 73.05, 'r'], ['Jhelum', 32.93, 73.72, 'r'],
     ['Jammu', 32.73, 74.86, 'r', 1], ['Sialkot', 32.49, 74.53, 'r'], ['Wazirabad', 32.44, 74.12, 'b'], ['Ramnagar', 32.33, 73.78, 'l'],
     ['Gujranwala', 32.16, 74.19, 'r'], ['Lahore', 31.58, 74.33, 'b', 2], ['Amritsar', 31.63, 74.87, 'r', 1], ['Kasur', 31.12, 74.45, 'r'], ['Ferozepur', 30.95, 74.62, 'r'],
     ['Dera Ghazi Khan', 30.05, 70.64, 'r'], ['Dera Ismail Khan', 31.83, 70.90, 'r'],
     ['Jhang', 31.27, 72.32, 'r'], ['Chiniot', 31.72, 72.98, 'r'], ['Kalabagh', 32.96, 71.55, 'r'],
     ['Pakpattan', 30.34, 73.39, 'r'], ['Shujabad', 29.88, 71.30, 'r'], ['Harappa', 30.63, 72.86, 'b'],
+    ['Srinagar', 34.08, 74.80, 'r', 1], ['Muzaffarabad', 34.37, 73.47, 'r'], ['Mirpur', 33.15, 73.75, 'r'], ['Kohat', 33.58, 71.44, 'r'], ['Bannu', 32.99, 70.60, 'r'],
+    ['Bhera', 32.48, 72.91, 'r'], ['Batala', 31.82, 75.20, 'r'], ['Jullundur', 31.33, 75.58, 'r'], ['Hoshiarpur', 31.53, 75.91, 'l'], ['Ludhiana', 30.90, 75.85, 'r', 1],
+    ['Sirhind', 30.64, 76.39, 'l'], ['Patiala', 30.34, 76.39, 'l'], ['Kangra', 32.10, 76.27, 'l'], ['Nurpur', 32.30, 75.89, 'l'], ['Bahawalpur', 29.40, 71.68, 'r', 1], ['Bathinda', 30.21, 74.95, 'r'],
   ];
   const REGIONS = [
     ['SIND SAGAR DOAB', 31.55, 71.62, -62, 15], ['CHAJ DOAB', 32.12, 72.88, -52, 11], ['RECHNA DOAB', 31.62, 73.72, -36, 11],
     ['BARI DOAB', 30.84, 73.86, -32, 12], ['KASHMIR', 33.68, 74.55, 0, 13], ['POTHOHAR', 33.25, 72.75, 0, 11],
-    ['DERAJAT', 30.85, 70.52, -84, 11], ['SIRHIND', 30.45, 75.35, 0, 11],
+    ['DERAJAT', 31.15, 70.3, -84, 11], ['SIRHIND', 30.85, 76.25, 0, 11],
+    ['JULLUNDUR DOAB', 31.42, 75.62, -38, 10], ['MALWA', 30.42, 75.25, 0, 12], ['HAZARA', 34.25, 73.2, 0, 11], ['JAMMU HILLS', 32.95, 75.3, -28, 10],
   ];
   // Where each campaign is marked: the place, the seal's offset from it (px),
   // and which side of the seal its name goes.
   const SPOTS = {
-    khari: { at: [33.07, 73.70], off: [26, -18], side: 'r', name: 'Khari' },
-    jamrud: { at: [34.0033, 71.3784], off: [-18, 26], side: 'l', name: 'Jamrud' },
-    rohtas: { at: [32.97, 73.58], off: [-26, -12], side: 'l', name: 'Rohtas' },
-    jammu: { at: [32.72, 74.86], off: [20, -14], side: 'r', name: 'Jammu' },
-    chillianwala: { at: [32.66, 73.60], off: [-22, 18], side: 'l', name: 'Chillianwala' },
-    gujrat: { at: [32.57, 74.08], off: [12, -20], side: 'r', name: 'Gujrat' },
-    lahore: { at: [31.58, 74.33], off: [0, 0], side: 'l', name: 'Lahore' },
-    multan1818: { at: [30.20, 71.47], off: [-24, -20], side: 'l', name: 'Multan' },
-    multan1849: { at: [30.20, 71.47], off: [24, 14], side: 'r', name: 'Multan', year: '1848–49' },
-    jhelum1857: { at: [32.925, 73.725], off: [20, 16], side: 'r', name: 'Jhelum' },
-    aliwal: { at: [30.945, 75.614], off: [-20, -18], side: 'l', name: 'Aliwal' },
-    gogera: { at: [30.955, 73.33], off: [-22, 20], side: 'l', name: 'Gogera' },
-    ferozeshah: { at: [30.88, 74.79], off: [18, 24], side: 'r', name: 'Ferozeshah' },
-    gujranwala: { at: [32.153, 74.193], off: [-22, 14], side: 'l', name: 'Gujranwala' },
-    nowshera: { at: [34.011, 71.975], off: [20, -16], side: 'r', name: 'Nowshera' },
-    naurangabad: { at: [31.16, 74.95], off: [14, -24], side: 'l', name: 'Naurangabad' },
-    sobraon: { at: [31.14, 74.866], off: [-24, -16], side: 'l', name: 'Sobraon' },
-    trimmu: { at: [32.16, 75.32], off: [-6, -24], side: 'l', name: 'Trimmu Ghat' },
+    khari: { at: [33.07, 73.70], side: 'r', lab: [0, -6], name: 'Khari' },
+    jamrud: { at: [34.0033, 71.3784], side: 'l', name: 'Jamrud' },
+    rohtas: { at: [32.97, 73.58], side: 'l', lab: [0, -4], name: 'Rohtas' },
+    jammu: { at: [32.72, 74.86], side: 'r', nudge: [5, -3], name: 'Jammu' },
+    chillianwala: { at: [32.66, 73.60], side: 'l', name: 'Chillianwala' },
+    gujrat: { at: [32.57, 74.08], side: 'r', name: 'Gujrat' },
+    lahore: { at: [31.58, 74.33], side: 'l', name: 'Lahore' },
+    multan1818: { at: [30.20, 71.47], side: 'l', nudge: [-5, -4], name: 'Multan' },
+    multan1849: { at: [30.20, 71.47], side: 'r', nudge: [5, 4], name: 'Multan', year: '1848–49' },
+    jhelum1857: { at: [32.925, 73.725], side: 'r', lab: [0, 7], name: 'Jhelum' },
+    aliwal: { at: [30.945, 75.614], side: 'l', lab: [0, -10], name: 'Aliwal' },
+    gogera: { at: [30.955, 73.33], side: 'l', name: 'Gogera' },
+    ferozeshah: { at: [30.88, 74.79], side: 'r', lab: [0, 6], name: 'Ferozeshah' },
+    gujranwala: { at: [32.153, 74.193], side: 'l', name: 'Gujranwala' },
+    nowshera: { at: [34.011, 71.975], side: 'r', name: 'Nowshera' },
+    naurangabad: { at: [31.16, 74.95], side: 'r', nudge: [6, -4], lab: [0, -8], name: 'Naurangabad' },
+    sobraon: { at: [31.14, 74.866], side: 'l', nudge: [-6, 4], lab: [0, 4], name: 'Sobraon' },
+    lahore1752: { at: [31.604, 74.394], side: 'l', lab: [0, -7], name: 'Lahore' },
+    attock: { at: [33.922, 72.362], side: 'r', name: 'Attock' },
+    ramnagar: { at: [32.331, 73.779], side: 'l', lab: [0, 6], name: 'Ramnagar' },
+    manupur: { at: [30.7585, 76.2702], side: 'l', name: 'Manupur' },
+    murree: { at: [33.9056, 73.3926], side: 'r', lab: [0, -6], name: 'Murree' },
+    jammu1845: { at: [32.72, 74.86], side: 'l', nudge: [-5, 3], name: 'Jammu' },
+    batala: { at: [31.762, 75.205], side: 'r', name: 'Batala' },
+    trimmu: { at: [32.16, 75.32], side: 'l', name: 'Trimmu Ghat' },
   };
+  // Battles fought by the same army one after another: a march arrow from
+  // each to the next, [from, to, what marched].
+  const MARCHES = [
+    ['ferozeshah', 'sobraon', 'Gough’s army, from Ferozeshah to the Sobraon bridgehead, Dec 1845 – Feb 1846'],
+    ['aliwal', 'sobraon', 'Harry Smith’s division rejoins Gough after Aliwal, Feb 1846'],
+    ['chillianwala', 'gujrat', 'Gough follows Sher Singh from Chillianwala to Gujrat, Feb 1849'],
+    ['multan1849', 'gujrat', 'Whish’s force marches north from Multan to join Gough, Feb 1849'],
+    ['lahore', 'khari', 'Gulab Singh’s Dogras, from the siege of Lahore to Khari Khariyali, 1841'],
+  ];
 
+  const spotAt = s => { const [x, y] = px(s.at), [nx, ny] = s.nudge || [0, 0]; return [x + nx, y + ny]; };
   const line = pts => 'M' + pts.map(p => px(p).map(f).join(' ')).join('L');
   // A smooth path through the points (Catmull-Rom as cubic Béziers).
   const smooth = pts => {
@@ -122,8 +141,14 @@ const CAMPAIGN_MAP = (() => {
     return d;
   }
 
-  function riverLabel(name, pts, seg) {
-    const [a, b] = [px(pts[seg]), px(pts[seg + 1])];
+  function riverLabel(name) {
+    const at = px(RIVER_LABELS[name] || [0, 0]);
+    let a, b, best = Infinity;
+    for (const [n, , pts] of RIVERS) if (n === name) for (let i = 0; i < pts.length - 1; i++) {
+      const p = px(pts[i]), q = px(pts[i + 1]), d = Math.hypot((p[0] + q[0]) / 2 - at[0], (p[1] + q[1]) / 2 - at[1]);
+      if (d < best && Math.hypot(q[0] - p[0], q[1] - p[1]) > 4) { best = d; a = p; b = q; }
+    }
+    if (!a) return '';
     let ang = Math.atan2(b[1] - a[1], b[0] - a[0]) * 180 / Math.PI;
     if (ang > 90) ang -= 180; if (ang < -90) ang += 180;
     const x = (a[0] + b[0]) / 2, y = (a[1] + b[1]) / 2;
@@ -148,7 +173,7 @@ const CAMPAIGN_MAP = (() => {
   }
 
   function cartouche() {
-    const [x0] = px([0, 74.05]), [, y0] = px([30.18, 0]), w = W - M - 12 - x0, km = K / 111.32; // px per km
+    const [x0] = px([0, 74.75]), [, y0] = px([30.05, 0]), w = W - M - 12 - x0, km = K / 111.32; // px per km
     let s = `<g class="cm-cartouche" transform="translate(${f(x0)} ${f(y0)})"><rect width="${f(w)}" height="96" rx="3" class="cm-cart-box"/><rect x="4" y="4" width="${f(w - 8)}" height="88" rx="2" class="cm-cart-in"/>`;
     s += `<text x="${f(w / 2)}" y="30" class="cm-cart-title">THE PANJAB</text><text x="${f(w / 2)}" y="47" class="cm-cart-sub">and its marches, 1761–1857</text>`;
     const bar = 100 * km, bx = (w - bar) / 2;
@@ -158,26 +183,33 @@ const CAMPAIGN_MAP = (() => {
   }
 
   function compass() {
-    const [x, y] = px([33.45, 75.42]);
+    const [x, y] = px([29.85, 70.55]);
     return `<g class="cm-compass" transform="translate(${f(x)} ${f(y)})"><circle r="22" class="cm-rose-disc"/><circle r="17" class="cm-rose-ring"/>`
       + `<path d="M0 -26L5 0L0 26L-5 0Z" class="cm-rose-a"/><path d="M-20 0L0 -4L20 0L0 4Z" class="cm-rose-b"/><path d="M0 -26L5 0L0 0Z" class="cm-rose-dark"/><path d="M20 0L0 4L0 0Z" class="cm-rose-dark"/>`
       + `<text y="-30" class="cm-rose-n">N</text></g>`;
   }
 
+  // A battle: a small seal with crossed swords on the very spot, its name and
+  // year beside it.
   function seal(g, current, era) {
     const s = SPOTS[g.group]; if (!s) return '';
     // Battles of other eras stay on the map, faint, as landmarks.
-    // The capital's star stands in for its faint mark.
-    if (era && g.era !== era) { if (TOWNS.some(t => t[0] === s.name && t[4] === 2)) return ''; const [x, y] = px(s.at); return `<circle cx="${f(x)}" cy="${f(y)}" r="3.2" class="cm-past"><title>${g.title}, ${g.year}</title></circle>`; }
-    const [x, y] = px(s.at), [dx, dy] = s.off, on = g.group === current;
-    const year = s.year || g.year, name = s.name;
-    const tx = s.side === 'l' ? -17 : 17, anchor = s.side === 'l' ? 'end' : 'start';
-    let out = '';
-    if (dx || dy) out += `<path d="M${f(x)} ${f(y)}L${f(x + dx)} ${f(y + dy)}" class="cm-leader"/><circle cx="${f(x)}" cy="${f(y)}" r="2.6" class="cm-site"/>`;
-    return out + `<g class="cm-battle${on ? ' on' : ''}" data-group="${g.group}" tabindex="0" role="button" aria-label="${g.title}" transform="translate(${f(x + dx)} ${f(y + dy)})"><title>${g.title}</title>`
-      + `<g class="cm-seal-g">${on ? '<circle r="18" class="cm-halo"/>' : ''}<circle r="13" class="cm-seal-rim"/><circle r="11" class="cm-seal"/>`
-      + `<path d="M-5.5 -5.5L5.5 5.5M5.5 -5.5L-5.5 5.5M-7 2.8L-2.8 7M7 2.8L2.8 7" class="cm-swords"/></g>`
-      + `<text x="${tx}" y="-1" text-anchor="${anchor}" class="cm-bname">${name}</text><text x="${tx}" y="11" text-anchor="${anchor}" class="cm-byear">${year}</text></g>`;
+    if (era && g.era !== era) { const [x, y] = px(s.at); return `<circle cx="${f(x)}" cy="${f(y)}" r="2.6" class="cm-past"><title>${g.title}, ${g.year}</title></circle>`; }
+    const [x, y] = spotAt(s), on = g.group === current, [lx, ly] = s.lab || [0, 0];
+    const left = s.side === 'l', tx = (left ? -11 : 11) + lx, anchor = left ? 'end' : 'start';
+    return `<g class="cm-battle${on ? ' on' : ''}" data-group="${g.group}" tabindex="0" role="button" aria-label="${g.title}" transform="translate(${f(x)} ${f(y)})"><title>${g.title}, ${s.year || g.year}</title>`
+      + `<circle r="14" class="cm-hit"/><g class="cm-seal-g">${on ? '<circle r="12" class="cm-halo"/>' : ''}<circle r="7.5" class="cm-seal-rim"/><circle r="6" class="cm-seal" style="fill:url(#cm${on ? 'Gold' : 'Wax'})"/>`
+      + `<path d="M-3 -3L3 3M3 -3L-3 3" class="cm-swords"/></g>`
+      + `<text x="${tx}" y="${f(3.5 + ly)}" text-anchor="${anchor}" class="cm-bname">${s.name}<tspan class="cm-byear" dx="4">${s.year || g.year}</tspan></text></g>`;
+  }
+
+  // A dotted line from one battle to the next by the same army.
+  function march([from, to, what], groups, era) {
+    const a = SPOTS[from], b = SPOTS[to], ga = groups.find(g => g.group === from), gb = groups.find(g => g.group === to);
+    if (!a || !b || !ga || !gb || (era && (ga.era !== era || gb.era !== era))) return '';
+    const [x0, y0] = spotAt(a), [x1, y1] = spotAt(b), dx = x1 - x0, dy = y1 - y0, len = Math.hypot(dx, dy), ux = dx / len, uy = dy / len, bend = Math.min(18, len * .12);
+    const d = `M${f(x0 + ux * 9)} ${f(y0 + uy * 9)}Q${f((x0 + x1) / 2 - uy * bend)} ${f((y0 + y1) / 2 + ux * bend)} ${f(x1 - ux * 9)} ${f(y1 - uy * 9)}`;
+    return `<path d="${d}" class="cm-march-line"><title>${what}</title></path>`;
   }
 
   function draw(groups, current, era) {
@@ -191,13 +223,13 @@ const CAMPAIGN_MAP = (() => {
       + `<clipPath id="cmClip"><rect x="${M}" y="${M}" width="${IW}" height="${IH}"/></clipPath></defs>`;
     svg += `<rect width="${W}" height="${H}" class="cm-paper"/><rect width="${W}" height="${H}" class="cm-paper" filter="url(#cmBlot)"/><rect width="${W}" height="${H}" class="cm-paper" filter="url(#cmGrain)" opacity=".5"/>`;
     svg += `<g clip-path="url(#cmClip)">`;
+    svg += `<image href="img/panjab-relief.jpg" x="${M}" y="${M}" width="${IW}" height="${IH}" preserveAspectRatio="none" class="cm-relief"/>`;
     for (const d of DESERTS) svg += `<path d="${stipple(d, r)}" class="cm-sand"/>`;
-    for (const rd of RIDGES) svg += `<path d="${hachures(rd, r)}" class="cm-hachure"/>`;
     for (const [name, lat, lon, ang, size] of REGIONS) { const [x, y] = px([lat, lon]); svg += `<text transform="translate(${f(x)} ${f(y)}) rotate(${ang})" class="cm-region" style="font-size:${size}px">${name}</text>`; }
     for (const rd of ROADS) svg += `<path d="${line(rd)}" class="cm-road"/>`;
     for (const [, w, pts] of RIVERS) svg += `<path d="${smooth(pts)}" class="cm-river-halo" style="stroke-width:${w + 4}"/>`;
     for (const [, w, pts] of RIVERS) svg += `<path d="${smooth(pts)}" class="cm-river" style="stroke-width:${w}"/>`;
-    for (const [name, , pts, seg] of RIVERS) svg += riverLabel(name, pts, seg);
+    for (const name of Object.keys(RIVER_LABELS)) svg += riverLabel(name);
     
     for (const [name, lat, lon, side, city] of TOWNS) {
       if (battleTowns.has(name)) continue;
@@ -210,9 +242,14 @@ const CAMPAIGN_MAP = (() => {
     svg += `</g>`;
     svg += `<rect x="${M}" y="${M}" width="${IW}" height="${IH}" fill="url(#cmVignette)" pointer-events="none"/>`;
     svg += frame() + compass() + cartouche();
+    for (const m of MARCHES) svg += march(m, groups, era);
     // The chosen campaign's seal goes last so it sits on top.
     for (const g of [...groups].sort((a, b) => (a.group === current) - (b.group === current))) svg += seal(g, current, era);
-    return svg + '</svg>';
+    // Each drawing gets its own ids: the title page and the opening screen
+    // both draw the map, and a fill pointing into a hidden copy renders blank.
+    const uid = `cm${++drawn}`;
+    return (svg + '</svg>').replace(/(id="|url\(#)cm([A-Z])/g, `$1${uid}$2`);
   }
+  let drawn = 0;
   return { draw };
 })();

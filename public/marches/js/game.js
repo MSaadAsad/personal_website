@@ -9,6 +9,14 @@ const SIDES = {
   red:   { name: 'Durrani Lashkar', short: 'Durrani', adj: 'Durrani', color: '#d36b56' },
 };
 const other = side => side === 'azure' ? 'red' : 'azure';
+// A side's name as it reads mid-sentence: "the Khalsa Army", "the Kanhaiya
+// Misl", but "Raja Gulab Singh" and "Sher Singh’s Army" with no article.
+const theSide = side => {
+  const n = SIDES[side].name;
+  if (/^The /.test(n)) return `the ${n.slice(4)}`;
+  return !/’s |\band\b/.test(n) && /^(Army|\d)|\b(Army|Garrison|Column|Division|District|Misl|Darbar|Infantry)$/.test(n) ? `the ${n}` : n;
+};
+const TheSide = side => theSide(side).replace(/^t/, 'T');
 
 const VARIANTS = {
   'Matchlockmen':       { type: 'foot',  mp: 8,  range: 1, atk: 3, def: 3, trait: 'Volley — a failed attack costs nothing', skirmish: true },
@@ -105,15 +113,27 @@ function newCampaign({ player = 'azure', ai = true, fog = true } = {}) {
     ferries: [], ferryBuilt: { azure: false, red: false },
     walls: { ...(SCN.walls || {}) },  // great fortifications that must be breached
     battered: {}, kacha: {}, mines: {},  // levels shelled off places' works; kacha forts dug, by hex; galleries under way, by target hex
+    eaten: {}, stores: {},               // villages foraged, by place; magazines emptied, by place and round
     turnNo: 0, events: [], battles: [],  // the chronicle: what happened, gathered into battles
     frames: [],                          // the board at the start of every command, for replays
     arrived: {},                         // reinforcements that have marched in
     generals: Object.fromEntries(['azure', 'red'].map(side => [side, { unitId: (units.find(u => u.side === side && (u.name === GENERALS[side].leads || u.variant === GENERALS[side].leads)) || units.find(u => u.side === side)).id, rode: false, forced: false, captured: false }])),
   };
+  S.engaged = {}; S.losses = {};
+  for (const u of units) enlist(u);
   applyFerries(S.ferries);
   reportPositions();
   startTurn();
   return S;
+}
+// The order of battle: soldiers by side and arm as the campaign opens, with
+// the reinforcements that march in (S.engaged), and those lost, by how they
+// were lost (S.losses). All in figures.
+function enlist(u) { const t = (((S.engaged ||= {})[u.side] ||= {})[VARIANTS[u.variant].type] ||= { n: 0, hp: 0 }); t.n++; t.hp += u.hp; }
+function noteLoss(u, figures, how) {
+  if (!(figures > 0)) return;
+  const t = (((S.losses ||= {})[u.side] ||= {})[VARIANTS[u.variant].type] ||= { killed: 0, captured: 0, deserted: 0 });
+  t[how] += figures;
 }
 // A formation's full day's march, in this map's hexes.
 const fullMp = u => Math.round(VARIANTS[u.variant].mp * MARCH_SCALE * PACE);
@@ -126,12 +146,19 @@ function makeUnit(side, variant, hex, id, name = null, figures = MAX_HP) {
 // A scenario with a `clock` is fought in watches of `hours` from `from`
 // o'clock on its first `day`, rather than a day to a round; between eight in
 // the evening and five in the morning it is night.
-function clockAt(r) { const c = SCN.clock, h = c.from + (r - 1) * c.hours; return { day: c.day + Math.floor(h / 24), hour: h % 24 }; }
+const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+// The date and hour of a round, rolling over into the next month as needed.
+function clockAt(r) {
+  const c = SCN.clock, h = c.from + (r - 1) * c.hours, year = parseInt(SCN.year) || 1800;
+  const date = new Date(Date.UTC(year, MONTHS.indexOf(c.month), c.day + Math.floor(h / 24)));
+  return { day: date.getUTCDate(), month: MONTHS[date.getUTCMonth()], hour: h % 24 };
+}
 function roundName(r = S.round) {
   if (!SCN.clock) return `Day ${r}`;
-  if (SCN.clock.hours >= 24) return `${clockAt(r).day} ${SCN.clock.month}`;  // a round is a day: just the date
-  const { day, hour } = clockAt(r), time = hour === 0 ? 'midnight' : hour === 12 ? 'noon' : `${hour % 12} ${hour < 12 ? 'am' : 'pm'}`;
-  return `${day} ${SCN.clock.month}, ${time}`;
+  const { day, month, hour } = clockAt(r);
+  if (SCN.clock.hours >= 24) return `${day} ${month}`;  // a round is a day: just the date
+  const time = hour === 0 ? 'midnight' : hour === 12 ? 'noon' : `${hour % 12} ${hour < 12 ? 'am' : 'pm'}`;
+  return `${day} ${month}, ${time}`;
 }
 const isNight = (r = S?.round) => !!SCN.clock && r !== undefined && (({ hour }) => hour >= 20 || hour < 5)(clockAt(r));
 // The share of a day's rations eaten (and brought up) in a round.
@@ -140,14 +167,16 @@ const dayShare = () => SCN.clock ? SCN.clock.hours / 24 : 1;
 function save() {
   if (S.replay) return;  // a replay borrows the board; it is never saved
   SUPPLY = {};
-  try { localStorage.setItem(SAVE_KEY, JSON.stringify({ ...S, undo: null, selected: null })); } catch { /* private mode */ }
+  try { localStorage.setItem(SAVE_KEY, JSON.stringify({ ...S, undo: null, selected: null, hexes: HEXES.length })); } catch { /* private mode */ }
 }
 function load() {
   try {
     const data = JSON.parse(localStorage.getItem(SAVE_KEY));
-    if (data?.version === SAVE_VERSION && Array.isArray(data.units)) {
+    // A save from before its map was redrawn (another hex count) is dropped.
+    const fits = d => (d.hexes ?? HEXES.length) === HEXES.length && d.units.every(u => HEXES[u.hex]);
+    if (data?.version === SAVE_VERSION && Array.isArray(data.units) && fits(data)) {
       S = data; applyFerries(S.ferries);
-      S.turnNo ??= 0; S.events ??= []; S.battles ??= []; S.frames ??= [];
+      S.turnNo ??= 0; S.events ??= []; S.battles ??= []; S.frames ??= []; S.eaten ??= {}; S.stores ??= {};
       return true;
     }
   } catch { /* corrupt save */ }
@@ -220,9 +249,12 @@ function pathTo(reach, from, to) {
   return path;
 }
 
-// A formation down to two figures of five has lost its nerve: it falls back when hit
-// and cannot attack until it rallies.
-const wavering = u => u.hp < maxHp(u) * WAVER_BELOW;
+// Morale runs from Wavering (−2) to Inspired (+2). A formation that is
+// Wavering, or down to two figures of five, has lost its nerve: it falls
+// back when hit and cannot attack until it rallies.
+const MORALE = { 2: 'Inspired', 1: 'Eager', 0: 'Steady', '-1': 'Shaken', '-2': 'Wavering' };
+const moraleOf = u => u.morale || 0;
+const wavering = u => u.hp < maxHp(u) * WAVER_BELOW || moraleOf(u) <= -2;
 
 // Guns that fire at range reach farther on a map of small hexes (SCN.gunRange).
 const rangeOf = variant => { const r = VARIANTS[variant].range; return r > 1 && SCN.gunRange ? SCN.gunRange : r; };
@@ -296,9 +328,9 @@ function captureGeneral(side) {
   g.captured = true;
   S.vp[other(side)] += GENERAL_RANSOM;
   note({ t: 'general', side, name: GENERALS[side].name, hex: unitById(g.unitId)?.hex ?? null });
-  log(other(side), `<b>${GENERALS[side].name} has been taken prisoner!</b> The ${SIDES[other(side)].name} gains ${GENERAL_RANSOM} war points.`);
+  log(other(side), `<b>${GENERALS[side].name} has been taken prisoner!</b> ${TheSide(other(side))} gains ${GENERAL_RANSOM} war points.`);
   UI.flash(`${GENERALS[side].name.toUpperCase()} CAPTURED`, other(side));
-  UI.dispatch({ side: other(side), kind: 'General taken', title: GENERALS[side].name, text: `${GENERALS[side].name}, ${GENERALS[side].title.replace(/^./, c => c.toLowerCase())}, has fallen into the hands of the ${SIDES[other(side)].name}. The ${SIDES[side].name} fights on without him.`, hex: unitById(g.unitId)?.hex });
+  UI.dispatch({ side: other(side), kind: 'General taken', title: GENERALS[side].name, text: `${GENERALS[side].name}, ${GENERALS[side].title.replace(/^./, c => c.toLowerCase())}, has fallen into the hands of ${theSide(other(side))}. ${TheSide(side)} fights on without him.`, hex: unitById(g.unitId)?.hex });
 }
 
 // ---------------------------------------------------------------------------
@@ -364,6 +396,51 @@ function supplyField(side) {
   return (SUPPLY[side] = dist);
 }
 
+// Living off the land. A formation that ends its command in a village, sarai,
+// town or city eats from its granaries whatever the wagons leave short, up to
+// a day's rations. A place holds only so many formation-days of food before
+// it is stripped bare (S.eaten), and its bins fill again over about a week.
+// A town shut in by a siege feeds no one this way.
+const LARDER = { village: 3, sarai: 2, town: 6, city: 10 };  // formation-days of food
+const REGROW_DAYS = 7;
+const larderOf = key => LARDER[MAP.places[key]?.kind] || 0;
+function larderLeft(key) {
+  const cap = larderOf(key), e = S.eaten?.[key];
+  if (!cap || !e) return cap;
+  return Math.min(cap, cap - e.d + (S.round - e.r) * dayShare() * cap / REGROW_DAYS);
+}
+const stripped = key => larderOf(key) > 0 && larderLeft(key) < 0.05;
+// Days until a stripped place can feed a formation for a day again.
+const regrowIn = key => Math.ceil((1 - larderLeft(key)) * REGROW_DAYS / larderOf(key));
+function forage(u, short) {
+  const key = HEXES[u.hex].place, left = key ? larderLeft(key) : 0;
+  if (short <= 0 || left < 0.05 || besieged(u.hex, u.side)) return 0;
+  const days = Math.min(short / STOCK_USE, dayShare(), left);
+  (S.eaten ||= {})[key] = { d: larderOf(key) - left + days, r: S.round };
+  if (stripped(key)) log(u.side, `${MAP.places[key].name} has been stripped bare; it will feed no one for ${regrowIn(key)} days.`);
+  return Math.round(days * STOCK_USE);
+}
+
+// Spoils. Breaking an enemy formation gives the victors its baggage; taking a
+// fort or walled town gives them its magazines, unless a siege has already
+// eaten them, and those stay empty for a week.
+const SPOILS = 20, STORE_DAYS = 7;
+function seizeBaggage(u, from) {
+  if (!u || u.hp <= 0) return;
+  const before = stockOf(u);
+  u.stock = Math.min(100, before + SPOILS);
+  if (u.stock > before) log(u.side, `${u.name} seized the baggage of ${from.name} (+${u.stock - before}% supplies).`);
+}
+const walledPlace = key => ['town', 'city', 'fort'].includes(MAP.places[key]?.kind) || SCN.walls?.[key] !== undefined;
+const storesFull = key => !(key in (S.stores || {})) || (S.round - S.stores[key]) * dayShare() >= STORE_DAYS;
+function seizeStores(key, side, hex) {
+  if (!walledPlace(key) || !storesFull(key)) return;
+  (S.stores ||= {})[key] = S.round;
+  const fed = S.units.filter(v => v.side === side && v.hex === hex && stockOf(v) < 100);
+  for (const v of fed) v.stock = 100;
+  if (fed.length) log(side, `The magazines of ${MAP.places[key].name} filled the ${SIDES[side].adj} wagons.`);
+}
+
 // ---------------------------------------------------------------------------
 // Ferries: once per campaign each side's foot may lash boats together across
 // the Jhelum or Chenab. It costs the builders their whole command and one
@@ -383,7 +460,7 @@ function buildFerry(u, across) {
   S.ferries.push({ a: u.hex, b: across, side: u.side, round: S.round });
   S.ferryBuilt[u.side] = true;
   applyFerries(S.ferries);
-  u.hp -= FERRY_COST; u.mp = 0; u.attacked = true; S.undo = null;
+  u.hp -= FERRY_COST; noteLoss(u, FERRY_COST, 'killed'); u.mp = 0; u.attacked = true; S.undo = null;
   log(u.side, `<b>${u.name}</b> lashed boats into a ferry across the ${river}${placeName(u.hex) ? ` at ${placeName(u.hex)}` : ''} (−${men(FERRY_COST)}). Either army may now cross there.`);
   UI.flash('FERRY BUILT', u.side);
   save(); UI.refresh();
@@ -566,6 +643,7 @@ function defenceOf(def, attacker, attackFrom) {
   const levy = localLevy(def.side, def.hex);
   if (levy) parts.push(['Allied levies', levy]);
   if (ledBy(def)) parts.push([GENERALS[def.side].name, 1]);
+  if (Math.abs(moraleOf(def)) === 2) parts.push([MORALE[moraleOf(def)], Math.sign(moraleOf(def))]);
   parts.push(marchState(def));
   if (attacker) {
     const rise = h.elev - HEXES[attackFrom].elev;
@@ -593,6 +671,7 @@ function attackOf(att, fromHex, def, mpLeft = att.mp) {
   // Height: attacking downhill helps (the defender's uphill bonus is in defenceOf).
   if (HEXES[fromHex].elev - h.elev >= 60) parts.push(['Attacking downhill', 1]);
   if (ledBy(att)) parts.push([GENERALS[att.side].name, 1]);
+  if (moraleOf(att)) parts.push([MORALE[moraleOf(att)], Math.sign(moraleOf(att))]);
   parts.push(marchState(att, att.moved || fromHex !== att.hex || mpLeft < att.mp, mpLeft));
   const st = stockOf(att);
   if (st < STOCK_DESERT) parts.push(['Starving', -2]);
@@ -671,10 +750,64 @@ function retreatPath(u, fromHex) {
   return path;
 }
 
+// Every blow tests a formation's nerve, and the more blows it takes in one
+// command the worse its chances: d6, +2 with the general (+1 beside him),
+// +1 behind walls or works, −1 hungry, −1 encircled, −1 for every blow
+// after the first. 3 or less: one step down; 4–5: it holds; 6 or more:
+// the blow steels it, one step up. Only a rout (three figures lost in one
+// blow) can break it two steps at once, on a roll of 1 or less.
+function nerveBonus(u) {
+  let b = ledBy(u) ? 2 : nearGeneral(u) ? 1 : 0;
+  if (fortLevels(u.hex) > 0 || kachaRound(u.hex)) b++;
+  if (stockOf(u) < STOCK_HUNGRY) b--;
+  if (pressureOn(u).encircled) b--;
+  return b;
+}
+function shiftMorale(u, d, why) {
+  const before = moraleOf(u), after = Math.max(-2, Math.min(2, before + d));
+  if (after === before) return 0;
+  u.morale = after;
+  note({ t: 'morale', side: u.side, unit: muster(u), hex: u.hex, from: before, to: after, why });
+  return after - before;
+}
+const d6 = () => 1 + Math.floor(Math.random() * 6);
+// Returns true if the formation's nerve broke (it fell to Wavering).
+function testNerve(u, routed = false) {
+  u.blows = (u.blows || 0) + 1;
+  const was = moraleOf(u), r = d6() + nerveBonus(u) - (u.blows - 1);
+  const moved = shiftMorale(u, r <= 1 && routed ? -2 : r <= 3 ? -1 : r <= 5 ? 0 : 1, 'blow');
+  if (moved > 0) log(u.side, `${u.name} stood the blow and is ${MORALE[moraleOf(u)].toLowerCase()}.`);
+  else if (moved < 0 && moraleOf(u) > -2) log(u.side, `${u.name} is ${MORALE[moraleOf(u)].toLowerCase()}${u.blows > 1 ? ` after ${u.blows} blows` : ''}.`);
+  else if (moved < 0) { log(u.side, `<b>${u.name}</b> has lost its nerve and wavers.`); return was > -2; }
+  return false;
+}
+// Winning heartens the men who won: a rout or a repulse always, one step
+// up; a plain hit on a 4 or better.
+function hearten(u, sure = true) {
+  if ((!sure && d6() < 4) || !shiftMorale(u, 1, 'success')) return;
+  log(u.side, `${u.name} is ${MORALE[moraleOf(u)].toLowerCase()} after its success.`);
+}
+// Panic: when a formation is destroyed, surrenders or loses its nerve, the
+// friends beside it test theirs (d6 + bonus; 2 or less shakes them a step).
+// One that is shaken into wavering spreads the panic further. Each
+// formation is tested once.
+function panic(hex, side, seen = new Set()) {
+  for (const v of S.units) {
+    if (v.side !== side || seen.has(v.id) || hexDistance(v.hex, hex) > 1) continue;
+    seen.add(v.id);
+    if (d6() + nerveBonus(v) > 2) continue;
+    const was = moraleOf(v);
+    if (!shiftMorale(v, -1, 'panic')) continue;
+    log(side, `Panic spread to ${v.name}: ${MORALE[moraleOf(v)].toLowerCase()}.`);
+    if (moraleOf(v) <= -2 && was > -2) panic(v.hex, side, seen);
+  }
+}
+
 async function fallBack(u, fromHex) {
   const path = retreatPath(u, fromHex);
   if (!path) {
     S.units = S.units.filter(v => v !== u);
+    noteLoss(u, u.hp, 'captured');
     log(u.side, `${u.name} was cut off and surrendered.`);
     note({ t: 'surrender', side: u.side, unit: muster(u), hex: u.hex, why: 'cut off' });
     return null;
@@ -695,6 +828,7 @@ async function attack(att, target) {
   att.attacked = true; att.mp = VARIANTS[att.variant].type === 'horse' ? Math.max(0, att.mp - ATTACK_MP) : 0; S.undo = null;
   const lostDef = Math.min(def.hp, dDef), lostAtt = Math.min(att.hp, dAtt);
   def.hp -= lostDef; att.hp -= lostAtt;
+  noteLoss(def, lostDef, 'killed'); noteLoss(att, lostAtt, 'killed');
   ENGAGEMENT = engagementAt(defHex);
   note({ t: 'combat', side: att.side, att: muster(att), def: muster(def), from: fromHex, hex: defHex, melee: f.melee, outcome, lostAtt, lostDef, odds: [ar + f.A.total, dr + f.D.total] });
   const where = placeName(defHex) ? ` at ${placeName(defHex)}` : '';
@@ -715,7 +849,14 @@ async function attack(att, target) {
     log(u.side, `${u.name} was destroyed.`);
     note({ t: 'destroyed', side: u.side, unit: muster(u), hex: u.hex });
     generalFalls(u);
+    panic(u.hex, u.side, new Set([u.id]));
   }
+  // The blows test both sides' nerve; a clear success heartens the winners.
+  const broke = [def, att].filter(u => u.hp > 0 && (u === def ? lostDef : lostAtt) && testNerve(u, (u === def ? lostDef : lostAtt) >= 3));
+  if (outcome === 'rout' && att.hp > 0) hearten(att);
+  if (outcome === 'hit' && att.hp > 0) hearten(att, false);
+  if (outcome === 'repulse' && def.hp > 0) hearten(def);
+  for (const u of broke) panic(u.hex, u.side, new Set([u.id]));
   // Down to two figures a formation must fall back, unless the general holds it together
   // or it is garrisoning a fort, where it fights to the last. An encircled
   // formation has nowhere to go and surrenders instead.
@@ -723,11 +864,15 @@ async function attack(att, target) {
   if (def.hp > 0 && lostDef && wavering(def) && !ledBy(def) && !garrisoned) {
     if (pressureOn(def).encircled) {
       S.units = S.units.filter(v => v !== def);
+      noteLoss(def, def.hp, 'captured');
       log(def.side, `${def.name} was surrounded and laid down its arms${placeName(defHex) ? ` at ${placeName(defHex)}` : ''}.`);
       note({ t: 'surrender', side: def.side, unit: muster(def), hex: defHex, why: 'surrounded' });
+      panic(defHex, def.side, new Set([def.id]));
     } else await fallBack(def, fromHex);
   }
   if (att.hp > 0 && lostAtt && wavering(att) && !ledBy(att)) await fallBack(att, defHex);
+  if (outcome === 'rout' || !S.units.includes(def)) seizeBaggage(att, def);
+  else if (!S.units.includes(att)) seizeBaggage(def, att);
   // Foot and horse that clear a hex in melee follow up into it, unless they
   // are a garrison sallying from walls or a strongpoint they hold: they stay.
   const garrison = fortLevels(fromHex) > 0 || STRONG_HEX.has(fromHex) && S.owners[STRONG_HEX.get(fromHex)] === att.side;
@@ -868,7 +1013,8 @@ async function moveUnit(u, to, reach = reachable(u)) {
     return true;
   }
   const key = STRONG_HEX.get(to), fort = FORT_HEX.get(to);
-  S.undo = { id: u.id, hex: u.hex, mp: u.mp, moved: u.moved, owner: key ? [key, S.owners[key]] : null, fort: fort ? [fort, S.forts[fort]] : null, events: S.events.length };
+  S.undo = { id: u.id, hex: u.hex, mp: u.mp, moved: u.moved, owner: key ? [key, S.owners[key]] : null, fort: fort ? [fort, S.forts[fort]] : null, events: S.events.length,
+    stocks: [u, ...unitsAt(to)].map(v => [v.id, v.stock]), stores: { ...(S.stores || {}) } };
   await UI.animateMove(u, path);
   note({ t: 'move', side: u.side, id: u.id, path });
   u.hex = to; u.mp -= cost; u.moved = true;
@@ -885,9 +1031,11 @@ async function moveUnit(u, to, reach = reachable(u)) {
 function capture(u) {
   const fort = FORT_HEX.get(u.hex);
   if (fort && S.forts[fort] !== u.side) {
-    note({ t: 'capture', side: u.side, unit: muster(u), place: fort, hex: u.hex, from: S.forts[fort] || null });
+    const was = S.forts[fort];
+    note({ t: 'capture', side: u.side, unit: muster(u), place: fort, hex: u.hex, from: was || null });
     S.forts[fort] = u.side;
     log(u.side, `<b>${u.name}</b> garrisoned ${MAP.places[fort].name}; it now feeds the ${SIDES[u.side].adj} supply lines.`);
+    if (was) seizeStores(fort, u.side, u.hex);
   }
   const key = STRONG_HEX.get(u.hex);
   if (key && S.owners[key] !== u.side) {
@@ -896,7 +1044,8 @@ function capture(u) {
     S.owners[key] = u.side;
     log(u.side, `<b>${u.name}</b> raised the ${SIDES[u.side].adj} standard over ${MAP.places[key].name}.`);
     UI.flash(`${MAP.places[key].name.toUpperCase()} TAKEN`, u.side);
-    UI.dispatch({ side: u.side, kind: 'Taken', title: MAP.places[key].name, text: `The ${u.name} raised the ${SIDES[u.side].adj} standard over ${MAP.places[key].name}${from ? `, taking it from the ${SIDES[from].name}` : ''}.`, hex: u.hex });
+    if (from) seizeStores(key, u.side, u.hex);
+    UI.dispatch({ side: u.side, kind: 'Taken', title: MAP.places[key].name, text: `The ${u.name} raised the ${SIDES[u.side].adj} standard over ${MAP.places[key].name}${from ? `, taking it from ${theSide(from)}` : ''}.`, hex: u.hex });
   }
 }
 function undoMove() {
@@ -905,6 +1054,8 @@ function undoMove() {
   u.hex = o.hex; u.mp = o.mp; u.moved = o.moved;
   if (o.owner) S.owners[o.owner[0]] = o.owner[1];
   if (o.fort) S.forts[o.fort[0]] = o.fort[1];
+  for (const [id, st] of o.stocks || []) { const v = unitById(id); if (v) v.stock = st; }
+  if (o.stores) S.stores = o.stores;
   S.events.length = Math.min(S.events.length, o.events ?? S.events.length);
   S.undo = null; S.selected = u.id;
   save(); UI.refresh();
@@ -930,7 +1081,7 @@ function arrive() {
     const at = hexOfStop(r.at);
     for (const [variant, name, figures] of r.units) {
       const hex = roomNear(at, r.side);
-      if (hex >= 0) S.units.push(makeUnit(r.side, variant, hex, nextUnitId(r.side), name, figures));
+      if (hex >= 0) { const u = makeUnit(r.side, variant, hex, nextUnitId(r.side), name, figures); S.units.push(u); enlist(u); }
     }
     log(r.side, `<b>${r.name}</b> ${r.note || 'joined the army'}.`);
     UI.flash(`${r.name.toUpperCase()} ARRIVES`, r.side);
@@ -960,7 +1111,7 @@ function happen() {
     if (ev.round !== S.round || (ev.side || FIRST) !== S.turn || S.happened?.[i]) return;
     (S.happened ||= {})[i] = true;
     for (const [k, d] of Object.entries(ev.walls || {})) S.walls[k] = Math.max(0, (S.walls[k] || 0) + d);
-    if (ev.hurt) for (const u of [...unitsAt(HEX_OF[ev.hurt.at])]) u.hp = Math.max(1, u.hp - ev.hurt.hp);
+    if (ev.hurt) for (const u of [...unitsAt(HEX_OF[ev.hurt.at])]) { const hp = Math.max(1, u.hp - ev.hurt.hp); noteLoss(u, u.hp - hp, 'killed'); u.hp = hp; }
     if (ev.falls && !S.generals[ev.falls].captured) {
       const g = S.generals[ev.falls];
       Object.assign(g, { captured: true, fallen: true });
@@ -981,6 +1132,7 @@ function startTurn() {
   arrive();
   checkMines();
   for (const u of S.units) if (u.side === S.turn) { u.mp = fullMp(u); u.attacked = false; u.moved = false; }
+  for (const u of S.units) u.blows = 0;  // blows taken this command, for the nerve test
   Object.assign(S.generals[S.turn], { rode: false, forced: false });
   S.undo = null; S.selected = null;
   // Keyframe for replays: the board as this command begins. The events noted
@@ -990,11 +1142,19 @@ function startTurn() {
 const boardSnapshot = () => JSON.parse(JSON.stringify({
   round: S.round, turn: S.turn, units: S.units, owners: S.owners, forts: S.forts, allies: S.allies,
   levied: S.levied, vp: S.vp, generals: S.generals, walls: S.walls, battered: S.battered || {}, kacha: S.kacha || {}, mines: S.mines || {},
+  eaten: S.eaten || {},
 }));
 
 async function endTurn() {
   if (S.winner) return;
   const side = S.turn, zoc = enemyZoc(side);
+  // Out of contact, a formation that did not fight steadies a step, and an
+  // eager one cools a step.
+  for (const u of S.units) if (u.side === side && !u.attacked && !zoc[u.hex] && moraleOf(u)) {
+    const up = moraleOf(u) < 0;
+    shiftMorale(u, up ? 1 : -1, up ? 'rest' : 'cool');
+    if (up) log(side, `${u.name} steadied out of contact (${MORALE[moraleOf(u)].toLowerCase()}).`);
+  }
   // Formations that held still away from the enemy, under a roof (a village,
   // sarai, town, city or fort), recover soldiers; not out on the open ground.
   // The general's presence brings stragglers back faster.
@@ -1009,10 +1169,14 @@ async function endTurn() {
     // A garrison shut up in a besieged fort or walled town lives on its
     // magazines: half rations, so it starves over a week or two, not days.
     const before = stockOf(u), got = delivery(u), shut = settlementDef(u.hex) >= SETTLEMENT_DEF.town && besieged(u.hex, side);
-    u.stock = Math.max(0, Math.min(100, Math.round(before + (got - STOCK_USE / (shut ? 2 : 1)) * dayShare())));
+    const fed = before + (got - STOCK_USE / (shut ? 2 : 1)) * dayShare();
+    u.stock = Math.max(0, Math.min(100, Math.round(fed + forage(u, 100 - fed))));
     if (before >= STOCK_HUNGRY && u.stock < STOCK_HUNGRY) log(side, `${u.name} is going hungry: its wagons cannot keep up (${u.stock}% supplies).`);
+    // A starving garrison has eaten its magazines.
+    if (shut && u.stock < STOCK_HUNGRY && HEXES[u.hex].place) (S.stores ||= {})[HEXES[u.hex].place] = S.round;
     if (u.stock >= STOCK_DESERT) continue;
     u.hp--;
+    noteLoss(u, 1, 'deserted');
     log(side, `${u.name} is starving and losing men to desertion (${men(Math.max(0, u.hp))} left, ${u.stock}% supplies).`);
     if (u.hp <= 0) {
       S.units = S.units.filter(v => v !== u);
@@ -1026,9 +1190,9 @@ async function endTurn() {
     if (!here.length || here.some(u => u.side !== side) || S.allies[powerId] === side) continue;
     const power = POWER_BY_ID[powerId];
     S.allies[powerId] = side;
-    log(side, `<b>${power.name}</b> pledged their levies to the ${SIDES[side].name}.`);
+    log(side, `<b>${power.name}</b> pledged their levies to ${theSide(side)}.`);
     UI.flash(`${power.name.toUpperCase()} JOINS`, side);
-    UI.dispatch({ side, kind: 'Allies', title: `${power.name} join the ${SIDES[side].short}`, text: `${power.chief} has pledged ${power.note.replace(/^The /, 'the ')} to the ${SIDES[side].name}${!S.levied[power.id] && unitsAt(hex).length < STACK_LIMIT ? `, and the ${power.levy.name} ride in to join` : ''}.`, history: power.history, hex });
+    UI.dispatch({ side, kind: 'Allies', title: `${power.name} join the ${SIDES[side].short}`, text: `${power.chief} has pledged ${power.note.replace(/^The /, 'the ')} to ${theSide(side)}${!S.levied[power.id] && unitsAt(hex).length < STACK_LIMIT ? `, and the ${power.levy.name} ride in to join` : ''}.`, history: power.history, hex });
     if (!S.levied[powerId] && unitsAt(hex).length < STACK_LIMIT) {
       S.levied[powerId] = true;
       S.units.push(makeUnit(side, power.levy.variant, hex, nextUnitId(side), power.levy.name));
@@ -1063,8 +1227,8 @@ async function endTurn() {
   }
   startTurn();
   // A side with nothing left in the field (until reinforcements come) passes.
-  if (!S.units.some(u => u.side === S.turn)) { log(S.turn, `${SCN.clock ? roundName() : `Round ${S.round}`}: the ${SIDES[S.turn].name} has no formations in the field.`); return endTurn(); }
-  log(S.turn, `${SCN.clock ? roundName() : `Round ${S.round}`}: the ${SIDES[S.turn].name} takes the initiative.${SCN.clock && isNight() && !isNight(S.round - (S.turn === FIRST ? 1 : 0)) ? ' Night has fallen.' : ''}`);
+  if (!S.units.some(u => u.side === S.turn)) { log(S.turn, `${SCN.clock ? roundName() : `Round ${S.round}`}: ${theSide(S.turn)} has no formations in the field.`); return endTurn(); }
+  log(S.turn, `${SCN.clock ? roundName() : `Round ${S.round}`}: ${theSide(S.turn)} takes the initiative.${SCN.clock && isNight() && !isNight(S.round - (S.turn === FIRST ? 1 : 0)) ? ' Night has fallen.' : ''}`);
   save();
   UI.refresh();
   UI.banner();
@@ -1081,6 +1245,8 @@ function declareWinner(side, reason) {
 // attacker must hold at the end of a round; with `general`, taking the
 // defending general wins as well.
 const goalForts = () => SCN.goal ? SCN.goal.forts || [SCN.goal.fort] : [];
+// A place is invested when the attacker's formations close on it from two or more hexes.
+const invested = (key, side) => besieged(HEX_OF[key], other(side));
 const goalMet = side => goalForts().length > 0 && goalForts().filter(k => S.owners[k] === side).length >= (SCN.goal.need || goalForts().length);
 // An escape goal: the side wins once `need` of its soldiers (figures) stand
 // on the ground of `power` at the end of its command, out of the enemy's reach.
@@ -1094,7 +1260,7 @@ function checkVictory() {
   // its side (the attacker, unless `prizeSide` says) whenever that side holds
   // it at the end of a round.
   if (g?.prize && S.owners[g.prize] === (g.prizeSide || g.attacker) && S.roundEnded) { declareWinner(g.prizeSide || g.attacker, g.prizeWins); return true; }
-  if (g && !g.atEnd && goalMet(g.attacker) && S.roundEnded) { declareWinner(g.attacker, g.attackerWins); return true; }
+  if (g && !g.atEnd && goalMet(g.attacker) && (!g.invest || invested(g.invest, g.attacker)) && S.roundEnded) { declareWinner(g.attacker, g.attackerWins); return true; }
   // Some goals also fall to the attacker if the defending general is taken.
   if (g && g.general && S.generals[other(g.attacker)].captured) { declareWinner(g.attacker, g.generalWins); return true; }
   if (g?.escape && S.turn === g.escape.side && escaped(g.escape.side) >= g.escape.need) { declareWinner(g.escape.side, g.escapeWins); return true; }
@@ -1105,7 +1271,7 @@ function checkVictory() {
     if (left < g.escape.need) { declareWinner(other(s), g.defenderWins); return true; }
   }
   const lead = S.vp.azure === S.vp.red ? null : S.vp.azure > S.vp.red ? 'azure' : 'red';
-  if (lead && S.vp[lead] >= VP_TARGET) { declareWinner(lead, `${S.vp[lead]} war points to ${S.vp[other(lead)]}: the forts and ghats of the Jhelum answer to the ${SIDES[lead].name}.`); return true; }
+  if (lead && S.vp[lead] >= VP_TARGET) { declareWinner(lead, `${S.vp[lead]} war points to ${S.vp[other(lead)]}: the forts and ghats of the Jhelum answer to ${theSide(lead)}.`); return true; }
   for (const side of ['azure', 'red']) {
     // (Not in a scenario with a fort to take: there one side may start out holding them all.)
     if (!g && STRONGPOINTS.every(k => S.owners[k] === side)) { declareWinner(side, 'Every strongpoint flies its standard.'); return true; }

@@ -121,8 +121,8 @@ function elevationKm(xKm, yKm) {
 const TERRAIN = {
   plain:    { name: 'Open plain',        move: 2, def: 0, note: 'Barani fields and grazing' },
   broken:   { name: 'Broken hills',      move: 3, def: 1, note: 'Ravines and low ridges' },
-  hills:    { name: 'Hills',             move: 4, def: 2, note: 'Steep sandstone ridges' },
-  mountain: { name: 'Mountains',         move: 6, def: 3, note: 'Pir Panjal spurs' },
+  hills:    { name: 'Hills',             move: 3, def: 2, note: 'Steep sandstone ridges' },
+  mountain: { name: 'Mountains',         move: 4, def: 3, note: 'Pir Panjal spurs' },
 };
 // Cover classes follow ESA WorldCover. Its "tree cover" below ~1,100 m here is
 // the dry subtropical scrub forest of phulai (Acacia modesta) and kao (wild
@@ -418,7 +418,7 @@ function terrainCost(a, dir, unit) {
   else {
     cost = TERRAIN[to.terrain].move + (to.cover ? COVER[to.cover].move : 0);
     // Horse struggles wherever the ground rises and falls more than 100 m within a hex.
-    if (kind === 'horse' && to.relief > 100) cost += 2;
+    if (kind === 'horse' && to.relief > 100) cost += 1;
     else if (kind === 'horse' && (to.cover === 'forest' || to.cover === 'woods')) cost += 1;
     if (kind === 'guns' && (to.terrain === 'hills' || to.terrain === 'mountain')) cost += 2;
     if (kind === 'camel' && to.terrain === 'mountain') cost += 1;

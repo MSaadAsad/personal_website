@@ -120,36 +120,53 @@ function renderGeneral() {
   const jump = $('#genJump');
   if (jump) jump.onclick = () => { if (humanTurn() && lead.side === S.turn) select(lead.id); flyTo(HEXES[lead.hex].x, HEXES[lead.hex].y, Math.max(R.cam.z, 0.75)); };
 }
-function generalPortrait(side) {
-  const p = PALETTE[side], lead = S.units.find(u => u.id === S.generals[side]?.unitId), std = lead && standardOf(lead);
-  const flag = std ? standardSvg(std, 9, 7, 20, 12, '#f2d27c', 1.2)
-    : `<path d="M9 7h20l-5 6 5 6H9z" fill="${p.flag}" stroke="#f2d27c" stroke-width="1.2"/><path d="M16.5 10l1 2 2.2.3-1.6 1.5.4 2.2-2-1-2 1 .4-2.2-1.6-1.5 2.2-.3z" fill="#fff3c4"/>`;
-  return `<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M8 47V6" stroke="${INK}" stroke-width="2.4"/><path d="M8 47V6" stroke="#e8c46a" stroke-width="1.2"/>${flag}<circle cx="8" cy="5" r="2.2" fill="#f2d27c"/><g transform="translate(29 46) scale(1.75)">${riderFigure('Irregular Sowars', { ...p, turban: '#f2d27c' }, '#e9e1d2')}</g></svg>`;
-}
+function generalPortrait(side) { return generalFace(GENERALS[side].name, SCN.standards?.[side], `gen-${side}`); }
 
+const STAT_ICON = {
+  march: '<path d="M7 3.5c1.6 0 2.4 1.4 2.2 3.4L8.6 11h-4l-.5-4C3.9 4.9 5.4 3.5 7 3.5zM4.7 12.4h4l-.2 1.4c-.2 1.3-3.4 1.3-3.6 0zM15.6 6.5c1.5 0 2.3 1.3 2.1 3.2l-.6 3.9h-3.9l-.4-3.8c-.2-2 1.3-3.3 2.8-3.3zM13.4 15h3.8l-.2 1.3c-.2 1.3-3.2 1.3-3.4 0z"/>',
+  attack: '<path d="M4 3l9.2 9.2 1.6-1.6L5.6 1.4H3.4zM13.2 13.6l2.6 2.6 1.5-1.5-2.6-2.6zM12.1 14.3l1.3 1.3-2.3 2.3-1.3-1.3zM16.3 18.3l1.4 1.4 1.4-1.4-1.4-1.4z"/>',
+  defence: '<path d="M11 1.8l7.2 2.6v5.4c0 4.6-3.1 8.2-7.2 10.2-4.1-2-7.2-5.6-7.2-10.2V4.4zm0 2.2v13.6c3-1.7 5-4.4 5-7.8V5.8z"/>',
+  supply: '<path d="M8 3h6l-1.2 2.6C16.6 7 19 10.4 19 14c0 3.6-3.6 5.5-8 5.5S3 17.6 3 14c0-3.6 2.4-7 6.2-8.4zm-1.2 9.6v1.6h8.4v-1.6z"/>',
+  height: '<path d="M1 19L8 6l3.6 6.2L14 9l7 10z"/>',
+  range: '<path d="M11 2a9 9 0 1 1 0 18 9 9 0 0 1 0-18zm0 2.2a6.8 6.8 0 1 0 0 13.6 6.8 6.8 0 0 0 0-13.6zm0 3a3.8 3.8 0 1 1 0 7.6 3.8 3.8 0 0 1 0-7.6zm0 2.3a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z"/>',
+};
+// Morale as a five-step track, Wavering to Inspired.
+function moraleChip(u) {
+  const m = moraleOf(u), what = { 2: '+1 attack and defence', 1: '+1 attack', 0: 'no effect', '-1': '−1 attack', '-2': '−1 defence, cannot attack, falls back when hit' }[m];
+  return `<p class="morale-chip m${m < 0 ? 'n' : 'p'}${Math.abs(m)}" title="Morale: ${MORALE[m]} (${what}). Every blow tests it, the more blows in a command the worse; rest out of contact to steady it."><small>Morale</small><span>${[-2, -1, 0, 1, 2].map(k => `<i class="${k === m ? 'on' : ''}"></i>`).join('')}</span><b>${MORALE[m]}</b></p>`;
+}
+const statIcon = k => `<svg viewBox="0 0 22 22" aria-hidden="true">${STAT_ICON[k]}</svg>`;
 function statBlock(u) {
-  const v = VARIANTS[u.variant];
-  return `<div class="stats"><div><small>March</small><b>${u.side === S.turn ? `${u.mp}<span>/${fullMp(u)}</span>` : fullMp(u)}</b></div><div><small>Attack</small><b>${v.atk}</b></div><div><small>Defence</small><b>${v.def}</b></div><div><small>Range</small><b>${rangeOf(u.variant)}</b></div></div>`;
+  const v = VARIANTS[u.variant], full = fullMp(u), mp = u.side === S.turn ? u.mp : full;
+  return `<div class="stats"><div class="march">${statIcon('march')}<small>March</small><b>${u.side === S.turn ? `${u.mp}<span>/${full}</span>` : full}</b><i style="--f:${Math.max(0, Math.min(1, mp / full))}"></i></div><div class="attack">${statIcon('attack')}<small>Attack</small><b>${v.atk}</b></div><div class="defence">${statIcon('defence')}<small>Defence</small><b>${v.def}</b></div><div class="range">${statIcon('range')}<small>Range</small><b>${rangeOf(u.variant)}</b></div></div>`;
 }
 function pipsHtml(hp, max = MAX_HP) { return `<span class="hp-pips${hp < max * WAVER_BELOW ? ' low' : ''}" title="${men(hp)} of ${men(max)}">${Array.from({ length: max }, (_, i) => `<i class="${i < hp ? 'on' : ''}"></i>`).join('')}</span>`; }
 
+// A formation's state in a word, for the plate on the map.
+function unitState(u) {
+  // Below half strength its ranks are broken; at the bottom of the morale track it wavers.
+  return u.hp < maxHp(u) * WAVER_BELOW ? ['waver', 'Broken ranks', 'Below half strength — cannot attack until it rallies'] : moraleOf(u) <= -2 ? ['waver', 'Wavering', 'Its nerve has gone — cannot attack until it steadies'] : u.side !== S.turn ? ['wait', 'Waiting', 'Awaiting its command']
+    : u.attacked ? (u.mp > 0 ? ['fought', 'Fought', 'Has fought — may still march'] : ['spent', 'Done', 'Has fought this round'])
+    : u.mp <= 0 ? ['spent', 'Done', 'March spent'] : u.moved ? ['moving', 'Marching', 'On the march'] : ['ready', 'Ready', 'Ready for orders'];
+}
+// The plate beside the selected formation: who it is, its strength and
+// nerve, what it can do, and its supplies, at a glance.
+function unitPlate(u) {
+  const v = VARIANTS[u.variant], m = moraleOf(u), st = stockOf(u), full = fullMp(u), mp = u.side === S.turn ? u.mp : full, [state, word, says] = unitState(u);
+  const days = wagonDays(u.side, u.hex), level = st < STOCK_DESERT ? 'cut' : st < STOCK_HUNGRY ? 'warn' : 'ok';
+  const here = HEXES[u.hex].place, larder = larderOf(here) ? (stripped(here) ? ` ${MAP.places[here].name} is stripped bare.` : ` ${MAP.places[here].name} can feed it what the wagons leave short.`) : '';
+  const supplyNote = `Supplies ${st}%. ${Number.isFinite(days) ? `Wagons reach it in ${days < 0.05 ? 'no time' : `${days.toFixed(1)} days`}: +${deliveryFor(days)}% a day against −${STOCK_USE}% eaten.` : 'No wagons can reach it: −20% a day.'}${larder}`;
+  const moraleNote = `Morale: ${MORALE[m]}. Every blow tests it, more so the more blows in one command; rest out of contact to steady it.`;
+  return `<div class="plate ${u.side}"><div class="pl-head"><span class="pl-type">${TYPE_NAME[v.type]}</span><b>${ledBy(u) ? '<i class="pl-star" title="The general rides with it">★</i>' : ''}${esc(u.name)}</b><em class="pl-state ${state}" title="${says}">${word}</em></div>`
+    + `<div class="pl-row"><span class="pl-men" title="${men(u.hp)} of ${men(maxHp(u))}">${pipsHtml(u.hp, maxHp(u))}${menCount(u.hp).toLocaleString('en')}</span><span class="pl-mo m${m < 0 ? 'n' : 'p'}${Math.abs(m)}" title="${moraleNote}">${[-2, -1, 0, 1, 2].map(k => `<i class="${k <= m ? 'on' : ''}${k === m ? ' at' : ''}"></i>`).join('')}<b>${MORALE[m]}</b></span></div>`
+    + `<div class="pl-stats"><span class="march" title="March points left of ${full}">${statIcon('march')}${mp}<small>/${full}</small></span><span class="attack" title="Attack">${statIcon('attack')}${v.atk}</span><span class="defence" title="Defence">${statIcon('defence')}${v.def}</span><span class="range" title="Range in hexes">${statIcon('range')}${rangeOf(u.variant)}</span><span class="supply ${level}" title="${supplyNote}">${statIcon('supply')}${st}%</span></div>`
+    + (v.trait ? `<div class="pl-trait">${v.trait}</div>` : '') + `</div>`;
+}
 function renderInspector() {
   const box = $('#inspector'), sel = S.selected && unitById(S.selected);
   const hex = V.hoverHex >= 0 ? V.hoverHex : sel ? sel.hex : -1;
   let html = '';
   if (sel) {
-    const v = VARIANTS[sel.variant], status = wavering(sel) ? 'Wavering — cannot attack until it rallies' : sel.side !== S.turn ? 'Awaiting its command' : sel.attacked ? (sel.mp > 0 ? 'Has fought — may still march' : 'Has fought this round') : sel.mp <= 0 ? 'March spent' : sel.moved ? 'On the march' : 'Ready for orders';
-    html += `<div class="unit-card ${sel.side}"><div class="unit-badge ${sel.side}">${unitPortrait(sel, 'portrait')}</div><div><small>${SIDES[sel.side].name} · ${TYPE_NAME[v.type]}</small><h2>${esc(sel.name)}</h2><p>${pipsHtml(sel.hp, maxHp(sel))} ${men(sel.hp)}</p><p class="${wavering(sel) ? 'warn' : ''}">${status}</p></div></div>${statBlock(sel)}<p class="trait">${v.trait}</p>`;
-    const st = stockOf(sel), days = wagonDays(sel.side, sel.hex), got = deliveryFor(days), net = got - STOCK_USE;
-    const level = st < STOCK_DESERT ? 'cut' : st < STOCK_HUNGRY ? 'warn' : 'ok';
-    const effect = st < STOCK_DESERT ? `starving: −2 attack, −1 defence, losing ${men(1)} every command` : st < STOCK_HUNGRY ? 'hungry: −1 attack, −1 defence, cannot rally' : st < STOCK_SHORT ? 'short: −1 attack' : 'well supplied';
-    html += `<div class="supply-card ${level}"><div class="supply-top"><b>Supplies ${st}%</b><span>${effect}</span></div><div class="supply-bar"><i style="width:${st}%"></i><em style="left:${STOCK_DESERT}%"></em><em style="left:${STOCK_HUNGRY}%"></em></div>`
-      + `<small>${Number.isFinite(days) ? `Wagons need ${days < 0.05 ? 'no time — at the depot' : `${days.toFixed(1)} day${days >= 1.05 ? 's' : ''}`} to reach it: +${got}% a day against −${STOCK_USE}% eaten (${net >= 0 ? '+' : ''}${net}%).` : 'No wagons can reach it: the road is cut or there is no friendly depot. −20% a day.'}</small></div>`;
-    if (ledBy(sel)) html += `<p class="led-note">★ Led by ${GENERALS[sel.side].name}: +1 attack, +1 defence, never falls back.</p>`;
-    if (humanTurn() && canFortify(sel)) html += `<button class="ferry-btn" id="fortifyBtn"><b>Dig a kacha fort here (K)</b><small>Takes this formation's whole day · mud wall and ditch, +${KACHA_DEF} defence · guns wear it down</small></button>`;
-    if (humanTurn() && canCountermine(sel)) { const [, m] = enemyGallery(sel); html += `<button class="ferry-btn" id="mineBtn"><b>Countermine (M)</b><small>The enemy has dug ${m.days} of ${MINE_DAYS} days towards these works · this formation's whole day · breaks into the gallery on a 4 or better</small></button>`; }
-    else if (humanTurn() && canMine(sel)) { const g = galleryAt(sel.side, sel.hex), t = mineTarget(sel), done = g && +g[0] === t ? g[1].days : 0; html += `<button class="ferry-btn" id="mineBtn"><b>${done ? 'Carry on the mine' : 'Dig a mine'} under ${esc(worksTitle(t))} (M)</b><small>${done + 1 === MINE_DAYS ? `Day ${MINE_DAYS} of ${MINE_DAYS}: springs it today, bringing down ${MINE_LEVELS} levels of the works` : `Day ${done + 1} of ${MINE_DAYS} · this formation's whole day · keep someone at the mouth or the gallery is lost`}</small></button>`; }
-    if (humanTurn() && sel.side === S.turn && ferrySites(sel).length) html += `<button class="ferry-btn" id="ferryBtn"><b>${V.ferryPick ? 'Choose the far bank…' : `Build a ferry across the ${nearestMajorRiver(sel.hex)}`}</b><small>Once per campaign · costs this command and ${FERRY_COST} soldier · either army may then cross</small></button>`;
     if (sel.side === S.turn && humanTurn()) {
       const hint = sel.attacked ? (sel.mp > 0 ? 'It has struck; horse can ride on with its remaining march points.' : 'This formation has fought and is done for the round.')
         : V.targets.length ? 'Red rings are in range. Click one to attack, or click blue ground to march.'
@@ -159,11 +176,13 @@ function renderInspector() {
       html += `<p class="hint">${hint}</p>`;
     }
   }
-  if (hex >= 0 && (!sel || hex !== sel.hex || !sel)) html += groundReport(hex, !!sel);
+  // The formation itself is on its plate on the map; here, the ground.
+  if (hex >= 0) html += groundReport(hex, !!html);
   else if (!sel) html = `<div class="empty"><h2>Survey the field</h2><p>Hover the map for a ground report. Select one of your formations to see where it can march and strike.</p></div>`;
   box.innerHTML = html;
 }
 
+const groundTile = (cls, label, val) => `<div class="gr-tile ${cls}">${statIcon(cls)}<small>${label}</small><b>${val}</b></div>`;
 function groundReport(hex, compact) {
   const h = HEXES[hex], t = TERRAIN[h.terrain], place = h.place && MAP.places[h.place], power = POWER_BY_ID[h.territory];
   const def = t.def + (h.cover ? COVER[h.cover].def : 0) + settlementDef(hex);
@@ -182,12 +201,14 @@ function groundReport(hex, compact) {
   const sk = STRONG_HEX.get(hex), fk = FORT_HEX.get(hex);
   if (sk) rows.push(['Strongpoint', S.owners[sk] ? `held by ${SIDES[S.owners[sk]].name}` : 'unclaimed']);
   if (fk) rows.push(['Fort', S.forts[fk] ? `held by ${SIDES[S.forts[fk]].name} · supply source` : 'ungarrisoned']);
+  if (larderOf(h.place)) rows.push(['Granaries', stripped(h.place) ? `stripped bare · feeds again in ${regrowIn(h.place)} days` : `${Math.floor(larderLeft(h.place) + 0.05)} of ${larderOf(h.place)} days' rations for a formation`]);
+  if ((fk || sk) && walledPlace(h.place)) rows.push(['Magazines', storesFull(h.place) ? 'full · whoever takes it refills' : 'emptied']);
   const works = worksOf(hex);
   if (works) rows.push([works.name === 'Kacha fort' ? 'Kacha fort' : 'Works', works.left ? `+${Math.ceil(works.left)} defence${works.left < works.max ? ` · battered (${Math.round(works.left / works.max * 100)}% standing)` : ''}` : 'battered down']);
   if (S.walls?.[h.place] !== undefined) rows.push(['Walls', S.walls[h.place] > 0 ? `+${Math.ceil(S.walls[h.place])} defence${S.walls[h.place] % 1 ? ' · battered' : ''}` : 'battered down']);
   if (works || S.walls?.[h.place] !== undefined) rows.push(['Under fire', 'every bombardment wears the works down; a hit brings down a level']);
   const enemies = unitsAt(hex).filter(playerSees);
-  return `<div class="ground ${compact ? 'compact' : ''}"><small>Ground report${place ? ` · ${place.kind}` : ''}</small><h3>${esc(title)}</h3><dl>${rows.map(([k, v]) => `<dt>${k}</dt><dd>${esc(v)}</dd>`).join('')}</dl>${enemies.length ? `<p class="occupants">${enemies.map(u => `<span class="${u.side}">${esc(u.name)} ${pipsHtml(u.hp, maxHp(u))}</span>`).join('')}</p>` : ''}</div>`;
+  return `<div class="ground ${compact ? 'compact' : ''}"><small>Ground report${place ? ` · ${place.kind}` : ''}</small><h3>${esc(title)}</h3><p class="gr-sub">${esc(rows[0][1])}</p><div class="gr-tiles">${groundTile('march', 'March', TERRAIN[h.terrain].move + (h.cover ? COVER[h.cover].move : 0))}${groundTile('defence', 'Defence', `+${def}`)}${groundTile('height', 'Height', `${h.elev}<small> m</small>`)}</div><dl>${rows.filter(([k]) => !['Ground', 'Height', 'March cost', 'Defence'].includes(k)).map(([k, v]) => `<dt>${k}</dt><dd>${esc(v)}</dd>`).join('')}</dl>${enemies.length ? `<p class="occupants">${enemies.map(u => `<span class="${u.side}">${esc(u.name)} ${pipsHtml(u.hp, maxHp(u))}</span>`).join('')}</p>` : ''}</div>`;
 }
 
 function renderRoster() {
@@ -195,7 +216,7 @@ function renderRoster() {
   $('#rosterSide').textContent = SIDES[side].short;
   $('#roster').innerHTML = S.units.filter(u => u.side === side).map(u => {
     const able = side === S.turn && canActCached(u), place = placeName(u.hex) || TERRAIN[HEXES[u.hex].terrain].name;
-    return `<button class="roster-row ${u.side} ${u.id === S.selected ? 'active' : ''} ${able ? 'able' : 'done'}" data-unit="${u.id}"><span class="mini-badge ${u.side}">${unitPortrait(u, 'portrait')}</span><span class="r-main"><b>${ledBy(u) ? '★ ' : ''}${esc(u.name)}</b><small>${esc(place)}${wavering(u) ? ' · <span class="warn">wavering</span>' : ''}</small></span><span class="r-side">${pipsHtml(u.hp, maxHp(u))}<em class="${stockOf(u) < STOCK_HUNGRY ? 'low' : ''}">${stockOf(u)}% supplies</em><em>${side !== S.turn || S.replay ? '' : able ? (u.moved ? `${u.mp} mp` : 'ready') : 'done'}</em></span></button>`;
+    return `<button class="roster-row ${u.side} ${u.id === S.selected ? 'active' : ''} ${able ? 'able' : 'done'}" data-unit="${u.id}"><span class="mini-badge ${u.side}">${unitPortrait(u, 'portrait')}</span><span class="r-main"><b>${ledBy(u) ? '★ ' : ''}${esc(u.name)}</b><small>${esc(place)}${u.hp < maxHp(u) * WAVER_BELOW ? ' · <span class="warn">broken ranks</span>' : moraleOf(u) ? ` · <span class="${moraleOf(u) < 0 ? 'warn' : 'good'}">${MORALE[moraleOf(u)].toLowerCase()}</span>` : ''}</small></span><span class="r-side">${pipsHtml(u.hp, maxHp(u))}<em class="${stockOf(u) < STOCK_HUNGRY ? 'low' : ''}">${stockOf(u)}% supplies</em>${side !== S.turn || S.replay ? '' : `<em class="pill ${able ? (u.moved ? 'moving' : 'ready') : 'done'}">${able ? (u.moved ? `${u.mp} mp` : 'ready') : 'done'}</em>`}</span></button>`;
   }).join('');
 }
 function renderObjectives() {
@@ -222,7 +243,8 @@ function renderLog() {
 
 function updateTooltip(clientX, clientY) {
   const tip = $('#tooltip'), hex = V.hoverHex;
-  if (hex < 0 || V.dragging) { tip.hidden = true; return; }
+  // Over the formation whose plate is open, the plate is the tooltip.
+  if (hex < 0 || V.dragging || (S.selected && unitById(S.selected)?.hex === hex)) { tip.hidden = true; return; }
   const sel = S.selected && unitById(S.selected), h = HEXES[hex], here = unitsAt(hex);
   let html = '';
   const enemy = sel && here.find(u => u.side !== sel.side);
@@ -322,13 +344,17 @@ function spadework(u) {
   return acts;
 }
 function syncActions() {
-  const box = $('#unitActions'), sel = S.selected && unitById(S.selected), acts = V.busy ? [] : spadework(sel);
-  box.hidden = !acts.length;
-  if (!acts.length) return;
+  const box = $('#unitActions'), sel = S.selected && unitById(S.selected);
+  const acts = sel && !V.busy ? spadework(sel) : [];
+  box.hidden = !sel || S.replay;
+  if (box.hidden) return;
   const h = HEXES[sel.hex];
   box.style.setProperty('--x', `${h.x.toFixed(1)}px`);
   box.style.setProperty('--y', `${h.y.toFixed(1)}px`);
-  box.innerHTML = acts.map(a => `<button class="act${a.ok ? '' : ' off'}${a.id === 'ferry' && V.ferryPick ? ' on' : ''}" data-act="${a.id}" title="${esc(a.why)}"><svg viewBox="0 0 16 16" aria-hidden="true">${ACT_ICON[a.id]}</svg><span>${a.label}</span><kbd>${a.key}</kbd></button>`).join('');
+  box.innerHTML = unitPlate(sel) + (acts.length ? `<div class="acts">${acts.map(a => `<button class="act${a.ok ? '' : ' off'}${a.id === 'ferry' && V.ferryPick ? ' on' : ''}" data-act="${a.id}" title="${esc(a.why)}"><svg viewBox="0 0 16 16" aria-hidden="true">${ACT_ICON[a.id]}</svg><span>${a.label}</span><kbd>${a.key}</kbd></button>`).join('')}</div>` : '');
+  // Beside the formation, on whichever side has room on screen.
+  const node = R.unitEls.get(sel.id), vp = $('#viewport').getBoundingClientRect(), at = node?.getBoundingClientRect();
+  box.classList.toggle('flip', !!at && at.right + 260 > vp.right);
 }
 function onAction(e) {
   const b = e.target.closest('.act');
@@ -495,6 +521,7 @@ UI.victory = (side, reason) => {
   d.dataset.side = side;
   $('#victoryTitle').textContent = side === 'draw' ? 'The season ends in stalemate' : `${SIDES[side].name} prevails`;
   $('#victoryCopy').textContent = reason;
+  $('#victoryOob').innerHTML = reckoning();
   renderVictoryBattles();
   setTimeout(() => { if (!d.open) d.showModal(); }, 600);
 };
@@ -641,6 +668,7 @@ async function replayEvent(e) {
     case 'advance': return march(unit(e.unit.id), [e.from ?? unit(e.unit.id)?.hex, e.hex]);
     case 'destroyed': case 'surrender': drop(e.unit.id); if (nearFocus(e.hex)) await sleep(300 / RP.speed); return;
     case 'ride': S.generals[e.side].unitId = e.id; syncUnits(); return;
+    case 'morale': { const u = unit(e.unit.id); if (u) u.morale = e.to; syncUnits(); if (e.why === 'panic' || (e.to <= -2 && e.from > -2)) return replayFx(e.hex, 'standoff', e.why === 'panic' ? 'PANIC' : 'NERVE BROKEN', ''); return; }
     case 'general': Object.assign(S.generals[e.side], { captured: true, fallen: !!e.fallen }); syncUnits(); return;
     case 'breach':
       if (e.place && e.walls !== undefined) S.walls[e.place] = e.walls; else if (e.place && e.left !== undefined && S.walls[e.place] !== undefined) S.walls[e.place] = e.left;
@@ -718,30 +746,14 @@ function bindReplay() {
 
 const CHRON = { shown: null, writing: new Set(), errors: new Map(), noticeTimer: 0 };
 const KIND_NAME = { siege: 'Siege', assault: 'Assault', battle: 'Battle', skirmish: 'Skirmish' };
-const daysText = b => b.last > b.first ? `days ${b.first}–${b.last}` : `day ${b.first}`;
+const daysText = b => SCN.clock ? (b.last > b.first ? `${roundName(b.first)} – ${roundName(b.last)}` : roundName(b.first)) : b.last > b.first ? `days ${b.first}–${b.last}` : `day ${b.first}`;
 const titleOf = b => b.account?.name || b.name;
 
 UI.battleEnded = b => {
   b.account = CHRONICLE.fieldNotes(b);
-  if (!b.major) return;
-  if (CHRONICLE.key() && CHRONICLE.auto()) writeAccount(b);
-  showNotice(b);
+  if (b.major) showNotice(b);
 };
 
-async function writeAccount(b) {
-  if (CHRON.writing.has(b.id) || !CHRONICLE.key()) return;
-  const campaign = S;
-  CHRON.writing.add(b.id); CHRON.errors.delete(b.id);
-  refreshChronicle(b);
-  try {
-    const account = await CHRONICLE.write(b);
-    if (S === campaign) { b.account = account; save(); }
-  } catch (err) {
-    CHRON.errors.set(b.id, err.message);
-  }
-  CHRON.writing.delete(b.id);
-  refreshChronicle(b);
-}
 function refreshChronicle(b) {
   if (S?.battles.includes(b)) renderBattles();
   if ($('#chronicleDialog').open) renderChronicle();
@@ -752,10 +764,8 @@ function refreshChronicle(b) {
 // A dispatch in the corner of the map when an engagement ends.
 function showNotice(b, quiet = false) {
   const n = $('#battleNotice'), a = b.account;
-  const status = CHRON.writing.has(b.id) ? '<em class="writing">Claude is writing the account…</em>'
-    : CHRON.errors.has(b.id) ? `<em class="error">No account: ${esc(CHRON.errors.get(b.id))}</em>` : '';
   n.dataset.side = b.victor || '';
-  n.innerHTML = `<small>${KIND_NAME[b.kind]} ended · ${daysText(b)}</small><b>${esc(a.name)}</b><span>${esc(a.verdict)}</span>${status}
+  n.innerHTML = `<small>${KIND_NAME[b.kind]} ended · ${daysText(b)}</small><b>${esc(a.name)}</b><span>${esc(a.verdict)}</span>
     <div><button class="primary" data-read="${b.id}">Read the account</button><button class="ghost" data-dismiss aria-label="Dismiss">×</button></div>`;
   n.hidden = false;
   CHRON.noticeFor = b.id;
@@ -790,7 +800,6 @@ function openChronicle(id = null) {
   renderChronicle();
   const d = $('#chronicleDialog');
   if (!d.open) d.showModal();
-  if (!done.length || !CHRONICLE.key()) $('#chronSettings').open = !CHRONICLE.key() && !!done.length;
 }
 function renderChronicle() {
   const done = S.battles.filter(b => !b.open), major = done.filter(b => b.major), minor = done.filter(b => !b.major);
@@ -800,27 +809,15 @@ function renderChronicle() {
     : '<p class="card-note">No battle has been fought yet.</p>';
   $('#chronList').querySelector(`[data-battle="${b?.id}"]`)?.classList.add('active');
   $('#chronBody').innerHTML = b ? accountHtml(b) : `<h2>${esc(SCN.title)}</h2><p class="verdict">The chronicle is empty.</p><div class="story"><p>When a battle or siege ends, it is named after the place it was fought and written up here: who struck first, how it turned and what it cost.</p></div>`;
-  const key = CHRONICLE.key();
-  $('#chronModel').textContent = CHRONICLE.MODEL;
-  $('#chronStatus').textContent = key ? `Claude writes the accounts (key …${key.slice(-4)})` : 'field notes only: add an API key for Claude';
-  $('#apiKey').value = '';
-  $('#apiKey').placeholder = key ? `saved: …${key.slice(-4)}` : 'sk-ant-…';
-  $('#forgetKey').disabled = !key;
-  $('#autoChron').checked = CHRONICLE.auto();
 }
 function accountHtml(b) {
-  const a = b.account || CHRONICLE.fieldNotes(b), key = CHRONICLE.key();
+  const a = b.account || CHRONICLE.fieldNotes(b);
   const toll = s => `<span class="${s}"><b>${esc(SIDES[s].name)}</b> ${b.lost[s] ? `−${men(b.lost[s])}` : 'no losses'}${b.broken[s] ? `, ${b.broken[s]} formation${b.broken[s] > 1 ? 's' : ''} lost` : ''}</span>`;
-  const status = CHRON.writing.has(b.id) ? '<em class="writing">Claude is writing the account…</em>'
-    : CHRON.errors.has(b.id) ? `<em class="error">Claude could not write it: ${esc(CHRON.errors.get(b.id))}</em>` : '';
-  const by = a.by === 'claude' ? `Written by Claude (${esc(a.model)}) from the day’s dispatches.` : 'Field notes from the dispatches.';
-  const action = !key ? '<button class="ghost" data-settings>Add an API key to have Claude write it</button>'
-    : `<button class="ghost" data-write="${b.id}" ${CHRON.writing.has(b.id) ? 'disabled' : ''}>${a.by === 'claude' ? 'Write it again' : 'Have Claude write it'}</button>`;
   return `<header class="won-${b.victor || 'none'}"><small>${KIND_NAME[b.kind]} · ${daysText(b)} · ${esc(b.place)}</small><h2>${esc(a.name)}</h2><p class="verdict">${esc(a.verdict)}</p></header>
     <div class="story">${a.story.split(/\n\s*\n/).map(p => `<p>${esc(p.trim())}</p>`).join('')}</div>
-    ${a.moments?.length ? `<h4>Turning points</h4><ol class="moments">${a.moments.map(m => `<li><span>Day ${m.day}</span>${esc(m.text)}</li>`).join('')}</ol>` : ''}
+    ${a.moments?.length ? `<h4>Turning points</h4><ol class="moments">${a.moments.map(m => `<li><span>${SCN.clock ? roundName(m.day) : `Day ${m.day}`}</span>${esc(m.text)}</li>`).join('')}</ol>` : ''}
     <div class="toll">${toll('azure')}${toll('red')}</div>
-    <footer><small>${by}</small>${status}<span>${action}<button class="ghost" data-map="${b.focus}">Show on map</button><button class="replay-btn" data-replay="${b.id}" ${battleFrames(b) ? '' : 'disabled title="Fought before replays were recorded"'}>▶ Replay the battle</button></span></footer>`;
+    <footer><small>From the day’s dispatches.</small><span><button class="ghost" data-map="${b.focus}">Show on map</button><button class="replay-btn" data-replay="${b.id}" ${battleFrames(b) ? '' : 'disabled title="Fought before replays were recorded"'}>▶ Replay the battle</button></span></footer>`;
 }
 
 function bindChronicle() {
@@ -836,9 +833,7 @@ function bindChronicle() {
   };
   for (const id of ['#battles', '#chronList', '#victoryBattles']) $(id).addEventListener('click', pick);
   $('#chronBody').addEventListener('click', e => {
-    const w = e.target.closest('[data-write]'), m = e.target.closest('[data-map]');
-    if (w) writeAccount(S.battles.find(x => x.id === +w.dataset.write));
-    if (e.target.closest('[data-settings]')) { $('#chronSettings').open = true; $('#apiKey').focus(); }
+    const m = e.target.closest('[data-map]');
     if (m) { $('#chronicleDialog').close(); flyTo(HEXES[+m.dataset.map].x, HEXES[+m.dataset.map].y, Math.max(R.cam.z, 1)); }
     const rp = e.target.closest('[data-replay]');
     if (rp) startReplay({ battle: S.battles.find(x => x.id === +rp.dataset.replay) });
@@ -850,16 +845,6 @@ function bindChronicle() {
   });
   $('#markers').addEventListener('pointerdown', e => { if (e.target.closest('.marker.battle')) e.stopPropagation(); });
   $('#markers').addEventListener('click', e => { const m = e.target.closest('.marker.battle'); if (m) openChronicle(+m.dataset.battle); });
-  $('#saveKey').onclick = () => {
-    const k = $('#apiKey').value.trim();
-    if (!k) return;
-    CHRONICLE.setKey(k);
-    renderChronicle();
-    toast('API key saved in this browser');
-  };
-  $('#apiKey').addEventListener('keydown', e => { if (e.key === 'Enter') $('#saveKey').click(); });
-  $('#forgetKey').onclick = () => { CHRONICLE.setKey(null); renderChronicle(); toast('API key forgotten'); };
-  $('#autoChron').onchange = e => CHRONICLE.setAuto(e.target.checked);
 }
 
 let toastTimer = 0;
@@ -1132,68 +1117,173 @@ function bindControls() {
 // The wars the battles belong to, in order; a scenario names its own `era`
 // or falls in by its year.
 const ERAS = [
-  { id: 'misl', name: 'The misls', years: '1748–1798' },
-  { id: 'ranjit', name: 'Rise of Ranjit Singh', years: '1799–1838' },
-  { id: 'civil', name: 'Sikh civil war', years: '1839–1845' },
-  { id: 'asw1', name: 'First Anglo-Sikh War', years: '1845–46' },
-  { id: 'asw2', name: 'Second Anglo-Sikh War', years: '1848–49' },
-  { id: 'rebellion', name: '1857', years: 'The rebellion' },
+  { id: 'durrani', name: 'The Durrani Invasions', years: '1747–67' },
+  { id: 'misl', name: 'The Misls', years: '1767–98' },
+  { id: 'ranjit', name: 'The Rise of Ranjit Singh', years: '1799–1838' },
+  { id: 'civil', name: 'The Sikh Civil War', years: '1839–45' },
+  { id: 'asw1', name: 'The First Anglo-Sikh War', years: '1845–46' },
+  { id: 'asw2', name: 'The Second Anglo-Sikh War', years: '1848–49' },
+  { id: 'rebellion', name: 'The Rebellion', years: '1857' },
 ];
-const eraOf = scn => scn.era || (scn.year < 1799 ? 'misl' : scn.year < 1839 ? 'ranjit' : scn.year < 1845 ? 'civil' : scn.year < 1847 ? 'asw1' : scn.year < 1850 ? 'asw2' : 'rebellion');
-function renderStart() {
-  const groupOf = id => SCENARIOS[id].group || id, current = groupOf(MAP_ID);
+const eraOf = scn => scn.era || (scn.year < 1767 ? 'durrani' : scn.year < 1799 ? 'misl' : scn.year < 1839 ? 'ranjit' : scn.year < 1845 ? 'civil' : scn.year < 1847 ? 'asw1' : scn.year < 1850 ? 'asw2' : 'rebellion');
+// The opening screen previews any battle from the scenario list alone
+// (V.preview); only taking command of a battle on another map loads that
+// map, as a fresh page.
+const groupOf = id => SCENARIOS[id].group || id;
+function battleGroups() {
   const groups = [];
-  for (const [id, scn] of Object.entries(SCENARIOS)) if (!groups.some(g => g.group === groupOf(id))) groups.push({ group: groupOf(id), title: scn.title, year: scn.year, era: eraOf(scn) });
-  const go = id => { if (id === MAP_ID) return; const url = new URL(location.href); url.searchParams.set('map', id); location.href = url.toString(); };
-  // A battle's seal opens its `primary` version, else its historic one.
-  const pickGroup = group => { const ids = Object.keys(SCENARIOS).filter(id => groupOf(id) === group); go(ids.find(id => SCENARIOS[id].primary) || ids.find(id => SCENARIOS[id].mode === 'historic') || ids[0]); };
+  for (const [id, scn] of Object.entries(SCENARIOS)) if (!groups.some(g => g.group === groupOf(id))) groups.push({ group: groupOf(id), title: scn.title, year: scn.year, years: scn.years || String(scn.year), era: eraOf(scn) });
+  return groups;
+}
+// A battle's seal opens its `primary` version, else its historic one.
+const groupLead = group => { const ids = Object.keys(SCENARIOS).filter(id => groupOf(id) === group); return ids.find(id => SCENARIOS[id].primary) || ids.find(id => SCENARIOS[id].mode === 'historic') || ids[0]; };
+const savedGame = id => {
+  if (id === MAP_ID) return S && !S.winner && S.log.length > 1 ? S : null;
+  try { const d = JSON.parse(localStorage.getItem(`jhelum-marches-${id}-v${SAVE_VERSION}`)); return d && !d.winner && d.log?.length > 1 && d.hexes ? d : null; } catch { return null; }
+};
+function enterBattle(id, params) {
+  const url = new URL(location.href);
+  url.search = '';
+  url.searchParams.set('map', id);
+  for (const [k, v] of Object.entries(params)) url.searchParams.set(k, v);
+  location.href = url.toString();
+}
+function renderStart() {
+  const pid = V.preview ||= MAP_ID, P = SCENARIOS[pid], current = groupOf(pid), groups = battleGroups();
+  const go = id => { V.preview = id; V.era = eraOf(SCENARIOS[id]); renderStart(); };
   // The era tabs filter the map's seals and the list; the era of the battle
-  // on the board is shown first.
-  V.era ||= eraOf(SCN);
+  // being previewed is shown first.
+  V.era ||= eraOf(P);
   const drawPick = () => {
-    const inEra = groups.filter(g => g.era === V.era), era = ERAS.find(e => e.id === V.era);
     $('#mapPick').innerHTML = `<div class="era-pick" role="tablist">${ERAS.map(e => { const n = groups.filter(g => g.era === e.id).length; return `<button role="tab" class="era ${e.id === V.era ? 'active' : ''}${n ? '' : ' empty'}" data-era="${e.id}" aria-selected="${e.id === V.era}"><b>${e.name}</b><small>${e.years}${n ? ` · ${n}` : ''}</small></button>`; }).join('')}</div>`
-      + CAMPAIGN_MAP.draw(groups, current, V.era)
-      + `<div class="cm-list">${inEra.length ? inEra.map(g => `<button class="cm-chip ${g.group === current ? 'active' : ''}" data-group="${g.group}">${esc(g.title)}</button>`).join('') : `<p class="cm-none">No battles of ${esc(era.name)} have been surveyed yet.</p>`}</div>`;
+      + CAMPAIGN_MAP.draw(groups, current, V.era);
     $('#mapPick').querySelectorAll('[data-group]').forEach(b => {
-      b.onclick = () => pickGroup(b.dataset.group);
-      b.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pickGroup(b.dataset.group); } };
+      b.onclick = () => go(groupLead(b.dataset.group));
+      b.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(groupLead(b.dataset.group)); } };
     });
     $('#mapPick').querySelectorAll('[data-era]').forEach(b => b.onclick = () => { V.era = b.dataset.era; drawPick(); });
   };
   drawPick();
   const modes = Object.keys(SCENARIOS).filter(id => groupOf(id) === current).sort((a, b) => !!SCENARIOS[b].primary - !!SCENARIOS[a].primary || (SCENARIOS[a].mode === 'open') - (SCENARIOS[b].mode === 'open'));
   $('#modePick').innerHTML = modes.length < 2 ? '' : modes.map(id => {
-    const m = SCENARIOS[id].mode || 'historic';
-    const sc = SCENARIOS[id], label = sc.modeLabel || (m === 'historic' ? 'Historic' : 'Open campaign'), note = sc.modeNote || (m === 'historic' ? 'the armies, numbers and days as recorded' : 'from an earlier start, evenly matched');
-    return `<button class="mode ${id === MAP_ID ? 'active' : ''}" data-mode="${id}"><b>${label}</b><small>${note}</small></button>`;
+    const sc = SCENARIOS[id], m = sc.mode || 'historic';
+    const label = sc.modeLabel || (m === 'historic' ? 'Historic' : 'Open campaign'), note = sc.modeNote || (m === 'historic' ? 'the armies, numbers and days as recorded' : 'from an earlier start, evenly matched');
+    return `<button class="mode ${id === pid ? 'active' : ''}" data-mode="${id}"><b>${label}</b><small>${note}</small></button>`;
   }).join('');
   $('#modePick').querySelectorAll('[data-mode]').forEach(b => b.onclick = () => go(b.dataset.mode));
-  $('#startMeta').textContent = [SCN.year, SCN.region].filter(Boolean).join(' · ');
-  $('#startTitle').textContent = SCN.title;
-  $('#startLede').textContent = SCN.blurb;
+  // Two-way toggles that drive the hidden selects the game reads.
+  document.querySelectorAll('#startDialog .seg').forEach(seg => {
+    const sel = $('#' + seg.dataset.for), sync = () => seg.querySelectorAll('button').forEach(b => { const on = b.dataset.v === sel.value; b.classList.toggle('on', on); b.setAttribute('aria-checked', on); });
+    seg.querySelectorAll('button').forEach(b => b.onclick = () => { sel.value = b.dataset.v; sync(); });
+    sync();
+  });
+  $('#startMeta').textContent = [P.years || P.year, P.region].filter(Boolean).join(' · ');
+  const hist = HISTORIES[groupOf(pid)];
+  $('#historyBtn').hidden = !hist;
+  $('#historyBtn').onclick = () => {
+    $('#historyTitle').textContent = `${P.title}, ${P.years || P.year}`;
+    $('#historyText').innerHTML = hist.history.map(p => `<p>${esc(p)}</p>`).join('');
+    $('#historySources').innerHTML = hist.sources.length ? hist.sources.map(s => `<li>${esc(s)}</li>`).join('') : '<li>Drawn from the general histories of the period.</li>';
+    $('#historyDialog').showModal();
+  };
+  $('#startTitle').textContent = P.title;
+  $('#startLede').textContent = P.blurb;
+  const saved = savedGame(pid), cont = $('#continueBtn');
+  cont.hidden = !saved;
+  if (saved) {
+    cont.querySelector('small').textContent = `Round ${saved.round} · ${P.sides[saved.player].name}${Object.values(saved.ai).some(Boolean) ? ' vs computer' : ' · hot-seat'}`;
+    cont.onclick = () => pid === MAP_ID ? V.resume() : enterBattle(pid, { resume: 1 });
+  }
   $('#sidePick').innerHTML = ['azure', 'red'].map(side => {
-    const sd = SCN.sides[side];
-    return `<button data-start="${side}" class="pick ${side}"><small>Play as</small><b>${esc(sd.name)}</b><span>${esc(sd.pitch)}</span><footer><em>${esc(sd.tag)}</em><i>Take command</i></footer></button>`;
+    const sd = P.sides[side], gen = P.generals?.[side];
+    return `<button data-start="${side}" class="pick ${side}">${gen ? `<span class="pick-face">${generalFace(gen.name, P.standards?.[side], `pick-${side}`)}</span>` : ''}<small>Play as${gen ? ` <cite>· ${esc(gen.name.replace(/ \(.*\)$/, ''))}</cite>` : ''}</small><b>${esc(sd.name)}</b><span>${esc(sd.pitch)}</span><footer><em>${esc(sd.tag)}</em><i>Take command</i></footer></button>`;
   }).join('');
-  $('#sidePick').querySelectorAll('[data-start]').forEach(b => b.onclick = () => briefThenStart(b.dataset.start, $('#opponent').value === 'ai'));
+  $('#sidePick').querySelectorAll('[data-start]').forEach(b => b.onclick = () => {
+    const ai = $('#opponent').value === 'ai';
+    if (pid === MAP_ID) briefThenStart(b.dataset.start, ai);
+    else enterBattle(pid, { side: b.dataset.start, ai: ai ? 1 : 0, fog: $('#fogPick').value });
+  });
 }
 function showStart() {
   exitReplay();
+  $('#homeDialog').close();
   renderStart();
-  const d = $('#startDialog'), saved = S && !S.winner && S.log.length > 1;
-  $('#continueBtn').hidden = !saved;
-  if (saved) $('#continueBtn').querySelector('small').textContent = `Round ${S.round} · ${SIDES[S.player].name}${Object.values(S.ai).some(Boolean) ? ' vs computer' : ' · hot-seat'}`;
-  d.showModal();
+  $('#startDialog').showModal();
   $('#mapPick .active')?.focus();
+}
+// The title page: the whole map with every battle, and the contents by war.
+function showHome() {
+  exitReplay();
+  const groups = battleGroups(), d = $('#homeDialog');
+  $('#homeMap').innerHTML = CAMPAIGN_MAP.draw(groups, groupOf(MAP_ID), null);
+  // The contents open a war or a battle; the map is only to look at.
+  $('#homeContents').innerHTML = ERAS.map(e => {
+    const gs = groups.filter(g => g.era === e.id);
+    return `<li><button class="toc-era" data-era="${e.id}"><b>${e.name}</b><span class="toc-dots"></span><small>${e.years}</small></button><p>${gs.map(g => `<button class="toc-battle" data-group="${g.group}">${esc(g.title)} <small>${g.years}</small></button>`).join('<span class="toc-sep"> · </span>')}</p></li>`;
+  }).join('');
+  d.querySelectorAll('#homeMap .cm-battle').forEach(g => { g.removeAttribute('tabindex'); g.removeAttribute('role'); });
+  d.querySelectorAll('#homeContents [data-era]').forEach(b => b.onclick = () => { V.era = b.dataset.era; const g = groups.find(g => g.era === V.era); if (g) V.preview = groupLead(g.group); showStart(); });
+  d.querySelectorAll('#homeContents [data-group]').forEach(b => b.onclick = () => { V.preview = groupLead(b.dataset.group); V.era = eraOf(SCENARIOS[V.preview]); showStart(); });
+  const saved = savedGame(MAP_ID), cont = $('#homeContinue');
+  cont.hidden = !saved;
+  if (saved) { cont.querySelector('small').textContent = `${SCN.title} · round ${saved.round}`; cont.onclick = () => { d.close(); V.resume(); }; }
+  $('#homeGo').onclick = () => { V.preview = MAP_ID; V.era = eraOf(SCN); showStart(); };
+  d.showModal();
+  d.scrollTop = 0;
+  $('#homeGo').focus({ preventScroll: true });
 }
 // The rules in brief, shown once a side is chosen and before the map opens,
 // until the player asks not to see them again.
 const RULES_KEY = 'jhelum-marches-rules-hidden';
+// The order of battle as the scenario gives it: each side's formations on the
+// field at the outset, by arm, and the columns expected later.
+const ARM_NAME = { foot: 'Infantry', horse: 'Cavalry', guns: 'Artillery' }, ARMS = ['foot', 'horse', 'guns'];
+const figuresOf = list => list.reduce((s, u) => s + u.hp, 0);
+function orderOfBattle() {
+  // The bodies that took the field: the army at the outset, the garrisons
+  // and posts, and each column that marched in later.
+  const bodies = { azure: [], red: [] };
+  for (const side of ['azure', 'red']) {
+    const here = START_UNITS.filter(u => u[0] === side), field = here.filter(u => !u[5]?.post), posts = here.filter(u => u[5]?.post);
+    const asUnits = list => list.map(([, variant, , , figures]) => ({ variant, hp: figures || MAX_HP }));
+    if (field.length) bodies[side].push({ name: 'In the field at the outset', units: asUnits(field) });
+    if (posts.length) bodies[side].push({ name: 'Garrisons and posts', units: asUnits(posts) });
+  }
+  for (const r of SCN.reinforcements || []) bodies[r.side].push({ name: r.name, when: roundName(r.round), units: r.units.map(([variant, , figures]) => ({ variant, hp: figures || MAX_HP })) });
+  // "4,000 infantry · 1,000 cavalry · 2 batteries", as an infobox gives it.
+  const make = units => {
+    const by = a => units.filter(u => VARIANTS[u.variant].type === a), n = f => menCount(f).toLocaleString('en');
+    const foot = figuresOf(by('foot')), horse = figuresOf(by('horse')), guns = by('guns').length;
+    return [foot && `${n(foot)} infantry`, horse && `${n(horse)} cavalry`, guns && `${guns} batter${guns > 1 ? 'ies' : 'y'} of guns`].filter(Boolean).join(' · ');
+  };
+  return ['azure', 'red'].map(side => {
+    const all = bodies[side].flatMap(b => b.units), gen = GENERALS[side];
+    return `<div class="oob-side ${side}"><h4>${esc(SIDES[side].name)}</h4>`
+      + `<dl class="oob-box"><dt>Commander</dt><dd>${esc(gen.name)}</dd><dt>Strength</dt><dd><b>${menCount(figuresOf(all)).toLocaleString('en')} men</b><br>${make(all)}</dd></dl>`
+      + `<ul class="oob-bodies">${bodies[side].map(b => `<li><b>${esc(b.name)}</b>${b.when ? `<em>${esc(b.when)}</em>` : ''}<span>${menCount(figuresOf(b.units)).toLocaleString('en')} · ${make(b.units)}</span></li>`).join('')}</ul></div>`;
+  }).join('');
+}
+// The reckoning at the end: those engaged, lost and remaining, by side and arm.
+function reckoning() {
+  if (!S.engaged) return '';
+  const n = f => menCount(f).toLocaleString('en');
+  return ['azure', 'red'].map(side => {
+    const eng = S.engaged[side] || {}, lost = S.losses?.[side] || {}, tot = { e: 0, k: 0, c: 0, d: 0, r: 0 };
+    const rows = ARMS.filter(a => eng[a]).map(a => {
+      const l = lost[a] || { killed: 0, captured: 0, deserted: 0 }, r = figuresOf(S.units.filter(u => u.side === side && VARIANTS[u.variant].type === a));
+      tot.e += eng[a].hp; tot.k += l.killed; tot.c += l.captured; tot.d += l.deserted; tot.r += r;
+      return `<tr><th>${ARM_NAME[a]}</th><td>${n(eng[a].hp)}</td><td>${n(l.killed)}</td><td>${n(l.captured)}</td><td>${n(l.deserted)}</td><td>${n(r)}</td></tr>`;
+    }).join('');
+    return `<div class="oob-side ${side}"><h4>${esc(SIDES[side].name)}<span>lost ${n(tot.k + tot.c + tot.d)} of ${n(tot.e)}</span></h4><table><thead><tr><th></th><th>Engaged</th><th>Killed &amp; wounded</th><th>Captured</th><th>Deserted</th><th>Remaining</th></tr></thead><tbody>${rows}</tbody><tfoot><tr><th>All arms</th><td>${n(tot.e)}</td><td>${n(tot.k)}</td><td>${n(tot.c)}</td><td>${n(tot.d)}</td><td>${n(tot.r)}</td></tr></tfoot></table></div>`;
+  }).join('');
+}
 function briefThenStart(player, ai) {
   let hidden = false;
   try { hidden = localStorage.getItem(RULES_KEY) === '1'; } catch { /* storage blocked */ }
-  if (hidden) { startCampaign(player, ai); return; }
+  // The briefing always shows the order of battle; the rules only until the
+  // player asks not to see them again.
+  $('#rulesDialog').classList.toggle('brief-only', hidden);
+  $('#rulesOob').innerHTML = orderOfBattle();
   const sd = SCN.sides[player], goal = $('#rulesGoal');
   goal.className = `rules-goal ${player}`;
   goal.innerHTML = `<b>${esc(sd.name)}</b>${esc(sd.pitch)}<em>${esc(sd.tag)}</em>`;
@@ -1262,21 +1352,31 @@ async function boot() {
     refresh();
     if (S.ai[S.turn] && !S.winner && !V.busy) { V.busy = true; runAI(S.turn).finally(() => { V.busy = false; refresh(); }); }
   };
-  $('#continueBtn').onclick = resume;
+  V.resume = resume;
   // Escape on the opening screen continues a saved campaign, or does nothing
   // if there is none yet (there would be no campaign to return to).
   $('#startDialog').addEventListener('cancel', e => {
     if (V.started) return;
     e.preventDefault();
-    if (!$('#continueBtn').hidden) resume();
+    if (!$('#continueBtn').hidden) $('#continueBtn').click();
   });
+  $('#homeDialog').addEventListener('cancel', e => { if (!V.started) e.preventDefault(); });
   const resumed = load();
   if (!resumed) newCampaign();
   fitBoard();
   refresh();
   document.fonts?.ready.then(() => { measureLabels(); layoutLabels(); });
   document.body.classList.remove('loading');
-  showStart();
+  // Arriving from the opening screen of another map: take command, or carry
+  // on a saved campaign, at once. Otherwise open on the title page.
+  const ask = new URLSearchParams(location.search);
+  history.replaceState(null, '', `?map=${MAP_ID}`);
+  if (ask.get('resume') && resumed) resume();
+  else if (ask.get('side') && SCN.sides[ask.get('side')]) {
+    $('#fogPick').value = ask.get('fog') === 'off' ? 'off' : 'on';
+    $('#opponent').value = ask.get('ai') === '0' ? 'human' : 'ai';
+    briefThenStart(ask.get('side'), ask.get('ai') !== '0');
+  } else showHome();
   window.__jm = { get S() { return S; }, HEXES, MAP, endTurn, runAI, attack, moveUnit, reachable, V, R, newCampaign, refresh };
 }
 

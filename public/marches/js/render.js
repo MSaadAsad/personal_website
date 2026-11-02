@@ -129,7 +129,7 @@ function drawStaticMap() {
   // Drawn in a fixed 16 px-per-km space and scaled to the board, so the
   // countryside has the same real-world grain whatever the map's hex size.
   const KM = 16, G = PX_PER_KM / KM, W = BOARD_W / G, H = BOARD_H / G;
-  const STEP = 19, glyph = { pine: '', canopy: '', shade: '', scrub: '' };
+  const STEP = 19, glyph = { trunk: '', pine: '', canopy: '', shade: '', scrub: '' };
   let plots = '', plots2 = '', furrows = '';
   // Field systems share an orientation across a district, as real ones do.
   const lattice = (i, j) => hash2(i + 9000, j + 7000), smooth = t => t * t * (3 - 2 * t);
@@ -145,7 +145,12 @@ function drawStaticMap() {
     const [tree, shrub, crop] = vegetationKm(x / KM, y / KM);
     if (tree > 0.3 && r3 < tree * 0.95) {
       const sz = 0.75 + hash2(gx + 3, gy + 5) * 0.55;
-      if (elevationKm(x / KM, y / KM) > 1100) glyph.pine += `M${f1(x)} ${f1(y - 6.5 * sz)}l${f1(3.2 * sz)} ${f1(7.5 * sz)}h${f1(-6.4 * sz)}z`;
+      // A deodar or chir: three tiers of drooping boughs on a short trunk.
+      if (elevationKm(x / KM, y / KM) > 1100) {
+        const k = sz * 0.62, t = (dy, w, h) => `M${f1(x)} ${f1(y + (dy - h) * k)}q${f1(w * 0.35 * k)} ${f1(h * 0.55 * k)} ${f1(w * k)} ${f1(h * k)}q${f1(-w * k)} ${f1(-0.9 * k)} ${f1(-2 * w * k)} 0q${f1(w * 0.65 * k)} ${f1(-h * 0.45 * k)} ${f1(w * k)} ${f1(-h * k)}z`;
+        glyph.pine += t(-5.2, 1.7, 3) + t(-2.8, 2.5, 3.4) + t(0, 3.3, 3.8);
+        glyph.trunk += `M${f1(x - 0.35 * k)} ${f1(y)}h${f1(0.7 * k)}v${f1(1.6 * k)}h${f1(-0.7 * k)}z`;
+      }
       else {
         const rr = 2.6 * sz, ox = (hash2(gx, gy + 9) - 0.5) * 4;
         glyph.shade += `M${f1(x + 0.9 - rr)} ${f1(y + 1)}a${f1(rr)} ${f1(rr * 0.85)} 0 1 0 ${f1(rr * 2)} 0a${f1(rr)} ${f1(rr * 0.85)} 0 1 0 ${f1(-rr * 2)} 0`;
@@ -513,14 +518,14 @@ function drawMarkers() {
     const [x, y] = placePx(key), owner = S.forts[key], m = el('div', `marker fortflag owner-${owner || 'none'}`, R.markers);
     m.style.left = `${f1(x)}px`; m.style.top = `${f1(y)}px`;
     m.innerHTML = '<i></i>';
-    m.title = `${MAP.places[key].name} — fort (${owner ? `held by the ${SIDES[owner].name}; a supply source` : 'ungarrisoned'})`;
+    m.title = `${MAP.places[key].name} — fort (${owner ? `held by ${theSide(owner)}; a supply source` : 'ungarrisoned'})`;
   }
   for (const power of POWERS.filter(p => p.npc)) {
     const [x, y] = placePx(power.seat), ally = S.allies[power.id], m = el('div', `marker seat ally-${ally || 'none'}`, R.markers);
     m.style.left = `${f1(x)}px`; m.style.top = `${f1(y)}px`;
     m.style.setProperty('--power', power.color);
     m.innerHTML = '<i></i><b></b>';
-    m.title = `${power.name} — seat of a local power (${ally ? `allied to the ${SIDES[ally].name}` : 'uncommitted'})`;
+    m.title = `${power.name} — seat of a local power (${ally ? `allied to ${theSide(ally)}` : 'uncommitted'})`;
   }
   // Mines under way: a gallery from the diggers' hex towards the works, with its days.
   for (const [hex, mn] of Object.entries(S.mines || {})) {
@@ -528,6 +533,14 @@ function drawMarkers() {
     m.style.left = `${f1((a.x * 2 + b.x) / 3)}px`; m.style.top = `${f1((a.y * 2 + b.y) / 3)}px`;
     m.innerHTML = `<svg viewBox="-10 -10 20 20" aria-hidden="true"><path class="shaft" d="M-6 6L6 -6"/><path class="pick" d="M2 -9c3 1 6 4 7 7M5.5 -5.5l-9 9"/></svg><b>${mn.days}/${MINE_DAYS}</b>`;
     m.title = `Mine under ${worksTitle(+hex)}: ${mn.days} of ${MINE_DAYS} days dug`;
+  }
+  // Villages and towns foraged bare: a grey wash over the houses.
+  for (const key of Object.keys(S.eaten || {})) {
+    if (!stripped(key) || HEX_OF[key] === undefined) continue;
+    const [x, y] = placePx(key), m = el('div', `marker stripped ${MAP.places[key].kind}`, R.markers);
+    m.style.left = `${f1(x)}px`; m.style.top = `${f1(y)}px`;
+    m.innerHTML = '<i></i>';
+    m.title = `${MAP.places[key].name}: stripped bare by foragers; feeds again in ${regrowIn(key)} days`;
   }
   // Rubble where gunfire has battered a place's works or walls.
   for (const key of Object.keys(MAP.places)) {
@@ -676,6 +689,7 @@ const STANDARDS = {
   dogra:      { tri: true, field: '#e8952a', edge: '#7a1f1a' },
   khalsa:     { field: '#e39a2b', disc: '#2a2a5a' },
   durrani:    { field: '#1f1d1a', crescent: '#f3efe4' },
+  mughal:     { field: '#2f5d3a', disc: '#e3b23c' },
   sadozai:    { field: '#2d6a3e', crescent: '#f3efe4' },
   bahawalpur: { field: '#2d6a3e', hoist: '#b5302b', crescent: '#f3efe4' },
   company:    { stripes: ['#b5302b', '#f3efe4'], canton: true },
@@ -790,8 +804,8 @@ function syncUnits(animating = null) {
     });
     node._hp = u.hp;
     const pile = stacks.get(u.hex), idx = pile.indexOf(u), mine = S.turn === u.side && !S.ai[u.side];
-    node.className = `unit ${u.side} type-${VARIANTS[u.variant].type}${playerSees(u) ? '' : ' fogged'}${u.id === S.selected ? ' selected' : ''}${mine && !canActCached(u) ? ' spent' : ''}${mine && canActCached(u) ? ' ready' : ''}${wavering(u) ? ' wavering' : ''}${ledBy(u) ? ' led' : ''}${stockOf(u) < STOCK_HUNGRY ? ' oos' : ''}${u.hex === R.peek ? ' peeked' : ''}`;
-    node.title = `${u.name} · ${SIDES[u.side].name} · ${men(u.hp)} of ${men(maxHp(u))}${wavering(u) ? ' · wavering' : ''}${ledBy(u) ? ` · led by ${GENERALS[u.side].name}` : ''}} · supplies ${stockOf(u)}%`;
+    node.className = `unit ${u.side} type-${VARIANTS[u.variant].type}${playerSees(u) ? '' : ' fogged'}${u.id === S.selected ? ' selected' : ''}${mine && !canActCached(u) ? ' spent' : ''}${mine && canActCached(u) ? ' ready' : ''}${wavering(u) ? ' wavering' : ''}${moraleOf(u) ? ` mo${moraleOf(u) < 0 ? 'n' : 'p'}${Math.abs(moraleOf(u))}` : ''}${ledBy(u) ? ' led' : ''}${stockOf(u) < STOCK_HUNGRY ? ' oos' : ''}${u.hex === R.peek ? ' peeked' : ''}`;
+    node.title = `${u.name} · ${SIDES[u.side].name} · ${men(u.hp)} of ${men(maxHp(u))}${u.hp < maxHp(u) * WAVER_BELOW ? ' · broken ranks' : ''}${moraleOf(u) ? ` · ${MORALE[moraleOf(u)].toLowerCase()}` : ''}${ledBy(u) ? ` · led by ${GENERALS[u.side].name}` : ''} · supplies ${stockOf(u)}%`;
     if (animating === u.id) continue;
     const h = HEXES[u.hex], spread = 8 * unitScale(R.cam.z), off = pile.length > 1 ? (idx - (pile.length - 1) / 2) * spread * 2 : 0;
     node.style.setProperty('--x', `${f1(h.x + off)}px`);

@@ -1,31 +1,21 @@
 'use strict';
 // Battle chronicles. When an engagement closes (game.js: closeBattles), its
-// recorded events are turned into a plain-facts brief and Claude writes the
-// account: a name for the battle or siege, a verdict, a short story and the
-// moments that decided it. Claude is called straight from the browser with
-// the player's own API key, which is kept only in this browser's storage.
-// Without a key the chronicle falls back to field notes built from the same
-// facts, so the game never depends on the network.
+// recorded events become field notes: a name for the battle or siege, a
+// verdict, a short story and the moments that decided it. Nothing leaves the
+// browser.
 
 const CHRONICLE = (() => {
-  const SDK_URL = 'https://cdn.jsdelivr.net/npm/@anthropic-ai/sdk@0.133.0/+esm';
-  const MODEL = 'claude-opus-5-5';
-  const KEY_STORE = 'jhelum-marches-anthropic-key', AUTO_STORE = 'jhelum-marches-chronicle-auto';
-  let sdk = null, queue = Promise.resolve();
-
-  const store = {
-    get(k) { try { return localStorage.getItem(k); } catch { return null; } },
-    set(k, v) { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch { /* storage blocked */ } },
-  };
-  const key = () => store.get(KEY_STORE) || '';
-  const auto = () => store.get(AUTO_STORE) !== 'off';
+  // An API key and settings were once kept here for a written chronicle; that
+  // option is gone, so clear anything left in this browser.
+  try { localStorage.removeItem('jhelum-marches-anthropic-key'); localStorage.removeItem('jhelum-marches-chronicle-auto'); } catch { /* storage blocked */ }
 
   // ---- The brief: what happened, in order, in plain words -----------------
 
   const OUTCOME = { rout: 'smashed', hit: 'struck', standoff: 'fought to a bloody standstill with', repulse: 'was thrown back by' };
   const missed = melee => melee ? 'attacked, but made no impression on' : 'fired on, but the shot fell short of';
   const COMPASS = ['east', 'north-east', 'north', 'north-west', 'west', 'south-west', 'south', 'south-east'];
-  const sideName = s => SIDES[s].name;
+  // "The Murree Garrison" reads as "the Murree Garrison" after an article.
+  const sideName = s => SIDES[s].name.replace(/^The /, '');
   const unitText = (u, nm) => `${nm(u)} (${u.variant}${u.general ? `, led by ${u.general}` : ''})`;
   const strength = u => men(Math.max(0, u.hp));
   // Formations that share a name (two Khalsa Topkhanas) are told apart by
@@ -74,6 +64,7 @@ const CHRONICLE = (() => {
       case 'advance': return `${r} · ${nm(e.unit)} pressed forward ${ground(e.hex).replace(/^(at|on) /, 'onto ')}.`;
       case 'capture': return `${r} · ${nm(e.unit)} took ${placeOf(e.place)} for the ${sideName(e.side)}${e.from ? ` from the ${sideName(e.from)}` : ''}.`;
       case 'general': return `${r} · ${e.name}, general of the ${sideName(e.side)}, was ${e.fallen ? 'killed' : 'taken prisoner'}.`;
+      case 'morale': return e.why === 'panic' ? `${r} · Panic spread to ${unitText(e.unit, nm)} ${ground(e.hex)}.` : e.to <= -2 && e.from > -2 ? `${r} · ${unitText(e.unit, nm)} lost its nerve ${ground(e.hex)}.` : null;
       default: return null;
     }
   }
@@ -97,6 +88,7 @@ const CHRONICLE = (() => {
       case 'surrender': return `The ${nm(e.unit)} ${was(e.unit)} ${e.why === 'surrounded' ? `surrounded and laid down ${its(e.unit)} arms` : 'cut off and surrendered'}.`;
       case 'capture': return `The ${nm(e.unit)} took ${placeOf(e.place)}.`;
       case 'general': return `${e.name} was ${e.fallen ? 'killed' : 'taken prisoner'}.`;
+      case 'morale': return e.why === 'panic' ? `Panic spread to the ${nm(e.unit)}.` : e.to <= -2 && e.from > -2 ? `The ${nm(e.unit)} lost ${its(e.unit)} nerve.` : null;
       default: return null;
     }
   }
@@ -122,65 +114,6 @@ const CHRONICLE = (() => {
     ].join('\n');
   }
 
-  // ---- Claude ---------------------------------------------------------------
-
-  const SYSTEM = `You are the chronicler of a historical strategy game set on the Jhelum frontier of the Punjab hills. After each engagement you receive the facts of what happened, as recorded by the game's rules, and you write the account that goes into the campaign chronicle.
-
-Write it as a historian telling the story of the fight: clear, vivid, period-appropriate English prose, past tense. The reader has just played the battle, so make it feel like their battle: who struck first, how the fight turned, what decided it and what it cost.
-
-Stay strictly within the facts. Do not invent people, named officers, dates, weather, or events that are not in the brief. You may describe the ground from the terrain given, and draw on the campaign background for context. Strength is given in round figures of men. Use them as the approximations they are ("some 400 men", "nearly a thousand"), and never give a more precise count. The dice and modifiers are the game's abstraction: never mention dice, rounds as game turns, or rules. Call a round "a day" or "the next morning" (or, where the brief gives hours, by its time of day).
-
-Name the engagement. Keep the provisional name unless it misdescribes the fight; it must contain the same place name. You may change only the form, for example "Siege of", "Storming of", "Assault on", "Battle of", "Action at", "Rout at", "Skirmish at", and keep any ordinal ("Second ...").`;
-
-  const SCHEMA = {
-    type: 'object',
-    additionalProperties: false,
-    required: ['name', 'verdict', 'story', 'moments'],
-    properties: {
-      name: { type: 'string', description: 'The name of the battle or siege, e.g. "Siege of Mangla Fort".' },
-      verdict: { type: 'string', description: 'One short line on the outcome, e.g. "Dogra victory: Sukhchainpur falls".' },
-      story: { type: 'string', description: 'The account: two or three paragraphs, 120 to 220 words in all, separated by blank lines.' },
-      moments: {
-        type: 'array',
-        description: 'Three to five turning points, in order.',
-        items: {
-          type: 'object', additionalProperties: false, required: ['day', 'text'],
-          properties: { day: { type: 'integer', description: 'The round it happened in.' }, text: { type: 'string', description: 'One sentence.' } },
-        },
-      },
-    },
-  };
-
-  async function claude(b, facts) {
-    sdk ||= import(SDK_URL).catch(err => { sdk = null; throw new Error(`could not load the Claude SDK (${err.message})`); });
-    const { default: Anthropic } = await sdk;
-    const client = new Anthropic({ apiKey: key(), dangerouslyAllowBrowser: true });
-    let msg;
-    try {
-      msg = await client.beta.messages.create({
-        model: MODEL,
-        max_tokens: 8000,
-        // If a safety classifier declines, Anthropic retries on its recommended fallback model.
-        betas: ['server-side-fallback-2026-07-01'],
-        fallbacks: 'default',
-        output_config: { effort: 'low', format: { type: 'json_schema', schema: SCHEMA } },
-        system: SYSTEM,
-        messages: [{ role: 'user', content: facts }],
-      });
-    } catch (err) {
-      const why = { 401: 'the API key was rejected', 403: 'this API key may not use that model', 429: 'rate limited; try again shortly', 529: 'Claude is overloaded; try again shortly' }[err?.status];
-      throw new Error(why || err?.error?.error?.message || err?.message || 'request failed');
-    }
-    if (msg.stop_reason === 'refusal') throw new Error('Claude declined to write this account');
-    if (msg.stop_reason === 'max_tokens') throw new Error('the account was cut off');
-    const text = msg.content.find(c => c.type === 'text')?.text;
-    const out = JSON.parse(text);
-    // The name must stay tied to the real place.
-    const place = b.place.toLowerCase();
-    if (!out.name?.toLowerCase().includes(place)) out.name = b.name;
-    return { ...out, by: 'claude', model: msg.model || MODEL };
-  }
-
   // ---- Field notes: the same facts without Claude ----------------------------
 
   function fieldNotes(b) {
@@ -191,7 +124,7 @@ Name the engagement. Keep the provisional name unless it misdescribes the fight;
     // starts where the fighting did.
     const opening = first && !turns.includes(first) ? [fightLine(first, nm)] : [];
     const story = [
-      `On day ${b.first} the ${A} fell upon the ${D} ${ground(b.focus).replace(/ \([^)]*\)$/, '')}${first ? `, ${possessive(first.att) ? '' : 'the '}${nm(first.att)} leading against ${possessive(first.def) ? '' : 'the '}${nm(first.def)}` : ''}. ${b.kind === 'siege' ? `The siege lasted ${days} days.` : days > 1 ? `The fighting went on for ${days} days.` : 'It was over within the day.'}`,
+      `${SCN.clock ? `On ${roundName(b.first)}` : `On day ${b.first}`} the ${A} fell upon the ${D} ${ground(b.focus).replace(/ \([^)]*\)$/, '')}${first ? `, ${possessive(first.att) ? '' : 'the '}${nm(first.att)} leading against ${possessive(first.def) ? '' : 'the '}${nm(first.def)}` : ''}. ${b.kind === 'siege' ? `The siege lasted ${days} days.` : days > 1 ? `The fighting went on for ${SCN.clock && SCN.clock.hours < 24 ? `${days * SCN.clock.hours} hours` : `${days} days`}.` : 'It was over within the day.'}`,
       [...opening, ...turns.slice(0, 8).map(e => plainLine(e, nm))].join(' '),
       `The ${sideName('azure')} lost ${b.lost.azure ? men(b.lost.azure) : 'no men'} and the ${sideName('red')} ${b.lost.red ? men(b.lost.red) : 'none'}. ${verdictOf(b)}.`,
     ].filter(Boolean);
@@ -207,18 +140,5 @@ Name the engagement. Keep the provisional name unless it misdescribes the fight;
     return b.victor ? `${SIDES[b.victor].adj} victory` : 'Indecisive';
   }
 
-  // Requests run one at a time, in the order the battles ended. The brief is
-  // taken now, while the campaign it describes is still the one in play.
-  function write(b) {
-    const facts = brief(b), job = queue.then(() => claude(b, facts));
-    queue = job.catch(() => {});
-    return job;
-  }
-
-  return {
-    MODEL,
-    key, setKey: k => store.set(KEY_STORE, k?.trim() || null),
-    auto, setAuto: on => store.set(AUTO_STORE, on ? null : 'off'),
-    brief, fieldNotes, verdictOf, write,
-  };
+  return { brief, fieldNotes, verdictOf };
 })();
