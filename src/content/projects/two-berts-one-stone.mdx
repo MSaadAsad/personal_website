@@ -1,6 +1,6 @@
 *There is no normal reason to do this.*
 
-For my capstone project, I needed to run two BERT models over the same financial text. One classified sentiment; the other identified forward-looking statements. I planned to deploy the system in the cloud, so the combined model's size and startup time mattered as well as inference speed. That led me to ask whether I could share some of their computation, shrink the result, and simplify what had to load before a prediction.
+As one small part of my university capstone project, I needed to run two BERT models over the same financial text. One classified sentiment; the other identified forward-looking statements. I planned to deploy the system in the cloud, so the combined model's size and startup time mattered as well as inference speed. That led me to ask whether I could share some of their computation, shrink the result, and simplify what had to load before a prediction.
 
 The models were [finbert-tone](https://huggingface.co/yiyanghkust/finbert-tone) and [finbert-fls](https://huggingface.co/yiyanghkust/finbert-fls). Both use a 12-layer BERT architecture with a hidden size of 768 and 109,754,115 parameters each. Every sentence therefore passed through two full encoders before reaching two different classification heads.
 

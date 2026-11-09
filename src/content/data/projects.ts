@@ -5,8 +5,7 @@ export const projects: Project[] = [
     slug: 'two-berts-one-stone',
     title: 'Two BERTs, One Stone',
     date: '2026-09-15',
-    description:
-      'Sharing layers, merging weights, and quantizing two FinBERT models.',
+    description: 'Compressing two FinBERT models.',
     image: '/assets/projects/making-two-berts-smaller/cover.svg',
     tags: ['NLP', 'Model compression'],
     techStack: ['Python', 'PyTorch', 'ONNX'],

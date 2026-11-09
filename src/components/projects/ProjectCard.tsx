@@ -32,13 +32,13 @@ export function ProjectCard({ project }: { project: Project }) {
       </div>
       <div className="flex items-center justify-between gap-4 px-4 py-3">
         <div className="min-w-0">
-          <h3 className="font-mono text-[0.75rem] font-semibold text-concrete-700 truncate">
+          <h3 className="font-mono text-[0.75rem] font-semibold text-concrete-800 truncate">
             {project.title}
           </h3>
-          <p className="mt-1 font-mono text-[0.65rem] text-concrete-600 line-clamp-2">
+          <p className="mt-1 font-mono text-[0.65rem] text-concrete-800 line-clamp-2">
             {project.description}
           </p>
-          <span className="mt-1 block font-mono text-[0.6rem] text-concrete-600 tracking-wider">
+          <span className="mt-1 block font-mono text-[0.6rem] text-concrete-800 tracking-wider">
             {project.date}
           </span>
         </div>
