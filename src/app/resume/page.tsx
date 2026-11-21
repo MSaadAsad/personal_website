@@ -45,10 +45,6 @@ export default function ResumePage() {
                   PyTorch, Transformers, OpenAI Agents SDK, MCP, PyMC, Scikit-Learn,
                   TypeScript, Django, Neo4j
                 </div>
-                <div>
-                  <span className="font-mono text-concrete-900">Languages:</span> English
-                  (Native), Urdu (Native), Spanish (Intermediate)
-                </div>
               </div>
             </div>
           </aside>
@@ -71,14 +67,15 @@ export default function ResumePage() {
                     </Link>
                   </p>
                   <p className="font-serif text-base text-concrete-800">
-                    B.Sc Computer Science: Data Science | GPA: 3.81
+                    B.Sc Computational Sciences: Applied Computer Science and
+                    Artificial Intelligence | GPA: 3.71
                   </p>
                   <ul className="list-disc pl-5 font-serif text-sm text-concrete-700 space-y-1 mt-2">
                     <li>
-                      Courses: Machine Learning, Artificial Intelligence, Bayesian
-                      Inference, Software Engineering, Financial Modeling, Marketing and
-                      Product Analysis, Economics, Data Structures and Algorithms,
-                      Statistics, Calculus I and II, Linear Algebra.
+                      Courses: Machine Learning, Artificial Intelligence, Deep Learning,
+                      Bayesian Inference, Statistics, Linear Algebra, Single and
+                      Multivariable Calculus, Data Structures and Algorithms, Software
+                      Engineering.
                     </li>
                   </ul>
                 </div>
@@ -104,7 +101,7 @@ export default function ResumePage() {
                         target="_blank"
                         rel="noopener noreferrer"
                       >
-                        TaxGPT
+                        TaxGPT YC S24
                       </Link>{' '}
                       (Research and Engineering Team)
                     </p>
@@ -114,20 +111,22 @@ export default function ResumePage() {
                   </div>
                   <div className="font-mono text-[0.75rem] text-concrete-700 md:text-right">
                     <div>San Francisco, CA</div>
-                    <div>July 2024 - Current</div>
+                    <div>July 2024 - Present</div>
                   </div>
                 </div>
                 <ul className="list-disc pl-5 font-serif text-sm text-concrete-800 space-y-2">
                   <li>
-                    4th engineering hire; designed and built TaxGPT&apos;s scalable AI
-                    tax-research agent in a SOC 2–compliant production environment,
-                    driving 30× growth in weekly active tax-professional users.
+                    As the 4th engineering hire, designed and scaled TaxGPT&apos;s
+                    flagship AI tax-research agent in a SOC 2-compliant production
+                    environment, serving 3,000+ weekly active tax professionals and
+                    processing 250,000 queries annually.
                   </li>
                   <li>
-                    Architected core agentic services, orchestration engines, and
-                    tax-law corpus retrieval systems with MCP-based tool and data
-                    interfaces, enabling modular retrieval, reasoning, and execution
-                    workflows and reducing time to deploy new agents.
+                    Architected the core agent powering TaxGPT Cowork, enabling
+                    end-to-end workflows through document analysis, browser and
+                    desktop automation, and MCP-based integrations with external
+                    tools and data sources; reduced LLM inference costs by
+                    approximately 80%.
                   </li>
                   <li>
                     Developed{' '}
@@ -139,14 +138,14 @@ export default function ResumePage() {
                     >
                       Agent Andrew
                     </Link>
-                    , an autonomous tax reviewer analyzing up to 500-page filings to
-                    flag issues in tax returns.
+                    , an autonomous tax-return reviewer analyzing filings up to 500
+                    pages to identify potential errors and missed deductions.
                   </li>
                   <li>
-                    Built an evaluation framework with benchmarking, regression tests,
-                    and prompt management to compare models, agent architectures, and
-                    retrieval approaches, maintaining performance while enabling safe
-                    experimentation.
+                    Built automated evaluation infrastructure for production LLM
+                    agents, combining end-to-end benchmarks, structured execution
+                    traces, agent-as-judge scoring, and regression tests to identify
+                    failures and compare model architectures.
                   </li>
                 </ul>
               </div>
@@ -171,7 +170,7 @@ export default function ResumePage() {
                     Researched model-agnostic data attribution for CV and NLP,
                     benchmarking interpretability methods and identifying high-impact
                     training data points using NTK-based approximations and
-                    LoRA-efficient influence estimation.
+                    LoRA-efficient influence function estimation.
                   </li>
                   <li>
                     Trained ResNet-18/34/50 on ImageNet-1k and GPT-2 on FineWeb,
@@ -207,39 +206,9 @@ export default function ResumePage() {
                 </div>
                 <ul className="list-disc pl-5 font-serif text-sm text-concrete-800 space-y-2">
                   <li>
-                    Researched rule-extraction methods for interpretable deep learning,
-                    benchmarking the RxREN algorithm across CV datasets and
-                    architectures and achieving 96% fidelity in converting black-box
-                    models into symbolic rule systems, enabling transparent auditing
-                    of model decision rules for reliability and compliance.
-                  </li>
-                  <li>
-                    Performed systematic hyperparameter and architecture studies to
-                    strengthen explainability robustness across models.
-                  </li>
-                </ul>
-              </div>
-
-              <div className="space-y-3">
-                <div className="flex flex-col md:flex-row md:items-start md:justify-between">
-                  <div>
-                    <p className="font-mono text-base text-concrete-900">
-                      World Wildlife Fund (Data and Technology Team)
-                    </p>
-                    <p className="font-serif text-base text-concrete-800">
-                      Data Science Intern
-                    </p>
-                  </div>
-                  <div className="font-mono text-[0.75rem] text-concrete-700 md:text-right">
-                    <div>San Francisco, CA</div>
-                    <div>June 2023 - Aug 2023</div>
-                  </div>
-                </div>
-                <ul className="list-disc pl-5 font-serif text-sm text-concrete-800 space-y-2">
-                  <li>
-                    Built Django REST APIs and Azure CI/CD workflows to automate
-                    partner data ingestion and standardize unstructured geospatial and
-                    tabular inputs into unified database schemas.
+                    Researched interpretable deep learning using the RxREN algorithm,
+                    benchmarking symbolic rule extraction from MLPs and achieving 96%
+                    fidelity in converting black-box models into auditable rules.
                   </li>
                 </ul>
               </div>
@@ -254,27 +223,48 @@ export default function ResumePage() {
                   <div>
                     <p className="font-mono text-base text-concrete-900">
                       <Link
-                        href="https://starc-ai-web.vercel.app/"
+                        href="/writing/looped-system-1-models"
                         className="text-[#0000EE] hover:underline underline-offset-4"
-                        target="_blank"
-                        rel="noopener noreferrer"
                       >
-                        StarcAI
-                      </Link>{' '}
-                      (Co-founder)
+                        Looped System 1 Models
+                      </Link>
                     </p>
                     <p className="font-serif text-sm text-concrete-800">
-                      Built sentiment modeling pipelines over MD&amp;A disclosures in
-                      10-K/10-Q filings to produce risk-calibrated signals guiding the
-                      structure and tone of corporate investor communications.
+                      Benchmarked JevK5, a Jev-like, decision-tuned Qwen3.5-4B model,
+                      against its base model on synthetic relational tasks, observing
+                      72.7% versus 60.3% accuracy on two-hop reasoning with 25 premises.
                     </p>
                     <p className="font-serif text-sm text-concrete-800 mt-2">
-                      Developed sentiment-conditioned text generation to produce
-                      tone-aligned investor communication drafts.
+                      Conducted 48,640 activation-patching interventions across 32
+                      decoder layers in both models, identifying answer-sensitive
+                      representations at layer 12.
                     </p>
                   </div>
                   <div className="font-mono text-[0.75rem] text-concrete-700 md:text-right">
-                    March 2025
+                    October 2026
+                  </div>
+                </div>
+
+                <div className="flex flex-col md:flex-row md:items-start md:justify-between">
+                  <div>
+                    <p className="font-mono text-base text-concrete-900">
+                      <Link
+                        href="/projects/two-berts-one-stone"
+                        className="text-[#0000EE] hover:underline underline-offset-4"
+                      >
+                        Two BERTs, One Stone
+                      </Link>
+                    </p>
+                    <p className="font-serif text-sm text-concrete-800">
+                      Merged two task-specialized FinBERT classifiers through weight
+                      averaging across six shared encoder layers, preserving ranking
+                      agreement with the original models (Kendall&apos;s τ =
+                      0.896/0.875). Applied ONNX optimization and INT8 quantization to
+                      reduce CPU inference latency from 180 ms to 57 ms per text.
+                    </p>
+                  </div>
+                  <div className="font-mono text-[0.75rem] text-concrete-700 md:text-right">
+                    January 2025
                   </div>
                 </div>
 
@@ -291,10 +281,10 @@ export default function ResumePage() {
                       </Link>
                     </p>
                     <p className="font-serif text-sm text-concrete-800">
-                      Implemented the first hybrid of Grouped-Query Attention and
-                      Mixture-of-Depths in a compact language model, achieving 70%
-                      faster training with ~10% accuracy tradeoff compared to baseline
-                      architectures.
+                      Implemented and benchmarked a transformer combining
+                      Grouped-Query Attention and Mixture-of-Depths, training up to
+                      3.9× as fast as a standard decoder-only transformer with 10%
+                      higher perplexity.
                     </p>
                   </div>
                   <div className="font-mono text-[0.75rem] text-concrete-700 md:text-right">
@@ -303,7 +293,6 @@ export default function ResumePage() {
                 </div>
               </div>
             </section>
-
           </div>
         </div>
       </div>
