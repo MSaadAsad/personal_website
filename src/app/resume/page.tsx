@@ -212,6 +212,30 @@ export default function ResumePage() {
                   </li>
                 </ul>
               </div>
+
+              <div className="space-y-3">
+                <div className="flex flex-col md:flex-row md:items-start md:justify-between">
+                  <div>
+                    <p className="font-mono text-base text-concrete-900">
+                      World Wildlife Fund (Data and Technology Team)
+                    </p>
+                    <p className="font-serif text-base text-concrete-800">
+                      Data Science Intern
+                    </p>
+                  </div>
+                  <div className="font-mono text-[0.75rem] text-concrete-700 md:text-right">
+                    <div>San Francisco, CA</div>
+                    <div>June 2023 - Aug 2023</div>
+                  </div>
+                </div>
+                <ul className="list-disc pl-5 font-serif text-sm text-concrete-800 space-y-2">
+                  <li>
+                    Built Django REST APIs and Azure CI/CD workflows to automate
+                    partner data ingestion and standardize unstructured geospatial and
+                    tabular inputs into unified database schemas.
+                  </li>
+                </ul>
+              </div>
             </section>
 
             <section className="space-y-6">
