@@ -76,20 +76,24 @@ export function Navigation() {
       {mobileOpen && (
         <div className="fixed inset-0 z-40 bg-[var(--color-concrete-block)] flex flex-col items-start justify-center px-12">
           <div className="space-y-6">
-            {links.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={cn(
-                  'block font-mono text-2xl font-bold tracking-tight transition-colors duration-150',
-                  pathname === link.href || pathname.startsWith(link.href + '/')
-                    ? 'text-steel-600'
-                    : 'text-concrete-700 hover:text-concrete-900'
-                )}
-              >
-                {link.label}
-              </Link>
-            ))}
+            {links.map((link) => {
+              const isActive = pathname === link.href || pathname.startsWith(link.href + '/');
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={cn(
+                    'flex items-center gap-3 font-mono text-2xl font-bold tracking-tight transition-colors duration-150',
+                    isActive
+                      ? 'text-[#0000EE]'
+                      : 'text-concrete-700 hover:text-concrete-900'
+                  )}
+                >
+                  {isActive && <span aria-hidden="true">→</span>}
+                  <span>{link.label}</span>
+                </Link>
+              );
+            })}
           </div>
           <div className="absolute bottom-12 left-12 font-mono text-[0.65rem] text-concrete-700">
             ESC to close

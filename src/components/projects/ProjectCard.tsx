@@ -10,9 +10,9 @@ export function ProjectCard({ project, priority = false }: { project: Project; p
   return (
     <Link
       href={`/projects/${project.slug}`}
-      className="concrete-card concrete-edge overflow-hidden block h-full w-full max-w-full"
+      className="group concrete-card concrete-edge overflow-hidden block h-full w-full max-w-full"
     >
-      <div className="aspect-[4/3] bg-concrete-300/70 border-b border-concrete-700/50 flex items-center justify-center p-3">
+      <div className="aspect-[4/3] bg-concrete-300/70 border-b border-concrete-700/50 shadow-[inset_0_3px_10px_rgba(46,46,44,0.28),inset_0_-1px_4px_rgba(255,255,255,0.2)] flex items-center justify-center p-3">
         {project.image ? (
           <div className="relative w-full aspect-[3/2] overflow-hidden border-2 border-concrete-900/70 bg-concrete-200 shadow-[0_5px_10px_rgba(46,46,44,0.18)]">
             <Image
@@ -49,7 +49,7 @@ export function ProjectCard({ project, priority = false }: { project: Project; p
           </span>
         </div>
         <span
-          className="font-mono text-[0.65rem] text-concrete-800 border border-concrete-700/70 px-3 py-1 bg-concrete-300/70 hover:text-concrete-900 transition-colors duration-150 shrink-0"
+          className="font-mono text-[0.65rem] text-concrete-800 border border-concrete-700/70 px-3 py-1 bg-concrete-300/70 group-hover:bg-[#0000EE] group-hover:text-white group-hover:border-[#0000EE] transition-colors duration-150 shrink-0"
         >
           OPEN
         </span>

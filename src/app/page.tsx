@@ -19,9 +19,9 @@ export default function Home() {
   return (
     <div className="relative">
       <div>
-      <div className="min-h-[calc(100svh-3.5rem)] flex flex-col justify-between">
+      <div className="min-h-[calc(100svh-3.5rem)] flex flex-col">
         {/* Hero */}
-        <section className="flex-1 flex items-center py-8">
+        <section className="flex items-center pt-16 pb-0">
           <Container>
             <div className="flex flex-col items-center text-center">
               <img
@@ -36,7 +36,7 @@ export default function Home() {
           </Container>
         </section>
 
-        <section className="py-0">
+        <section className="py-0 mt-auto pt-12 md:pt-14">
           <Container>
             <div className="concrete-block concrete-edge border-b-2 border-concrete-900/70 shadow-[inset_0_-18px_0_rgba(46,46,44,0.45)] bg-[linear-gradient(to_bottom,rgba(0,0,0,0)_0%,rgba(46,46,44,0.18)_100%)]">
               <div className="flex flex-col md:flex-row">

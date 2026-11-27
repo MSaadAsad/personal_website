@@ -4,7 +4,7 @@ import { ShelfItem as ShelfItemType } from '@/types/content';
 export function ShelfItemCard({ item }: { item: ShelfItemType }) {
   const content = (
     <>
-      <div className="aspect-[4/3] bg-concrete-300/70 border-b border-concrete-700/50 flex items-center justify-center p-3">
+      <div className="aspect-[4/3] bg-concrete-300/70 border-b border-concrete-700/50 shadow-[inset_0_3px_10px_rgba(46,46,44,0.28),inset_0_-1px_4px_rgba(255,255,255,0.2)] flex items-center justify-center p-3">
         {item.coverImage ? (
           <div className="h-[92%] aspect-[2/3] max-w-full overflow-hidden border-2 border-concrete-900/70 bg-concrete-200 shadow-[0_5px_10px_rgba(46,46,44,0.22)]">
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -37,7 +37,7 @@ export function ShelfItemCard({ item }: { item: ShelfItemType }) {
             {item.year}
           </span>
         </div>
-        <span className="font-mono text-[0.65rem] text-concrete-800 border border-concrete-700/70 px-3 py-1 bg-concrete-300/70 hover:text-concrete-900 transition-colors duration-150 shrink-0">
+        <span className="font-mono text-[0.65rem] text-concrete-800 border border-concrete-700/70 px-3 py-1 bg-concrete-300/70 group-hover:bg-[#0000EE] group-hover:text-white group-hover:border-[#0000EE] transition-colors duration-150 shrink-0">
           OPEN
         </span>
       </div>
@@ -48,7 +48,7 @@ export function ShelfItemCard({ item }: { item: ShelfItemType }) {
     return (
       <Link
         href={`/shelf/${item.reviewSlug}`}
-        className="concrete-card concrete-edge overflow-hidden block h-full"
+        className="group concrete-card concrete-edge overflow-hidden block h-full"
       >
         {content}
       </Link>
@@ -61,7 +61,7 @@ export function ShelfItemCard({ item }: { item: ShelfItemType }) {
         href={item.url}
         target="_blank"
         rel="noopener noreferrer"
-        className="concrete-card concrete-edge overflow-hidden block h-full"
+        className="group concrete-card concrete-edge overflow-hidden block h-full"
       >
         {content}
       </a>

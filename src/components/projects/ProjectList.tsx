@@ -23,7 +23,7 @@ export function ProjectList({ projects }: { projects: Project[] }) {
   const mdFiller = visible.length > 0 && visible.length % 2 === 1;
 
   return (
-    <div className="concrete-block concrete-edge overflow-hidden" style={{ backgroundColor: "transparent", borderColor: "rgba(74,74,72,1)", boxShadow: "0 16px 22px rgba(46,46,44,0.28)" }}>
+    <div className="concrete-block concrete-edge overflow-hidden" style={{ backgroundColor: "transparent", backgroundImage: "none", borderColor: "rgba(74,74,72,1)", boxShadow: "0 16px 22px rgba(46,46,44,0.28)" }}>
       <div className="border-b border-concrete-700/60 concrete-edge bg-[var(--color-concrete-block)]">
         <div className="flex flex-wrap gap-0" role="group" aria-label="Filter projects by year">
           {['all', ...years].map((key) => (
