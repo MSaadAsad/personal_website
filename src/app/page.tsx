@@ -19,36 +19,38 @@ export default function Home() {
   return (
     <div className="relative">
       <div>
-      {/* Hero */}
-      <section className="flex items-center pt-16 pb-0">
-        <Container>
-          <div className="flex flex-col items-center text-center">
-            <img
-              src="/assets/c.png"
-              alt="Pixel hero artwork"
-              className="w-full max-w-sm drop-shadow-[0_2px_12px_rgba(0,0,0,0.35)]"
-            />
-            <h1 className="mt-7 mb-2 font-mono text-[0.9rem] text-concrete-200 tracking-[0.3em]">
-              M. SAAD ASAD
-            </h1>
-          </div>
-        </Container>
-      </section>
-
-      <section className="py-0 mt-12 md:mt-14">
-        <Container>
-          <div className="concrete-block concrete-edge border-b-2 border-concrete-900/70 shadow-[inset_0_-18px_0_rgba(46,46,44,0.45)] bg-[linear-gradient(to_bottom,rgba(0,0,0,0)_0%,rgba(46,46,44,0.18)_100%)]">
-            <div className="flex flex-col md:flex-row">
-              <Link
-                href="/about"
-                className="w-full px-6 py-5 text-center font-mono text-[0.75rem] text-[#0000EE] tracking-[0.25em] uppercase bg-[var(--color-concrete-block)] hover:border-concrete-900/70 hover:shadow-[inset_0_-2px_0_rgba(46,46,44,0.25)] transition-colors duration-150 md:border-r md:border-concrete-700/60"
-              >
-                About
-              </Link>
+      <div className="min-h-[calc(100svh-3.5rem)] flex flex-col justify-between">
+        {/* Hero */}
+        <section className="flex-1 flex items-center py-8">
+          <Container>
+            <div className="flex flex-col items-center text-center">
+              <img
+                src="/assets/c.png"
+                alt="Pixel hero artwork"
+                className="w-full max-w-sm drop-shadow-[0_2px_12px_rgba(0,0,0,0.35)]"
+              />
+              <h1 className="mt-7 mb-2 font-mono text-[0.9rem] text-concrete-200 tracking-[0.3em]">
+                M. SAAD ASAD
+              </h1>
             </div>
-          </div>
-        </Container>
-      </section>
+          </Container>
+        </section>
+
+        <section className="py-0">
+          <Container>
+            <div className="concrete-block concrete-edge border-b-2 border-concrete-900/70 shadow-[inset_0_-18px_0_rgba(46,46,44,0.45)] bg-[linear-gradient(to_bottom,rgba(0,0,0,0)_0%,rgba(46,46,44,0.18)_100%)]">
+              <div className="flex flex-col md:flex-row">
+                <Link
+                  href="/about"
+                  className="w-full px-6 py-5 text-center font-mono text-[0.75rem] text-[#0000EE] tracking-[0.25em] uppercase bg-[var(--color-concrete-block)] hover:border-concrete-900/70 hover:shadow-[inset_0_-2px_0_rgba(46,46,44,0.25)] transition-colors duration-150 md:border-r md:border-concrete-700/60"
+                >
+                  About
+                </Link>
+              </div>
+            </div>
+          </Container>
+        </section>
+      </div>
 
       {/* Featured Projects */}
       {featuredProjects.length > 0 && (
