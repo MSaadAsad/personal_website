@@ -20,7 +20,7 @@ export default function Home() {
     <div className="relative">
       <div>
       {/* Hero */}
-      <section className="flex items-center pt-12 md:pt-16 pb-0">
+      <section className="flex items-center pt-16 pb-0">
         <Container>
           <div className="flex flex-col items-center text-center">
             <img
@@ -28,19 +28,14 @@ export default function Home() {
               alt="Pixel hero artwork"
               className="w-full max-w-sm drop-shadow-[0_2px_12px_rgba(0,0,0,0.35)]"
             />
-            <div className="mt-6 inline-flex flex-col items-center gap-1.5 px-5 py-2.5 bg-concrete-950/50 backdrop-blur-[2px] border border-white/20 shadow-[0_6px_18px_rgba(0,0,0,0.28)]">
-              <h1 className="font-mono text-[0.9rem] font-semibold text-white tracking-[0.3em]">
-                M. SAAD ASAD
-              </h1>
-              <p className="font-mono text-[0.65rem] text-concrete-100 tracking-[0.18em] uppercase">
-                AI Research · Maps · Writing
-              </p>
-            </div>
+            <h1 className="mt-7 mb-2 font-mono text-[0.9rem] text-concrete-200 tracking-[0.3em]">
+              M. SAAD ASAD
+            </h1>
           </div>
         </Container>
       </section>
 
-      <section className="py-0 mt-10 md:mt-12">
+      <section className="py-0 mt-12 md:mt-14">
         <Container>
           <div className="concrete-block concrete-edge border-b-2 border-concrete-900/70 shadow-[inset_0_-18px_0_rgba(46,46,44,0.45)] bg-[linear-gradient(to_bottom,rgba(0,0,0,0)_0%,rgba(46,46,44,0.18)_100%)]">
             <div className="flex flex-col md:flex-row">
