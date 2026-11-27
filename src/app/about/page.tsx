@@ -7,7 +7,7 @@ export const metadata = {
 
 export default function AboutPage() {
   return (
-    <Container className="py-24">
+    <Container className="pt-10 pb-16 md:pt-12 md:pb-20">
       <div className="concrete-block concrete-edge concrete-header">
         <div>
           <h1 className="text-heading font-mono font-bold text-concrete-900 tracking-tight">
@@ -17,8 +17,8 @@ export default function AboutPage() {
         </div>
       </div>
 
-      <div className="concrete-block concrete-edge p-8 md:p-10">
-        <div className="grid gap-16 lg:grid-cols-[1fr_300px]">
+      <div className="concrete-block concrete-edge p-6 sm:p-8 md:p-10">
+        <div className="grid gap-10 md:grid-cols-[1fr_240px] lg:grid-cols-[1fr_280px] lg:gap-14">
           <div className="space-y-7">
             <p className="font-serif text-base text-concrete-800 leading-relaxed">
               I&apos;m Saad. I&apos;m from a small city in Pakistani Kashmir called{' '}
@@ -197,8 +197,8 @@ export default function AboutPage() {
             </div>
           </div>
 
-          <aside className="space-y-10">
-            <div className="aspect-[3/4] concrete-block concrete-edge overflow-hidden">
+          <aside className="space-y-8">
+            <div className="aspect-[3/4] max-w-[280px] mx-auto md:max-w-none concrete-block concrete-edge overflow-hidden">
               <img
                 src="/assets/about-photo.jpg"
                 alt="Saad Asad portrait"

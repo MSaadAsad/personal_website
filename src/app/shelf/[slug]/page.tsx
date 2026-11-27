@@ -37,7 +37,7 @@ export default async function ShelfReviewPage({
   }
 
   return (
-    <Container className="py-24">
+    <Container className="pt-10 pb-16 md:pt-12 md:pb-20">
       <Link
         href="/shelf"
         className="font-mono text-[0.65rem] text-concrete-700 hover:text-[#0000EE] transition-colors duration-150 mb-10 inline-block tracking-wider"

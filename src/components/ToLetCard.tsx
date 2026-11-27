@@ -1,7 +1,8 @@
-export function ToLetCard() {
+export function ToLetCard({ className }: { className?: string }) {
   return (
     <div
-      className="overflow-hidden flex flex-col h-full"
+      aria-hidden="true"
+      className={`overflow-hidden flex flex-col h-full${className ? ` ${className}` : ''}`}
       style={{
         border: '1px solid rgba(74, 74, 72, 0.55)',
         boxShadow:
@@ -26,11 +27,7 @@ export function ToLetCard() {
       <div
         className="flex items-center px-4 py-3 flex-grow"
         style={{ backgroundColor: 'var(--color-concrete-block)' }}
-      >
-        <span className="font-mono text-[0.75rem] font-semibold text-concrete-600 tracking-wider">
-          [INSERT NEW CARD HERE]
-        </span>
-      </div>
+      />
     </div>
   );
 }

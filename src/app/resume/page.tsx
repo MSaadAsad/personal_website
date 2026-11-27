@@ -8,7 +8,7 @@ export const metadata = {
 
 export default function ResumePage() {
   return (
-    <Container className="py-24">
+    <Container className="pt-10 pb-16 md:pt-12 md:pb-20">
       <div className="concrete-block concrete-edge concrete-header">
         <div>
           <h1 className="text-heading font-mono font-bold text-concrete-900 tracking-tight">

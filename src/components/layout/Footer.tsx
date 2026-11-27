@@ -28,7 +28,7 @@ export function Footer() {
   if (pathname.startsWith('/pakistan-map') || pathname.startsWith('/naqsha')) return null;
 
   const copyright = (
-    <div className="font-mono text-[0.78rem] text-concrete-700 tracking-wider px-6 py-4 flex items-center justify-center flex-1">
+    <div className="font-mono text-[0.78rem] text-concrete-800 tracking-wider px-6 py-4 flex items-center justify-center flex-1">
       &copy; {new Date().getFullYear()} SAAD
     </div>
   );
@@ -36,14 +36,14 @@ export function Footer() {
   const contact = (
     <Link
       href="/contact"
-      className="font-mono text-[0.78rem] text-concrete-700 hover:text-[#0000EE] transition-colors duration-150 tracking-wider px-6 py-4 flex items-center justify-center flex-1"
+      className="font-mono text-[0.78rem] text-concrete-800 hover:text-[#0000EE] transition-colors duration-150 tracking-wider px-6 py-4 flex items-center justify-center flex-1"
     >
       CONTACT
     </Link>
   );
 
   return (
-    <footer className="border-t border-concrete-700/60 bg-[var(--color-concrete-block)] mt-32">
+    <footer className="border-t border-concrete-700/60 bg-[var(--color-concrete-block)] mt-20">
       <Container className="py-0 flex flex-col md:flex-row items-stretch">
         {variant === 'test' ? (
           <>

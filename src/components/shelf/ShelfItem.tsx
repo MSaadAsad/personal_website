@@ -25,19 +25,19 @@ export function ShelfItemCard({ item }: { item: ShelfItemType }) {
           </div>
         )}
       </div>
-      <div className="flex items-center justify-between gap-4 px-4 py-3">
-        <div className="min-w-0">
-          <h3 className="font-mono text-[0.75rem] font-semibold text-concrete-700 truncate">
+      <div className="flex items-center justify-between gap-3 px-4 py-3 min-w-0">
+        <div className="min-w-0 flex-1">
+          <h3 className="font-mono text-[0.75rem] font-semibold text-concrete-900 truncate">
             {item.title}
           </h3>
-          <p className="mt-1 font-mono text-[0.65rem] text-concrete-700 line-clamp-2">
+          <p className="mt-1 font-mono text-[0.65rem] text-concrete-800 line-clamp-2">
             {item.creator}
           </p>
           <span className="mt-1 block font-mono text-[0.6rem] text-concrete-700 tracking-wider">
             {item.year}
           </span>
         </div>
-        <span className="font-mono text-[0.65rem] text-concrete-700 border border-concrete-700/70 px-3 py-1 bg-concrete-300/70 hover:text-concrete-900 transition-colors duration-150 shrink-0">
+        <span className="font-mono text-[0.65rem] text-concrete-800 border border-concrete-700/70 px-3 py-1 bg-concrete-300/70 hover:text-concrete-900 transition-colors duration-150 shrink-0">
           OPEN
         </span>
       </div>

@@ -8,7 +8,7 @@ export const metadata = {
 
 export default function ContactPage() {
   return (
-    <Container className="py-24">
+    <Container className="pt-10 pb-16 md:pt-12 md:pb-20">
       <PageHeader
         title="CONTACT"
         className="concrete-block concrete-edge concrete-header"
@@ -31,7 +31,7 @@ export default function ContactPage() {
                 rel={link.href.startsWith('http') ? 'noopener noreferrer' : undefined}
                 className="flex items-baseline gap-5 group"
               >
-                <span className="font-mono text-[0.6rem] text-concrete-600 tracking-[0.2em] w-20 shrink-0">
+                <span className="font-mono text-[0.6rem] text-concrete-700 tracking-[0.2em] w-20 shrink-0">
                   {link.label}
                 </span>
                 <span className="font-mono text-[0.75rem] text-[#0000EE] group-hover:underline underline-offset-4 transition-colors duration-150">

@@ -21,6 +21,15 @@ export function Navigation() {
     setMobileOpen(false);
   }, [pathname]);
 
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setMobileOpen(false);
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [mobileOpen]);
+
   return (
     <>
       <nav className="fixed top-0 left-0 right-0 z-50 bg-[var(--color-concrete-block)] border-b border-concrete-700/60 shadow-[0_6px_16px_rgba(46,46,44,0.18)]">
@@ -82,7 +91,7 @@ export function Navigation() {
               </Link>
             ))}
           </div>
-          <div className="absolute bottom-12 left-12 font-mono text-[0.65rem] text-concrete-600">
+          <div className="absolute bottom-12 left-12 font-mono text-[0.65rem] text-concrete-700">
             ESC to close
           </div>
         </div>
